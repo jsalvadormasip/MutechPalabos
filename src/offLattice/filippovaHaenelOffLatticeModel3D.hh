@@ -192,7 +192,6 @@ void FilippovaHaenelModel3D<T,Descriptor>::cellCompletion (
     int numDensityConditions = 0;
     for (plint iDirection=0; iDirection<(plint)dryNodeFluidDirections.size(); ++iDirection) {
         int iOpp = dryNodeFluidDirections[iDirection];
-        int iPop = indexTemplates::opposite<Descriptor<T> >(iOpp);
         Dot3D fluidDirection(D::c[iOpp][0],D::c[iOpp][1],D::c[iOpp][2]);
         Array<T,3> wallNode, wall_vel;
         T wallDistance;
@@ -205,6 +204,7 @@ void FilippovaHaenelModel3D<T,Descriptor>::cellCompletion (
         this->pointOnSurface( guoNode+absoluteOffset, fluidDirection,
                               wallNode, wallDistance, wallNormal,
                               wall_vel, bdType, dryNodeId );
+        PLB_ASSERT( ok );
         if (bdType == OffBoundary::densityNeumann) {
             ++numDensityConditions;
             averageRhoBar = averageRhoBar + wall_vel[0];
@@ -216,7 +216,6 @@ void FilippovaHaenelModel3D<T,Descriptor>::cellCompletion (
         wallRhoBar = averageRhoBar / numDensityConditions;
         for (plint iDirection=0; iDirection<(plint)dryNodeFluidDirections.size(); ++iDirection) {
             int iOpp = dryNodeFluidDirections[iDirection];
-            int iPop = indexTemplates::opposite<Descriptor<T> >(iOpp);
             Dot3D fluidDirection(D::c[iOpp][0],D::c[iOpp][1],D::c[iOpp][2]);
             Cell<T,Descriptor> const& f_cell =
                 lattice.get( guoNode.x+fluidDirection.x,
@@ -226,11 +225,13 @@ void FilippovaHaenelModel3D<T,Descriptor>::cellCompletion (
         }
         T rhoBar;
         Array<T,3> j;
-        s_cell.getDynamics().computeRhoBarJ(s_cell, rhoBar, j);
+        // The cell has NoDynamics, and cannot be used to compute moments.
+        momentTemplates<T,Descriptor>::get_rhoBar_j(s_cell, rhoBar, j);
         T jSqr = normSqr(j);
         Array<T,Descriptor<T>::q> oldFeq, newFeq;
-        s_cell.getDynamics().computeEquilibria(oldFeq, rhoBar, j, jSqr);
+        dynamicsTemplates<T,Descriptor>::complete_bgk_ma2_equilibria( rhoBar, Descriptor<T>::invRho(rhoBar), j, jSqr, oldFeq );
         s_cell.getDynamics().computeEquilibria(newFeq, wallRhoBar, j, jSqr);
+        dynamicsTemplates<T,Descriptor>::complete_bgk_ma2_equilibria( wallRhoBar, Descriptor<T>::invRho(wallRhoBar), j, jSqr, newFeq );
         for (plint iPop=0; iPop<Descriptor<T>::q; ++iPop) {
             s_cell[iPop] += newFeq[iPop]-oldFeq[iPop];
         }

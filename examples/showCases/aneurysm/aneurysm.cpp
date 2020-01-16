@@ -102,6 +102,8 @@ void iniLattice( MultiBlockLattice3D<T,DESCRIPTOR>& lattice,
     //   boundary layer, and keep the rest as BGKdynamics.
     defineDynamics(lattice, voxelizedDomain.getVoxelMatrix(), lattice.getBoundingBox(),
                    new NoDynamics<T,DESCRIPTOR>, voxelFlag::outside);
+    defineDynamics(lattice, voxelizedDomain.getVoxelMatrix(), lattice.getBoundingBox(),
+                   new NoDynamics<T,DESCRIPTOR>, voxelFlag::outerBorder);
     initializeAtEquilibrium(lattice, lattice.getBoundingBox(), (T) 1., Array<T,3>((T) 0.,(T) 0.,(T) 0.));
     lattice.initialize();
 }
@@ -136,6 +138,7 @@ void setOpenings (
         }
         else {
             inletOutlets.push_back (
+                    //new VelocityPlugProfile3D<T>(uLB) );
                     new DensityNeumannBoundaryProfile3D<T> );
         }
     }
@@ -350,8 +353,8 @@ std::unique_ptr<MultiBlockLattice3D<T,DESCRIPTOR> > run (
             lattice->getBoundingBox(), *lattice, *rhoBarJfield, processorLevel );
 
     // The Guo off lattice boundary condition is set up.
-    GuoOffLatticeModel3D<T,DESCRIPTOR>* model =
-            new GuoOffLatticeModel3D<T,DESCRIPTOR> (
+    FilippovaHaenelModel3D<T,DESCRIPTOR>* model =
+            new FilippovaHaenelModel3D<T,DESCRIPTOR> (
                 new TriangleFlowShape3D<T,Array<T,3> > (
                     voxelizedDomain.getBoundary(), profiles),
                 flowType, useAllDirections );
