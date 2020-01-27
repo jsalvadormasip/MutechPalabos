@@ -127,6 +127,7 @@ void setOpenings (
                 boundary.getInletOutlet(openingSortDirection)[i] );
 
         if (opening.inlet) {
+            /*
             if (poiseuilleInlet) {
                 inletOutlets.push_back (
                         new PoiseuilleProfile3D<T>(uLB) );
@@ -135,6 +136,9 @@ void setOpenings (
                 inletOutlets.push_back (
                         new VelocityPlugProfile3D<T>(uLB) );
             }
+            */
+            inletOutlets.push_back (
+                    new DensityNeumannBoundaryProfile3D<T>(1.002) );
         }
         else {
             inletOutlets.push_back (

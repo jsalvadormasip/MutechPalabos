@@ -207,13 +207,12 @@ void FilippovaHaenelModel3D<T,Descriptor>::cellCompletion (
         PLB_ASSERT( ok );
         if (bdType == OffBoundary::densityNeumann) {
             ++numDensityConditions;
-            averageRhoBar = averageRhoBar + wall_vel[0];
+            averageRhoBar = averageRhoBar + Descriptor<T>::rhoBar(wall_vel[0]);
         }
     }
     bool isDensityNeuman = numDensityConditions > 0;
     if (isDensityNeuman) {
-        T wallRhoBar = 0.;
-        wallRhoBar = averageRhoBar / numDensityConditions;
+        T wallRhoBar = averageRhoBar / numDensityConditions;
         for (plint iDirection=0; iDirection<(plint)dryNodeFluidDirections.size(); ++iDirection) {
             int iOpp = dryNodeFluidDirections[iDirection];
             Dot3D fluidDirection(D::c[iOpp][0],D::c[iOpp][1],D::c[iOpp][2]);
@@ -230,10 +229,12 @@ void FilippovaHaenelModel3D<T,Descriptor>::cellCompletion (
         T jSqr = normSqr(j);
         Array<T,Descriptor<T>::q> oldFeq, newFeq;
         dynamicsTemplates<T,Descriptor>::complete_bgk_ma2_equilibria( rhoBar, Descriptor<T>::invRho(rhoBar), j, jSqr, oldFeq );
+        // Debugging
         s_cell.getDynamics().computeEquilibria(newFeq, wallRhoBar, j, jSqr);
         dynamicsTemplates<T,Descriptor>::complete_bgk_ma2_equilibria( wallRhoBar, Descriptor<T>::invRho(wallRhoBar), j, jSqr, newFeq );
         for (plint iPop=0; iPop<Descriptor<T>::q; ++iPop) {
             s_cell[iPop] += newFeq[iPop]-oldFeq[iPop];
+
         }
         return;
     }
