@@ -8,7 +8,7 @@ if (${CMAKE_VERSION} VERSION_LESS "3.0.0")
     set(CMAKE_LANGUAGES_COMPILER CXX)
     find_package(MPI REQUIRED)
 else ()
-    project(palabos LANGUAGES CXX) # change to the name of your project if you woant to compile your application
+    project(palabos LANGUAGES CXX) # change to the name of your project if you want to compile your application
 endif ()
 
 set(DEFAULT ON CACHE INTERNAL "Default options")
