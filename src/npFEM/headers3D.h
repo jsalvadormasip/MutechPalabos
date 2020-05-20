@@ -31,31 +31,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <core/globalDefs.h>
-#include <parallelism/headers3D.h>
-#include <latticeBoltzmann/headers3D.h>
-#include <core/headers3D.h>
-#include <basicDynamics/headers3D.h>
-#include <boundaryCondition/headers3D.h>
-#include <complexDynamics/headers3D.h>
-#include <multiPhysics/headers3D.h>
-#include <io/headers3D.h>
-#include <atomicBlock/headers3D.h>
-#include <multiBlock/headers3D.h>
-#include <multiGrid/headers3D.h>
-#include <algorithm/headers3D.h>
-#include <dataProcessors/headers3D.h>
-#include <particles/headers3D.h>
-#include <offLattice/headers3D.h>
-#include <libraryInterfaces/headers3D.h>
-#include <finiteDifference/headers3D.h>
-#include <coProcessors/headers3D.h>
-#include <gridRefinement/headers3D.h>
-#include <npFEM/headers3D.h>
+/** \file
+ * Groups all the include files for npFEM.
+ */
+#include "npFEM/Constraint.h"
+#include "npFEM/Force.h"
+#include "npFEM/LSSolver.h"
+#include "npFEM/Solver.h"
+#include "npFEM/Types.h"
+#include "npFEM/hyperelasticity.h"
+#include "npFEM/rbcCommunicate.h"
+#include "npFEM/rbcFiltering.h"
+#include "npFEM/rbcGlobal.h"
+#include "npFEM/rbcParticle.h"
+#include "npFEM/rbcShapeOp.h"
+#include "npFEM/shapeOpWrapper.h"
+#include "npFEM/visualization.h"
 
-// Include also 2D data structures. They are for
-// example required to write 2D images.
-#include <core/headers2D.h>
-#include <atomicBlock/headers2D.h>
-#include <multiBlock/headers2D.h>
-#include <multiGrid/headers2D.h>
+#ifdef PLB_GPU
+#include "npFEM/src_GPU/Constraint_Flattening.h"
+#include "npFEM/src_GPU/GPU_data.h"
+#include "npFEM/src_GPU/Solver_GPU.h"
+#include "npFEM/src_GPU/common.h"
+#include "npFEM/src_GPU/device_utilities.h"
+#include "npFEM/src_GPU/projections_GPU.h"
+#include "npFEM/src_GPU/projections_GPU_MATH.h"
+#include "npFEM/src_GPU/projections_GPU_soa.h"
+#include "npFEM/src_GPU/quasy_newton.h"
+#include "npFEM/src_GPU/quasy_newton3.h"
+#include "npFEM/src_GPU/sparse_matrix.h"
+#include "npFEM/src_GPU/sum_cuda.h"
+#include "npFEM/src_GPU/svd3_cuda.h"
+#endif // PLB_GPU
