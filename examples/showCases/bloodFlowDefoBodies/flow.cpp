@@ -52,11 +52,11 @@ T collisions_threshold_rep;
 T collisions_threshold_nonRep;
 
 // Do not change the order
-#include "npFEM/rbcShapeOp.h"
-#include "npFEM/rbcGlobal.h"
-#include "npFEM/rbcParticle.h"
-#include "npFEM/rbcCommunicate.h"
-#include "npFEM/visualization.h"
+//#include "npFEM/rbcShapeOp.h"
+//#include "npFEM/rbcGlobal.h"
+//#include "npFEM/rbcParticle.h"
+//#include "npFEM/rbcCommunicate.h"
+//#include "npFEM/visualization.h"
 
 // Generic solvers
 // ShapeOp always in physical units
@@ -80,12 +80,12 @@ std::map<pluint, pluint> bodyToProc;
 // This variable does not change during the time iterations, and it
 // is different on each processor.
 // In physical units.
-std::vector<ShapeOpBody> shapeOpBodies;
+std::vector<ShapeOpBody<T>> shapeOpBodies;
 std::vector<ShapeOp_Solver*> shapeOpRBCs, shapeOpPLTs;
 std::vector<ShapeOp_Solver*> shapeOpRBCs_empty, shapeOpPLTs_empty;
 #ifdef GPU
-ShapeOp::Solver_GPU sGPU;
-ShapeOp::Solver_GPU sGPU_plt;
+Solver_GPU sGPU;
+Solver_GPU sGPU_plt;
 #endif
 
 // _p  : physical system
@@ -146,7 +146,7 @@ T drivingForce_lb;
 T pipeRadius_LB;
 
 // Dumping of Centers of Mass for every body
-ShapeOp::MatrixXX centers_log;
+MatrixXX centers_log;
 
 // for debuging only
 void flatten_mesh(RawConnectedTriangleMesh<double> *obstacle, double *obstacle_vertices, double *obstacle_normals) {
@@ -407,7 +407,7 @@ void iniShapeOpSolvers(std::string fname_points, std::string fname_constraints,
 	// std::pair<plint, plint> myRangeRBC(0, -1);
 	// std::pair<plint, plint> myRangePLT(0, -1);
 	// for CPUs with no matched GPUs: { myRangeRBC.second - myRangeRBC.first + myRangePLT.second - myRangePLT.first + 2 } == 0
-	shapeOpBodies = std::vector<ShapeOpBody>(myRangeRBC.second - myRangeRBC.first + myRangePLT.second - myRangePLT.first + 2);
+	shapeOpBodies = std::vector<ShapeOpBody<T>>(myRangeRBC.second - myRangeRBC.first + myRangePLT.second - myRangePLT.first + 2);
 	std::vector<int> *rbc_graph = RBC_shapeOpSolverTemplate.get_mesh_graph();
 	std::vector<int> *plt_graph = PLT_shapeOpSolverTemplate.get_mesh_graph();
 
@@ -431,13 +431,13 @@ void iniShapeOpSolvers(std::string fname_points, std::string fname_constraints,
 			solver->rotatePoints("y", rotation[1] * std::acos((T)-1) / 180);
 			solver->rotatePoints("z", rotation[2] * std::acos((T)-1) / 180);
 
-			solver->shiftPoints(ShapeOp::Vector3(position[0], position[1], position[2]));
+			solver->shiftPoints(Vector3(position[0], position[1], position[2]));
 
 			setConstraintsFromCSV(*solver, "./Case_Studies/" + case_name + "/" + fname_constraints);
 			setConnectivityListFromCSV(*solver, "./Case_Studies/" + case_name + "/" + fname_connectivity);
 			setOnSurfaceParticle(*solver, "./Case_Studies/" + case_name + "/" + fname_onsurface);
 
-			ShapeOp::Matrix3X forces(3, solver->getPoints().cols());
+			Matrix3X forces(3, solver->getPoints().cols());
 			forces.setZero();
 			addVertexForce(*solver, forces);
 
@@ -450,7 +450,7 @@ void iniShapeOpSolvers(std::string fname_points, std::string fname_constraints,
 			setConnectivityListFromCSV(*solver, "./Case_Studies/" + case_name + "/" + fname_connectivity);
 			setOnSurfaceParticle(*solver, "./Case_Studies/" + case_name + "/" + fname_onsurface);
 
-			ShapeOp::Matrix3X forces(3, solver->getPoints().cols());
+			Matrix3X forces(3, solver->getPoints().cols());
 			forces.setZero();
 			addVertexForce(*solver, forces);
 
@@ -519,7 +519,7 @@ void iniPalabosParticles(Group3D& group, T vel)
             shapeOpSolverTemplate_tmp.rotatePoints("y", rotation[1] * std::acos((T)-1) / 180);
             shapeOpSolverTemplate_tmp.rotatePoints("z", rotation[2] * std::acos((T)-1) / 180);
 
-            shapeOpSolverTemplate_tmp.shiftPoints(ShapeOp::Vector3(position[0], position[1], position[2]));
+            shapeOpSolverTemplate_tmp.shiftPoints(Vector3(position[0], position[1], position[2]));
         }
         else
         {
@@ -536,8 +536,8 @@ void iniPalabosParticles(Group3D& group, T vel)
             }
         }
 
-        const ShapeOp::Matrix3X& tmp_points = shapeOpSolverTemplate_tmp.getPoints();
-        const ShapeOp::Matrix3X& tmp_vels = shapeOpSolverTemplate_tmp.getVelocities();
+        const Matrix3X& tmp_points = shapeOpSolverTemplate_tmp.getPoints();
+        const Matrix3X& tmp_vels = shapeOpSolverTemplate_tmp.getVelocities();
 
         for (pluint vertexID = 0; vertexID < (pluint)tmp_points.cols(); ++vertexID)
         {
@@ -598,7 +598,7 @@ void iniPalabosParticles(Group3D& group, T vel)
             shapeOpSolverTemplate_tmp.rotatePoints("y", rotation[1] * std::acos((T)-1) / 180);
             shapeOpSolverTemplate_tmp.rotatePoints("z", rotation[2] * std::acos((T)-1) / 180);
 
-            shapeOpSolverTemplate_tmp.shiftPoints(ShapeOp::Vector3(position[0], position[1], position[2]));
+            shapeOpSolverTemplate_tmp.shiftPoints(Vector3(position[0], position[1], position[2]));
         }
         else
         {
@@ -615,8 +615,8 @@ void iniPalabosParticles(Group3D& group, T vel)
             }
         }
 
-        const ShapeOp::Matrix3X& tmp_points = shapeOpSolverTemplate_tmp.getPoints();
-        const ShapeOp::Matrix3X& tmp_vels = shapeOpSolverTemplate_tmp.getVelocities();
+        const Matrix3X& tmp_points = shapeOpSolverTemplate_tmp.getPoints();
+        const Matrix3X& tmp_vels = shapeOpSolverTemplate_tmp.getVelocities();
 
         for (pluint vertexID = 0; vertexID < (pluint)tmp_points.cols(); ++vertexID)
         {
@@ -820,10 +820,10 @@ void iniPalabosParticles(Group3D& group, T vel)
 void resetCommunication()
 {
 	// Get rid of the local meshes of the previous iteration.
-	std::map<pluint, LocalMesh*>::iterator it = LocalMeshes().begin();
-	for (; it != LocalMeshes().end(); ++it)
+	std::map<pluint, LocalMesh<T>*>::iterator it = LocalMeshes<T>().begin();
+	for (; it != LocalMeshes<T>().end(); ++it)
 		delete it->second;
-	LocalMeshes().clear();
+	LocalMeshes<T>().clear();
 
 	// Reset data structures for MPI communication
 	for (pluint i = 0; i < shapeOpBodies.size(); ++i)
@@ -832,8 +832,8 @@ void resetCommunication()
 
 void forceMpiCompletion()
 {
-	typename std::map<pluint, LocalMesh*>::iterator it = LocalMeshes().begin();
-	for (; it != LocalMeshes().end(); ++it)
+	typename std::map<pluint, LocalMesh<T>*>::iterator it = LocalMeshes<T>().begin();
+	for (; it != LocalMeshes<T>().end(); ++it)
 		it->second->completeRequests();
 }
 
@@ -1037,7 +1037,7 @@ void loadAllBlocks(Group3D& group, pluint& iteration)
 }
 
 #ifdef GPU
-void copy_data_to_gpu(ShapeOp::Solver_GPU &sGPU, vector<ShapeOp::Solver*> &cpu_solvers)
+void copy_data_to_gpu(Solver_GPU &sGPU, vector<Solver*> &cpu_solvers)
 {
 	// copy forces and colliding data from CPU solver to GPU solver
 	int total_neighbor = 0;
@@ -1054,8 +1054,8 @@ void copy_data_to_gpu(ShapeOp::Solver_GPU &sGPU, vector<ShapeOp::Solver*> &cpu_s
 	}
 	total_neighbor = neighbor[cpu_solvers.size()];
 
-	ShapeOp::Matrix3X neighbor_vertices = ShapeOp::Matrix3X::Zero(3, total_neighbor);
-	ShapeOp::Matrix3X neighbor_normals = ShapeOp::Matrix3X::Zero(3, total_neighbor);
+	Matrix3X neighbor_vertices = Matrix3X::Zero(3, total_neighbor);
+	Matrix3X neighbor_normals = Matrix3X::Zero(3, total_neighbor);
 	int k = 0;
 	for (ShapeOp_Solver *s : cpu_solvers)
 	{
@@ -1069,10 +1069,10 @@ void copy_data_to_gpu(ShapeOp::Solver_GPU &sGPU, vector<ShapeOp::Solver*> &cpu_s
 	sGPU.add_collinding_points(neighbor_vertices.data(), neighbor_normals.data(), neighbor.data(), total_neighbor);
 }
 
-void copy_data_to_cpu(ShapeOp::Solver_GPU &sGPU, vector<ShapeOp::Solver*> &cpu_solvers)
+void copy_data_to_cpu(Solver_GPU &sGPU, vector<Solver*> &cpu_solvers)
 {
-	ShapeOp::MatrixXXCuda vel = sGPU.getVelocities();
-	ShapeOp::MatrixXXCuda *points = sGPU.get_transformedPoints();
+	MatrixXXCuda vel = sGPU.getVelocities();
+	MatrixXXCuda *points = sGPU.get_transformedPoints();
 	for (pluint i = 0; i <cpu_solvers.size(); ++i)
 	{
 		cpu_solvers[i]->setVelocities(vel.block(3 * i, 0, 3, vel.cols()));
@@ -1384,7 +1384,7 @@ int main(int argc, char* argv[])
 	setConstraintsFromCSV(RBC_shapeOpSolverTemplate, "./Case_Studies/" + Case_Study_RBC + "/" + "constraints.csv");
 	setConnectivityListFromCSV(RBC_shapeOpSolverTemplate, "./Case_Studies/" + Case_Study_RBC + "/" + "surface_connectivity.csv"); // Surface Connectivity (tetrahedra are not included)
 	setOnSurfaceParticle(RBC_shapeOpSolverTemplate, "./Case_Studies/" + Case_Study_RBC + "/" + "onSurfaceParticle.csv");
-	ShapeOp::Matrix3X RBC_forces(3, RBC_shapeOpSolverTemplate.getPoints().cols());
+	Matrix3X RBC_forces(3, RBC_shapeOpSolverTemplate.getPoints().cols());
 	RBC_forces.setZero();
 	addVertexForce(RBC_shapeOpSolverTemplate, RBC_forces);
 	RBC_shapeOpSolverTemplate.initialize(Calpha_ShapeOp_RBC, Cbeta_ShapeOp_RBC, dt_p * (T)(timestep_ShapeOp), rho_ShapeOp_RBC, false, applyGlobalVolumeConservation_ShapeOp_RBC, globalVolumeConservationWeight_ShapeOp_RBC, dx_p, dt_p);
@@ -1395,7 +1395,7 @@ int main(int argc, char* argv[])
 	setConstraintsFromCSV(PLT_shapeOpSolverTemplate, "./Case_Studies/" + Case_Study_PLT + "/" + "constraints.csv");
 	setConnectivityListFromCSV(PLT_shapeOpSolverTemplate, "./Case_Studies/" + Case_Study_PLT + "/" + "surface_connectivity.csv"); // Surface Connectivity (tetrahedra are not included)
 	setOnSurfaceParticle(PLT_shapeOpSolverTemplate, "./Case_Studies/" + Case_Study_PLT + "/" + "onSurfaceParticle.csv");
-	ShapeOp::Matrix3X PLT_forces(3, PLT_shapeOpSolverTemplate.getPoints().cols());
+	Matrix3X PLT_forces(3, PLT_shapeOpSolverTemplate.getPoints().cols());
 	PLT_forces.setZero();
 	addVertexForce(PLT_shapeOpSolverTemplate, PLT_forces);
 	PLT_shapeOpSolverTemplate.initialize(Calpha_ShapeOp_PLT, Cbeta_ShapeOp_PLT, dt_p * (T)(timestep_ShapeOp), rho_ShapeOp_PLT, false, applyGlobalVolumeConservation_ShapeOp_PLT, globalVolumeConservationWeight_ShapeOp_PLT, dx_p, dt_p);
@@ -1647,8 +1647,8 @@ int main(int argc, char* argv[])
 
 #ifdef GPU
 	// GPU init
-	auto init_gpu = [&](ShapeOp::Solver_GPU &sGPU, ShapeOp::Solver &s_template, std::vector<ShapeOp::Solver*> &solvers, plb::Array<double, 3>*iniPositions, vector<int> *mesh_graph, Mesh_info params) {
-		sGPU = ShapeOp::Solver_GPU(s_template.getPoints(),
+	auto init_gpu = [&](Solver_GPU &sGPU, Solver &s_template, std::vector<Solver*> &solvers, plb::Array<double, 3>*iniPositions, vector<int> *mesh_graph, Mesh_info params) {
+		sGPU = Solver_GPU(s_template.getPoints(),
 		s_template.getConnectivityList(),
 		s_template.get_onSurfaceParticle(),
 		s_template.getConstraints(), params, s_template.Cbeta_,
@@ -1910,7 +1910,7 @@ int main(int argc, char* argv[])
 	Actions3D actions2a;
 	plint particleID_act2a = actions2a.addBlock(group.get("vertexParticles"));
 	actions2a.addProcessor(
-		new ConstructLocalMeshesFromParticles<T, DESCRIPTOR>(rbcTemplate, pltTemplate),
+		new ConstructLocalMeshesFromParticles<T, DESCRIPTOR>(rbcTemplate, pltTemplate, bodyToType, particleEnvelopeWidth),
 		particleID_act2a, group.getBoundingBox());
 
     Actions3D actions2b;
@@ -1922,7 +1922,7 @@ int main(int argc, char* argv[])
 	T Cp = rho_p * (dx_p * dx_p) / (dt_p * dt_p); // pressure
 	T Ca = dx_p * dx_p; // area
     T densityOffset = 1.0;
-	actions2b.addProcessor(new CollisionsForcesCombo<T, DESCRIPTOR>(dx_p, omega, densityOffset, Cf, Cp, Ca),
+	actions2b.addProcessor(new CollisionsForcesCombo<T, DESCRIPTOR>(dx_p, omega, densityOffset, Cf, Cp, Ca, collisions_threshold, wallVertexNormals, CellPacking),
 		particleID_act2b, rhoBarID_act2b, piNeqID_act2b, group.getBoundingBox());
 
 	// 3. Immersed boundary method.
@@ -1935,7 +1935,7 @@ int main(int argc, char* argv[])
 	{
 		actions3.addProcessor(
 			new MultiDirectForcingImmersedBoundaryIteration3D<T,
-			DESCRIPTOR>(1. / omega, incompressibleModel),
+			DESCRIPTOR>(1. / omega, incompressibleModel, wallMesh),
 			particleID_act3, rhoBarID_act3, jID_act3,
 			group.getBoundingBox());
 		actions3.addCommunication(jID_act3, modif::staticVariables);
@@ -1974,7 +1974,7 @@ int main(int argc, char* argv[])
 	///////////////////////////////////////////////////////////////////////////
 
 	// allocate memory for output dump
-	centers_log = ShapeOp::MatrixXX(output_timestep / timestep_ShapeOp, 3 * shapeOpBodies.size());
+	centers_log = MatrixXX(output_timestep / timestep_ShapeOp, 3 * shapeOpBodies.size());
 
 	// if restart from a CP then the first output is discarded
     // because it is the corresponding zero time and thus it is a void one.
@@ -2100,7 +2100,7 @@ int main(int argc, char* argv[])
             timer("apply-containers").start();
             for (pluint i = 0; i < shapeOpBodies.size(); ++i)
             {
-                shapeOpBodies[i].applyForces();
+                shapeOpBodies[i].applyForces(CellPacking);
                 shapeOpBodies[i].applyCollidingNeighbors();
             }
             timer("apply-containers").stop();
@@ -2155,7 +2155,7 @@ int main(int argc, char* argv[])
 				}
 			}
 #else
-			ShapeOp::Vector3 COM;
+			Vector3 COM;
 			pluint i = ((iT - timestep_ShapeOp) % output_timestep) / timestep_ShapeOp;
 			pluint j = 0;
 			for (auto& so : shapeOpRBCs)

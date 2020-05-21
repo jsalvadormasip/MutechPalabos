@@ -141,48 +141,6 @@ file(GLOB_RECURSE EXT_SRC "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
 
 add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 
-# Palabos Extensions
-include_directories("${PALABOS_EXTENSIONS_ROOT}")
-include_directories("${PYPAL_ROOT}")
-include_directories("${PYPAL_ROOT}/pypal_palabos_extensions")
-
-###############################################################################
-# ShapeOp Library
-###############################################################################
-
-include_directories("../../src/shapeOpEigen")
-include_directories("../../src/shapeOpSrc")
-include_directories("../../ShapeOp_GH/externalLibraries/nanoflann/include")
-if(ENABLE_CUDA)
-    include_directories("../../src/shapeOpSrc/src_GPU")
-    include_directories("${CUDA_TOOLKIT_ROOT_DIR}")
-    include_directories("${CUDA_TOOLKIT_ROOT_DIR}/include/")
-endif()
-
-file(GLOB SHAPEOP_H "../../src/shapeOpSrc/*.h")
-file(GLOB SHAPEOP_CPP "../../src/shapeOpSrc/*.cpp")
-if(ENABLE_CUDA)
-    # cuh files
-    file(GLOB SHAPEOP_CUDA_H "../../src/shapeOpSrc/src_GPU/*.h")
-    # cu files
-    file(GLOB SHAPEOP_CUDA_SOURCES_CPP "../../src/shapeOpSrc/src_GPU/*.cpp")
-    file(GLOB SHAPEOP_CUDA_SOURCES_CU  "../../src/shapeOpSrc/src_GPU/*.cu")
-    set(SHAPEOP_CUDA_SOURCES ${SHAPEOP_CUDA_SOURCES_CPP} ${SHAPEOP_CUDA_SOURCES_CU})  
-endif()
-
-# By adding the SHAPEOP_H, we manage to show the headers in a separate folder 
-# in the project tree (quite handy for development)
-
-# Build ShapeOp Library (For stand-alone go with dynamic)
-if(NOT ENABLE_CUDA)
-    add_library(shapeOp STATIC ${SHAPEOP_CPP} ${SHAPEOP_H})
-else()
-    set(HEADERS ${SHAPEOP_H} ${SHAPEOP_CUDA_H})
-    set(SOURCES ${SHAPEOP_CPP} ${SHAPEOP_CUDA_SOURCES})
-    add_library(shapeOp STATIC ${HEADERS} ${SOURCES})
-    target_link_libraries(shapeOp ${CUDA_LINK_LIBRARIES_KEYWORD})
-endif()
-
 ###############################################################################
 
 file(GLOB DEPS_H "./*.h")
@@ -190,7 +148,7 @@ file(GLOB PARAMS_1 "./*.xml")
 file(GLOB PARAMS_2 "./*.pos")
 
 add_executable(${EXECUTABLE_NAME} "./${EXECUTABLE_NAME}.cpp" ${DEPS_H} ${PARAMS_1} ${PARAMS_2})
-target_link_libraries(${EXECUTABLE_NAME} palabos shapeOp)
+target_link_libraries(${EXECUTABLE_NAME} palabos)
 if(ENABLE_MPI)
 	target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
 endif()
@@ -200,7 +158,7 @@ if(ENABLE_CUDA)
     add_executable(${EXECUTABLE_NAME_GPU} EXCLUDE_FROM_ALL "./${EXECUTABLE_NAME}.cpp" ${DEPS_H} ${PARAMS_1} ${PARAMS_2})
     target_compile_options(${EXECUTABLE_NAME_GPU} PUBLIC -DGPU=1)
     set_property(TARGET ${EXECUTABLE_NAME_GPU} PROPERTY CUDA_SEPARABLE_COMPILATION ON)
-    target_link_libraries(${EXECUTABLE_NAME_GPU} shapeOp palabos)
+    target_link_libraries(${EXECUTABLE_NAME_GPU} palabos)
     if(ENABLE_MPI)
         target_link_libraries(${EXECUTABLE_NAME_GPU} ${MPI_CXX_LIBRARIES})
     endif()
