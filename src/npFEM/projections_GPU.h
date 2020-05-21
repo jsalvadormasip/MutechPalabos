@@ -8,6 +8,9 @@
 #include <cuda_runtime.h>
 #include "npFEM/projections_GPU_MATH.h"
 ///////////////////////////////////////////////////////////////////////////////
+namespace plb {
+namespace npfem {
+
 __device__ __forceinline__
 void project_Area( int tid, int n_points, int n_constraints, int n_projected_points, int nb_cells,
                    ShapeOpScalar *points_d, ShapeOpScalar *projections_d, ShapeOpScalar *f_int_nonePD_d,
@@ -593,6 +596,9 @@ void project_TriangleStrainLimiting( int tid, int n_points, int n_constraints, i
   projections_d[IDX(0, idO_, 3)] = weight_ * PF00; projections_d[IDX(0, idO_ + 1, 3)] = weight_ * PF01;
   projections_d[IDX(1, idO_, 3)] = weight_ * PF10; projections_d[IDX(1, idO_ + 1, 3)] = weight_ * PF11;
   projections_d[IDX(2, idO_, 3)] = weight_ * PF20; projections_d[IDX(2, idO_ + 1, 3)] = weight_ * PF21;
+}
+
+}
 }
 ///////////////////////////////////////////////////////////////////////////////
 #endif // PROJECTIONS_GPU_H

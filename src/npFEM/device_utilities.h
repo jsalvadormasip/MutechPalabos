@@ -15,7 +15,8 @@
 
 #include "npFEM/sparse_matrix.h"
 
-
+namespace plb {
+namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
 inline void CUDA_HandleError( cudaError_t err, const char *file, int line );
 #define CUDA_HANDLE_ERROR( err ) (CUDA_HandleError( err, __FILE__, __LINE__ ))
@@ -62,6 +63,7 @@ void points_time_mat_3X3(cuda_scalar *mat_d, const cuda_scalar *mat_h, double *p
 ///////////////////////////////////////////////////////////////////////////////
 void device_make_periodic(ShapeOpScalar *points_d, ShapeOpScalar *center, float nx, float ny, float nz, int ncells, int npoints,int it);
 ///////////////////////////////////////////////////////////////////////////////
-
+}
+}
 #endif // DEVICE_UTILITIES_H
 ///////////////////////////////////////////////////////////////////////////////

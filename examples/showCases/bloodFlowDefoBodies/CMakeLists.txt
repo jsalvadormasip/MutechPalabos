@@ -139,6 +139,10 @@ include_directories("${PALABOS_ROOT}/externalLibraries/Eigen3")
 file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp")
 file(GLOB_RECURSE EXT_SRC "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
 
+if(NOT ENABLE_CUDA)
+    list(REMOVE_ITEM PALABOS_SRC "${PALABOS_ROOT}/src/npFEM/Solver_GPU.cpp")
+endif()
+
 add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 
 ###############################################################################

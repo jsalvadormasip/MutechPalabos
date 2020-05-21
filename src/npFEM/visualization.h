@@ -7,8 +7,8 @@
     ((x[0] - y[0]) * (x[0] - y[0]) + (x[1] - y[1]) * (x[1] - y[1])             \
         + (x[2] - y[2]) * (x[2] - y[2]))
 
-namespace plb
-{
+namespace plb {
+namespace npfem {
 
 template <typename T>
 void multiProcWriteVTK(
@@ -143,6 +143,7 @@ void multiProcWriteVTK(
 	ofile.close();
 }
 	
+}
 }
 
 /*

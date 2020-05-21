@@ -17,6 +17,7 @@
 #include "npFEM/Force.h"
 
 namespace plb {
+namespace npfem {
 
 typedef plb::npfem::Solver ShapeOp_Solver;
 
@@ -42,6 +43,7 @@ void addVertexForce(ShapeOp_Solver& s, const plb::npfem::Matrix3X& forces, const
 
 void editVertexForce(ShapeOp_Solver& s, const plb::npfem::Matrix3X& forces, const int cell_id = 0);
 
+}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

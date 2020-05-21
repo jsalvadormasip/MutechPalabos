@@ -4,6 +4,7 @@
 #include "npFEM/shapeOpWrapper.h"
 
 namespace plb {
+namespace npfem {
 
 // Handle file opening error
 inline void IsOpen_HandleError(bool open, const char* file, int line)
@@ -368,6 +369,7 @@ void editVertexForce(ShapeOp_Solver& s, const plb::npfem::Matrix3X& forces, cons
 	*/
 }
 
-} // namespace plb
+}
+}
 
 #endif

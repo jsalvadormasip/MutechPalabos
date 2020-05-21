@@ -5,6 +5,9 @@
 #include "npFEM/sparse_matrix.h"
 #include "npFEM/common.h"
 
+namespace plb {
+namespace npfem {
+
 struct matrix3{
 	float data[9];
 };
@@ -125,5 +128,8 @@ struct Simulation_data
 	//ncell
 	int *has_converged;
 };
+
+}
+}
 
 #endif

@@ -5,6 +5,9 @@
 #include<stdlib.h>
 #include<time.h>
 
+namespace plb {
+namespace npfem {
+
 template <class T>
 __forceinline__ __device__ void sum(T *buffer, int n_sum, int n, int id) {
 
@@ -102,6 +105,9 @@ __global__ void test_sum2() {
 	triple_sum(buffer1, buffer2, buffer3, 256, 258, threadIdx.x);
 	__syncthreads();
 	if (threadIdx.x == 0) printf("test sum %f %f %f", buffer1[0], buffer2[0], buffer3[0]);
+}
+
+}
 }
 
 #endif

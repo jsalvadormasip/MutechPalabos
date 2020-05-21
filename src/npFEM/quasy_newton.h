@@ -30,6 +30,8 @@ inline void handleError(cudaError_t code, const char *file, int line)
 #define ID_COL(i,j,N) ((N*(j)) + (i))
 #define ID_ROW(i,j,N) ((N*(i)) + (j))
 
+namespace plb {
+namespace npfem {
 
 //trace((x-y)'*M*(x-y)) + trace(x' L x) - trace (x' J p )
 __global__ void  eval_objectif(sparse_matrix_cuda L, sparse_matrix_cuda J, double *m, double *x, double *y, double *p, double *energies, double h2, int x_n, int p_n, int ncell, int nb_sum_thread){
@@ -413,6 +415,7 @@ __global__ void velocities_equals_points_minus_points_prev(double *points, doubl
 	velocities[id] = (points[id] - points_prev[id])*one_over_h;
 }
 
-
+}
+}
 
 #endif //QUASY

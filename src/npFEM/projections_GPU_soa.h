@@ -9,6 +9,8 @@
 #include <cuda_runtime.h>
 #include "npFEM/projections_GPU_MATH.h"
 
+namespace plb {
+namespace npfem {
 ////////////////////////////////////////////////////////////////////////////////
 __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, double *points_d, short *triangles_d, cuda_scalar *force, 
 								 double *E_nonePD, cuda_scalar volume0, const int nb_sum_thread, double *buffer_double, cuda_scalar *grad_c, const int id, const float volume_weight) {
@@ -903,6 +905,9 @@ void project_collision_d(int n_points, int nb_cells, double *points, double *nea
             E_nonePD[blockIdx.x*n_constraints + threadIdx.x] += weight_col_nonRep*(dif[0] * dif[0] + dif[1] * dif[1] + dif[2] * dif[2]) / 2.0f;
         }
 	}
+}
+
+}
 }
 ///////////////////////////////////////////////////////////////////////////////
 #endif // PROJECTIONS_GPU_H

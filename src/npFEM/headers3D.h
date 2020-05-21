@@ -62,4 +62,4 @@
 #include "npFEM/sparse_matrix.h"
 #include "npFEM/sum_cuda.h"
 #include "npFEM/svd3_cuda.h"
-#endif // NPFEM_CUDA
+#endif //NPFEM_CUDA

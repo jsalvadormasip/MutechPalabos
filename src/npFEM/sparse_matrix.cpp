@@ -1,6 +1,9 @@
 #include "npFEM/sparse_matrix.h"
 #include <stdio.h>
 
+namespace plb {
+namespace npfem {
+
 void print_mat_sparse(sparse_matrix_cuda mat, int l, int n, int size) {
 
 	for (int j = 0; j<l; j++) {
@@ -58,4 +61,7 @@ sparse_matrix_cuda make_sparse_from_full(double *mat, int rows, int cols) {
 		}
 	}
 	return out;
+}
+
+}
 }

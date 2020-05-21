@@ -1,6 +1,7 @@
 #pragma once
 
 namespace plb {
+namespace npfem {
 
 // Convert a matrix to a list (std::vector) of row vectors of the same size
 //
@@ -154,5 +155,7 @@ inline bool median(const Eigen::MatrixBase<DerivedV>& V, mType& m)
         m = vV[n];
     }
     return true;
+}
+
 }
 }

@@ -27,9 +27,15 @@ API.*/
 
 #define BL 0
 
+namespace plb {
+namespace npfem {
+
 /** Defines the scalar type used by the ShapeOp solver (float or double).*/
 typedef SHAPEOP_SCALAR ShapeOpScalar;
 typedef double cuda_scalar;
+
+}
+}
 ///////////////////////////////////////////////////////////////////////////////
 #define LU_GPU // Faster than the other 2
 //#define CHOLESKY_GPU

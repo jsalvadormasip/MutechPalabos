@@ -20,7 +20,8 @@
 #define SIGN(a) 			                  ((a)<0?-1:1)
 #define CLAMP(a, l, h)                  (((a)>(h))?(h):(((a)<(l))?(l):(a)))
 
-
+namespace plb {
+namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T>
 __device__ __forceinline__
@@ -474,6 +475,9 @@ __device__ cuda_scalar g_tr(cuda_scalar x, cuda_scalar miu, cuda_scalar lambda, 
 __device__ cuda_scalar g_prime_tr(cuda_scalar x, cuda_scalar miu, cuda_scalar lambda, cuda_scalar kappa) {
 
 	return 0;
+}
+
+}
 }
 //////////////////////////////////////////////////////////////////////////////
 #endif // PROJECTIONS_GPU_MATH_H

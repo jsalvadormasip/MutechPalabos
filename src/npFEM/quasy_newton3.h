@@ -4,6 +4,8 @@
 
 #include "npFEM/quasy_newton.h"
 
+namespace plb {
+namespace npfem {
 
 __global__ void  test_convergence_d(double *energies, double *energies_prev, int *has_converged, double *descent_direction_dot_gradient, double scalar, int ncell) {
 
@@ -609,6 +611,9 @@ __device__ void trace_x_time_y3(const double *x, const double *y, double *result
 		//printf("blockIdx.x %d sum %f \n", blockIdx.x, buffer[0]);
 		*result = buffer[0];
 	}
+}
+
+}
 }
 
 #endif //QUASY3
