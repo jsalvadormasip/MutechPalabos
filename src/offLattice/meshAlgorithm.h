@@ -31,7 +31,7 @@
 
 #include "core/globalDefs.h"
 #include "core/units.h"
-#include "geometry/triangleMesh.h"
+#include "offLattice/triangleMesh.h"
 #include "offLattice/triangleSet.h"
 
 #include <vector>

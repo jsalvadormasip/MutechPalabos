@@ -26,10 +26,10 @@
 #define OFF_FILE_IO_HH
 
 #include "core/runTimeDiagnostics.h"
-#include "geometry/offFileIO.h"
-#include "geometry/triangleMesh.h"
-#include "geometry/connectedTriangleMesh.h"
-#include "geometry/connectedTriangleUtil.h"
+#include "offLattice/offFileIO.h"
+#include "offLattice/triangleMesh.h"
+#include "offLattice/connectedTriangleMesh.h"
+#include "offLattice/connectedTriangleUtil.h"
 
 #include <vector>
 #include <fstream>

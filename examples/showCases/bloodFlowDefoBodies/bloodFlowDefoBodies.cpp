@@ -83,7 +83,7 @@ std::map<pluint, pluint> bodyToProc;
 std::vector<ShapeOpBody<T>> shapeOpBodies;
 std::vector<ShapeOp_Solver*> shapeOpRBCs, shapeOpPLTs;
 std::vector<ShapeOp_Solver*> shapeOpRBCs_empty, shapeOpPLTs_empty;
-#ifdef GPU
+#ifdef NPFEM_CUDA
 Solver_GPU sGPU;
 Solver_GPU sGPU_plt;
 #endif
@@ -312,7 +312,7 @@ void iniShapeOpSolvers(std::string fname_points, std::string fname_constraints,
         return;
 
     plb::global::logfile("progress.log").flushEntry("initializing npFEM solvers: Ranges start");
-#ifdef GPU
+#ifdef NPFEM_CUDA
     //////////////////////////////////////////////////////////////////////////////////////////
     // This code works only for cases where every node has at least one GPU attached to it. //
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -1036,7 +1036,7 @@ void loadAllBlocks(Group3D& group, pluint& iteration)
 	iteration = intIteration;
 }
 
-#ifdef GPU
+#ifdef NPFEM_CUDA
 void copy_data_to_gpu(Solver_GPU &sGPU, vector<Solver*> &cpu_solvers)
 {
 	// copy forces and colliding data from CPU solver to GPU solver
@@ -1246,7 +1246,7 @@ int main(int argc, char* argv[])
     xmlFile["System_Setup"]["vel_cap"].read(vel_cap);
     xmlFile["System_Setup"]["vel_cap_fin"].read(vel_cap_fin);
 
-#ifdef GPU
+#ifdef NPFEM_CUDA
     Mesh_info params_rbc;
 
     params_rbc.rho = rho_ShapeOp_RBC;
@@ -1400,7 +1400,7 @@ int main(int argc, char* argv[])
 	addVertexForce(PLT_shapeOpSolverTemplate, PLT_forces);
 	PLT_shapeOpSolverTemplate.initialize(Calpha_ShapeOp_PLT, Cbeta_ShapeOp_PLT, dt_p * (T)(timestep_ShapeOp), rho_ShapeOp_PLT, false, applyGlobalVolumeConservation_ShapeOp_PLT, globalVolumeConservationWeight_ShapeOp_PLT, dx_p, dt_p);
 
-#ifdef GPU
+#ifdef NPFEM_CUDA
     params_rbc.miu = 35.0;
     params_rbc.lambda = 5.0;
     params_rbc.kappa = 0.0;
@@ -1645,7 +1645,7 @@ int main(int argc, char* argv[])
 
 	///////////////////////////////////////////////////////////////////////////
 
-#ifdef GPU
+#ifdef NPFEM_CUDA
 	// GPU init
 	auto init_gpu = [&](Solver_GPU &sGPU, Solver &s_template, std::vector<Solver*> &solvers, plb::Array<double, 3>*iniPositions, vector<int> *mesh_graph, Mesh_info params) {
 		sGPU = Solver_GPU(s_template.getPoints(),
@@ -1922,7 +1922,7 @@ int main(int argc, char* argv[])
 	T Cp = rho_p * (dx_p * dx_p) / (dt_p * dt_p); // pressure
 	T Ca = dx_p * dx_p; // area
     T densityOffset = 1.0;
-	actions2b.addProcessor(new CollisionsForcesCombo<T, DESCRIPTOR>(dx_p, omega, densityOffset, Cf, Cp, Ca, collisions_threshold, wallVertexNormals, CellPacking),
+	actions2b.addProcessor(new CollisionsForcesCombo<T, DESCRIPTOR>(dx_p, omega, densityOffset, Cf, Cp, Ca, collisions_threshold_rep, collisions_threshold_nonRep, wallVertexNormals, CellPacking),
 		particleID_act2b, rhoBarID_act2b, piNeqID_act2b, group.getBoundingBox());
 
 	// 3. Immersed boundary method.
@@ -2109,7 +2109,7 @@ int main(int argc, char* argv[])
 			plb::global::logfile("progress.log").flushEntry("Run the ShapeOp solver");
             timer("logging").stop();
 			timer("shapeop").start();
-#ifdef GPU
+#ifdef NPFEM_CUDA
 			if (shapeOpRBCs.size()) {
 				copy_data_to_gpu(sGPU, shapeOpRBCs);
 				sGPU.Palabos_iT_ = iT;
@@ -2290,7 +2290,7 @@ int main(int argc, char* argv[])
 		timer("actions6").stop();
 		// - Advance the particles (SOLID at t+1)
 
-#ifndef GPU
+#ifndef NPFEM_CUDA
 		if (iT%timestep_ShapeOp == 0)
 		{
             timer("shapeop").start();

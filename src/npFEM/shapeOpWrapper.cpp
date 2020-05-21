@@ -36,9 +36,9 @@ void setPointsFromCSV(ShapeOp_Solver& s, std::string filename, bool best_fit_T)
     }
     points_file.close();
 
-    ShapeOp::Matrix3X q(3, n_points);
+    plb::npfem::Matrix3X q(3, n_points);
     for (int i = 0; i < q.cols(); ++i)
-        q.col(i) = ShapeOp::Vector3(xv[i], yv[i], zv[i]);
+        q.col(i) = plb::npfem::Vector3(xv[i], yv[i], zv[i]);
 
     if (!best_fit_T)
     {
@@ -51,29 +51,29 @@ void setPointsFromCSV(ShapeOp_Solver& s, std::string filename, bool best_fit_T)
         // This branch is to avoid setting the initial conditions with deformed bodies
         // such that we avoid energy bursts
 
-        const ShapeOp::Matrix3X& p = s.getPoints();
+        const plb::npfem::Matrix3X& p = s.getPoints();
 
         ///////////////////////////////////////////////////////////////////
 
         // See the least-squares fitting using SVD by Sorkine & Rabinovitch
 
-        ShapeOp::Vector3 p_ = p.rowwise().mean();
-        ShapeOp::Vector3 q_ = q.rowwise().mean();
+        plb::npfem::Vector3 p_ = p.rowwise().mean();
+        plb::npfem::Vector3 q_ = q.rowwise().mean();
 
-        ShapeOp::Matrix3X x = p;
+        plb::npfem::Matrix3X x = p;
         x.colwise() -= p_;
-        ShapeOp::Matrix3X y = q;
+        plb::npfem::Matrix3X y = q;
         y.colwise() -= q_;
 
-        ShapeOp::Matrix33 S = x * ShapeOp::MatrixXX::Identity(n_points, n_points) * y.transpose();
-        Eigen::JacobiSVD<ShapeOp::Matrix33> svd(S, Eigen::ComputeFullU | Eigen::ComputeFullV);
-        ShapeOp::Matrix33 U = svd.matrixU();
-        ShapeOp::Matrix33 V = svd.matrixV();
+        plb::npfem::Matrix33 S = x * plb::npfem::MatrixXX::Identity(n_points, n_points) * y.transpose();
+        Eigen::JacobiSVD<plb::npfem::Matrix33> svd(S, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        plb::npfem::Matrix33 U = svd.matrixU();
+        plb::npfem::Matrix33 V = svd.matrixV();
 
-        ShapeOp::Vector3 diag(1., 1., (V*U.transpose()).determinant());
-        ShapeOp::Matrix33 R = V * diag.asDiagonal() * U.transpose();
+        plb::npfem::Vector3 diag(1., 1., (V*U.transpose()).determinant());
+        plb::npfem::Matrix33 R = V * diag.asDiagonal() * U.transpose();
 
-        ShapeOp::Vector3 t = q_ - R * p_;
+        plb::npfem::Vector3 t = q_ - R * p_;
 
         ///////////////////////////////////////////////////////////////////
 
@@ -102,22 +102,22 @@ void setVelsFromCSV(ShapeOp_Solver& s, std::string filename)
     }
     vels_file.close();
 
-    ShapeOp::Matrix3X q(3, n_points);
+    plb::npfem::Matrix3X q(3, n_points);
     for (int i = 0; i < q.cols(); ++i)
-        q.col(i) = ShapeOp::Vector3(xv[i], yv[i], zv[i]);
+        q.col(i) = plb::npfem::Vector3(xv[i], yv[i], zv[i]);
     
     s.setVelocities(q);
 }
 
 void savePointsToCSV(ShapeOp_Solver& s, std::string filename, size_t iT, size_t dt_ShapeOp)
 {
-    ShapeOp::Matrix3X points = s.getPoints();
-    const ShapeOp::Matrix3X& vels = s.getVelocities();
+    plb::npfem::Matrix3X points = s.getPoints();
+    const plb::npfem::Matrix3X& vels = s.getVelocities();
 
     if (dt_ShapeOp != 1)
     {
         double delta = s.getTimeStep();
-        ShapeOp::Matrix3X oldPoints = points - delta * vels;
+        plb::npfem::Matrix3X oldPoints = points - delta * vels;
 
         double delta_Palabos = delta / ((double)dt_ShapeOp);
         size_t proceedBy = iT % dt_ShapeOp;
@@ -136,7 +136,7 @@ void savePointsToCSV(ShapeOp_Solver& s, std::string filename, size_t iT, size_t 
 
 void saveVelsToCSV(ShapeOp_Solver& s, std::string filename)
 {
-    const ShapeOp::Matrix3X& velocities = s.getVelocities();
+    const plb::npfem::Matrix3X& velocities = s.getVelocities();
 
     std::ofstream vels_file(filename.c_str());
     ISOPEN_HANDLE_ERROR(vels_file.is_open());
@@ -157,8 +157,8 @@ void setConstraintsFromCSV(ShapeOp_Solver& s, std::string filename)
         // read details of the constraint
         std::string constraintType;
         std::vector<int> idI;
-        ShapeOp::Scalar weight;
-        std::vector<ShapeOp::Scalar> scalars;
+        plb::npfem::Scalar weight;
+        std::vector<plb::npfem::Scalar> scalars;
 
         std::istringstream ss(line);
         std::string token;
@@ -188,7 +188,7 @@ void setConstraintsFromCSV(ShapeOp_Solver& s, std::string filename)
 
         // Add constraint to the solver!
         if (constraintType.compare("VolumeMaterial") == 0) {
-            auto c = std::make_shared<ShapeOp::VolumeMaterialConstraint>(
+            auto c = std::make_shared<plb::npfem::VolumeMaterialConstraint>(
                 idI, weight, s.getPoints());
             c->setRangeMin(scalars[0]);
             c->setRangeMax(scalars[1]);
@@ -197,7 +197,7 @@ void setConstraintsFromCSV(ShapeOp_Solver& s, std::string filename)
             c->setKappa(scalars[4]);
             s.addConstraint(c);
         } else if (constraintType.compare("VolumeDamping") == 0) {
-            auto c = std::make_shared<ShapeOp::VolumeDampingConstraint>(
+            auto c = std::make_shared<plb::npfem::VolumeDampingConstraint>(
                 idI, weight, s.getPoints());
             c->setRangeMin(scalars[0]);
             c->setRangeMax(scalars[1]);
@@ -206,7 +206,7 @@ void setConstraintsFromCSV(ShapeOp_Solver& s, std::string filename)
             c->setKappa(scalars[4]);
             s.addConstraint(c);
         } else if (constraintType.compare("SurfaceMaterial") == 0) {
-            auto c = std::make_shared<ShapeOp::SurfaceMaterialConstraint>(
+            auto c = std::make_shared<plb::npfem::SurfaceMaterialConstraint>(
                 idI, weight, s.getPoints());
             c->setRangeMin(scalars[0]);
             c->setRangeMax(scalars[1]);
@@ -215,32 +215,32 @@ void setConstraintsFromCSV(ShapeOp_Solver& s, std::string filename)
             c->setKappa(scalars[4]);
             s.addConstraint(c);
         } else if (constraintType.compare("Volume") == 0) {
-            auto c = std::make_shared<ShapeOp::VolumeConstraint>(
+            auto c = std::make_shared<plb::npfem::VolumeConstraint>(
                 idI, weight, s.getPoints());
             c->setRangeMin(scalars[0]);
             c->setRangeMax(scalars[1]);
             s.addConstraint(c);
         } else if (constraintType.compare("Area") == 0) {
-            auto c = std::make_shared<ShapeOp::AreaConstraint>(
+            auto c = std::make_shared<plb::npfem::AreaConstraint>(
                 idI, weight, s.getPoints());
             c->setRangeMin(scalars[0]);
             c->setRangeMax(scalars[1]);
             s.addConstraint(c);
         } else if (constraintType.compare("Bending") == 0) {
-            auto c = std::make_shared<ShapeOp::BendingConstraint>(
+            auto c = std::make_shared<plb::npfem::BendingConstraint>(
                 idI, weight, s.getPoints());
             c->setRangeMin(scalars[0]);
             c->setRangeMax(scalars[1]);
             s.addConstraint(c);
         } else if (constraintType.compare("EdgeStrainLimiting") == 0) {
-            auto c = std::make_shared<ShapeOp::EdgeStrainLimitingConstraint>(
+            auto c = std::make_shared<plb::npfem::EdgeStrainLimitingConstraint>(
                 idI, weight, s.getPoints());
             c->setRangeMin(scalars[0]);
             c->setRangeMax(scalars[1]);
             s.addConstraint(c);
         } else if (constraintType.compare("TriangleStrainLimiting") == 0) {
             auto c
-                = std::make_shared<ShapeOp::TriangleStrainLimitingConstraint>(
+                = std::make_shared<plb::npfem::TriangleStrainLimitingConstraint>(
                     idI, weight, s.getPoints());
             c->setRangeMin(scalars[0]);
             c->setRangeMax(scalars[1]);
@@ -279,7 +279,7 @@ void setConnectivityListFromCSV(ShapeOp_Solver& s, std::string filename)
 
 void setForcesFromCSV(ShapeOp_Solver& s, std::string filename)
 {
-    ShapeOp::Matrix3X forces(3, s.getPoints().cols());
+    plb::npfem::Matrix3X forces(3, s.getPoints().cols());
 
     std::ifstream forces_file(filename.c_str());
     ISOPEN_HANDLE_ERROR(forces_file.is_open());
@@ -293,7 +293,7 @@ void setForcesFromCSV(ShapeOp_Solver& s, std::string filename)
         while (std::getline(ss, token, ',')) {
             force.push_back(std::stof(token));
         }
-        forces.col(i) = ShapeOp::Vector3(force[0], force[1], force[2]);
+        forces.col(i) = plb::npfem::Vector3(force[0], force[1], force[2]);
         ++i;
     }
     forces_file.close();
@@ -303,7 +303,7 @@ void setForcesFromCSV(ShapeOp_Solver& s, std::string filename)
 
 void saveForcesToCSV(ShapeOp_Solver& s, std::string filename)
 {
-    const ShapeOp::Matrix3X& forces = s.get_Palabos_Forces();
+    const plb::npfem::Matrix3X& forces = s.get_Palabos_Forces();
 
     std::ofstream forces_file(filename.c_str());
     ISOPEN_HANDLE_ERROR(forces_file.is_open());
@@ -331,7 +331,7 @@ void setOnSurfaceParticle(ShapeOp_Solver& s, std::string filename)
     s.set_onSurfaceParticle(onSurfaceParticle);
 }
 
-void addVertexForce(ShapeOp_Solver& s, const ShapeOp::Matrix3X& forces, const int cell_id)
+void addVertexForce(ShapeOp_Solver& s, const plb::npfem::Matrix3X& forces, const int cell_id)
 {
     // In the RBC implementation the Force Id coincides with the vertex Id
     // Both ways to edit Vertex forces are equivalent. I keep both for legacy
@@ -343,13 +343,13 @@ void addVertexForce(ShapeOp_Solver& s, const ShapeOp::Matrix3X& forces, const in
     // 2nd way to edit the vertex forces
     for (int i = 0; i < forces.cols(); ++i) {
         auto VertexForce
-            = std::make_shared<ShapeOp::VertexForce>(forces.col(i), i);
+            = std::make_shared<plb::npfem::VertexForce>(forces.col(i), i);
         s.addForces(VertexForce);
     }
 	*/
 }
 
-void editVertexForce(ShapeOp_Solver& s, const ShapeOp::Matrix3X& forces, const int cell_id)
+void editVertexForce(ShapeOp_Solver& s, const plb::npfem::Matrix3X& forces, const int cell_id)
 {
     // In the RBC implementation the Force Id coincides with the vertex Id
     // Both ways to edit Vertex forces are equivalent. I keep both for legacy
@@ -361,7 +361,7 @@ void editVertexForce(ShapeOp_Solver& s, const ShapeOp::Matrix3X& forces, const i
     // 2nd way to edit the vertex forces
     for (int i = 0; i < forces.cols(); ++i) {
         auto VertexForce
-            = std::dynamic_pointer_cast<ShapeOp::VertexForce>(s.getForce(i));
+            = std::dynamic_pointer_cast<plb::npfem::VertexForce>(s.getForce(i));
         // force Id stays unchanged
         VertexForce->setForce(forces.col(i));
     }

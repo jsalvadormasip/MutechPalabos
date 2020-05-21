@@ -27,9 +27,9 @@
 
 #include <limits>
 #include <fstream>
-#include "geometry/vtkFileIO.h"
+#include "offLattice/vtkFileIO.h"
 #include "io/imageWriter.h"
-#include "geometry/connectedTriangleUtil.h"
+#include "offLattice/connectedTriangleUtil.h"
 
 namespace plb {
 

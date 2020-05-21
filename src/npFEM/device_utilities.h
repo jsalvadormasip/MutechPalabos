@@ -5,15 +5,15 @@
 #define DEVICE_UTILITIES_H
 ///////////////////////////////////////////////////////////////////////////////
 //#include "Types.h"
-#include "common.h"
-#include "GPU_data.h"
-#include "Constraint_Flattening.h"
+#include "npFEM/common.h"
+#include "npFEM/GPU_data.h"
+#include "npFEM/Constraint_Flattening.h"
 #include <iostream>
 #include <cstdio>
 #include <string.h>
 #include <vector>
 
-#include "sparse_matrix.h"
+#include "npFEM/sparse_matrix.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////

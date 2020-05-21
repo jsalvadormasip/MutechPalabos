@@ -4,10 +4,10 @@
 #ifndef DEVICE_UTILITIES_CU
 #define DEVICE_UTILITIES_CU
 ///////////////////////////////////////////////////////////////////////////////
-#include "device_utilities.h"
-#include "projections_GPU_soa.h"
-#include "GPU_data.h"
-#include "quasy_newton3.h"
+#include "npFEM/device_utilities.h"
+#include "npFEM/projections_GPU_soa.h"
+#include "npFEM/GPU_data.h"
+#include "npFEM/quasy_newton3.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 #include <chrono>

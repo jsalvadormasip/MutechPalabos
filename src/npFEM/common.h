@@ -40,7 +40,7 @@ typedef double cuda_scalar;
 #pragma warning(disable : 4251) // Disable warnings about templates and std
                                 // types exposed in the c++ interface.
 #pragma warning(disable : 4244) // conversion from 'double' to
-                                // 'ShapeOp::Scalar', possible loss of data
+                                // 'plb::npfem::Scalar', possible loss of data
 #pragma warning(disable : 4996) // dll window function
 #ifdef SHAPEOP_EXPORT
 #define SHAPEOP_API __declspec(dllexport)

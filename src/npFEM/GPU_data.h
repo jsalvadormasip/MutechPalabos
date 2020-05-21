@@ -2,8 +2,8 @@
 #ifndef CUDASTRCT
 #define CUDASTRCT
 
-#include "sparse_matrix.h"
-#include "common.h"
+#include "npFEM/sparse_matrix.h"
+#include "npFEM/common.h"
 
 struct matrix3{
 	float data[9];

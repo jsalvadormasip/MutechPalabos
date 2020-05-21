@@ -16,7 +16,7 @@
 #ifndef SVD3_CUDA_H
 #define SVD3_CUDA_H
 
-#include "common.h"
+#include "npFEM/common.h"
 #include <cuda_runtime.h>
 #include "math.h" // CUDA math library
 

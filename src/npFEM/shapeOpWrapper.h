@@ -8,17 +8,17 @@
 #include <string>
 
 #include "npFEM/Solver.h"
-#ifndef NO_PALABOS
-#ifdef GPU
-#include "npFEM/src_GPU/Solver_GPU.h"
+#ifndef NPFEM_SA
+#ifdef NPFEM_CUDA
+#include "npFEM/Solver_GPU.h"
 #endif
-#endif // !NO_PALABOS
+#endif // !NPFEM_SA
 #include "npFEM/Constraint.h"
 #include "npFEM/Force.h"
 
 namespace plb {
 
-typedef ShapeOp::Solver ShapeOp_Solver;
+typedef plb::npfem::Solver ShapeOp_Solver;
 
 void setPointsFromCSV(ShapeOp_Solver& s, std::string filename, bool best_fit_T = false);
 void setVelsFromCSV(ShapeOp_Solver& s, std::string filename);
@@ -38,9 +38,9 @@ void setOnSurfaceParticle(ShapeOp_Solver& s, std::string filename);
 
 // This runs only once as an initialization. Afterwards, modify forces with
 // editVertexForce
-void addVertexForce(ShapeOp_Solver& s, const ShapeOp::Matrix3X& forces, const int cell_id = 0);
+void addVertexForce(ShapeOp_Solver& s, const plb::npfem::Matrix3X& forces, const int cell_id = 0);
 
-void editVertexForce(ShapeOp_Solver& s, const ShapeOp::Matrix3X& forces, const int cell_id = 0);
+void editVertexForce(ShapeOp_Solver& s, const plb::npfem::Matrix3X& forces, const int cell_id = 0);
 
 }
 

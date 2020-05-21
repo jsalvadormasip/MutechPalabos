@@ -11,27 +11,12 @@
 #ifndef TYPES_H
 #define TYPES_H
 ///////////////////////////////////////////////////////////////////////////////
-#include "src_GPU/common.h"
-// Stand-alone development
-#ifdef NO_PALABOS
-#include <Eigen/Dense>
-#include <Eigen/Sparse>
-#include <Eigen/Eigenvalues>
-#include "../../shapeOp_GH/externalLibraries/eigen/unsupported/Eigen/KroneckerProduct"
-#else
-// Eigen used by Palabos
+#include "npFEM/common.h"
 #include <Eigen3/Core>
 #include <Eigen3/Dense>
 #include <Eigen3/Sparse>
-//#include <Eigen3/Eigenvalues>
-//#include "../../shapeOp_GH/externalLibraries/eigen/unsupported/Eigen/KroneckerProduct"
-#endif
-// For Collisions
-#ifndef NO_PALABOS
+#include <Eigen3/Eigenvalues>
 #include "nanoflann/nanoflann.hpp"
-#else
-#include "nanoflann.hpp"
-#endif
 ///////////////////////////////////////////////////////////////////////////////
 /**
 This file redefines EIGEN types using the scalar type ::ShapeOpScalar defined in

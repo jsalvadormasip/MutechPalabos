@@ -1,4 +1,4 @@
-#include "sparse_matrix.h"
+#include "npFEM/sparse_matrix.h"
 #include <stdio.h>
 
 void print_mat_sparse(sparse_matrix_cuda mat, int l, int n, int size) {

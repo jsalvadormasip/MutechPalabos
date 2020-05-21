@@ -4,9 +4,9 @@
 #ifndef PROJECTIONS_GPU_H
 #define PROJECTIONS_GPU_H
 ///////////////////////////////////////////////////////////////////////////////
-#include "common.h"
+#include "npFEM/common.h"
 #include <cuda_runtime.h>
-#include "projections_GPU_MATH.h"
+#include "npFEM/projections_GPU_MATH.h"
 ///////////////////////////////////////////////////////////////////////////////
 __device__ __forceinline__
 void project_Area( int tid, int n_points, int n_constraints, int n_projected_points, int nb_cells,

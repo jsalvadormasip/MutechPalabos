@@ -25,7 +25,7 @@
 #ifndef OBSOLETE_FORMAT_WRAPPER_H
 #define OBSOLETE_FORMAT_WRAPPER_H
 
-#include "geometry/rawTriangleMesh.h"
+#include "offLattice/rawTriangleMesh.h"
 #include "offLattice/triangleBoundary3D.h"
 #include <string>
 #include <map>

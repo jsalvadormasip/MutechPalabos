@@ -94,7 +94,7 @@ private:
 /* Sparse linear system solver based on successive over-relaxation (SOR). */
 class SHAPEOP_API SORSolver : public LSSolver {
 public:
-    SORSolver(ShapeOp::Scalar relaxation = 1.6);
+    SORSolver(plb::npfem::Scalar relaxation = 1.6);
     virtual ~SORSolver(){};
     /* Initialize SOR. */
     virtual void initialize(
@@ -106,7 +106,7 @@ public:
     virtual Eigen::ComputationInfo info() const override final;
 private:
     SparseMatrixT<Eigen::RowMajor> A_;
-    ShapeOp::Scalar relaxation_;
+    plb::npfem::Scalar relaxation_;
     unsigned int iteration_;
 };
 ///////////////////////////////////////////////////////////////////////////////

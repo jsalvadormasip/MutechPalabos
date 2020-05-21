@@ -25,7 +25,7 @@
 #ifndef OBSOLETE_FORMAT_WRAPPER_HH
 #define OBSOLETE_FORMAT_WRAPPER_HH
 
-#include "geometry/obsoleteFormatWrapper.h"
+#include "offLattice/obsoleteFormatWrapper.h"
 
 namespace plb {
 

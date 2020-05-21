@@ -4,10 +4,10 @@
 #ifndef PROJECTIONS_GPU_H
 #define PROJECTIONS_GPU_H
 ///////////////////////////////////////////////////////////////////////////////
-#include "common.h"
-#include "sum_cuda.h"
+#include "npFEM/common.h"
+#include "npFEM/sum_cuda.h"
 #include <cuda_runtime.h>
-#include "projections_GPU_MATH.h"
+#include "npFEM/projections_GPU_MATH.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, double *points_d, short *triangles_d, cuda_scalar *force, 

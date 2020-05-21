@@ -26,7 +26,7 @@
 #define CONNECTED_TRIANGLE_UTIL_H
 
 #include "core/geometry3D.h"
-#include "geometry/connectedTriangleMesh.h"
+#include "offLattice/connectedTriangleMesh.h"
 
 namespace plb {
 

@@ -65,7 +65,7 @@ SHAPEOP_INLINE Eigen::ComputationInfo MINRESSolver::info() const
 }
 */
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE SORSolver::SORSolver(ShapeOp::Scalar relaxation)
+SHAPEOP_INLINE SORSolver::SORSolver(plb::npfem::Scalar relaxation)
     : relaxation_(relaxation)
 {
 }

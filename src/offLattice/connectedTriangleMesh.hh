@@ -41,11 +41,11 @@
 #include "latticeBoltzmann/geometricOperationTemplates.h"
 #include "io/plbFiles.h"
 
-#include "geometry/rawTriangleMesh.h"
-#include "geometry/connectedTriangleMesh.h"
-#include "geometry/connectedTriangleUtil.h"
-#include "geometry/stlFileIO.h"
-#include "geometry/offFileIO.h"
+#include "offLattice/rawTriangleMesh.h"
+#include "offLattice/connectedTriangleMesh.h"
+#include "offLattice/connectedTriangleUtil.h"
+#include "offLattice/stlFileIO.h"
+#include "offLattice/offFileIO.h"
 
 namespace plb {
 

@@ -28,7 +28,7 @@
 #include <limits>
 #include <map>
 #include <fstream>
-#include "geometry/asciiDataFileIO.h"
+#include "offLattice/asciiDataFileIO.h"
 
 namespace plb {
 

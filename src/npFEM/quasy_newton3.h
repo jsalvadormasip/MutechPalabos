@@ -2,7 +2,7 @@
 
 #define QUASY3
 
-#include "quasy_newton.h"
+#include "npFEM/quasy_newton.h"
 
 
 __global__ void  test_convergence_d(double *energies, double *energies_prev, int *has_converged, double *descent_direction_dot_gradient, double scalar, int ncell) {
@@ -579,7 +579,7 @@ __device__ void damping(const double *points, const double *points_prev, double 
 	velocities[id +   n] += calpha*deltaV[1];
 	velocities[id + 2*n] += calpha*deltaV[2];
 
-#ifndef NO_PALABOS
+#ifndef NPFEM_SA
 	//if(threadIdx.x == 0)printf("1/h %f  dx_P %f", one_over_h*h2, DX_P);
 	ShapeOpScalar vel_lattx = velocities[id      ]/(dx_p*one_over_h*h2);
 	ShapeOpScalar vel_latty = velocities[id +   n]/(dx_p*one_over_h*h2);

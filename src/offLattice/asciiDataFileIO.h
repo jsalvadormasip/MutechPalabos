@@ -31,7 +31,7 @@
 
 
 #include "core/globalDefs.h"
-#include "geometry/connectedTriangleMesh.h"
+#include "offLattice/connectedTriangleMesh.h"
 
 namespace plb {
 

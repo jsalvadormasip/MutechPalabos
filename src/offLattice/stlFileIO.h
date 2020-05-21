@@ -32,7 +32,7 @@
 
 #include "core/globalDefs.h"
 #include "offLattice/triangleSelector.h"
-#include "geometry/triangleMesh.h"
+#include "offLattice/triangleMesh.h"
 
 #include <vector>
 #include <string>

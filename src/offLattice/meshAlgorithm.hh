@@ -29,7 +29,7 @@
  * Algorithms, applied to generic meshes.
  */
 
-#include "geometry/meshAlgorithm.h"
+#include "offLattice/meshAlgorithm.h"
 #include "core/array.h"
 #include "core/util.h"
 #include "core/globalDefs.h"

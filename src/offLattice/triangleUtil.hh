@@ -29,7 +29,7 @@
 #include "core/globalDefs.h"
 #include "core/plbDebug.h"
 #include "latticeBoltzmann/geometricOperationTemplates.h"
-#include "geometry/triangleUtil.h"
+#include "offLattice/triangleUtil.h"
 #include "core/util.h"
 
 namespace plb {

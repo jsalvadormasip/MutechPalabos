@@ -25,8 +25,8 @@
 #ifndef STL_FILE_IO_HH
 #define STL_FILE_IO_HH
 
-#include "geometry/triangleMesh.h"
-#include "geometry/stlFileIO.h"
+#include "offLattice/triangleMesh.h"
+#include "offLattice/stlFileIO.h"
 #include "core/runTimeDiagnostics.h"
 #include "latticeBoltzmann/geometricOperationTemplates.h"
 

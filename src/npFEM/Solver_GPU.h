@@ -6,13 +6,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <vector>
 #include <memory>
-#include "Types.h"
-#include "Constraint_Flattening.h"
+#include "npFEM/Types.h"
+#include "npFEM/Constraint_Flattening.h"
 ///////////////////////////////////////////////////////////////////////////////
 #include <cuda_runtime.h>
-#include "sparse_matrix.h"
-#include "common.h"
-#include "GPU_data.h"
+#include "npFEM/sparse_matrix.h"
+#include "npFEM/common.h"
+#include "npFEM/GPU_data.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 /** @file

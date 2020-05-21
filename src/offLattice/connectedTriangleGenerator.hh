@@ -25,8 +25,8 @@
 #ifndef CONNECTED_TRIANGLE_GENERATOR_HH
 #define CONNECTED_TRIANGLE_GENERATOR_HH
 
-#include "geometry/connectedTriangleGenerator.h"
-#include "geometry/obsoleteFormatWrapper.h"
+#include "offLattice/connectedTriangleGenerator.h"
+#include "offLattice/obsoleteFormatWrapper.h"
 #include "offLattice/triangleSetGenerator.h"
 
 namespace plb {

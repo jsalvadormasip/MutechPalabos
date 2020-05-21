@@ -27,7 +27,7 @@
 
 #include "core/geometry3D.h"
 #include "core/util.h"
-#include "geometry/connectedTriangleUtil.h"
+#include "offLattice/connectedTriangleUtil.h"
 
 namespace plb {
 

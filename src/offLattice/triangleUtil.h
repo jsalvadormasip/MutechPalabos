@@ -25,7 +25,7 @@
 #ifndef TRIANGLE_UTIL_H
 #define TRIANGLE_UTIL_H
 
-#include "geometry/triangleMesh.h"
+#include "offLattice/triangleMesh.h"
 
 namespace plb {
 

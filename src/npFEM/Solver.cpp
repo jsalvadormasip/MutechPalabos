@@ -14,7 +14,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #define THREED
 ///////////////////////////////////////////////////////////////////////////////
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
 #ifdef SHAPEOP_MSVC
 // Console Output
 #include <windows.h>
@@ -204,14 +204,14 @@ SHAPEOP_INLINE void Solver::calculateArea(Scalar& Area){
         if (useSurfaceMaterialConstraint)
         {
             if (constraints_[i]->get_ConstraintType().compare("SurfaceMaterial") == 0) {
-                auto c = std::dynamic_pointer_cast<ShapeOp::SurfaceMaterialConstraint>(getConstraint(i));
+                auto c = std::dynamic_pointer_cast<plb::npfem::SurfaceMaterialConstraint>(getConstraint(i));
                 c->calculateArea(points_, Area);
             }
         }
         if (useAreaConstraint)
         {
             if (constraints_[i]->get_ConstraintType().compare("Area") == 0) {
-                auto c = std::dynamic_pointer_cast<ShapeOp::AreaConstraint>(getConstraint(i));
+                auto c = std::dynamic_pointer_cast<plb::npfem::AreaConstraint>(getConstraint(i));
                 c->calculateArea(points_, Area);
             }
         }
@@ -227,7 +227,7 @@ SHAPEOP_INLINE void Solver::calculateVolume(Scalar& Volume)
         SHAPEOP_OMP_FOR for (int i = 0; i < static_cast<int>(constraints_.size()); ++i)
     {
         if (constraints_[i]->get_ConstraintType().compare("Volume") == 0) {
-            auto c = std::dynamic_pointer_cast<ShapeOp::VolumeConstraint>(getConstraint(i));
+            auto c = std::dynamic_pointer_cast<plb::npfem::VolumeConstraint>(getConstraint(i));
             c->calculateVolume(points_, Volume);
         }
     }
@@ -246,7 +246,7 @@ SHAPEOP_INLINE void Solver::calculateVolumeFromSurfaceAndPrepareConstraint(Scala
         SHAPEOP_OMP_FOR for (int i = 0; i < static_cast<int>(constraints_.size()); ++i)
     {
         if (constraints_[i]->get_ConstraintType().compare("SurfaceMaterial") == 0) {
-            auto c = std::dynamic_pointer_cast<ShapeOp::SurfaceMaterialConstraint>(getConstraint(i));
+            auto c = std::dynamic_pointer_cast<plb::npfem::SurfaceMaterialConstraint>(getConstraint(i));
             std::vector<int> idI_ = c->get_idI();
 
             Matrix32 edges, P;
@@ -284,12 +284,12 @@ SHAPEOP_INLINE void Solver::mass_lumping()
     for (int i = 0; i < static_cast<int>(constraints_.size()); ++i) {
 #ifdef MASS_LUMPING_VOLUMETRIC
         if (constraints_[i]->get_ConstraintType().compare("VolumeMaterial") == 0) {
-            auto c = std::dynamic_pointer_cast<ShapeOp::VolumeMaterialConstraint>(getConstraint(i));
+            auto c = std::dynamic_pointer_cast<plb::npfem::VolumeMaterialConstraint>(getConstraint(i));
             c->mass_lumping(points_, triplets);
         }
 #else
         if (constraints_[i]->get_ConstraintType().compare("SurfaceMaterial") == 0) {
-            auto c = std::dynamic_pointer_cast<ShapeOp::SurfaceMaterialConstraint>(getConstraint(i));
+            auto c = std::dynamic_pointer_cast<plb::npfem::SurfaceMaterialConstraint>(getConstraint(i));
             c->mass_lumping(points_, triplets);
         }
 #endif
@@ -307,7 +307,7 @@ SHAPEOP_INLINE bool Solver::initialize(Scalar Calpha
     , Scalar externalSolverSpatialResolution
     , Scalar externalSolverTimeResolution)
 {
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
 #ifdef SHAPEOP_MSVC
     // Console output for dll
     AllocConsole();
@@ -338,7 +338,7 @@ SHAPEOP_INLINE bool Solver::initialize(Scalar Calpha
         calculateVolume(Volume0_);
 #endif //THREED
 
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
     std::cout << "***********************************************************"
         << std::endl;
     std::cout << "CPU VERSION >> Number of Points & Constraints: " << n_points
@@ -431,7 +431,7 @@ SHAPEOP_INLINE bool Solver::initialize(Scalar Calpha
             Scalar omega = sqrt(eigenValues_(mode));
             naturalPeriods_(mode) = 2. * acos(-1) / omega;
             dampingRatios_(mode) = 0.5 * Cbeta_ * omega;
-#ifndef NO_PALABOS
+#ifndef NPFEM_SA
             global::logfile_nonparallel("NaturalPeriods_and_DampingRatio.log")
                 .flushEntry("Mode: " + util::val2str(mode) + ": "
                     + util::val2str(naturalPeriods_(mode)) + " | "
@@ -453,7 +453,7 @@ SHAPEOP_INLINE bool Solver::initialize(Scalar Calpha
     Palabos_iT_ = 0;
 
     // Prefactorize matrix
-    solver_ = std::make_shared<ShapeOp::SimplicialLDLTSolver>();
+    solver_ = std::make_shared<plb::npfem::SimplicialLDLTSolver>();
     solver_->initialize(M_star_ + Laplacian); // Hessian Approximation
 
 #ifdef NUM_STABILITY
@@ -461,7 +461,7 @@ SHAPEOP_INLINE bool Solver::initialize(Scalar Calpha
     N_dense_inv_ = N_dense.inverse();
 #endif
 
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
     // If it is called from Palabos, this is set from before
     // For testing purposes ... collisions
     onSurfaceParticle_.clear();
@@ -517,7 +517,7 @@ SHAPEOP_INLINE bool Solver::solve(int m
     , Scalar max_u_lb
     , Scalar max_u_lb_fin)
 {
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
 #ifdef SHAPEOP_MSVC
     // Console output for dll
     AllocConsole();
@@ -531,7 +531,7 @@ SHAPEOP_INLINE bool Solver::solve(int m
     // m = 2, simple (naive) Quasi-Newton & m > 2, L-BFGS
     if (m < 2) m = 15;
 
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
     if (Palabos_iT_ == 0) {
         std::cout << "Calpha: " << Calpha_ << "\n";
         std::cout << "Cbeta: " << Cbeta_ << "\n";
@@ -793,7 +793,7 @@ SHAPEOP_INLINE bool Solver::solve(int m
             break;
         }
 
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
     std::cout << "Loops until convergence: " << it << " | ";
     if (it != 0)
         std::cout << "Average Line Search Loops: "
@@ -822,7 +822,7 @@ SHAPEOP_INLINE bool Solver::solve(int m
     // Meaning that starting from the momentum (first), we went as far as what we could.
     PBD_Damping();
 
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
     calculateArea(Area_);
 #ifdef THREED
     if (applyGlobalVolumeConservation_)
@@ -889,7 +889,7 @@ SHAPEOP_INLINE bool Solver::solve(int m
     //logfile_nonparallel(
     //    "body_" + util::val2str(bodyID_) + "_Energy.csv")
     //    .flushEntry(util::val2str(evalKinPlusPotEnergy(points_)));
-#endif // NO_PALABOS
+#endif // NPFEM_SA
 
     //GyrationTensor();
 
@@ -966,13 +966,13 @@ SHAPEOP_INLINE void Solver::GyrationTensor()
             restShapeEigenvalues_ = eigenvalues;
             ++G_flag_;
         }
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
         std::cout << "The eigenvalues of the Gyration tensor are:\n" << eigensolver.eigenvalues().transpose() << "\n";
 #else
         global::logfile_nonparallel(
             "body_" + util::val2str(bodyID_) + "_ShapeOp_GyrationEigen.log")
             .flushEntry(util::val2str(std::abs(eigenvalues[0] - restShapeEigenvalues_[0])));
-#endif // NO_PALABOS
+#endif // NPFEM_SA
     }
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -1025,7 +1025,7 @@ SHAPEOP_INLINE void Solver::PBD_Damping()
         velocities_.col(i) += Calpha_ * dvi;
     }
 
-#ifndef NO_PALABOS
+#ifndef NPFEM_SA
     // Lattice Units
     Scalar C_vel = externalSolverSpatialResolution_ / externalSolverTimeResolution_;
 
@@ -1054,7 +1054,7 @@ SHAPEOP_INLINE void Solver::PBD_Damping()
     }
 #endif // ENABLE_LOGS
 
-#endif // !NO_PALABOS
+#endif // !NPFEM_SA
 
     points_ = oldPoints_ + velocities_ * delta_;
 }

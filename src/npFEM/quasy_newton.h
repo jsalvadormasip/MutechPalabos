@@ -2,12 +2,12 @@
 
 #define QUASY
 
-#include "common.h"
+#include "npFEM/common.h"
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
-#include "sum_cuda.h"
-#include "sparse_matrix.h"
+#include "npFEM/sum_cuda.h"
+#include "npFEM/sparse_matrix.h"
 
 
 #define OTHER_ERROR if (cudaPeekAtLastError())printf(" error %s \n", cudaGetErrorString(cudaPeekAtLastError()))
@@ -98,7 +98,7 @@ __global__ void  center(double *points, int n_points) {
 
 __global__ void  test_convergence(double *energies, double *energies_prev, int *has_converged, double *descent_direction_dot_gradient, double scalar, int ncell) {
 
-	//energies est energies_prev n'ont pas la meme structure, energies ne contient que l'energie par composant, cell-ci doit être sommé.
+	//energies est energies_prev n'ont pas la meme structure, energies ne contient que l'energie par composant, cell-ci doit ï¿½tre sommï¿½.
 	double E = energies[threadIdx.x] + energies[threadIdx.x + ncell] + energies[threadIdx.x + 2 * ncell];
 	#if DEBUG
 		if (threadIdx.x == 0)printf("%f \n", E);
@@ -175,7 +175,7 @@ __global__ void eval_gradient_and_copy(sparse_matrix_cuda L, sparse_matrix_cuda 
 __global__ void comput_s_t_rho(double *point, double *prev_point, double *gradient, double *prev_gradient, double *s, double *t, double *rho, int head, int n, int nb_cell,  int nb_sum_thread) {
 
 	int id = threadIdx.x;
-	//mouai a factorisé
+	//mouai a factorisï¿½
 
 	int point_id = blockIdx.x * 3 * n + id;
 	int s_id = CIRCULAR_ID(head, MEM_SIZE) * 3 * n*nb_cell + point_id;

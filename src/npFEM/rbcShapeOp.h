@@ -46,12 +46,12 @@ public:
 	void init(pluint bodyID_, RawConnectedTriangleMesh<T>* templateMesh_, std::vector<int> *mesh_graph = NULL)
     {
 		int nb = solver.getPoints().cols();
-		commForces = ShapeOp::Matrix3X::Zero(3, nb);
-		shearForces = ShapeOp::Matrix3X::Zero(3, nb);
-		normals = ShapeOp::Matrix3X::Zero(3, nb);
+		commForces = plb::npfem::Matrix3X::Zero(3, nb);
+		shearForces = plb::npfem::Matrix3X::Zero(3, nb);
+		normals = plb::npfem::Matrix3X::Zero(3, nb);
 		numReceived = 0;
-		pressure = ShapeOp::VectorX::Zero(nb);
-		area = ShapeOp::VectorX::Zero(nb);
+		pressure = plb::npfem::VectorX::Zero(nb);
+		area = plb::npfem::VectorX::Zero(nb);
 		bodyID = bodyID_ ;
 		solver.bodyID_ = bodyID;
 		templateMesh = templateMesh_;
@@ -166,17 +166,17 @@ public:
 
         // ShapeOp side Center of Mass
         SOLocalMeshCenterOfMass = Array<T, 3>(0., 0., 0.);
-        const ShapeOp::Matrix3X& points = solver.getPoints();
+        const plb::npfem::Matrix3X& points = solver.getPoints();
 
         for (pluint i = 0; i < (pluint)vertexIDs.size(); ++i) 
         {
-            ShapeOp::Vector3 shearForce;
+            plb::npfem::Vector3 shearForce;
             shearForce[0] = plbShearForces[i][0];
             shearForce[1] = plbShearForces[i][1];
             shearForce[2] = plbShearForces[i][2];
             shearForces.col(vertexIDs[i]) = shearForce;
 
-            ShapeOp::Vector3 normal;
+            plb::npfem::Vector3 normal;
             normal[0] = plbNormals[i][0];
             normal[1] = plbNormals[i][1];
             normal[2] = plbNormals[i][2];
@@ -219,7 +219,7 @@ public:
         }
     }
 
-    void applyForces()
+    void applyForces(bool CellPacking)
     {
         const std::vector<bool>& onSurfaceParticle = solver.get_onSurfaceParticle();
 
@@ -249,18 +249,18 @@ public:
         forceFiltered = commForces;
         
         // On the GPU side it is done directly in the SO solver
-#ifndef GPU
+#ifndef NPFEM_CUDA
         // Spatial Filtering
-        ShapeOp::Matrix3X tmpForces = forceFiltered;
+        plb::npfem::Matrix3X tmpForces = forceFiltered;
 
         for (pluint i = 0; i < (pluint)forceFiltered.cols(); ++i)
         {
             if (!onSurfaceParticle[i])
                 continue;
 				
-            ShapeOp::VectorX vx(mesh_graph[i].size());
-            ShapeOp::VectorX vy(mesh_graph[i].size());
-            ShapeOp::VectorX vz(mesh_graph[i].size());
+            plb::npfem::VectorX vx(mesh_graph[i].size());
+            plb::npfem::VectorX vy(mesh_graph[i].size());
+            plb::npfem::VectorX vz(mesh_graph[i].size());
 
             int j = 0;
             for (auto v : mesh_graph[i])
@@ -276,7 +276,7 @@ public:
             median(vy, my);
             median(vz, mz);
 
-            tmpForces.col(i) = ShapeOp::Vector3(mx, my, mz);
+            tmpForces.col(i) = plb::npfem::Vector3(mx, my, mz);
         }
 
         forceFiltered = tmpForces;
@@ -296,14 +296,14 @@ public:
 
     void applyCollidingNeighbors()
     {
-        ShapeOp::Matrix3X neighbors(3, collisionNeighbors.size());
-        ShapeOp::Matrix3X neighborsNormals(3, collisionNeighbors.size());
+        plb::npfem::Matrix3X neighbors(3, collisionNeighbors.size());
+        plb::npfem::Matrix3X neighborsNormals(3, collisionNeighbors.size());
         for (pluint i = 0; i < (pluint)neighbors.cols(); ++i) {
-            neighbors.col(i) = ShapeOp::Vector3(collisionNeighbors[i][0],
+            neighbors.col(i) = plb::npfem::Vector3(collisionNeighbors[i][0],
                                                 collisionNeighbors[i][1],
                                                 collisionNeighbors[i][2]);
 
-            neighborsNormals.col(i) = ShapeOp::Vector3(collisionNeighborsNormals[i][0],
+            neighborsNormals.col(i) = plb::npfem::Vector3(collisionNeighborsNormals[i][0],
                                                        collisionNeighborsNormals[i][1],
                                                        collisionNeighborsNormals[i][2]);
         }
@@ -345,7 +345,7 @@ public:
         PLB_ASSERT(i < numTasksToSendVelocities());
         velocities_.clear();
 
-        ShapeOp::Matrix3X& vels = solver.getVelocities();
+        plb::npfem::Matrix3X& vels = solver.getVelocities();
 
         for (pluint j = 0; j < vertexIDsPerProcessor[i].size(); ++j)
         {
@@ -378,7 +378,7 @@ public:
     /*
     // Create a Palabos Mesh from a GPU_solver.
     template <typename T>
-	RawConnectedTriangleMesh<T> generateMeshGPU(const ShapeOp::MatrixXXCuda *points_t, 
+	RawConnectedTriangleMesh<T> generateMeshGPU(const plb::npfem::MatrixXXCuda *points_t, 
 												const std::vector<std::vector<int>> &triangles, const int nb_cells, double dx) {
 		typedef Array<Array<T, 3>, 3> RawTriangle;
 
@@ -415,7 +415,7 @@ public:
 	}
     */
 
-	RawConnectedTriangleMesh<T> mergeMultipleMeshes(std::vector<ShapeOp::Solver*> &rbc, std::vector<ShapeOp::Solver*> &plt, T dx,
+	RawConnectedTriangleMesh<T> mergeMultipleMeshes(std::vector<plb::npfem::Solver*> &rbc, std::vector<plb::npfem::Solver*> &plt, T dx,
         T dump_RBCs_ratio = 1.0, T dump_PLTs_ratio = 1.0)
     {
 		std::vector<Array<T, 3>> vertices;
@@ -424,7 +424,7 @@ public:
 
 		for (int j = 0; j < (int)((T)rbc.size()*dump_RBCs_ratio); j++)
         {
-			const ShapeOp::Matrix3X& points = rbc[j]->getPoints();
+			const plb::npfem::Matrix3X& points = rbc[j]->getPoints();
 
 			for (pluint i = 0; i < (pluint)points.cols(); ++i)
             {
@@ -435,7 +435,7 @@ public:
 
 		for (int j = 0; j < (int)((T)plt.size()*dump_PLTs_ratio); j++)
         {
-			const ShapeOp::Matrix3X& points = plt[j]->getPoints();
+			const plb::npfem::Matrix3X& points = plt[j]->getPoints();
 
 			for (pluint i = 0; i < (pluint)points.cols(); ++i)
             {
@@ -485,9 +485,9 @@ public:
         typedef typename RawConnectedTriangleMesh<T>::PVertex PVertex;
 
         // Whatever we get from ShapeOp is in physical units
-        ShapeOp::Matrix3X points = solver.getPoints(); // Do a copy
-        //const ShapeOp::Matrix3X& Palabos_Forces = solver.get_Palabos_Forces();
-        const ShapeOp::Matrix3X& vels = solver.getVelocities();
+        plb::npfem::Matrix3X points = solver.getPoints(); // Do a copy
+        //const plb::npfem::Matrix3X& Palabos_Forces = solver.get_Palabos_Forces();
+        const plb::npfem::Matrix3X& vels = solver.getVelocities();
 
         // ShapeOp has already moved the points at the next
         // ShapeOp timestep (which is in principal different
@@ -496,7 +496,7 @@ public:
         // Below is a small correction for the visualization only
         if (dt_ShapeOp != 1) {
             T delta = solver.getTimeStep();
-            ShapeOp::Matrix3X oldPoints = points - delta * vels;
+            plb::npfem::Matrix3X oldPoints = points - delta * vels;
 
             T delta_Palabos = delta / ((T)dt_ShapeOp);
             pluint proceedBy = iT % dt_ShapeOp;
@@ -537,8 +537,8 @@ public:
     // Move ShapeOp solvers inside the domain
     void imposePlbPeriodicityToSO(T dx, pluint nx, pluint ny, pluint nz)
     {
-        const ShapeOp::Matrix3X& points = solver.getPoints();
-        ShapeOp::Vector3 centroid = points.rowwise().mean();
+        const plb::npfem::Matrix3X& points = solver.getPoints();
+        plb::npfem::Vector3 centroid = points.rowwise().mean();
         Array<T, 3> c_lb(centroid[0] / dx, centroid[1] / dx, centroid[2] / dx);
         Array<T, 3> c_lb_init = c_lb;
 
@@ -548,12 +548,12 @@ public:
         if (x || y || z)
         {
             Array<T, 3> displace = c_lb - c_lb_init;
-            ShapeOp::Vector3 displaceSO(displace[0] * dx, displace[1] * dx, displace[2] * dx);
+            plb::npfem::Vector3 displaceSO(displace[0] * dx, displace[1] * dx, displace[2] * dx);
             solver.shiftPoints(displaceSO);
         }
     }
 
-	vector<int> *mesh_graph;
+	std::vector<int> *mesh_graph;
 
 private:
     pluint bodyID;
@@ -565,9 +565,9 @@ private:
     // Consequently, it is going to receive the forces
     // from the corresponding processors.
     pluint numReceived;
-    ShapeOp::Matrix3X commForces;
-    ShapeOp::Matrix3X shearForces, normals;
-	ShapeOp::VectorX pressure, area;
+    plb::npfem::Matrix3X commForces;
+    plb::npfem::Matrix3X shearForces, normals;
+	plb::npfem::VectorX pressure, area;
 
     std::vector<pluint> taskIDs; // from where it receives data
     std::vector<std::vector<pluint>> vertexIDsPerProcessor;
@@ -586,7 +586,7 @@ private:
     std::vector<Array<T, 3>> collisionNeighbors, collisionNeighborsNormals;
 
     // Force Filtering
-    ShapeOp::Matrix3X forceFiltered;
+    plb::npfem::Matrix3X forceFiltered;
 };
 
 // For a given body ID, returns the index inside the vector of ShapeOp solvers
@@ -629,7 +629,7 @@ RawConnectedTriangleMesh<T> generateMesh(ShapeOp_Solver& solver, T dx)
 
     // ShapeOp in physical units
     // All points (OnSurface + interior)
-    const ShapeOp::Matrix3X& points = solver.getPoints();
+    const plb::npfem::Matrix3X& points = solver.getPoints();
     for (pluint i = 0; i < (pluint)points.cols(); ++i)
     {
         Array<T, 3> vertex(points.col(i)[0], points.col(i)[1], points.col(i)[2]);
@@ -667,7 +667,7 @@ RawConnectedTriangleMesh<T> generateNeighbors(ShapeOp_Solver& solver, T dx,
     std::vector<Array<T, 3>> vertices;
     std::vector<Array<plint, 3>> triangles;
 
-    const ShapeOp::Matrix3X& points = solver.verticesOfCollidingPieces_.back();
+    const plb::npfem::Matrix3X& points = solver.verticesOfCollidingPieces_.back();
 
     for (pluint i = 0; i < (pluint)points.cols(); ++i) {
         Array<T, 3> vertex(points.col(i)[0], points.col(i)[1], points.col(i)[2]);

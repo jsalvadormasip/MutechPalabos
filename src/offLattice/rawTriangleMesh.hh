@@ -31,9 +31,9 @@
 #include "io/plbFiles.h"
 #include "latticeBoltzmann/geometricOperationTemplates.h"
 
-#include "geometry/rawTriangleMesh.h"
-#include "geometry/stlFileIO.h"
-#include "geometry/offFileIO.h"
+#include "offLattice/rawTriangleMesh.h"
+#include "offLattice/stlFileIO.h"
+#include "offLattice/offFileIO.h"
 
 #include <vector>
 #include <string>

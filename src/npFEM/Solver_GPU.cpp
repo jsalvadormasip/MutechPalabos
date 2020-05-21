@@ -10,7 +10,7 @@
 #include "Constraint.h"
 #include "Force.h"
 ///////////////////////////////////////////////////////////////////////////////
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
 #ifdef SHAPEOP_MSVC
 // Console Output in the case of a dll
 #include <windows.h>
@@ -292,7 +292,7 @@ SHAPEOP_INLINE void Solver_GPU::setDamping(Scalar damping) {
   damping_ = damping;
 }
 ///////////////////////////////////////////////////////////////////////////////
-MatrixXXCuda *ShapeOp::Solver_GPU::get_transformedPoints()
+MatrixXXCuda *plb::npfem::Solver_GPU::get_transformedPoints()
 {
 	return &Points_rowMajor_;
 }
@@ -320,7 +320,7 @@ SHAPEOP_INLINE void Solver_GPU::setConnectivityList(const std::vector<std::vecto
 SHAPEOP_INLINE const std::vector<std::vector<int> > &Solver_GPU::getConnectivityList() const{
     return connectivity_list_;
 }
-void ShapeOp::Solver_GPU::make_periodic(float nx, float ny, float nz, float dx, int it){
+void plb::npfem::Solver_GPU::make_periodic(float nx, float ny, float nz, float dx, int it){
 	//std::cout << "size " << nx*dx << " " << ny*dx << " " << nz*dx << std::endl;
 	device_make_periodic(simulation_input_d_.points, simulation_data_d_.center, nx*dx, ny*dx, nz*dx, mesh_info_.nb_cells, mesh_info_.n_points, it);
 }
@@ -396,7 +396,7 @@ double compute_volume_cpu(double *points, short *triangle, int n_tri, int n_p) {
 ///////////////////////////////////////////////////////////////////////////////TODO
 
 SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
 #ifdef SHAPEOP_MSVC
     //Console output for dll
     AllocConsole();
@@ -418,11 +418,11 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   assert(n_points != 0);
   assert(n_constraints != 0);
 
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
   std::cout << "***********************************************************" << std::endl;
   std::cout << "GPU VERSION >> Number of Points & Constraints: " << n_points << " - " << n_constraints << std::endl;
   std::cout << "***********************************************************" << std::endl;
-#endif // NO_PALABOS
+#endif // NPFEM_SA
 
   std::vector<Triplet> triplets;
   int idO = 0;
@@ -463,7 +463,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   delta_ = timestep;
   momentum_ = Matrix3X::Zero(3, n_points);
 
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
   std::cout << " Calpha" << mesh_info_.calpha << "  Cbeta " << Cbeta_ << "  " << timestep << " rho " << mesh_info_.rho << " delta " << delta_ << std::endl;
 #endif
 
@@ -482,7 +482,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   M_star_ = M_tilde_ / (delta_ * delta_);
   M_tilde_inv_ = (MatrixXX(M_tilde_)).inverse();
 
-#ifdef NO_PALABOS
+#ifdef NPFEM_SA
   printf("GPU Volume0_ %.17f  rho_ %f n_points %d  number of cells %d\n", mesh_info_.volume, mesh_info_.rho, n_points, mesh_info_.nb_cells);
 #endif
   //printf("GPU M_tilde_inv %f %f %f %f %f \n", M_tilde_inv_(223, 221), M_tilde_inv_(223, 222), M_tilde_inv_(223, 223), M_tilde_inv_(223, 224), M_tilde_inv_(223, 225));
@@ -508,7 +508,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   std::vector<bool>().swap(collision_state_);
   for (int i = 0; i < n_points; ++i) collision_state_.push_back(false);
   
-  solver_ = std::make_shared<ShapeOp::SimplicialLDLTSolver>();
+  solver_ = std::make_shared<plb::npfem::SimplicialLDLTSolver>();
 
   //Prefactorize matrix
   solver_->initialize(N_);
@@ -561,15 +561,15 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   return true;
 }
 //////////////////////////////////////////////////////////////////////////////
-void ShapeOp::Solver_GPU::compute_first_centroid() {
+void plb::npfem::Solver_GPU::compute_first_centroid() {
 	first_center(mesh_info_, simulation_input_d_, simulation_data_d_, simulation_data_d_.center);
 }
 //////////////////////////////////////////////////////////////////////////////
-void ShapeOp::Solver_GPU::set_initial_positions(const double *centers){
+void plb::npfem::Solver_GPU::set_initial_positions(const double *centers){
 	set_cells_initial_position(centers, simulation_data_d_.center, mesh_info_.nb_cells, mesh_info_, mesh_data_d_, simulation_input_d_ , simulation_data_d_);
 		
 }
-void ShapeOp::Solver_GPU::reset_position(const double *centers) {
+void plb::npfem::Solver_GPU::reset_position(const double *centers) {
 	//reset_position(const double *center_h, double *center_d, Simulation_input *input_h, Mesh_info info, Mesh_data mesh, Simulation_input *input_d, Simulation_data sim)
 	reset_position_d(centers, simulation_data_d_.center, points_.data(), mesh_info_, mesh_data_d_, simulation_input_d_, simulation_data_d_);
 }
@@ -587,18 +587,18 @@ void Solver_GPU::set_initial_velocity(double x, double y, double z){
 	//velocities_.row(1) = Matrix3X::Ones(1, n_points_)*y;
 	//velocities_.row(2) = Matrix3X::Ones(1, n_points_)*z;
 }
-ShapeOpScalar *ShapeOp::Solver_GPU::get_centers(){
+ShapeOpScalar *plb::npfem::Solver_GPU::get_centers(){
 	return simulation_data_h_.center;
 }
 
-int ShapeOp::Solver_GPU::get_nb_triangle(){
+int plb::npfem::Solver_GPU::get_nb_triangle(){
 	return mesh_info_.n_triangles;
 }
-int ShapeOp::Solver_GPU::get_nb_points()
+int plb::npfem::Solver_GPU::get_nb_points()
 {
 	return mesh_info_.n_points;
 }
-int ShapeOp::Solver_GPU::get_nb_cells(){
+int plb::npfem::Solver_GPU::get_nb_cells(){
 	return mesh_info_.nb_cells;
 }
 
@@ -772,7 +772,7 @@ void Solver_GPU::set_gpu_starting_position(const Matrix3X &points, int cell){
 	points_from_Host_to_Device(points.cols(), simulation_input_d_.points, tp_point.data(), cell);
 }
 
-void ShapeOp::Solver_GPU::set_gpu_starting_velocities(const Matrix3X & vels, int cell){
+void plb::npfem::Solver_GPU::set_gpu_starting_velocities(const Matrix3X & vels, int cell){
 	MatrixXXCuda tp_vel = vels;
 	points_from_Host_to_Device(vels.cols(), simulation_input_d_.velocities, tp_vel.data(), cell);
 }

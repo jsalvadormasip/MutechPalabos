@@ -25,7 +25,7 @@
 #ifndef CONNECTED_TRIANGLE_GENERATOR_H
 #define CONNECTED_TRIANGLE_GENERATOR_H
 
-#include "geometry/connectedTriangleMesh.h"
+#include "offLattice/connectedTriangleMesh.h"
 
 namespace plb {
 
