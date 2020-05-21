@@ -2,6 +2,7 @@
 
 namespace plb
 {
+namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 template<typename T, template<typename U> class Descriptor>
@@ -16,7 +17,7 @@ public:
     plint getSurfaceId() const { return surfaceId; }
     plint& getSurfaceId() { return surfaceId; }
 
-    virtual T getArea() const = 0;
+    virtual T getArea(RawConnectedTriangleMesh<T>* wallMesh) const = 0;
 private:
     plint surfaceId;
 };
@@ -64,7 +65,7 @@ public:
     {
         return new bodyVertexParticle<T, Descriptor>(*this);
     }
-    virtual T getArea() const;
+    virtual T getArea(RawConnectedTriangleMesh<T>* wallMesh) const;
 private:
     static plint id;
 };
@@ -100,7 +101,7 @@ bodyVertexParticle<T, Descriptor>::bodyVertexParticle(pluint vertexID_,
 }
 
 template <typename T, template <typename U> class Descriptor>
-T bodyVertexParticle<T, Descriptor>::getArea() const
+T bodyVertexParticle<T, Descriptor>::getArea(RawConnectedTriangleMesh<T>* wallMesh) const
 {
     pluint bodyID = (pluint)this->getSurfaceId();
 
@@ -110,7 +111,7 @@ T bodyVertexParticle<T, Descriptor>::getArea() const
     }
     else
     {
-        typename std::map<pluint, LocalMesh*>::iterator it = LocalMeshes().find(bodyID);
+        typename std::map<pluint, LocalMesh<T>*>::iterator it = LocalMeshes<T>().find(bodyID);
         return it->second->mesh.vertex(this->getTag())->area();
     }
 }
@@ -123,19 +124,27 @@ template <typename T, template <typename U> class Descriptor>
 class ConstructLocalMeshesFromParticles : public BoxProcessingFunctional3D
 {
 public:
-    ConstructLocalMeshesFromParticles(RawConnectedTriangleMesh<T>* rbcTemplate_, RawConnectedTriangleMesh<T>* pltTemplate_);
+    ConstructLocalMeshesFromParticles(RawConnectedTriangleMesh<T>* rbcTemplate_, RawConnectedTriangleMesh<T>* pltTemplate_,
+            std::map<pluint, pluint> bodyToType_,
+            plint particleEnvelopeWidth_);
     virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> blocks);
     virtual ConstructLocalMeshesFromParticles<T, Descriptor>* clone() const;
     virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
 private:
     RawConnectedTriangleMesh<T> *rbcTemplate, *pltTemplate;
+    std::map<pluint, pluint> bodyToType;
+    plint particleEnvelopeWidth;
 };
 
 template <typename T, template <typename U> class Descriptor>
 ConstructLocalMeshesFromParticles<T, Descriptor>::
-    ConstructLocalMeshesFromParticles(RawConnectedTriangleMesh<T>* rbcTemplate_, RawConnectedTriangleMesh<T>* pltTemplate_)
+    ConstructLocalMeshesFromParticles(RawConnectedTriangleMesh<T>* rbcTemplate_, RawConnectedTriangleMesh<T>* pltTemplate_,
+            std::map<pluint, pluint> bodyToType_,
+            plint particleEnvelopeWidth_)
     : rbcTemplate(rbcTemplate_)
     , pltTemplate(pltTemplate_)
+    , bodyToType(bodyToType_)
+    , particleEnvelopeWidth(particleEnvelopeWidth_)
 {
 }
 
@@ -163,17 +172,17 @@ void ConstructLocalMeshesFromParticles<T, Descriptor>::processGenericBlocks(
 
         pluint vertexID = particle->getTag();
 
-        typename std::map<pluint, LocalMesh*>::iterator it = LocalMeshes().find(bodyID);
-        if (it == LocalMeshes().end())
+        typename std::map<pluint, LocalMesh<T>*>::iterator it = LocalMeshes<T>().find(bodyID);
+        if (it == LocalMeshes<T>().end())
         {
             // if RBC
             if (bodyToType[bodyID] == 0)
-                LocalMeshes()[bodyID] = new LocalMesh(*rbcTemplate, bodyID);
+                LocalMeshes<T>()[bodyID] = new LocalMesh<T>(*rbcTemplate, bodyID);
             // if PLT
             if (bodyToType[bodyID] == 1)
-                LocalMeshes()[bodyID] = new LocalMesh(*pltTemplate, bodyID);
+                LocalMeshes<T>()[bodyID] = new LocalMesh<T>(*pltTemplate, bodyID);
 
-            it = LocalMeshes().find(bodyID);
+            it = LocalMeshes<T>().find(bodyID);
         }
 
         it->second->mesh.vertex(vertexID)->get() = particle->getPosition();
@@ -200,7 +209,9 @@ class CollisionsForcesCombo : public BoxProcessingFunctional3D
 {
 public:
     CollisionsForcesCombo(T dx_, T omega_, T densityOffset_,
-                          T Cf_, T Cp_, T Ca_);
+                          T Cf_, T Cp_, T Ca_, T collisions_threshold_,
+                          std::vector<Array<T, 3>> wallVertexNormals_,
+                          bool CellPacking_);
     virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> blocks);
     virtual CollisionsForcesCombo<T, Descriptor>* clone() const;
     virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
@@ -210,17 +221,25 @@ private:
     T omega;
     T rho0;
     T Cf, Cp, Ca;
+    T collisions_threshold;
+    std::vector<Array<T, 3>> wallVertexNormals;
+    bool CellPacking;
 };
 
 template <typename T, template <typename U> class Descriptor>
 CollisionsForcesCombo<T, Descriptor>::CollisionsForcesCombo(T dx_, T omega_, T densityOffset_,
-                                                            T Cf_, T Cp_, T Ca_)
+                                                            T Cf_, T Cp_, T Ca_, T collisions_threshold_,
+                                                            std::vector<Array<T, 3>> wallVertexNormals_,
+                                                            bool CellPacking_)
     : dx_p(dx_)
     , omega(omega_)
     , rho0(densityOffset_)
     , Cf(Cf_)
     , Cp(Cp_)
     , Ca(Ca_)
+    , collisions_threshold(collisions_threshold_)
+    , wallVertexNormals(wallVertexNormals_)
+    , CellPacking(CellPacking_)
 {
 }
 
@@ -286,7 +305,7 @@ void CollisionsForcesCombo<T, Descriptor>::processGenericBlocks(
         // Center of Mass calculation (global coordinates - lattice units)
         localCOMs[bodyID] /= (T)localcnt[bodyID];
 
-        typename std::map<pluint, LocalMesh*>::iterator it = LocalMeshes().find(bodyID);
+        typename std::map<pluint, LocalMesh<T>*>::iterator it = LocalMeshes<T>().find(bodyID);
 
         // Clean containers
         it->second->vertexIDs.clear();
@@ -313,7 +332,7 @@ void CollisionsForcesCombo<T, Descriptor>::processGenericBlocks(
 
         pluint vertexId = particle->getTag();
 
-        typename std::map<pluint, LocalMesh*>::iterator it = LocalMeshes().find(bodyID);
+        typename std::map<pluint, LocalMesh<T>*>::iterator it = LocalMeshes<T>().find(bodyID);
 
 ///////////////////////////////////////////////////////////////////////////////
         // Collision Handling First
@@ -434,14 +453,14 @@ void CollisionsForcesCombo<T, Descriptor>::processGenericBlocks(
             pluint verId = part->getTag();
 
             Array<T, 3> normal;
-            typename std::map<pluint, LocalMesh*>::iterator it_tmp;
+            typename std::map<pluint, LocalMesh<T>*>::iterator it_tmp;
             if (candidateBodyId == IDforWall)
             {
                 normal = wallVertexNormals[verId];
             }
             else
             {
-                it_tmp = LocalMeshes().find(candidateBodyId);
+                it_tmp = LocalMeshes<T>().find(candidateBodyId);
                 normal = it_tmp->second->mesh.vertex(verId)->normal(areaWeighted);
             }
 
@@ -655,7 +674,7 @@ void LocalMeshToParticleVelocity3D<T, Descriptor>::processGenericBlocks(
 
         pluint vertexId = particle->getTag();
 
-        typename std::map<pluint, LocalMesh*>::const_iterator it = LocalMeshes().find(bodyID);
+        typename std::map<pluint, LocalMesh<T>*>::const_iterator it = LocalMeshes<T>().find(bodyID);
 
         // The particle "velocity" is simply a position offset which will be
         // applied the next time "AdvanceParticles" is applied, to guarantee
@@ -690,7 +709,8 @@ BlockDomain::DomainT
 template<typename T, template<typename U> class Descriptor>
 class MultiDirectForcingImmersedBoundaryIteration3D : public BoxProcessingFunctional3D {
 public:
-    MultiDirectForcingImmersedBoundaryIteration3D(T tau_, bool incompressibleModel_);
+    MultiDirectForcingImmersedBoundaryIteration3D(T tau_, bool incompressibleModel_,
+                                                  RawConnectedTriangleMesh<T>* wallMesh_);
     virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> blocks);
     virtual MultiDirectForcingImmersedBoundaryIteration3D<T,Descriptor>* clone() const;
     virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
@@ -702,9 +722,11 @@ private:
 
 template<typename T, template<typename U> class Descriptor>
 MultiDirectForcingImmersedBoundaryIteration3D<T,Descriptor>::MultiDirectForcingImmersedBoundaryIteration3D(
-        T tau_, bool incompressibleModel_)
+        T tau_, bool incompressibleModel_,
+        RawConnectedTriangleMesh<T>* wallMesh_)
     : tau(tau_),
-      incompressibleModel(incompressibleModel_)
+      incompressibleModel(incompressibleModel_),
+      wallMesh(wallMesh_)
 { }
 
 template<typename T, template<typename U> class Descriptor>
@@ -760,7 +782,7 @@ void MultiDirectForcingImmersedBoundaryIteration3D<T,Descriptor>::processGeneric
             }
 
             Array<T,3> const& wallVelocity = particle->getVelocity();
-            T area = particle->getArea();
+            T area = particle->getArea(wallMesh);
 
             deltaG[iParticle] = area * (wallVelocity - averageJ);
         }
@@ -796,7 +818,7 @@ void MultiDirectForcingImmersedBoundaryIteration3D<T,Descriptor>::processGeneric
             }
 
             Array<T,3> const& wallVelocity = particle->getVelocity();
-            T area = particle->getArea();
+            T area = particle->getArea(wallMesh);
 
             deltaG[iParticle] = area * (Descriptor<T>::fullRho(averageRhoBar) * wallVelocity - averageJ);
         }
@@ -855,3 +877,4 @@ BlockDomain::DomainT MultiDirectForcingImmersedBoundaryIteration3D<T,Descriptor>
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace plb
+}

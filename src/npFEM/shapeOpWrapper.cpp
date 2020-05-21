@@ -1,7 +1,9 @@
 #ifndef SHAPEOPWRAPPER_CPP
 #define SHAPEOPWRAPPER_CPP
 
-#include "shapeOpWrapper.h"
+#include "npFEM/shapeOpWrapper.h"
+
+namespace plb {
 
 // Handle file opening error
 inline void IsOpen_HandleError(bool open, const char* file, int line)
@@ -365,5 +367,7 @@ void editVertexForce(ShapeOp_Solver& s, const ShapeOp::Matrix3X& forces, const i
     }
 	*/
 }
+
+} // namespace plb
 
 #endif

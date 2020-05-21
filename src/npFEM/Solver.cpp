@@ -4,10 +4,13 @@
 #ifndef SOLVER_CPP
 #define SOLVER_CPP
 ///////////////////////////////////////////////////////////////////////////////
-#include "Solver.h"
-#include "LSSolver.h"
-#include "Constraint.h"
-#include "Force.h"
+#include <iostream>
+#include "core/util.h"
+#include "core/plbLogFiles.h"
+#include "npFEM/Solver.h"
+#include "npFEM/LSSolver.h"
+#include "npFEM/Constraint.h"
+#include "npFEM/Force.h"
 ///////////////////////////////////////////////////////////////////////////////
 #define THREED
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,7 +44,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #define MASS_LUMPING_VOLUMETRIC
 ///////////////////////////////////////////////////////////////////////////////
-namespace ShapeOp {
+namespace plb {
+namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
 Solver::Solver()
 {
@@ -428,7 +432,7 @@ SHAPEOP_INLINE bool Solver::initialize(Scalar Calpha
             naturalPeriods_(mode) = 2. * acos(-1) / omega;
             dampingRatios_(mode) = 0.5 * Cbeta_ * omega;
 #ifndef NO_PALABOS
-            logfile_nonparallel("NaturalPeriods_and_DampingRatio.log")
+            global::logfile_nonparallel("NaturalPeriods_and_DampingRatio.log")
                 .flushEntry("Mode: " + util::val2str(mode) + ": "
                     + util::val2str(naturalPeriods_(mode)) + " | "
                     + util::val2str(dampingRatios_(mode)));
@@ -965,7 +969,7 @@ SHAPEOP_INLINE void Solver::GyrationTensor()
 #ifdef NO_PALABOS
         std::cout << "The eigenvalues of the Gyration tensor are:\n" << eigensolver.eigenvalues().transpose() << "\n";
 #else
-        logfile_nonparallel(
+        global::logfile_nonparallel(
             "body_" + util::val2str(bodyID_) + "_ShapeOp_GyrationEigen.log")
             .flushEntry(util::val2str(std::abs(eigenvalues[0] - restShapeEigenvalues_[0])));
 #endif // NO_PALABOS
@@ -1044,7 +1048,7 @@ SHAPEOP_INLINE void Solver::PBD_Damping()
 #ifdef ENABLE_LOGS
     if (velocityLimit > 0)
     {
-        plb::global::logfile_nonparallel("instability.log")
+        global::logfile_nonparallel("instability.log")
             .flushEntry("At Palabos iT=" + util::val2str(Palabos_iT_) + " | ShapeOp bodyID=" + util::val2str(bodyID_) +
                 " | VELOCITY LIMIT ACTIVATED, on " + util::val2str(velocityLimit) + " vertices");
     }
@@ -1178,6 +1182,7 @@ SHAPEOP_INLINE void Solver::removeCollisionConstraints()
         constraints_.pop_back();
 }
 ///////////////////////////////////////////////////////////////////////////////
-} // namespace ShapeOp
-    ///////////////////////////////////////////////////////////////////////////////
+} // namespace npfem
+} // namespace plb
+///////////////////////////////////////////////////////////////////////////////
 #endif // SOLVER_CPP

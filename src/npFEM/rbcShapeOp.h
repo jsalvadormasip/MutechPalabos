@@ -1,34 +1,14 @@
 #pragma once
 
-#include "shapeOpWrapper.h"
-#include "rbcFiltering.h"
+#include "npFEM/shapeOpWrapper.h"
+#include "npFEM/rbcFiltering.h"
+#include "npFEM/npfemConstants.h"
 #include <numeric>
 
 #define FILTERING
 
-using namespace global;
-
-namespace plb
-{
-
-// Do not use MPI_TAG = 0 because it is reserved for Palabos
-const int MPItagIniPalabosParticles = 2709;
-
-const int shapeOpMPItagForcesAndCollisionContainersBodyID = 2710;
-const int shapeOpMPItagForcesAndCollisionContainersNumVertices = 2711;
-const int shapeOpMPItagForcesAndCollisionContainersVertexIDs = 2712;
-const int shapeOpMPItagForcesAndCollisionContainersShearForces = 2713;
-const int shapeOpMPItagForcesAndCollisionContainersNormals = 2714;
-const int shapeOpMPItagForcesAndCollisionContainersPressure = 2715;
-const int shapeOpMPItagForcesAndCollisionContainersArea = 2716;
-const int shapeOpMPItagForcesAndCollisionContainersNumCollidingNeighbors = 2717;
-const int shapeOpMPItagForcesAndCollisionContainersCollisionNeighbors = 2718;
-const int shapeOpMPItagForcesAndCollisionContainerscollisionNeighborsNormals = 2719;
-
-const int shapeOpMPItagVelocities = 2730;
-
-const pluint IDforWall = std::numeric_limits<pluint>::max();
-std::vector<Array<T, 3>> wallVertexNormals;
+namespace plb {
+namespace npfem {
 
 
 template <typename T>
@@ -57,6 +37,7 @@ inline void controlPositionPeriodic(Array<T, 3>& pos, const pluint lx, const plu
     pos[2] = getPeriodicPosition1D<T>(pos[2], lz, corrected_z);
 }
 
+template <typename T>
 class ShapeOpBody
 {
 public:
@@ -434,7 +415,6 @@ public:
 	}
     */
 
-	template <typename T>
 	RawConnectedTriangleMesh<T> mergeMultipleMeshes(std::vector<ShapeOp::Solver*> &rbc, std::vector<ShapeOp::Solver*> &plt, T dx,
         T dump_RBCs_ratio = 1.0, T dump_PLTs_ratio = 1.0)
     {
@@ -611,7 +591,8 @@ private:
 
 // For a given body ID, returns the index inside the vector of ShapeOp solvers
 // that has the solver of that body.
-pluint getSolverID(pluint bodyID, std::vector<ShapeOpBody> const& shapeOpBodies)
+template <typename T>
+pluint getSolverID(pluint bodyID, std::vector<ShapeOpBody<T>> const& shapeOpBodies)
 {
     plint solverID = -1;
     for (plint i = 0; i < (plint)shapeOpBodies.size(); ++i) {
@@ -623,7 +604,8 @@ pluint getSolverID(pluint bodyID, std::vector<ShapeOpBody> const& shapeOpBodies)
 }
 
 // Checks if all local body solvers have received the newest force data.
-bool communicationComplete(std::vector<ShapeOpBody>& shapeOpBodies)
+template <typename T>
+bool communicationComplete(std::vector<ShapeOpBody<T>>& shapeOpBodies)
 {
     pluint cnt = 0;
     for (pluint i = 0; i < shapeOpBodies.size(); ++i)
@@ -718,4 +700,5 @@ RawConnectedTriangleMesh<T> generateNeighbors(ShapeOp_Solver& solver, T dx,
 }
 */
 
+}
 }

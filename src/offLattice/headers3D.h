@@ -71,10 +71,8 @@
 #include "offLattice/asciiDataFileIO.h"
 #include "offLattice/meshAlgorithm.h"
 
-
 #ifndef PLB_BGP
 #ifdef PLB_USE_EIGEN
 #include "offLattice/generalizedOffLatticeModel3D.h"
 #endif
 #endif
-

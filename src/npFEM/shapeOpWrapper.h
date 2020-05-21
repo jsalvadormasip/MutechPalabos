@@ -5,15 +5,18 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <string>
 
-#include "Solver.h"
+#include "npFEM/Solver.h"
 #ifndef NO_PALABOS
 #ifdef GPU
-#include "Solver_GPU.h"
+#include "npFEM/src_GPU/Solver_GPU.h"
 #endif
 #endif // !NO_PALABOS
-#include "Constraint.h"
-#include "Force.h"
+#include "npFEM/Constraint.h"
+#include "npFEM/Force.h"
+
+namespace plb {
 
 typedef ShapeOp::Solver ShapeOp_Solver;
 
@@ -38,6 +41,8 @@ void setOnSurfaceParticle(ShapeOp_Solver& s, std::string filename);
 void addVertexForce(ShapeOp_Solver& s, const ShapeOp::Matrix3X& forces, const int cell_id = 0);
 
 void editVertexForce(ShapeOp_Solver& s, const ShapeOp::Matrix3X& forces, const int cell_id = 0);
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef SHAPEOP_HEADER_ONLY

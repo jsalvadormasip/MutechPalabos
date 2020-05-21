@@ -1,13 +1,16 @@
 #pragma once
 
-namespace plb
-{
+#include "npFEM/rbcShapeOp.h"
+#include "npFEM/rbcGlobal.h"
+
+namespace plb {
+namespace npfem {
 
 // This is the "send" part of the MPI communication for forces (Palabos->ShapeOp) & Collision Containers
 template <typename T>
-void sendBodyForcesAndCollisionData(std::map<pluint, pluint>& bodyToProc, std::vector<ShapeOpBody>& shapeOpBodies)
+void sendBodyForcesAndCollisionData(std::map<pluint, pluint>& bodyToProc, std::vector<ShapeOpBody<T>>& shapeOpBodies)
 {
-    for (typename std::map<pluint, LocalMesh*>::iterator it = LocalMeshes().begin(); it != LocalMeshes().end(); ++it)
+    for (typename std::map<pluint, LocalMesh<T>*>::iterator it = LocalMeshes<T>().begin(); it != LocalMeshes<T>().end(); ++it)
     {
         it->second->numVertices = (pluint)it->second->vertexIDs.size();
 
@@ -48,7 +51,7 @@ void sendBodyForcesAndCollisionData(std::map<pluint, pluint>& bodyToProc, std::v
 // This is the "receive" part of the MPI communication for forces & Collisions
 // Containers (Palabos->ShapeOp).
 template <typename T>
-void receiveBodyForcesAndCollisionData(std::vector<ShapeOpBody>& shapeOpBodies)
+void receiveBodyForcesAndCollisionData(std::vector<ShapeOpBody<T>>& shapeOpBodies)
 {
     pluint numLocalBodies = shapeOpBodies.size();
 
@@ -183,7 +186,7 @@ void receiveBodyForcesAndCollisionData(std::vector<ShapeOpBody>& shapeOpBodies)
 // This is the "send" part of the MPI communication for velocities
 // (ShapeOp->Palabos).
 template <typename T>
-void sendBodiesVelocities(std::vector<ShapeOpBody>& shapeOpBodies)
+void sendBodiesVelocities(std::vector<ShapeOpBody<T>>& shapeOpBodies)
 {    
     for (pluint i = 0; i < shapeOpBodies.size(); ++i)
         shapeOpBodies[i].sendVelocities();
@@ -191,13 +194,13 @@ void sendBodiesVelocities(std::vector<ShapeOpBody>& shapeOpBodies)
 
 // This is the "receive" part of the MPI communication for velocities (ShapeOp->Palabos).
 template <typename T>
-void receiveBodiesVelocities(std::map<pluint, pluint>& bodyToProc, std::vector<ShapeOpBody>& shapeOpBodies, T dx, T dt, T rho)
+void receiveBodiesVelocities(std::map<pluint, pluint>& bodyToProc, std::vector<ShapeOpBody<T>>& shapeOpBodies, T dx, T dt, T rho)
 {
     // From physical to lattice units (From ShapeOp to Palabos)
     T Cu = dt / dx;
 
-    typename std::map<pluint, LocalMesh*>::iterator it = LocalMeshes().begin();
-    for (; it != LocalMeshes().end(); ++it)
+    typename std::map<pluint, LocalMesh<T>*>::iterator it = LocalMeshes<T>().begin();
+    for (; it != LocalMeshes<T>().end(); ++it)
     {
         if (it->second->numVertices == 0)
             continue;
@@ -242,4 +245,5 @@ void receiveBodiesVelocities(std::map<pluint, pluint>& bodyToProc, std::vector<S
     }
 }
 
-}
+} // namespace npfem
+} // namespace plb

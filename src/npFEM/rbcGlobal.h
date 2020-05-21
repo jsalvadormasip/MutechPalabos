@@ -1,7 +1,9 @@
 #pragma once
 
 namespace plb {
+namespace npfem {
 
+template <typename T>
 struct LocalMesh
 {
 
@@ -139,11 +141,13 @@ struct LocalMesh
 // in the current processor, used to compute data like area and
 // normals. They are reconstructed at every iteration.
 // In lattice units.
-inline std::map<pluint, LocalMesh*>& LocalMeshes()
+template <typename T>
+inline std::map<pluint, LocalMesh<T>*>& LocalMeshes()
 {
     // the key of the map is the unique bodyID
-    static std::map<pluint, LocalMesh*> instance;
+    static std::map<pluint, LocalMesh<T>*> instance;
     return instance;
 }
 
+}
 }

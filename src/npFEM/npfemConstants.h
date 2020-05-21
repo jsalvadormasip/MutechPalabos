@@ -19,5 +19,7 @@ const int shapeOpMPItagForcesAndCollisionContainerscollisionNeighborsNormals = 2
 
 const int shapeOpMPItagVelocities = 2730;
 
+const pluint IDforWall = std::numeric_limits<pluint>::max();
+
 }
 }
