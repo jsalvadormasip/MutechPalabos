@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 project(bloodFlowDefoBodies)
 enable_language(CXX)
-#enable_language(CUDA)
+
+option(ENABLE_CUDA "Enabling CUDA" OFF)
+if(ENABLE_CUDA)
+  enable_language(CUDA)
+endif()
 
 set(EXECUTABLE_NAME "bloodFlowDefoBodies")
 set(EXECUTABLE_NAME_GPU "bloodFlowDefoBodies_gpu")
@@ -103,7 +107,6 @@ if (ENABLE_LOGS)
     add_definitions(-DENABLE_LOGS)
 endif()
 
-option(ENABLE_CUDA "Enabling CUDA" OFF)
 if(ENABLE_CUDA)
     message("Enabling CUDA")
     add_definitions(-DNPFEM_CUDA)

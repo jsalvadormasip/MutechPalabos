@@ -39,7 +39,6 @@
 #include "npFEM/LSSolver.h"
 #include "npFEM/Solver.h"
 #include "npFEM/Types.h"
-#include "npFEM/hyperelasticity.h"
 #include "npFEM/rbcCommunicate.h"
 #include "npFEM/rbcFiltering.h"
 #include "npFEM/rbcGlobal.h"
