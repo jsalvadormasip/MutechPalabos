@@ -53,7 +53,6 @@
 #include "npFEM/GPU_data.h"
 #include "npFEM/Solver_GPU.h"
 #include "npFEM/device_utilities.h"
-#include "npFEM/projections_GPU.h"
 #include "npFEM/projections_GPU_MATH.h"
 #include "npFEM/projections_GPU_soa.h"
 #include "npFEM/quasy_newton.h"

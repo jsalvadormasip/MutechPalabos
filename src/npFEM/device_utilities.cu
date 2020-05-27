@@ -8,9 +8,11 @@
 #include "npFEM/projections_GPU_soa.h"
 #include "npFEM/GPU_data.h"
 #include "npFEM/quasy_newton3.h"
-
-///////////////////////////////////////////////////////////////////////////////
 #include <chrono>
+///////////////////////////////////////////////////////////////////////////////
+namespace plb {
+namespace npfem {
+///////////////////////////////////////////////////////////////////////////////
 std::chrono::duration<ShapeOpScalar> time_elapsed_area;
 std::chrono::duration<ShapeOpScalar> time_elapsed_volume;
 std::chrono::duration<ShapeOpScalar> time_elapsed_bending;
@@ -19,12 +21,8 @@ double time_elapsed_area_d = 0;
 double time_elapsed_volume_d = 0;
 double time_elapsed_bending_d = 0;
 double time_elapsed_triangle_d = 0;
-
-namespace plb {
-namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
 // Handle CUDA error messages
-
 inline void CUDA_HandleError(cudaError_t err, const char *file, int line)
 {
   if (err != cudaSuccess) {

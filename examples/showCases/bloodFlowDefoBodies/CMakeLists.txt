@@ -36,7 +36,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
         set(CMAKE_CXX_FLAGS "-std=c++11 -w")
         #set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
     endif()
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     message("Clang.")
@@ -144,9 +144,19 @@ file(GLOB_RECURSE EXT_SRC "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
 
 if(NOT ENABLE_CUDA)
     list(REMOVE_ITEM PALABOS_SRC "${PALABOS_ROOT}/src/npFEM/Solver_GPU.cpp")
+else()
+    include_directories("${CUDA_TOOLKIT_ROOT_DIR}")
+    include_directories("${CUDA_TOOLKIT_ROOT_DIR}/include/")
+
+    file(GLOB NPFEM_CUDA_SOURCES_CU  "${PALABOS_ROOT}/src/npFEM/*.cu")
 endif()
 
-add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
+if(NOT ENABLE_CUDA)
+    add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
+else()
+    add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC} ${NPFEM_CUDA_SOURCES_CU})
+    target_link_libraries(palabos ${CUDA_LINK_LIBRARIES_KEYWORD})
+endif()
 
 ###############################################################################
 
