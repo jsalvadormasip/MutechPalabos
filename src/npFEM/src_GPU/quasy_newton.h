@@ -101,7 +101,7 @@ __global__ void  center(double *points, int n_points) {
 
 __global__ void  test_convergence(double *energies, double *energies_prev, int *has_converged, double *descent_direction_dot_gradient, double scalar, int ncell) {
 
-	//energies est energies_prev n'ont pas la meme structure, energies ne contient que l'energie par composant, cell-ci doit �tre somm�.
+	//energies est energies_prev n'ont pas la meme structure, energies ne contient que l'energie par composant, cell-ci doit etre somme.
 	double E = energies[threadIdx.x] + energies[threadIdx.x + ncell] + energies[threadIdx.x + 2 * ncell];
 	#if DEBUG
 		if (threadIdx.x == 0)printf("%f \n", E);
@@ -178,7 +178,7 @@ __global__ void eval_gradient_and_copy(sparse_matrix_cuda L, sparse_matrix_cuda 
 __global__ void comput_s_t_rho(double *point, double *prev_point, double *gradient, double *prev_gradient, double *s, double *t, double *rho, int head, int n, int nb_cell,  int nb_sum_thread) {
 
 	int id = threadIdx.x;
-	//mouai a factoris�
+	//mouai a factorise
 
 	int point_id = blockIdx.x * 3 * n + id;
 	int s_id = CIRCULAR_ID(head, MEM_SIZE) * 3 * n*nb_cell + point_id;
