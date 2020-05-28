@@ -5,10 +5,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <time.h>
 #include <string.h>
-#include "Solver_GPU.h"
-#include "LSSolver.h"
-#include "Constraint.h"
-#include "Force.h"
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef NPFEM_SA
 #ifdef SHAPEOP_MSVC
@@ -17,9 +13,14 @@
 #endif
 #endif
 ///////////////////////////////////////////////////////////////////////////////
-#include "device_utilities.h"
-#include "sparse_matrix.h"
-#include "GPU_data.h"
+#include "npFEM/src_GPU/Solver_GPU.h"
+#include "npFEM/LSSolver.h"
+#include "npFEM/Constraint.h"
+#include "npFEM/Force.h"
+#include "npFEM/src_GPU/device_utilities.h"
+#include "npFEM/src_GPU/sparse_matrix.h"
+#include "npFEM/src_GPU/GPU_data.h"
+
 #include "palabos3D.h"
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef SHAPEOP_OPENMP

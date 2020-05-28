@@ -2,8 +2,8 @@
 #ifndef CUDASTRCT
 #define CUDASTRCT
 
-#include "npFEM/sparse_matrix.h"
-#include "npFEM/common.h"
+#include "npFEM/src_GPU/sparse_matrix.h"
+#include "npFEM/src_GPU/common.h"
 
 namespace plb {
 namespace npfem {

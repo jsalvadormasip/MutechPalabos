@@ -1,9 +1,9 @@
-#ifndef  CUDA_SUM
+#ifndef CUDA_SUM
 #define CUDA_SUM
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 namespace plb {
 namespace npfem {

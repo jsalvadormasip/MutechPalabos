@@ -4,16 +4,15 @@
 #ifndef DEVICE_UTILITIES_H
 #define DEVICE_UTILITIES_H
 ///////////////////////////////////////////////////////////////////////////////
-//#include "Types.h"
-#include "npFEM/common.h"
-#include "npFEM/GPU_data.h"
-#include "npFEM/Constraint_Flattening.h"
 #include <iostream>
 #include <cstdio>
 #include <string.h>
 #include <vector>
 
-#include "npFEM/sparse_matrix.h"
+#include "npFEM/src_GPU/common.h"
+#include "npFEM/src_GPU/GPU_data.h"
+#include "npFEM/src_GPU/Constraint_Flattening.h"
+#include "npFEM/src_GPU/sparse_matrix.h"
 
 namespace plb {
 namespace npfem {

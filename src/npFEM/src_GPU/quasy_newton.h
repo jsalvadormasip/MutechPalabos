@@ -1,14 +1,21 @@
 #ifndef QUASY
-
 #define QUASY
 
-#include "npFEM/common.h"
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
-#include "npFEM/sum_cuda.h"
-#include "npFEM/sparse_matrix.h"
 
+#include "npFEM/src_GPU/common.h"
+#include "npFEM/src_GPU/sum_cuda.h"
+#include "npFEM/src_GPU/sparse_matrix.h"
+
+
+#define CIRCULAR_ID(id, n) (id)%(n)
+#define ID_COL(i,j,N) ((N*(j)) + (i))
+#define ID_ROW(i,j,N) ((N*(i)) + (j))
+
+namespace plb {
+namespace npfem {
 
 #define OTHER_ERROR if (cudaPeekAtLastError())printf(" error %s \n", cudaGetErrorString(cudaPeekAtLastError()))
 #define HANDLE_KERNEL_ERROR(...) \
@@ -26,12 +33,6 @@ inline void handleError(cudaError_t code, const char *file, int line)
 		exit(EXIT_FAILURE);
 	}
 }
-#define CIRCULAR_ID(id, n) (id)%(n)
-#define ID_COL(i,j,N) ((N*(j)) + (i))
-#define ID_ROW(i,j,N) ((N*(i)) + (j))
-
-namespace plb {
-namespace npfem {
 
 //trace((x-y)'*M*(x-y)) + trace(x' L x) - trace (x' J p )
 __global__ void  eval_objectif(sparse_matrix_cuda L, sparse_matrix_cuda J, double *m, double *x, double *y, double *p, double *energies, double h2, int x_n, int p_n, int ncell, int nb_sum_thread){

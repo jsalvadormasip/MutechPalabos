@@ -1,5 +1,5 @@
-#include "npFEM/sparse_matrix.h"
 #include <stdio.h>
+#include "npFEM/src_GPU/sparse_matrix.h"
 
 namespace plb {
 namespace npfem {

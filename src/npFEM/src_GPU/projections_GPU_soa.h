@@ -4,10 +4,11 @@
 #ifndef PROJECTIONS_GPU_H
 #define PROJECTIONS_GPU_H
 ///////////////////////////////////////////////////////////////////////////////
-#include "npFEM/common.h"
-#include "npFEM/sum_cuda.h"
 #include <cuda_runtime.h>
-#include "npFEM/projections_GPU_MATH.h"
+
+#include "npFEM/src_GPU/common.h"
+#include "npFEM/src_GPU/sum_cuda.h"
+#include "npFEM/src_GPU/projections_GPU_MATH.h"
 
 namespace plb {
 namespace npfem {

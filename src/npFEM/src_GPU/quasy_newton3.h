@@ -2,7 +2,7 @@
 
 #define QUASY3
 
-#include "npFEM/quasy_newton.h"
+#include "npFEM/src_GPU/quasy_newton.h"
 
 namespace plb {
 namespace npfem {

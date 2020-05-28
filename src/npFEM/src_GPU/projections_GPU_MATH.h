@@ -4,12 +4,13 @@
 #ifndef PROJECTIONS_GPU_MATH_H
 #define PROJECTIONS_GPU_MATH_H
 ///////////////////////////////////////////////////////////////////////////////
-#include "npFEM/common.h"
-#include <cuda_runtime.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "npFEM/svd3_cuda.h"
+#include <cuda_runtime.h>
+
+#include "npFEM/src_GPU/common.h"
+#include "npFEM/src_GPU/svd3_cuda.h"
 ///////////////////////////////////////////////////////////////////////////////
 // Zero-based indexing for raw pointer arrays, where ld is the number of rows
 // for ColMajor matrices

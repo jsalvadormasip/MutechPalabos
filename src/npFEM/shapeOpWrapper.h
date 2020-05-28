@@ -10,7 +10,7 @@
 #include "npFEM/Solver.h"
 #ifndef NPFEM_SA
 #ifdef NPFEM_CUDA
-#include "npFEM/Solver_GPU.h"
+#include "npFEM/src_GPU/Solver_GPU.h"
 #endif
 #endif // !NPFEM_SA
 #include "npFEM/Constraint.h"
