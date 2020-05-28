@@ -61,8 +61,7 @@ SHAPEOP_API int shapeop_solve(ShapeOpSolver* op, int m,
     unsigned int max_iterations, unsigned int max_line_search_loops,
     unsigned int max_attempts_to_solve_stagnation, unsigned int convergence_window, ShapeOpScalar tol,
     ShapeOpScalar gamma, ShapeOpScalar gamma2,
-    ShapeOpScalar collisions_threshold, ShapeOpScalar collisions_weight,
-    ShapeOpScalar C_EWMA);
+    ShapeOpScalar collisions_threshold, ShapeOpScalar collisions_weight);
 /* Set the vertices to the ShapeOp solver. For more details see #ShapeOp::Solver. */
 SHAPEOP_API void shapeop_setPoints(ShapeOpSolver *op, ShapeOpScalar *points, int nb_points);
 /* Get the vertices back from the ShapeOp solver. For more details see #ShapeOp::Solver. */

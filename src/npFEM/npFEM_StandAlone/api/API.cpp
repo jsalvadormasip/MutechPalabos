@@ -38,12 +38,11 @@ extern int shapeop_solve(ShapeOpSolver* op, int m, unsigned int max_iterations,
     unsigned int max_line_search_loops,
     unsigned int max_attempts_to_solve_stagnation, unsigned int convergence_window, 
     ShapeOpScalar tol, ShapeOpScalar gamma, ShapeOpScalar gamma2,
-    ShapeOpScalar collisions_threshold, ShapeOpScalar collisions_weight,
-    ShapeOpScalar C_EWMA)
+    ShapeOpScalar collisions_threshold, ShapeOpScalar collisions_weight)
 {
     return static_cast<int>(!op->s->solve(m, max_iterations,
         max_line_search_loops, max_attempts_to_solve_stagnation, convergence_window, tol, gamma,
-        gamma2, collisions_threshold, collisions_weight, C_EWMA));
+        gamma2, collisions_threshold, collisions_weight));
 }
 extern void shapeop_setPoints(
     ShapeOpSolver* op, ShapeOpScalar* points, int nb_points)
