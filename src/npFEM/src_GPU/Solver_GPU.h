@@ -8,11 +8,11 @@
 #include <memory>
 #include <cuda_runtime.h>
 
-#include "npFEM/Types.h"
-#include "npFEM/src_GPU/Constraint_Flattening.h"
-#include "npFEM/src_GPU/sparse_matrix.h"
-#include "npFEM/src_GPU/common.h"
-#include "npFEM/src_GPU/GPU_data.h"
+#include "Types.h"
+#include "Constraint_Flattening.h"
+#include "sparse_matrix.h"
+#include "common.h"
+#include "GPU_data.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 /** @file

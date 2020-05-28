@@ -20,6 +20,12 @@
 #include "palabos3D.h"
 #include "palabos3D.hh"
 
+#include "rbcShapeOp.h"
+#include "rbcGlobal.h"
+#include "rbcParticle.h"
+#include "rbcCommunicate.h"
+#include "visualization.h"
+
 using namespace plb;
 using namespace std;
 using namespace plb::global;
@@ -50,13 +56,6 @@ std::map<pluint, pluint> bodyToType;
 // To be used by PIK
 T collisions_threshold_rep;
 T collisions_threshold_nonRep;
-
-// Do not change the order
-//#include "npFEM/rbcShapeOp.h"
-//#include "npFEM/rbcGlobal.h"
-//#include "npFEM/rbcParticle.h"
-//#include "npFEM/rbcCommunicate.h"
-//#include "npFEM/visualization.h"
 
 // Generic solvers
 // ShapeOp always in physical units

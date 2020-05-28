@@ -19,7 +19,7 @@
 #include <cuda_runtime.h>
 #include "math.h" // CUDA math library
 
-#include "npFEM/src_GPU/common.h"
+#include "common.h"
 
 #ifdef DOUBLE_SHAPEOP
 #define _gamma 5.828427124 // FOUR_GAMMA_SQUARED = sqrt(8)+3;

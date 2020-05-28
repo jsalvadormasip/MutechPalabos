@@ -9,8 +9,8 @@
 #include <stdlib.h>
 #include <cuda_runtime.h>
 
-#include "npFEM/src_GPU/common.h"
-#include "npFEM/src_GPU/svd3_cuda.h"
+#include "common.h"
+#include "svd3_cuda.h"
 ///////////////////////////////////////////////////////////////////////////////
 // Zero-based indexing for raw pointer arrays, where ld is the number of rows
 // for ColMajor matrices

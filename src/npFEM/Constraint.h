@@ -4,7 +4,7 @@
 #ifndef CONSTRAINT_H
 #define CONSTRAINT_H
 ///////////////////////////////////////////////////////////////////////////////
-#include "npFEM/Types.h"
+#include "Types.h"
 #include <memory>
 #include <cmath>
 #ifndef M_PI

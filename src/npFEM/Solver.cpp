@@ -7,10 +7,10 @@
 #include <iostream>
 #include "core/util.h"
 #include "core/plbLogFiles.h"
-#include "npFEM/Solver.h"
-#include "npFEM/LSSolver.h"
-#include "npFEM/Constraint.h"
-#include "npFEM/Force.h"
+#include "Solver.h"
+#include "LSSolver.h"
+#include "Constraint.h"
+#include "Force.h"
 ///////////////////////////////////////////////////////////////////////////////
 #define THREED
 ///////////////////////////////////////////////////////////////////////////////

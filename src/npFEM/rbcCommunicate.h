@@ -1,7 +1,7 @@
 #pragma once
 
-#include "npFEM/rbcShapeOp.h"
-#include "npFEM/rbcGlobal.h"
+#include "rbcShapeOp.h"
+#include "rbcGlobal.h"
 
 namespace plb {
 namespace npfem {

@@ -4,7 +4,7 @@
 #ifndef LSSOLVER_H
 #define LSSOLVER_H
 ///////////////////////////////////////////////////////////////////////////////
-#include "npFEM/Types.h"
+#include "Types.h"
 //#include <unsupported/Eigen/src/IterativeSolvers/MINRES.h>
 ///////////////////////////////////////////////////////////////////////////////
 /* This file contains all the linear system solvers of the ShapeOp library. */

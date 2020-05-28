@@ -62,7 +62,7 @@ inline std::vector<typename DerivedM::Scalar> matrix_to_list(
     return V;
 }
 //////////////////////////////////////////////
-void swap(double *a, double *b) {
+void swap_local(double *a, double *b) {
 	double tp = *a;
 	*a = *b;
 	*b = tp;
@@ -73,7 +73,7 @@ T kselect(T *seq, int n, int k) {
 	int i = 0;
 	int start_n = n;
 	//randome pivot
-	//swap(seq[0], seq[(int)(((double)rand())/MAXINT*(n-1))]);
+	//swap_local(seq[0], seq[(int)(((double)rand())/MAXINT*(n-1))]);
 
 	double p = seq[0];
 	int t = 0;
@@ -82,12 +82,12 @@ T kselect(T *seq, int n, int k) {
 	while (t < start_n*start_n) {
 		t++;
 		i_prev = i;
-		//swap(seq + i, seq + i + (int)(((double)rand())/MAXINT*(n - 1 - i)));
+		//swap_local(seq + i, seq + i + (int)(((double)rand())/MAXINT*(n - 1 - i)));
 		p = seq[i];
 		//is seq[i]=p
 		while (i + 1 < n && p >seq[i + 1]) {
 			t++;
-			swap(&seq[i], &seq[i + 1]);
+			swap_local(&seq[i], &seq[i + 1]);
 			i++;
 		}
 		int j = i + 1;
@@ -97,8 +97,8 @@ T kselect(T *seq, int n, int k) {
 			if (p >= seq[j]) {
 				t++;
 				//printf("%d > %d\n", p, seq[j]);
-				swap(&seq[i + 1], &seq[j]);
-				swap(&seq[i + 1], &seq[i]);
+				swap_local(&seq[i + 1], &seq[j]);
+				swap_local(&seq[i + 1], &seq[i]);
 				i += 1;
 			}
 			j++;

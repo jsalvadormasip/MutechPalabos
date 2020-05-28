@@ -127,7 +127,7 @@ endif()
 
 ###############################################################################
 
-# ShapeOp not stand alone development -> WRAPPER ON by default
+# npFEM not stand alone development -> WRAPPER ON by default
 add_definitions(-DWRAPPER_ON)
 add_definitions(-DPLB_USE_EIGEN)
 
@@ -138,23 +138,49 @@ add_definitions(-DPLB_USE_EIGEN)
 include_directories("${PALABOS_ROOT}/src")
 include_directories("${PALABOS_ROOT}/externalLibraries")
 include_directories("${PALABOS_ROOT}/externalLibraries/Eigen3")
+
+file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp")
+file(GLOB_RECURSE EXT_SRC     "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
+
+file(GLOB_RECURSE REMOVE_SRC "${PALABOS_ROOT}/src/npFEM/*.cpp") # Compile npFEM separately
+list(REMOVE_ITEM PALABOS_SRC ${REMOVE_SRC})
+
+add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
+
+###############################################################################
+# npFEM Library
+###############################################################################
+
+include_directories("${PALABOS_ROOT}/src/npFEM")
 if(ENABLE_CUDA)
     include_directories("${CUDA_TOOLKIT_ROOT_DIR}")
     include_directories("${CUDA_TOOLKIT_ROOT_DIR}/include/")
+
+    include_directories("${PALABOS_ROOT}/src/npFEM/src_GPU")
 endif()
 
-file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp" "${PALABOS_ROOT}/src/*.cu")
-file(GLOB_RECURSE EXT_SRC "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
-if(NOT ENABLE_CUDA)
-    list(REMOVE_ITEM PALABOS_SRC "${PALABOS_ROOT}/src/*.cu")
-    list(REMOVE_ITEM PALABOS_SRC "${PALABOS_ROOT}/src/npFEM/src_GPU/Solver_GPU.cpp")
+file(GLOB NPFEM_H "${PALABOS_ROOT}/src/npFEM/*.h")
+file(GLOB NPFEM_CPP "${PALABOS_ROOT}/src/npFEM/*.cpp")
+if(ENABLE_CUDA)
+    # cuh files
+    file(GLOB NPFEM_CUDA_H "${PALABOS_ROOT}/src/npFEM/src_GPU/*.h")
+    # cu files
+    file(GLOB NPFEM_CUDA_SOURCES_CPP "${PALABOS_ROOT}/src/npFEM/src_GPU/*.cpp")
+    file(GLOB NPFEM_CUDA_SOURCES_CU  "${PALABOS_ROOT}/src/npFEM/src_GPU/*.cu")
+    set(NPFEM_CUDA_SOURCES ${NPFEM_CUDA_SOURCES_CPP} ${NPFEM_CUDA_SOURCES_CU})  
 endif()
 
+# By adding the NPFEM_H, we manage to show the headers in a separate folder 
+# in the project tree (quite handy for development)
+
+# Build NPFEM Library (For stand-alone go with dynamic)
 if(NOT ENABLE_CUDA)
-    add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
+    add_library(npFEM STATIC ${NPFEM_CPP} ${NPFEM_H})
 else()
-    add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
-    target_link_libraries(palabos ${CUDA_LINK_LIBRARIES_KEYWORD})
+    set(HEADERS ${NPFEM_H} ${NPFEM_CUDA_H})
+    set(SOURCES ${NPFEM_CPP} ${NPFEM_CUDA_SOURCES})
+    add_library(npFEM STATIC ${HEADERS} ${SOURCES})
+    target_link_libraries(npFEM ${CUDA_LINK_LIBRARIES_KEYWORD})
 endif()
 
 ###############################################################################
@@ -164,7 +190,7 @@ file(GLOB PARAMS_1 "./*.xml")
 file(GLOB PARAMS_2 "./*.pos")
 
 add_executable(${EXECUTABLE_NAME} "./${EXECUTABLE_NAME}.cpp" ${DEPS_H} ${PARAMS_1} ${PARAMS_2})
-target_link_libraries(${EXECUTABLE_NAME} palabos)
+target_link_libraries(${EXECUTABLE_NAME} palabos npFEM)
 if(ENABLE_MPI)
 	target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
 endif()
@@ -174,7 +200,7 @@ if(ENABLE_CUDA)
     add_executable(${EXECUTABLE_NAME_GPU} EXCLUDE_FROM_ALL "./${EXECUTABLE_NAME}.cpp" ${DEPS_H} ${PARAMS_1} ${PARAMS_2})
     target_compile_options(${EXECUTABLE_NAME_GPU} PUBLIC -DNPFEM_CUDA=1)
     set_property(TARGET ${EXECUTABLE_NAME_GPU} PROPERTY CUDA_SEPARABLE_COMPILATION ON)
-    target_link_libraries(${EXECUTABLE_NAME_GPU} palabos)
+    target_link_libraries(${EXECUTABLE_NAME_GPU} palabos npFEM)
     if(ENABLE_MPI)
         target_link_libraries(${EXECUTABLE_NAME_GPU} ${MPI_CXX_LIBRARIES})
     endif()

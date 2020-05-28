@@ -6,10 +6,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <chrono>
 
-#include "npFEM/src_GPU/device_utilities.h"
-#include "npFEM/src_GPU/projections_GPU_soa.h"
-#include "npFEM/src_GPU/GPU_data.h"
-#include "npFEM/src_GPU/quasy_newton3.h"
+#include "device_utilities.h"
+#include "projections_GPU_soa.h"
+#include "GPU_data.h"
+#include "quasy_newton3.h"
 ///////////////////////////////////////////////////////////////////////////////
 namespace plb {
 namespace npfem {

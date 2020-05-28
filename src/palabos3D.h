@@ -51,7 +51,6 @@
 #include <finiteDifference/headers3D.h>
 #include <coProcessors/headers3D.h>
 #include <gridRefinement/headers3D.h>
-#include <npFEM/headers3D.h>
 
 // Include also 2D data structures. They are for
 // example required to write 2D images.

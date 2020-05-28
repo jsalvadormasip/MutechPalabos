@@ -6,9 +6,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <cuda_runtime.h>
 
-#include "npFEM/src_GPU/common.h"
-#include "npFEM/src_GPU/sum_cuda.h"
-#include "npFEM/src_GPU/projections_GPU_MATH.h"
+#include "common.h"
+#include "sum_cuda.h"
+#include "projections_GPU_MATH.h"
 
 namespace plb {
 namespace npfem {

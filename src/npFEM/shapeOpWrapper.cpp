@@ -1,7 +1,7 @@
 #ifndef SHAPEOPWRAPPER_CPP
 #define SHAPEOPWRAPPER_CPP
 
-#include "npFEM/shapeOpWrapper.h"
+#include "shapeOpWrapper.h"
 
 namespace plb {
 namespace npfem {

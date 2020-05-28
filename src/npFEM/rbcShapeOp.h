@@ -1,8 +1,8 @@
 #pragma once
 
-#include "npFEM/shapeOpWrapper.h"
-#include "npFEM/rbcFiltering.h"
-#include "npFEM/npfemConstants.h"
+#include "shapeOpWrapper.h"
+#include "rbcFiltering.h"
+#include "npfemConstants.h"
 #include <numeric>
 
 #define FILTERING

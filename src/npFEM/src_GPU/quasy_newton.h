@@ -5,9 +5,9 @@
 #include<stdlib.h>
 #include<time.h>
 
-#include "npFEM/src_GPU/common.h"
-#include "npFEM/src_GPU/sum_cuda.h"
-#include "npFEM/src_GPU/sparse_matrix.h"
+#include "common.h"
+#include "sum_cuda.h"
+#include "sparse_matrix.h"
 
 
 #define CIRCULAR_ID(id, n) (id)%(n)

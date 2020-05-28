@@ -11,7 +11,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 ///////////////////////////////////////////////////////////////////////////////
-#include "npFEM/common.h"
+#include "common.h"
 #include <Eigen3/Core>
 #include <Eigen3/Dense>
 #include <Eigen3/Sparse>
