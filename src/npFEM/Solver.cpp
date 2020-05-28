@@ -5,12 +5,12 @@
 #define SOLVER_CPP
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream>
-#include "core/util.h"
-#include "core/plbLogFiles.h"
+
 #include "Solver.h"
 #include "LSSolver.h"
 #include "Constraint.h"
 #include "Force.h"
+#include "common.h"
 ///////////////////////////////////////////////////////////////////////////////
 #define THREED
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,6 +20,9 @@
 #include <windows.h>
 #include <iostream>
 #endif
+#else
+#include "core/util.h"
+#include "core/plbLogFiles.h"
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef SHAPEOP_OPENMP
@@ -530,54 +533,6 @@ SHAPEOP_INLINE bool Solver::solve(int m
 
     // m = 2, simple (naive) Quasi-Newton & m > 2, L-BFGS
     if (m < 2) m = 15;
-
-#ifdef NPFEM_SA
-    if (Palabos_iT_ == 0) {
-        std::cout << "Calpha: " << Calpha_ << "\n";
-        std::cout << "Cbeta: " << Cbeta_ << "\n";
-        std::cout << "timestep: " << delta_ << "\n";
-        std::cout << "density: " << rho_ << "\n";
-        std::cout << "density: " << rho_ << "\n";
-        std::cout << "globalVolumeConservationWeight: " << globalVolumeConservationWeight_ << "\n";
-
-        std::cout << "m: " << m << "\n";
-        std::cout << "max_iterations: " << max_iterations << "\n";
-        std::cout << "max_line_search_loops: " << max_line_search_loops << "\n";
-        std::cout << "max_attempts_to_solve_stagnation: " << max_attempts_to_solve_stagnation << "\n";
-        std::cout << "convergence_window: " << convergence_window << "\n";
-        std::cout << "tol: " << tol << "\n";
-        std::cout << "gamma: " << gamma << "\n";
-        std::cout << "gamma2: " << gamma2 << "\n";
-        std::cout << "collisions_threshold: " << collisions_threshold << "\n";
-        std::cout << "collisions_weight: " << collisions_weight << "\n";
-    }
-    ++Palabos_iT_;
-#else
-    /*
-    if (oldPointsHistory_ == 0) {
-    logfile_nonparallel("body_" + util::val2str(bodyID_) + "_ShapeOp_Params.log")
-    .flushEntry(
-    "Calpha: " + util::val2str(Calpha_) + "\n"
-    + "Cbeta: " + util::val2str(Cbeta_) + "\n"
-    + "timestep: " + util::val2str(delta_) + "\n"
-    + "density: " + util::val2str(rho_) + "\n"
-    + "globalVolumeConservationWeight: " + util::val2str(globalVolumeConservationWeight_) + "\n"
-    + "externalSolverSpatialResolution_: " + util::val2str(externalSolverSpatialResolution_) + "\n"
-    + "externalSolverTimeResolution_: " + util::val2str(externalSolverTimeResolution_) + "\n"
-
-    + "m: " + util::val2str(m) + "\n"
-    + "max_iterations: " + util::val2str(max_iterations) + "\n"
-    + "max_line_search_loops: " + util::val2str(max_line_search_loops) + "\n"
-    + "max_attempts_to_solve_stagnation: " + util::val2str(max_attempts_to_solve_stagnation) + "\n"
-    + "convergence_window: " + util::val2str(convergence_window) + "\n"
-    + "tol: " + util::val2str(tol) + "\n"
-    + "gamma: " + util::val2str(gamma) + "\n"
-    + "gamma2: " + util::val2str(gamma2) + "\n"
-    + "collisions_threshold: " + util::val2str(collisions_threshold) + "\n"
-    + "collisions_weight: " + util::val2str(collisions_weight) + "\n");
-    }
-    */
-#endif
 
     // For convergence issues, move the points at the origin.
     pointsTI_ = points_;

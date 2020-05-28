@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 project(bloodFlowDefoBodies)
+
 enable_language(CXX)
 
 option(ENABLE_CUDA "Enabling CUDA" OFF)

@@ -11,12 +11,13 @@
 #ifndef TYPES_H
 #define TYPES_H
 ///////////////////////////////////////////////////////////////////////////////
-#include "common.h"
 #include <Eigen3/Core>
 #include <Eigen3/Dense>
 #include <Eigen3/Sparse>
 #include <Eigen3/Eigenvalues>
 #include "nanoflann/nanoflann.hpp"
+
+#include "common.h"
 ///////////////////////////////////////////////////////////////////////////////
 /**
 This file redefines EIGEN types using the scalar type ::ShapeOpScalar defined in

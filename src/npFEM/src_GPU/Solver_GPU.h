@@ -13,7 +13,6 @@
 #include "sparse_matrix.h"
 #include "common.h"
 #include "GPU_data.h"
-
 ///////////////////////////////////////////////////////////////////////////////
 /** @file
 This file contains the main ShapeOp solver.*/
