@@ -59,14 +59,13 @@ include_directories("${PALABOS_ROOT}/externalLibraries/nanoflann")
 ###############################################################################
 
 include_directories("${PALABOS_ROOT}/src/npFEM")
-include_directories("${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone/api")
+include_directories("${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone_RhinoGH/api")
 
 file(GLOB NPFEM_H "${PALABOS_ROOT}/src/npFEM/*.h")
 file(GLOB NPFEM_CPP "${PALABOS_ROOT}/src/npFEM/*.cpp")
-# h files
-file(GLOB API_HEADERS "${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone/api/*.h")
-# cpp files
-file(GLOB API_SOURCES "${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone/api/*.cpp")
+
+file(GLOB API_HEADERS "${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone_RhinoGH/api/*.h")
+file(GLOB API_SOURCES "${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone_RhinoGH/api/*.cpp")
 
 # By adding the NPFEM_H, we manage to show the headers in a separate folder 
 # in the project tree (quite handy for development)
