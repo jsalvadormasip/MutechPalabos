@@ -110,7 +110,6 @@ endif()
 
 if(ENABLE_CUDA)
     message("Enabling CUDA")
-    add_definitions(-DNPFEM_CUDA)
 
     find_package(CUDA REQUIRED)
     if(NOT CUDA_FOUND)

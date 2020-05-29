@@ -33,8 +33,8 @@
     <output_timestep> 4000 </output_timestep> <!--> Every how many Palabos timesteps to print results <-->
     <max_time> 0.6 </max_time> <!--> Simulation stops when Simulated Time is over X seconds <-->
 
-    <printVTKs> false </printVTKs>
-    <!--> ratio: [0..1], applies in VTKs & COMs (Centers of Masses) <-->
+    <printVTKs> true </printVTKs>
+    <!--> ratio: [0..1], applies in VTKs & COMs (Center of Mass) <-->
     <dump_RBCs_ratio_VTKs> 1.0 </dump_RBCs_ratio_VTKs>
     <dump_PLTs_ratio_VTKs> 1.0 </dump_PLTs_ratio_VTKs>
     <dump_RBCs_ratio_COMs> 0.0 </dump_RBCs_ratio_COMs>
@@ -77,12 +77,14 @@
     <gamma> 1e-4 </gamma>
     <gamma2> 0.9 </gamma2>
 
+    <!--> Default values to avoid interpenetrations. For repulsive forces just increase the collisions_weight_rep <-->
+
     <collisions_threshold_nonRep> 2.0 </collisions_threshold_nonRep>
     <collisions_weight_nonRep> 20.0 </collisions_weight_nonRep>
 
     <collisions_threshold_rep> 2.0 </collisions_threshold_rep>
     <collisions_weight_rep> 20.0 </collisions_weight_rep>
-    <beta_morse> 0.0 </beta_morse>
+    <beta_morse> 0.0 </beta_morse> <!--> not implemented <-->
 </ShapeOp_General>
 
 <!--> For CellPacking set CALPHA to 0.9 <-->
@@ -90,7 +92,7 @@
 
 <ShapeOp_RBC>
   <rho> 1125.0 </rho> <!--> Density of RBC in physical units (femtoGr/um^3) <-->
-  <Calpha> 0.9 </Calpha>
+  <Calpha> 0.9 </Calpha> <!--> Based on the NoneWheelerExps calibration <-->
   <Cbeta> 0.01 </Cbeta>
 
   <applyGlobalVolumeConservation> true </applyGlobalVolumeConservation>

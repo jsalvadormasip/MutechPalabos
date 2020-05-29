@@ -1,0 +1,13 @@
+bloodFlowDefoBodies
+bloodFlowDefoBodies_gpu
+
+bloodFlowDefoBodies.exe
+bloodFlowDefoBodies_gpu.exe
+
+tmp*/
+CPs/
+
+build*/
+
+Release/
+Debug/

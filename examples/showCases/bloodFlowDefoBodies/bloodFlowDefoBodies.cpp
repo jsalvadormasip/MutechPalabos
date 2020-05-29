@@ -17,9 +17,11 @@
 #include <unistd.h>
 #endif
 
+// Load Palabos Lib
 #include "palabos3D.h"
 #include "palabos3D.hh"
 
+// Load npFEM Lib
 #include "rbcShapeOp.h"
 #include "rbcGlobal.h"
 #include "rbcParticle.h"
