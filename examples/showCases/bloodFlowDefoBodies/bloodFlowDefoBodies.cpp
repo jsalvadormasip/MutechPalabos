@@ -1922,7 +1922,7 @@ int main(int argc, char* argv[])
 	T Cp = rho_p * (dx_p * dx_p) / (dt_p * dt_p); // pressure
 	T Ca = dx_p * dx_p; // area
     T densityOffset = 1.0;
-	actions2b.addProcessor(new CollisionsForcesCombo<T, DESCRIPTOR>(dx_p, omega, densityOffset, Cf, Cp, Ca, collisions_threshold_rep, collisions_threshold_nonRep, wallVertexNormals, CellPacking),
+	actions2b.addProcessor(new CollisionsForcesCombo<T, DESCRIPTOR>(dx_p, omega, densityOffset, Cf, Cp, Ca, collisions_threshold_rep, collisions_threshold_nonRep, wallVertexNormals, bodyToType, CellPacking),
 		particleID_act2b, rhoBarID_act2b, piNeqID_act2b, group.getBoundingBox());
 
 	// 3. Immersed boundary method.

@@ -217,7 +217,7 @@ class CollisionsForcesCombo : public BoxProcessingFunctional3D
 public:
     CollisionsForcesCombo(T dx_, T omega_, T densityOffset_,
                           T Cf_, T Cp_, T Ca_, T collisions_threshold_rep_, T collisions_threshold_nonRep_,
-                          std::vector<Array<T, 3>> wallVertexNormals_,
+                          std::vector<Array<T, 3>> wallVertexNormals_, std::map<pluint, pluint> bodyToType_,
                           bool CellPacking_);
     virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> blocks);
     virtual CollisionsForcesCombo<T, Descriptor>* clone() const;
@@ -230,13 +230,14 @@ private:
     T Cf, Cp, Ca;
     T collisions_threshold_rep, collisions_threshold_nonRep;
     std::vector<Array<T, 3>> wallVertexNormals;
+    std::map<pluint, pluint> bodyToType;
     bool CellPacking;
 };
 
 template <typename T, template <typename U> class Descriptor>
 CollisionsForcesCombo<T, Descriptor>::CollisionsForcesCombo(T dx_, T omega_, T densityOffset_,
                                                             T Cf_, T Cp_, T Ca_, T collisions_threshold_rep_, T collisions_threshold_nonRep_,
-                                                            std::vector<Array<T, 3>> wallVertexNormals_,
+                                                            std::vector<Array<T, 3>> wallVertexNormals_, std::map<pluint, pluint> bodyToType_,
                                                             bool CellPacking_)
     : dx_p(dx_)
     , omega(omega_)
@@ -247,6 +248,7 @@ CollisionsForcesCombo<T, Descriptor>::CollisionsForcesCombo(T dx_, T omega_, T d
     , collisions_threshold_rep(collisions_threshold_rep_)
     , collisions_threshold_nonRep(collisions_threshold_nonRep_)
     , wallVertexNormals(wallVertexNormals_)
+    , bodyToType(bodyToType_)
     , CellPacking(CellPacking_)
 {
 }
