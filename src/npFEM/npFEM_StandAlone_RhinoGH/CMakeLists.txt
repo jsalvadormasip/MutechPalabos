@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
-project(ShapeOpGH)
+project(npFEM_RhinoGH)
 
 set(DEFAULT ON CACHE INTERNAL "Default options")
 
@@ -9,7 +9,7 @@ enable_language(CXX)
 # Convert paths to UNIX compatible
 file(TO_CMAKE_PATH $ENV{PALABOS_ROOT} PALABOS_ROOT)
 
-# Development of ShapeOp (stand-alone version)
+# Development of npFEM (stand-alone/SA version)
 add_definitions(-DNPFEM_SA)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -70,7 +70,7 @@ file(GLOB API_SOURCES "${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone_RhinoGH/api/*.
 # By adding the NPFEM_H, we manage to show the headers in a separate folder 
 # in the project tree (quite handy for development)
 
-# Build NPFEM Library (For stand-alone go with dynamic)
+# Build NPFEM Library (For stand-alone go with dynamic lib)
 set(HEADERS ${NPFEM_H} ${API_HEADERS})
 set(SOURCES ${NPFEM_CPP} ${API_SOURCES})
 add_library(npFEM SHARED ${SOURCES} ${HEADERS})

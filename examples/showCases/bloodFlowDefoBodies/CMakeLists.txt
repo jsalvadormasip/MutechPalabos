@@ -126,18 +126,13 @@ if(ENABLE_CUDA)
 endif()
 
 ###############################################################################
-
-# npFEM not stand alone development -> WRAPPER ON by default
-add_definitions(-DWRAPPER_ON)
-add_definitions(-DPLB_USE_EIGEN)
-
-###############################################################################
 # Palabos Library
 ###############################################################################
 
 include_directories("${PALABOS_ROOT}/src")
 include_directories("${PALABOS_ROOT}/externalLibraries")
 include_directories("${PALABOS_ROOT}/externalLibraries/Eigen3")
+add_definitions(-DPLB_USE_EIGEN)
 
 file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp")
 file(GLOB_RECURSE EXT_SRC     "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")

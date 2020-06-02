@@ -563,7 +563,7 @@ SHAPEOP_INLINE bool Solver::solve(int m
         addCollisionConstraints(collisions_threshold_rep, collisions_weight_rep, collisions_threshold_nonRep, collisions_weight_nonRep, beta_morse);
     }
 
-#ifndef WRAPPER_ON
+#ifdef NPFEM_SA
     // Convert forces into a dense matrix form
     Palabos_Forces_.setZero(3, points_.cols());
     for (int i = 0; i < static_cast<int>(Palabos_Forces_.cols()); ++i) {
@@ -572,6 +572,7 @@ SHAPEOP_INLINE bool Solver::solve(int m
         }
     }
 #endif
+    
     // Momentum = The new positions in the absence of internal forces
     momentum_ = points_
         + (delta_ * M_tilde_inv_ * M_ * velocities_.transpose()
