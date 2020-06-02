@@ -14,7 +14,7 @@ npFEM is a heavily modified version of ShapeOp (https://www.shapeop.org/). The d
 
 ## Compilation
 
-Palabos-npFEM has been tested in both UNIX and Windows (with the provided CMake File):
+Palabos-npFEM has been tested in both UNIX and Windows (provided CMake File). Before following the steps below, make sure to set the enviroment variable PALABOS_ROOT as the root folder of palabos.
 
 1. mkdir build
 2. cd build

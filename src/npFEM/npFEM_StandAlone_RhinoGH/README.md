@@ -26,6 +26,8 @@ What we provide in the npFEM_RhinoGH folder adopts ideas and code from the proje
 
 ## Compilation
 
+npFEM has been tested in both UNIX and Windows. Before following the steps below, make sure to set the enviroment variable PALABOS_ROOT as the root folder of palabos.
+
 Windows only (CMake & Visual Studio):
 
 1. mkdir build (current folder)
