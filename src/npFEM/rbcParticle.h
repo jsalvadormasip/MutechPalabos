@@ -3,6 +3,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "palabos3D.h"
+#include "palabos3D.hh"
+#include "rbcGlobal.h"
+#include "npfemConstants.h"
+
 namespace plb {
 namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
@@ -579,11 +584,6 @@ void CollisionsForcesCombo<T, Descriptor>::processGenericBlocks(
             Array<T, 3> averagePi_n2;
             SymmetricTensorImpl<T, 3>::matVectMult(averagePiNeq2, -normal, averagePi_n2);
             */
-
-            // ******************************************
-            // Choose whichever technique is more stable!
-            // ******************************************
-            // For more details: See immersedSurfaceParticleProcessingFunctional3D.hh - TwoSided
 
             // Pressure (Not yet the force since we will correct it later)
             pressure = -(singleValRho - rho0)*Descriptor<T>::cs2;

@@ -41,16 +41,15 @@ using namespace plb::npfem;
 
 typedef double T;
 
-std::vector<Array<T, 3>> wallVertexNormals;
-
+bool CellPacking;
 
 // So that at least all neighbors of a bulk vertex are found in the envelope.
 plint particleEnvelopeWidth;
-bool CellPacking;
 
 // The shape of all walls, to be used for collisions with the bodies.
 RawConnectedTriangleMesh<T>* wallMesh;
 std::string wallStlFileName;
+std::vector<Array<T, 3>> wallVertexNormals;
 
 // Tag to distinguish the type of body. The key is the unique ID of the body.
 std::map<pluint, pluint> bodyToType;

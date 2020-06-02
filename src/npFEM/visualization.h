@@ -2,7 +2,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
+
 #include <cerrno>
+
+#include "palabos3D.h"
+#include "palabos3D.hh"
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))

@@ -3,6 +3,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "palabos3D.h"
+#include "palabos3D.hh"
+
 namespace plb {
 namespace npfem {
 

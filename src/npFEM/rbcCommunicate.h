@@ -3,8 +3,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "rbcShapeOp.h"
+#include "palabos3D.h"
+#include "palabos3D.hh"
 #include "rbcGlobal.h"
+#include "rbcShapeOp.h"
 
 namespace plb {
 namespace npfem {

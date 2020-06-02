@@ -5,6 +5,13 @@ For more information on the library (numerics & parameters), you can consult the
 * https://arxiv.org/abs/1903.06479
 * https://arxiv.org/abs/1911.03062
 
+npFEM is a heavily modified version of ShapeOp (https://www.shapeop.org/). The different naming originates from the fact that the modifications make the solver more like an FEM solver instead of a computer graphics tool. In more details:
+
+1. We have changed radically the original ShapeOp solver. Our approach follows the paper of Liu et al. (https://arxiv.org/abs/1604.07378), thus the solver uses a Quasi-Newton optimization technique, and not the standard local-global alternating approach of ShapeOp.
+2. In Computer Graphics, the solvers are approximating Newton's equations, reducing the computational cost. Our solver is not approximating Newton's equations, but we provide a converged solution, focusing on accuracy and physically correct states.
+3. We provide a CUDA implementation of the solver.
+4. From ShapeOp, we are using mainly the code structure.
+
 ## Compilation
 
 Palabos-npFEM has been tested in both UNIX and Windows (with the provided CMake File):
