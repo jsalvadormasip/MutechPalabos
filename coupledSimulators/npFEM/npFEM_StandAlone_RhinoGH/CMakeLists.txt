@@ -6,12 +6,6 @@ set(DEFAULT ON CACHE INTERNAL "Default options")
 
 enable_language(CXX)
 
-# Convert paths to UNIX compatible
-file(TO_CMAKE_PATH $ENV{PALABOS_ROOT} PALABOS_ROOT)
-
-# Development of npFEM (stand-alone/SA version)
-add_definitions(-DNPFEM_SA)
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
     #set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
@@ -47,6 +41,19 @@ if(ENABLE_OPENMP)
     endif()
 endif()
 
+###############################################################################
+# Palabos Library
+###############################################################################
+
+file(TO_CMAKE_PATH $ENV{PALABOS_ROOT} PALABOS_ROOT)
+
+###############################################################################
+# npFEM Library
+###############################################################################
+
+# Development of npFEM (stand-alone/SA version)
+add_definitions(-DNPFEM_SA)
+
 # Find Eigen
 include_directories("${PALABOS_ROOT}/externalLibraries")
 include_directories("${PALABOS_ROOT}/externalLibraries/Eigen3")
@@ -54,18 +61,14 @@ include_directories("${PALABOS_ROOT}/externalLibraries/Eigen3")
 # Find NanoFlann
 include_directories("${PALABOS_ROOT}/externalLibraries/nanoflann")
 
-###############################################################################
-# npFEM Library
-###############################################################################
+include_directories("${PALABOS_ROOT}/coupledSimulators/npFEM")
+include_directories("${PALABOS_ROOT}/coupledSimulators/npFEM/npFEM_StandAlone_RhinoGH/api")
 
-include_directories("${PALABOS_ROOT}/src/npFEM")
-include_directories("${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone_RhinoGH/api")
+file(GLOB NPFEM_H "${PALABOS_ROOT}/coupledSimulators/npFEM/*.h")
+file(GLOB NPFEM_CPP "${PALABOS_ROOT}/coupledSimulators/npFEM/*.cpp")
 
-file(GLOB NPFEM_H "${PALABOS_ROOT}/src/npFEM/*.h")
-file(GLOB NPFEM_CPP "${PALABOS_ROOT}/src/npFEM/*.cpp")
-
-file(GLOB API_HEADERS "${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone_RhinoGH/api/*.h")
-file(GLOB API_SOURCES "${PALABOS_ROOT}/src/npFEM/npFEM_StandAlone_RhinoGH/api/*.cpp")
+file(GLOB API_HEADERS "${PALABOS_ROOT}/coupledSimulators/npFEM/npFEM_StandAlone_RhinoGH/api/*.h")
+file(GLOB API_SOURCES "${PALABOS_ROOT}/coupledSimulators/npFEM/npFEM_StandAlone_RhinoGH/api/*.cpp")
 
 # By adding the NPFEM_H, we manage to show the headers in a separate folder 
 # in the project tree (quite handy for development)

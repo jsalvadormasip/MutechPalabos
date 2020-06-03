@@ -137,38 +137,33 @@ add_definitions(-DPLB_USE_EIGEN)
 file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp")
 file(GLOB_RECURSE EXT_SRC     "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
 
-file(GLOB_RECURSE REMOVE_SRC "${PALABOS_ROOT}/src/npFEM/*.cpp") # Compile npFEM separately
-list(REMOVE_ITEM PALABOS_SRC ${REMOVE_SRC})
-
 add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 
 ###############################################################################
-# npFEM Library
+# npFEM Library (Compile npFEM separately)
 ###############################################################################
 
-include_directories("${PALABOS_ROOT}/src/npFEM")
+include_directories("${PALABOS_ROOT}/coupledSimulators/npFEM")
 if(ENABLE_CUDA)
     include_directories("${CUDA_TOOLKIT_ROOT_DIR}")
     include_directories("${CUDA_TOOLKIT_ROOT_DIR}/include/")
-
-    include_directories("${PALABOS_ROOT}/src/npFEM/src_GPU")
+    include_directories("${PALABOS_ROOT}/coupledSimulators/npFEM/src_GPU")
 endif()
 
-file(GLOB NPFEM_H "${PALABOS_ROOT}/src/npFEM/*.h")
-file(GLOB NPFEM_CPP "${PALABOS_ROOT}/src/npFEM/*.cpp")
+file(GLOB NPFEM_H "${PALABOS_ROOT}/coupledSimulators/npFEM/*.h")
+file(GLOB NPFEM_CPP "${PALABOS_ROOT}/coupledSimulators/npFEM/*.cpp")
 if(ENABLE_CUDA)
     # cuh files
-    file(GLOB NPFEM_CUDA_H "${PALABOS_ROOT}/src/npFEM/src_GPU/*.h")
+    file(GLOB NPFEM_CUDA_H "${PALABOS_ROOT}/coupledSimulators/npFEM/src_GPU/*.h")
     # cu files
-    file(GLOB NPFEM_CUDA_SOURCES_CPP "${PALABOS_ROOT}/src/npFEM/src_GPU/*.cpp")
-    file(GLOB NPFEM_CUDA_SOURCES_CU  "${PALABOS_ROOT}/src/npFEM/src_GPU/*.cu")
+    file(GLOB NPFEM_CUDA_SOURCES_CPP "${PALABOS_ROOT}/coupledSimulators/npFEM/src_GPU/*.cpp")
+    file(GLOB NPFEM_CUDA_SOURCES_CU  "${PALABOS_ROOT}/coupledSimulators/npFEM/src_GPU/*.cu")
     set(NPFEM_CUDA_SOURCES ${NPFEM_CUDA_SOURCES_CPP} ${NPFEM_CUDA_SOURCES_CU})  
 endif()
 
 # By adding the NPFEM_H, we manage to show the headers in a separate folder 
 # in the project tree (quite handy for development)
 
-# Build NPFEM Library (For stand-alone go with dynamic)
 if(NOT ENABLE_CUDA)
     add_library(npFEM STATIC ${NPFEM_CPP} ${NPFEM_H})
 else()
