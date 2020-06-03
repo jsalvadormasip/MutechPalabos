@@ -11,11 +11,8 @@ endif()
 
 set(EXECUTABLE_NAME "bloodFlowDefoBodies")
 set(EXECUTABLE_NAME_GPU "bloodFlowDefoBodies_gpu")
-if (WIN32)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
-else()
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
-endif()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
@@ -23,9 +20,6 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message("Generated with config types: ${CMAKE_CONFIGURATION_TYPES}")
 message(${CMAKE_BUILD_TYPE})
-
-# Convert paths to UNIX compatible
-file(TO_CMAKE_PATH $ENV{PALABOS_ROOT} PALABOS_ROOT)
 
 # Compiler flags
 # Append flags: set(CMAKE_XXX_FLAGS "${CMAKE_XXX_FLAGS} ...")
@@ -128,6 +122,8 @@ endif()
 ###############################################################################
 # Palabos Library
 ###############################################################################
+
+file(TO_CMAKE_PATH $ENV{PALABOS_ROOT} PALABOS_ROOT)
 
 include_directories("${PALABOS_ROOT}/src")
 include_directories("${PALABOS_ROOT}/externalLibraries")

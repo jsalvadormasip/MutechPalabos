@@ -1,3 +1,29 @@
+if(CI)
+###############################################################################
+
+get_filename_component(EXECUTABLE_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+###############################################################################
+
+add_executable(${EXECUTABLE_NAME} "./${EXECUTABLE_NAME}.cpp")
+
+# Link with the following libraries
+target_link_libraries(${EXECUTABLE_NAME} palabos)
+if(ENABLE_MPI)
+    target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
+endif()
+
+###############################################################################
+
+# This returns when you compile Palabos and all the examples (root CMakeLists.txt)
+return()
+
+###############################################################################
+endif()
+
+message("Build example separately")
 cmake_minimum_required(VERSION 2.8.12)
 
 project(palabosExample)
