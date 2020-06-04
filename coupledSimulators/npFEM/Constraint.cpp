@@ -1,5 +1,23 @@
 ///////////////////////////////////////////////////////////////////////////////
-
+/* This file is distributed as part of the Palabos library.
+ *
+ * It has been adapted from a file of the ShapeOp library.
+ * The ShapeOp library can be downloaded at the address https://www.shapeop.org.
+ * It is governed by the terms of the Mozilla Public License v. 2.0.
+ *
+ * This file is subject to the terms of the Mozilla Public License v. 2.0.
+ * If a copy of the MPL was not distributed with this file, 
+ * you can obtain one at http://mozilla.org/MPL/2.0/.
+ * 
+ * Contact:
+ * Christos Kotsalos
+ * kotsaloscv@gmail.com
+ * Computer Science Department
+ * University of Geneva
+ * 
+ * The most recent release of Palabos can be downloaded at 
+ * <https://palabos.unige.ch/>
+*/
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef CONSTRAINT_CPP
 #define CONSTRAINT_CPP
