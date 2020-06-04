@@ -7,7 +7,5 @@ bloodFlowDefoBodies_gpu.exe
 tmp*/
 CPs/
 
-build*/
-
 Release/
 Debug/

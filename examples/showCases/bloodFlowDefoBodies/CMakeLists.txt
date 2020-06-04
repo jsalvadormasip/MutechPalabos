@@ -1,3 +1,51 @@
+if(CI)
+###############################################################################
+
+enable_language(CXX)
+
+set(EXECUTABLE_NAME "bloodFlowDefoBodies")
+set(EXECUTABLE_NAME_GPU "bloodFlowDefoBodies_gpu")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+    message("MSVC.")
+	add_definitions(/DMSVC)
+    add_definitions(/DSHAPEOP_MSVC)
+    add_definitions(/DSHAPEOP_EXPORT)
+endif()
+
+###############################################################################
+# npFEM Library (Compile npFEM separately)
+###############################################################################
+
+include_directories("../../../coupledSimulators/npFEM")
+
+file(GLOB NPFEM_H "../../../coupledSimulators/npFEM/*.h")
+file(GLOB NPFEM_CPP "../../../coupledSimulators/npFEM/*.cpp")
+
+add_library(npFEM STATIC ${NPFEM_CPP} ${NPFEM_H})
+
+###############################################################################
+
+file(GLOB DEPS_H "./*.h")
+file(GLOB PARAMS_1 "./*.xml")
+file(GLOB PARAMS_2 "./*.pos")
+
+add_executable(${EXECUTABLE_NAME} "./${EXECUTABLE_NAME}.cpp" ${DEPS_H} ${PARAMS_1} ${PARAMS_2})
+target_link_libraries(${EXECUTABLE_NAME} palabos npFEM)
+if(ENABLE_MPI)
+	target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
+endif()
+
+###############################################################################
+
+# This returns when you compile Palabos and all the examples (root CMakeLists.txt)
+return()
+
+###############################################################################
+endif()
+
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 project(bloodFlowDefoBodies)
@@ -123,15 +171,15 @@ endif()
 # Palabos Library
 ###############################################################################
 
-file(TO_CMAKE_PATH $ENV{PALABOS_ROOT} PALABOS_ROOT)
+#file(TO_CMAKE_PATH $ENV{PALABOS_ROOT} PALABOS_ROOT)
 
-include_directories("${PALABOS_ROOT}/src")
-include_directories("${PALABOS_ROOT}/externalLibraries")
-include_directories("${PALABOS_ROOT}/externalLibraries/Eigen3")
+include_directories("../../../src")
+include_directories("../../../externalLibraries")
+include_directories("../../../externalLibraries/Eigen3")
 add_definitions(-DPLB_USE_EIGEN)
 
-file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp")
-file(GLOB_RECURSE EXT_SRC     "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
+file(GLOB_RECURSE PALABOS_SRC "../../../src/*.cpp")
+file(GLOB_RECURSE EXT_SRC     "../../../externalLibraries/tinyxml/*.cpp")
 
 add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 
@@ -139,21 +187,21 @@ add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 # npFEM Library (Compile npFEM separately)
 ###############################################################################
 
-include_directories("${PALABOS_ROOT}/coupledSimulators/npFEM")
+include_directories("../../../coupledSimulators/npFEM")
 if(ENABLE_CUDA)
     include_directories("${CUDA_TOOLKIT_ROOT_DIR}")
     include_directories("${CUDA_TOOLKIT_ROOT_DIR}/include/")
-    include_directories("${PALABOS_ROOT}/coupledSimulators/npFEM/src_GPU")
+    include_directories("../../../coupledSimulators/npFEM/src_GPU")
 endif()
 
-file(GLOB NPFEM_H "${PALABOS_ROOT}/coupledSimulators/npFEM/*.h")
-file(GLOB NPFEM_CPP "${PALABOS_ROOT}/coupledSimulators/npFEM/*.cpp")
+file(GLOB NPFEM_H "../../../coupledSimulators/npFEM/*.h")
+file(GLOB NPFEM_CPP "../../../coupledSimulators/npFEM/*.cpp")
 if(ENABLE_CUDA)
     # cuh files
-    file(GLOB NPFEM_CUDA_H "${PALABOS_ROOT}/coupledSimulators/npFEM/src_GPU/*.h")
+    file(GLOB NPFEM_CUDA_H "../../../coupledSimulators/npFEM/src_GPU/*.h")
     # cu files
-    file(GLOB NPFEM_CUDA_SOURCES_CPP "${PALABOS_ROOT}/coupledSimulators/npFEM/src_GPU/*.cpp")
-    file(GLOB NPFEM_CUDA_SOURCES_CU  "${PALABOS_ROOT}/coupledSimulators/npFEM/src_GPU/*.cu")
+    file(GLOB NPFEM_CUDA_SOURCES_CPP "../../../coupledSimulators/npFEM/src_GPU/*.cpp")
+    file(GLOB NPFEM_CUDA_SOURCES_CU  "../../../coupledSimulators/npFEM/src_GPU/*.cu")
     set(NPFEM_CUDA_SOURCES ${NPFEM_CUDA_SOURCES_CPP} ${NPFEM_CUDA_SOURCES_CU})  
 endif()
 
