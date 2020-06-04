@@ -1,7 +1,7 @@
 if(CI)
 ###############################################################################
 
-get_filename_component(EXECUTABLE_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+set(EXECUTABLE_NAME "rectangularChannel3D")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
