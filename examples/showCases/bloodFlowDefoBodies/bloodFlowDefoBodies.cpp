@@ -1300,7 +1300,14 @@ int main(int argc, char* argv[])
     params_rbc.calpha = Calpha_ShapeOp_RBC;
     params_rbc.vel_cap = vel_cap;
     params_rbc.vel_cap_fin = vel_cap_fin;
+    // These values (miu,lambda,kappa) are the parameters of the SurfaceMaterial Constraint for the npFEM solver:
+    // see Case_Studies/RBC(PLT)_X/constraints.csv
+    // For the GPU-version they are manually set from here. TODO: Change it as in CPU-version within shapeOpWrapper.h(cpp)
+    params_rbc.miu = 35.0;
+    params_rbc.lambda = 5.0;
+    params_rbc.kappa = 0.0;
 
+    
     Mesh_info params_plt;
 
     params_plt.rho = rho_ShapeOp_PLT;
@@ -1314,6 +1321,9 @@ int main(int argc, char* argv[])
     params_plt.calpha = Calpha_ShapeOp_PLT;
     params_plt.vel_cap = vel_cap;
     params_plt.vel_cap_fin = vel_cap_fin;
+    params_plt.miu = 35.0;
+    params_plt.lambda = 5.0;
+    params_plt.kappa = 0.0;
 #endif // GPU
 
 	///////////////////////////////////////////////////////////////////////////
@@ -1439,17 +1449,6 @@ int main(int argc, char* argv[])
 	PLT_forces.setZero();
 	addVertexForce(PLT_shapeOpSolverTemplate, PLT_forces);
 	PLT_shapeOpSolverTemplate.initialize(Calpha_ShapeOp_PLT, Cbeta_ShapeOp_PLT, dt_p * (T)(timestep_ShapeOp), rho_ShapeOp_PLT, false, applyGlobalVolumeConservation_ShapeOp_PLT, globalVolumeConservationWeight_ShapeOp_PLT, dx_p, dt_p);
-
-#ifdef NPFEM_CUDA
-    params_rbc.miu = 35.0;
-    params_rbc.lambda = 5.0;
-    params_rbc.kappa = 0.0;
-
-    params_plt.miu = 35.0;
-    params_plt.lambda = 5.0;
-    params_plt.kappa = 0.0;
-#endif // GPU
-
 
 	numRBC = 0;
 	numPLT = 0;
