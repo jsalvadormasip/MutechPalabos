@@ -1,21 +1,12 @@
 /* This file is part of the Palabos library.
  *
- * The Palabos softare is developed since 2011 by FlowKit-Numeca Group Sarl
- * (Switzerland) and the University of Geneva (Switzerland), which jointly
- * own the IP rights for most of the code base. Since October 2019, the
- * Palabos project is maintained by the University of Geneva and accepts
- * source code contributions from the community.
- * 
- * Contact:
- * Jonas Latt
- * Computer Science Department
- * University of Geneva
- * 7 Route de Drize
- * 1227 Carouge, Switzerland
- * jonas.latt@unige.ch
+ * Copyright (C) 2011-2017 FlowKit Sarl
+ * Route d'Oron 2
+ * 1010 Lausanne, Switzerland
+ * E-mail contact: contact@flowkit.com
  *
  * The most recent release of Palabos can be downloaded at 
- * <https://palabos.unige.ch/>
+ * <http://www.palabos.org/>
  *
  * The library Palabos is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License as
@@ -52,6 +43,10 @@
 #include <numeric>
 #include <algorithm>
 #include <memory>
+#ifdef HDF5
+#include "io/hdf_wrapper.h"
+#endif
+#include <time.h>
 
 namespace plb {
 
@@ -59,10 +54,9 @@ namespace parallelIO {
 
 /***** 1. Multi-Block Writer **************************************************/
 
-void writeXmlSpec( MultiBlock3D& multiBlock, FileName fName,
+XMLwriter writeXmlSpec( MultiBlock3D& multiBlock, FileName fName,
                    std::vector<plint> const& offset, bool dynamicContent )
 {
-    fName.setExt("plb");
     MultiBlockManagement3D const& management = multiBlock.getMultiBlockManagement();
     std::map<plint,Box3D> const& bulks = management.getSparseBlockStructure().getBulks();
     PLB_ASSERT( offset.empty() || bulks.size()==offset.size() );
@@ -142,7 +136,9 @@ void writeXmlSpec( MultiBlock3D& multiBlock, FileName fName,
             xmlProcessors[iProcessor]["Blocks"].set(processors[iProcessor].getMultiBlockIds());
         }
     }
-    xml.print(FileName(fName).defaultPath(global::directories().getOutputDir()));
+	return xml;
+	
+    //xml.print(FileName(fName).defaultPath(global::directories().getOutputDir()));
 }
 
 void writeOneBlockXmlSpec( MultiBlock3D const& multiBlock, FileName fName, plint dataSize,
@@ -207,8 +203,32 @@ void transposeToBackward(plint sizeOfCell, Box3D const& domain, std::vector<char
     transp.swap(data);
 }
 
-void save( MultiBlock3D& multiBlock, FileName fName, bool dynamicContent )
-{
+#ifdef HDF5
+void save_hdf(MultiBlock3D& multiBlock, FileName fName, bool dynamicContent) {
+
+	global::profiler().start("io");
+	std::vector<plint> offset;
+	std::vector<plint> myBlockIds;
+	std::vector<std::vector<char> > data;
+
+	dumpData(multiBlock, dynamicContent, offset, myBlockIds, data);
+
+	//std::cout << " offset size " << offset.size() << " myBlocksIDs.size " << myBlockIds.size() << "data.size() " << data.size() << std::endl;
+
+	//writeRawData(fName, myBlockIds, offset, data);
+	XMLwriter xml = writeXmlSpec(multiBlock, fName, offset, dynamicContent);
+	std::string s_fname = fName.get();
+	std::string s_xml = xml.sprint();
+
+	write_parallel_hdf5( s_fname.c_str(), "binary_blob", myBlockIds, offset, data, s_xml, global::mpi().getRank(), global::mpi().getGlobalCommunicator());
+
+	//xml.sprint();
+	global::profiler().stop("io");
+}
+#endif
+
+void save( MultiBlock3D& multiBlock, FileName fName, bool dynamicContent ){
+
     global::profiler().start("io");
     std::vector<plint> offset;
     std::vector<plint> myBlockIds;
@@ -216,13 +236,18 @@ void save( MultiBlock3D& multiBlock, FileName fName, bool dynamicContent )
 
     dumpData(multiBlock, dynamicContent, offset, myBlockIds, data);
 
-    writeXmlSpec(multiBlock, fName, offset, dynamicContent);
-    writeRawData(fName, myBlockIds, offset, data);
+	writeRawData(fName, myBlockIds, offset, data);
+
+    XMLwriter xml = writeXmlSpec(multiBlock, fName, offset, dynamicContent);
+	fName.setExt("plb");
+	xml.print(FileName(fName).defaultPath(global::directories().getOutputDir()));
+    //xml.sprint();
     global::profiler().stop("io");
 }
 
 void saveFull( MultiBlock3D& multiBlock, FileName fName, IndexOrdering::OrderingT ordering, bool appendMode )
 {
+    //std::cout << "              saveFull HOHOH" << std::endl;
     global::profiler().start("io");
     SparseBlockStructure3D blockStructure(multiBlock.getBoundingBox());
     Box3D bbox = multiBlock.getBoundingBox();
@@ -236,8 +261,7 @@ void saveFull( MultiBlock3D& multiBlock, FileName fName, IndexOrdering::Ordering
                            bbox.y0, bbox.y1, bbox.z0, bbox.z1 ),
                     iRange );
         }
-    }
-    else if (ordering==IndexOrdering::backward) {
+    } else if (ordering==IndexOrdering::backward) {
         plint nBlocks = std::min(bbox.getNz(), (plint)global::mpi().getSize());
         std::vector<std::pair<plint,plint> > ranges;
         util::linearRepartition(bbox.z0, bbox.z1, nBlocks, ranges);
@@ -247,8 +271,7 @@ void saveFull( MultiBlock3D& multiBlock, FileName fName, IndexOrdering::Ordering
                     ranges[iRange].first, ranges[iRange].second ),
                     iRange );
         }
-    }
-    else {
+    }else {
         // Sparse ordering not defined.
         PLB_ASSERT( false );
     }
@@ -276,6 +299,7 @@ void saveFull( MultiBlock3D& multiBlock, FileName fName, IndexOrdering::Ordering
     if (!appendMode) {
         writeOneBlockXmlSpec(*multiAdjacentBlock, fName, totalSize, ordering);
     }
+
     writeRawData(fName, myBlockIds, offset, data, appendMode);
     delete multiAdjacentBlock;
     global::profiler().stop("io");
@@ -283,7 +307,7 @@ void saveFull( MultiBlock3D& multiBlock, FileName fName, IndexOrdering::Ordering
 
 void dumpData( MultiBlock3D& multiBlock, bool dynamicContent,
                std::vector<plint>& offset, std::vector<plint>& myBlockIds,
-               std::vector<std::vector<char> >& data )
+               std::vector<std::vector<char>>& data )
 {
     MultiBlockManagement3D const& management = multiBlock.getMultiBlockManagement();
     std::map<plint,Box3D> const& bulks = management.getSparseBlockStructure().getBulks();
@@ -293,6 +317,7 @@ void dumpData( MultiBlock3D& multiBlock, bool dynamicContent,
     std::map<plint,Box3D>::const_iterator it = bulks.begin();
     plint pos = 0;
     for (; it != bulks.end(); ++it) {
+		//std::cout << "contiguousID " << it->first << " " << pos << std::endl;
         toContiguousId[it->first] = pos;
         ++pos;
     }
@@ -302,22 +327,30 @@ void dumpData( MultiBlock3D& multiBlock, bool dynamicContent,
     data.resize(myBlocks.size());
     std::vector<plint> blockSize(numBlocks);
     std::fill(blockSize.begin(), blockSize.end(), 0);
+    //std::cout << "myBlocks.size()" << myBlocks.size() << std::endl;
+	
     for (pluint iBlock=0; iBlock<myBlocks.size(); ++iBlock) {
         plint blockId = myBlocks[iBlock];
         SmartBulk3D bulk(management, blockId);
         Box3D localBulk(bulk.toLocal(bulk.getBulk()));
+		//localBulk is the real domain without the communication buffer
         AtomicBlock3D const& block = multiBlock.getComponent(blockId);
         modif::ModifT typeOfVariables = dynamicContent ? modif::dataStructure : modif::staticVariables;
         block.getDataTransfer().send(localBulk, data[iBlock], typeOfVariables);
         plint contiguousId = toContiguousId[blockId];
         myBlockIds[iBlock] = contiguousId;
         blockSize[contiguousId] = (plint)data[iBlock].size();
+		//std::cout << "block size " << (plint)data[iBlock].size() << std::endl;
+		//std::cout << "id_block" << contiguousId << " rank " << global::mpi().getRank() << std::endl;
     }
 #ifdef PLB_MPI_PARALLEL
     global::mpi().allReduceVect(blockSize, MPI_SUM);
 #endif
+	
+	///TODO make it a mpi_scan to be parrallel
     offset.resize(numBlocks);
     std::partial_sum(blockSize.begin(), blockSize.end(), offset.begin());
+
 }
 
 }  // namespace parallelIO

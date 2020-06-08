@@ -1,21 +1,12 @@
 /* This file is part of the Palabos library.
  *
- * The Palabos softare is developed since 2011 by FlowKit-Numeca Group Sarl
- * (Switzerland) and the University of Geneva (Switzerland), which jointly
- * own the IP rights for most of the code base. Since October 2019, the
- * Palabos project is maintained by the University of Geneva and accepts
- * source code contributions from the community.
- * 
- * Contact:
- * Jonas Latt
- * Computer Science Department
- * University of Geneva
- * 7 Route de Drize
- * 1227 Carouge, Switzerland
- * jonas.latt@unige.ch
+ * Copyright (C) 2011-2017 FlowKit Sarl
+ * Route d'Oron 2
+ * 1010 Lausanne, Switzerland
+ * E-mail contact: contact@flowkit.com
  *
  * The most recent release of Palabos can be downloaded at 
- * <https://palabos.unige.ch/>
+ * <http://www.palabos.org/>
  *
  * The library Palabos is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License as
@@ -42,11 +33,15 @@
 #include "multiBlock/multiBlock3D.h"
 #include "core/serializer.h"
 #include "io/plbFiles.h"
+#include "libraryInterfaces/TINYXML_xmlIO.h"
 
 namespace plb {
 
 
 namespace parallelIO {
+
+
+void save_hdf(MultiBlock3D& multiBlock, FileName fName, bool dynamicContent = true);
 
 void save( MultiBlock3D& multiBlock, FileName fName,
            bool dynamicContent = true );
@@ -69,8 +64,7 @@ void dumpData( MultiBlock3D& multiBlock, bool dynamicContent,
                std::vector<plint>& offset, std::vector<plint>& myBlockIds,
                std::vector<std::vector<char> >& data );
 
-void writeXmlSpec( MultiBlock3D& multiBlock, FileName fName,
-                   std::vector<plint> const& offset, bool dynamicContent );
+XMLwriter writeXmlSpec( MultiBlock3D& multiBlock, FileName fName, std::vector<plint> const& offset, bool dynamicContent );
 
 }  // namespace parallelIO
 

@@ -1,21 +1,12 @@
 /* This file is part of the Palabos library.
  *
- * The Palabos softare is developed since 2011 by FlowKit-Numeca Group Sarl
- * (Switzerland) and the University of Geneva (Switzerland), which jointly
- * own the IP rights for most of the code base. Since October 2019, the
- * Palabos project is maintained by the University of Geneva and accepts
- * source code contributions from the community.
- * 
- * Contact:
- * Jonas Latt
- * Computer Science Department
- * University of Geneva
- * 7 Route de Drize
- * 1227 Carouge, Switzerland
- * jonas.latt@unige.ch
+ * Copyright (C) 2011-2017 FlowKit Sarl
+ * Route d'Oron 2
+ * 1010 Lausanne, Switzerland
+ * E-mail contact: contact@flowkit.com
  *
  * The most recent release of Palabos can be downloaded at 
- * <https://palabos.unige.ch/>
+ * <http://www.palabos.org/>
  *
  * The library Palabos is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License as
@@ -50,7 +41,9 @@ class XMLreaderProxy;
 
 class XMLreader {
 public:
+	XMLreader();
     XMLreader( std::string fName );
+	void XMLreader_parse_from_string( const char *raw_xml);
     XMLreader( std::vector<TiXmlNode*> pParentVect );
     ~XMLreader();
     void print(int indent) const;
@@ -68,7 +61,7 @@ private:
     void mainProcessorIni(TiXmlNode* pParent);
     void mainProcessorIni(std::vector<TiXmlNode*> pParentVect);
     void slaveProcessorIni();
-    XMLreader();
+   // XMLreader();
 private:
     struct Data {
         std::string text;
@@ -113,8 +106,11 @@ public:
     XMLwriter& operator[] (std::string name);
     XMLwriter& operator[] (plint id);
     template<typename ostrT>
+	void toOutputStream_parrallel(ostrT& ostr, int indent=0) const;
+	template<typename ostrT>
     void toOutputStream(ostrT& ostr, int indent=0) const;
     void print(std::string fName) const;
+	std::string sprint();
 private:
     XMLwriter( std::string name_ );
 private:
