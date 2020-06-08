@@ -41,7 +41,7 @@ namespace plb {
 namespace parallelIO {
 
 
-void save_hdf(MultiBlock3D& multiBlock, FileName fName, bool dynamicContent = true);
+void saveHDF(MultiBlock3D& multiBlock, FileName fName, bool dynamicContent = true);
 
 void save( MultiBlock3D& multiBlock, FileName fName,
            bool dynamicContent = true );

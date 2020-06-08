@@ -40,7 +40,7 @@
 #include "multiBlock/multiBlockOperations3D.h"
 #include "io/plbFiles.h"
 #ifdef HDF5
-#include "io/hdf_wrapper.h"
+#include "io/hdfWrapper.h"
 #endif
 #include <numeric>
 #include <algorithm>
@@ -267,7 +267,7 @@ XMLreader  readXmlSpec(const char *xml, std::string path, Box3D& boundingBox, st
 }
 
 #ifdef HDF5
-MultiBlock3D* load3D_hdf(FileName fName)
+MultiBlock3D* load3dHDF(FileName fName)
 {
 	Box3D boundingBox;
 	std::vector<plint> offsets;
@@ -278,8 +278,8 @@ MultiBlock3D* load3D_hdf(FileName fName)
 	bool dynamicContent;
 	plint cellDim;
 	
-	open_hdf_file(fName.get().c_str(), global::mpi().getGlobalCommunicator());
-	char *xml = read_string_hdf5();
+    openHDFfile(fName.get().c_str(), global::mpi().getGlobalCommunicator());
+	char *xml = readStringHDF5();
 
 	//std::cout << xml << std::endl;
 	XMLreader  Parsed_xml = readXmlSpec(xml, fName.getPath(), boundingBox, offsets, envelopeWidth, gridLevel, cellDim, dataType,
@@ -318,14 +318,14 @@ MultiBlock3D* load3D_hdf(FileName fName)
 	//std::cout << " my_block_Id " << myBlockIds.size() << " " << global::mpi().getRank() << std::endl;
 	
 	std::vector<std::vector<char>> data;
-	data = read_parallel_hdf5(myBlockIds, offsets, global::mpi().getRank(), global::mpi().getGlobalCommunicator());
+	data = readParallelHDF5(myBlockIds, offsets, global::mpi().getRank(), global::mpi().getGlobalCommunicator());
 
 	std::map<int, std::string> foreignIds;
 	createDynamicsForeignIds3D(Parsed_xml, foreignIds);
 	//intepreting binary blobs as lattice append here
 	dumpRestoreData(*newBlock, dynamicContent, myBlockIds, data, foreignIds);
 	readXmlProcessors(Parsed_xml, *newBlock);
-	close_hdf_file();
+	closeHDFfile();
 
 	return newBlock;	
 }
@@ -387,11 +387,11 @@ MultiBlock3D* load3D(FileName fName)
 }
 
 #ifdef HDF5
-void load_hdf(FileName fName, MultiBlock3D& intoBlock, bool dynamicContent)
+void loadHDF(FileName fName, MultiBlock3D& intoBlock, bool dynamicContent)
 {
 	//load3D_hdf(fName);
 	
-	std::unique_ptr<MultiBlock3D> loadedBlock (load3D_hdf(fName));
+	std::unique_ptr<MultiBlock3D> loadedBlock (load3dHDF(fName));
 	
 	modif::ModifT typeOfVariables = dynamicContent ?
 		modif::dataStructure : modif::staticVariables;

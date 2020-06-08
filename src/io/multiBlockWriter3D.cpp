@@ -44,7 +44,7 @@
 #include <algorithm>
 #include <memory>
 #ifdef HDF5
-#include "io/hdf_wrapper.h"
+#include "io/hdfWrapper.h"
 #endif
 #include <time.h>
 
@@ -204,7 +204,7 @@ void transposeToBackward(plint sizeOfCell, Box3D const& domain, std::vector<char
 }
 
 #ifdef HDF5
-void save_hdf(MultiBlock3D& multiBlock, FileName fName, bool dynamicContent) {
+void saveHDF(MultiBlock3D& multiBlock, FileName fName, bool dynamicContent) {
 
 	global::profiler().start("io");
 	std::vector<plint> offset;
@@ -220,7 +220,7 @@ void save_hdf(MultiBlock3D& multiBlock, FileName fName, bool dynamicContent) {
 	std::string s_fname = fName.get();
 	std::string s_xml = xml.sprint();
 
-	write_parallel_hdf5( s_fname.c_str(), "binary_blob", myBlockIds, offset, data, s_xml, global::mpi().getRank(), global::mpi().getGlobalCommunicator());
+	writeParallelHDF5( s_fname.c_str(), "binary_blob", myBlockIds, offset, data, s_xml, global::mpi().getRank(), global::mpi().getGlobalCommunicator());
 
 	//xml.sprint();
 	global::profiler().stop("io");

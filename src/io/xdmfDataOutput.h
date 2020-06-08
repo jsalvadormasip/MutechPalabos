@@ -142,7 +142,7 @@ namespace plb {
 			}
 			//std::cout << "myBlockIds" << myBlockIds.size()  << std::endl;
 			
-			write_parallel_hdf5<T>(h5_fname.c_str(), set_name, myBlockIds, offset, data, "", global::mpi().getRank(), global::mpi().getGlobalCommunicator(), field > 0);
+			writeParallelHDF5<T>(h5_fname.c_str(), set_name, myBlockIds, offset, data, "", global::mpi().getRank(), global::mpi().getGlobalCommunicator(), field > 0);
 			field++;
 		}	
 	};
