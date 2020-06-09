@@ -105,7 +105,7 @@ static void writeParallelHDF5(const char *file_name, const char *data_set_path, 
 	}
 	if (typeid(T) == typeid(double)) {
 		h5_type = H5T_NATIVE_DOUBLE;
-		printf("h5_type %d \n", h5_type);
+		//printf("h5_type %d \n", h5_type);
 		//h5_element_size = sizeof(double);
 	}
 	
