@@ -72,7 +72,6 @@ static void writeStringHDF5(hid_t file_id, std::string const& string, int mpi_ra
     status = H5Sclose(dataspace_id);
 }
 
-//todo make it parallel.. maybe
 static char *readStringHDF5() {
 
     hid_t       dset_id;  /* identifiers */
@@ -209,7 +208,7 @@ static void closeHDFfile() {
 //this is an optimization it allows to read data and metadata without having to close and reopen the file
 static std::vector< std::vector<char> > readParallelHDF5(std::vector<plb::plint> const& my_block_id, std::vector<plb::plint> const& i_offset, int mpi_rank, MPI_Comm comm) {
     
-    hid_t   dset_id, plist_id;         // file and dataset identifiers //
+    hid_t   dset_id, plist_id;        // file and dataset identifiers //
     hid_t   filespace, memspace;      // file and memory dataspace identifiers //
     herr_t    status;
     hsize_t    data_piece_size;

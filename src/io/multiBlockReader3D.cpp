@@ -71,14 +71,11 @@ void dumpRestoreData( MultiBlock3D& multiBlock, bool dynamicContent,
         SmartBulk3D bulk(multiBlock.getMultiBlockManagement(), blockId);
         Box3D localBulk(bulk.toLocal(bulk.getBulk()));
         AtomicBlock3D& block = multiBlock.getComponent(blockId);
-        //NOTE joel deserialisation
         block.getDataTransfer().receive(localBulk, data[iBlock], typeOfVariables, foreignIds);
     }
     multiBlock.getBlockCommunicator().duplicateOverlaps(multiBlock, typeOfVariables);
 }
 
-
-///note de joel factorisation so it can be use with a string instead of directly reading a file
 void createDynamicsForeignIds3D(XMLreader &reader, std::map<int, std::string>& foreignIds)
 {
     foreignIds.clear();
@@ -100,11 +97,8 @@ void createDynamicsForeignIds3D(XMLreader &reader, std::map<int, std::string>& f
     }
 }
 
-
-
 void createDynamicsForeignIds3D(FileName fName, std::map<int,std::string>& foreignIds)
 {
- 
     fName.defaultPath(global::directories().getInputDir());
     fName.setExt("plb");
     XMLreader reader(fName);
@@ -407,7 +401,6 @@ void load(FileName fName, MultiBlock3D& intoBlock, bool dynamicContent )
                   intoBlock, intoBlock.getBoundingBox(), typeOfVariables );
 }
 
-
 SavedFullMultiBlockSerializer3D::SavedFullMultiBlockSerializer3D(FileName fName)
 {
     fName.defaultPath(global::directories().getInputDir());
@@ -555,7 +548,6 @@ Box3D SavedFullMultiBlockSerializer3D::getBoundingBox() const {
 bool SavedFullMultiBlockSerializer3D::orderingIsForward() const {
     return forwardOrdering;
 }
-
 
 }  // namespace parallelIO
 
