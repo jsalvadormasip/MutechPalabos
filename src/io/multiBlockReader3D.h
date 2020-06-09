@@ -1,12 +1,21 @@
 /* This file is part of the Palabos library.
  *
- * Copyright (C) 2011-2017 FlowKit Sarl
- * Route d'Oron 2
- * 1010 Lausanne, Switzerland
- * E-mail contact: contact@flowkit.com
+ * The Palabos softare is developed since 2011 by FlowKit-Numeca Group Sarl
+ * (Switzerland) and the University of Geneva (Switzerland), which jointly
+ * own the IP rights for most of the code base. Since October 2019, the
+ * Palabos project is maintained by the University of Geneva and accepts
+ * source code contributions from the community.
+ * 
+ * Contact:
+ * Jonas Latt
+ * Computer Science Department
+ * University of Geneva
+ * 7 Route de Drize
+ * 1227 Carouge, Switzerland
+ * jonas.latt@unige.ch
  *
  * The most recent release of Palabos can be downloaded at 
- * <http://www.palabos.org/>
+ * <https://palabos.unige.ch/>
  *
  * The library Palabos is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License as
@@ -25,6 +34,7 @@
 /** \file
  * I/O routines for 3D multiblock -- header file.
  */
+
 #ifndef MULTI_BLOCK_READER_3D_H
 #define MULTI_BLOCK_READER_3D_H
 

@@ -1,12 +1,21 @@
 /* This file is part of the Palabos library.
  *
- * Copyright (C) 2011-2017 FlowKit Sarl
- * Route d'Oron 2
- * 1010 Lausanne, Switzerland
- * E-mail contact: contact@flowkit.com
+ * The Palabos softare is developed since 2011 by FlowKit-Numeca Group Sarl
+ * (Switzerland) and the University of Geneva (Switzerland), which jointly
+ * own the IP rights for most of the code base. Since October 2019, the
+ * Palabos project is maintained by the University of Geneva and accepts
+ * source code contributions from the community.
+ * 
+ * Contact:
+ * Jonas Latt
+ * Computer Science Department
+ * University of Geneva
+ * 7 Route de Drize
+ * 1227 Carouge, Switzerland
+ * jonas.latt@unige.ch
  *
  * The most recent release of Palabos can be downloaded at 
- * <http://www.palabos.org/>
+ * <https://palabos.unige.ch/>
  *
  * The library Palabos is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License as
@@ -62,7 +71,7 @@ void dumpRestoreData( MultiBlock3D& multiBlock, bool dynamicContent,
         SmartBulk3D bulk(multiBlock.getMultiBlockManagement(), blockId);
         Box3D localBulk(bulk.toLocal(bulk.getBulk()));
         AtomicBlock3D& block = multiBlock.getComponent(blockId);
-		//NOTE joel deserialisation
+        //NOTE joel deserialisation
         block.getDataTransfer().receive(localBulk, data[iBlock], typeOfVariables, foreignIds);
     }
     multiBlock.getBlockCommunicator().duplicateOverlaps(multiBlock, typeOfVariables);
@@ -72,23 +81,23 @@ void dumpRestoreData( MultiBlock3D& multiBlock, bool dynamicContent,
 ///note de joel factorisation so it can be use with a string instead of directly reading a file
 void createDynamicsForeignIds3D(XMLreader &reader, std::map<int, std::string>& foreignIds)
 {
-	foreignIds.clear();
-	std::vector<MultiBlock3D::ProcessorStorage3D> processors;
-	XMLreaderProxy dynReader(0);
-	try {
-		dynReader = reader["Block3D"]["Data"]["DynamicsDict"];
-	}
-	catch (PlbIOException const&) {
-		return;
-	}
-	std::vector<XMLreader*> const& dynItems = dynReader.getChildren();
-	std::map<int, std::string> foreignIdToName;
-	for (pluint i = 0; i<dynItems.size(); ++i) {
-		std::string dynamicsName = dynItems[i]->getName();
-		int dynamicsId;
-		XMLreaderProxy(dynItems[i]).read(dynamicsId);
-		foreignIds.insert(std::pair<int, std::string>(dynamicsId, dynamicsName));
-	}
+    foreignIds.clear();
+    std::vector<MultiBlock3D::ProcessorStorage3D> processors;
+    XMLreaderProxy dynReader(0);
+    try {
+        dynReader = reader["Block3D"]["Data"]["DynamicsDict"];
+    }
+    catch (PlbIOException const&) {
+        return;
+    }
+    std::vector<XMLreader*> const& dynItems = dynReader.getChildren();
+    std::map<int, std::string> foreignIdToName;
+    for (pluint i = 0; i<dynItems.size(); ++i) {
+        std::string dynamicsName = dynItems[i]->getName();
+        int dynamicsId;
+        XMLreaderProxy(dynItems[i]).read(dynamicsId);
+        foreignIds.insert(std::pair<int, std::string>(dynamicsId, dynamicsName));
+    }
 }
 
 
@@ -99,57 +108,56 @@ void createDynamicsForeignIds3D(FileName fName, std::map<int,std::string>& forei
     fName.defaultPath(global::directories().getInputDir());
     fName.setExt("plb");
     XMLreader reader(fName);
-	createDynamicsForeignIds3D(reader, foreignIds);
+    createDynamicsForeignIds3D(reader, foreignIds);
 }
 
 void readXmlProcessors(XMLreader &reader, MultiBlock3D& block) {
-	std::vector<MultiBlock3D::ProcessorStorage3D> processors;
-	XMLreaderProxy procReader(0);
-	try {
-		procReader = reader["Block3D"]["Data"]["Processor"];
-	}
-	catch (PlbIOException const&) {
-		return;
-	}
+    std::vector<MultiBlock3D::ProcessorStorage3D> processors;
+    XMLreaderProxy procReader(0);
+    try {
+        procReader = reader["Block3D"]["Data"]["Processor"];
+    }
+    catch (PlbIOException const&) {
+        return;
+    }
 
-	std::vector<MultiBlock3D*> processorPartnerList;
-	processorPartnerList.push_back(&block);
-	for (; procReader.isValid(); procReader = procReader.iterId()) {
-		std::string processorName, data;
-		Box3D domain; Array<plint, 6> domain_arr;
-		plint level;
-		std::vector<id_t> blocks;
-		procReader["Name"].read(processorName);
-		procReader["Data"].read(data);
-		procReader["Domain"].read<plint, 6>(domain_arr);
-		domain.from_plbArray(domain_arr);
-		procReader["Level"].read(level);
-		procReader["Blocks"].read(blocks);
+    std::vector<MultiBlock3D*> processorPartnerList;
+    processorPartnerList.push_back(&block);
+    for (; procReader.isValid(); procReader = procReader.iterId()) {
+        std::string processorName, data;
+        Box3D domain; Array<plint, 6> domain_arr;
+        plint level;
+        std::vector<id_t> blocks;
+        procReader["Name"].read(processorName);
+        procReader["Data"].read(data);
+        procReader["Domain"].read<plint, 6>(domain_arr);
+        domain.from_plbArray(domain_arr);
+        procReader["Level"].read(level);
+        procReader["Blocks"].read(blocks);
 
-		BoxProcessingFunctional3D* functional = meta::processorRegistration3D().create(processorName, data);
-		MultiBlock3D::ProcessorStorage3D newStorage(
-			BoxProcessorGenerator3D(functional, domain),
-			processorPartnerList, level);
+        BoxProcessingFunctional3D* functional = meta::processorRegistration3D().create(processorName, data);
+        MultiBlock3D::ProcessorStorage3D newStorage(
+            BoxProcessorGenerator3D(functional, domain),
+            processorPartnerList, level);
 
-		processors.push_back(newStorage);
-	}
-	for (pluint iProcessor = 0; iProcessor<processors.size(); ++iProcessor) {
-		DataProcessorGenerator3D* newGenerator = processors[iProcessor].getGenerator().clone();
-		if (newGenerator->extract(block.getBoundingBox())) {
-			addInternalProcessor(*newGenerator,
-				processors[iProcessor].getMultiBlocks(),
-				processors[iProcessor].getLevel());
-		}
-		delete newGenerator;
-	}
+        processors.push_back(newStorage);
+    }
+    for (pluint iProcessor = 0; iProcessor<processors.size(); ++iProcessor) {
+        DataProcessorGenerator3D* newGenerator = processors[iProcessor].getGenerator().clone();
+        if (newGenerator->extract(block.getBoundingBox())) {
+            addInternalProcessor(*newGenerator,
+                processors[iProcessor].getMultiBlocks(),
+                processors[iProcessor].getLevel());
+        }
+        delete newGenerator;
+    }
 }
 
 void readXmlProcessors(const char *xml, MultiBlock3D& block) {
 
-	//std::cout <<" READ XML " << std::endl;
-	XMLreader reader;
-	reader.XMLreader_parse_from_string(xml);
-	readXmlProcessors(reader, block);
+    XMLreader reader;
+    reader.XMLreader_parse_from_string(xml);
+    readXmlProcessors(reader, block);
 }
 
 //Factorisation so it can work with string
@@ -158,7 +166,7 @@ void readXmlProcessors(FileName fName, MultiBlock3D& block) {
     fName.defaultPath(global::directories().getInputDir());
     fName.setExt("plb");
     XMLreader reader(fName);
-	readXmlProcessors(reader, block);
+    readXmlProcessors(reader, block);
 }
 
 void readXmlSpec (XMLreader &reader,
@@ -238,96 +246,89 @@ void readXmlSpec (XMLreader &reader,
 }
 //factorisation so It cant work with string input as well
 void readXmlSpec(
-	FileName fName, Box3D& boundingBox, std::vector<plint>& offsets,
-	plint& envelopeWidth, plint& gridLevel, plint& cellDim,
-	std::string& dataType, std::string& descriptor, std::string& family,
-	std::vector<Box3D>& components, bool& dynamicContent, FileName& data_fName)
+    FileName fName, Box3D& boundingBox, std::vector<plint>& offsets,
+    plint& envelopeWidth, plint& gridLevel, plint& cellDim,
+    std::string& dataType, std::string& descriptor, std::string& family,
+    std::vector<Box3D>& components, bool& dynamicContent, FileName& data_fName)
 {
-	fName.defaultPath(global::directories().getInputDir());
-	fName.setExt("plb");
-	XMLreader reader(fName);
-	readXmlSpec(reader, fName.getPath(), boundingBox, offsets,
-		envelopeWidth, gridLevel,cellDim, dataType, descriptor, family,
-		components, dynamicContent, data_fName);	
+    fName.defaultPath(global::directories().getInputDir());
+    fName.setExt("plb");
+    XMLreader reader(fName);
+    readXmlSpec(reader, fName.getPath(), boundingBox, offsets,
+        envelopeWidth, gridLevel,cellDim, dataType, descriptor, family,
+        components, dynamicContent, data_fName);    
 }
 
 XMLreader  readXmlSpec(const char *xml, std::string path, Box3D& boundingBox, std::vector<plint>& offsets,
-	plint& envelopeWidth, plint& gridLevel, plint& cellDim,
-	std::string& dataType, std::string& descriptor, std::string& family,
-	std::vector<Box3D>& components, bool& dynamicContent, FileName& data_fName)
+    plint& envelopeWidth, plint& gridLevel, plint& cellDim,
+    std::string& dataType, std::string& descriptor, std::string& family,
+    std::vector<Box3D>& components, bool& dynamicContent, FileName& data_fName)
 {
-	XMLreader reader;
-	reader.XMLreader_parse_from_string(xml);
+    XMLreader reader;
+    reader.XMLreader_parse_from_string(xml);
 
-	readXmlSpec(reader, path, boundingBox, offsets,
-		envelopeWidth, gridLevel, cellDim, dataType, descriptor, family,
-		components, dynamicContent, data_fName);
+    readXmlSpec(reader, path, boundingBox, offsets,
+        envelopeWidth, gridLevel, cellDim, dataType, descriptor, family,
+        components, dynamicContent, data_fName);
 
-	return reader;
+    return reader;
 }
 
 #ifdef HDF5
 MultiBlock3D* load3dHDF(FileName fName)
 {
-	Box3D boundingBox;
-	std::vector<plint> offsets;
-	plint envelopeWidth, gridLevel;
-	std::string dataType, descriptor, family;
-	FileName data_fName;
-	std::vector<Box3D> components;
-	bool dynamicContent;
-	plint cellDim;
-	
+    Box3D boundingBox;
+    std::vector<plint> offsets;
+    plint envelopeWidth, gridLevel;
+    std::string dataType, descriptor, family;
+    FileName data_fName;
+    std::vector<Box3D> components;
+    bool dynamicContent;
+    plint cellDim;
+    
     openHDFfile(fName.get().c_str(), global::mpi().getGlobalCommunicator());
-	char *xml = readStringHDF5();
+    char *xml = readStringHDF5();
 
-	//std::cout << xml << std::endl;
-	XMLreader  Parsed_xml = readXmlSpec(xml, fName.getPath(), boundingBox, offsets, envelopeWidth, gridLevel, cellDim, dataType,
-		descriptor, family, components, dynamicContent, data_fName);
+    XMLreader  Parsed_xml = readXmlSpec(xml, fName.getPath(), boundingBox, offsets, envelopeWidth, gridLevel, cellDim, dataType,
+        descriptor, family, components, dynamicContent, data_fName);
 
-	SparseBlockStructure3D blockStructure(boundingBox);
-	for (plint iComponent = 0; iComponent<(plint)components.size(); ++iComponent) {
-		blockStructure.addBlock(components[iComponent], iComponent);
-	}
+    SparseBlockStructure3D blockStructure(boundingBox);
+    for (plint iComponent = 0; iComponent<(plint)components.size(); ++iComponent) {
+        blockStructure.addBlock(components[iComponent], iComponent);
+    }
 
-	ExplicitThreadAttribution* threadAttribution = new ExplicitThreadAttribution;
-	std::vector<std::pair<plint, plint>> blockRanges;
-	plint numBlocks = offsets.size();
-	plint numRanges = std::min(numBlocks, (plint)global::mpi().getSize());
-	util::linearRepartition(0, numBlocks - 1, numRanges, blockRanges);
-	std::vector<plint> myBlockIds;
+    ExplicitThreadAttribution* threadAttribution = new ExplicitThreadAttribution;
+    std::vector<std::pair<plint, plint>> blockRanges;
+    plint numBlocks = offsets.size();
+    plint numRanges = std::min(numBlocks, (plint)global::mpi().getSize());
+    util::linearRepartition(0, numBlocks - 1, numRanges, blockRanges);
+    std::vector<plint> myBlockIds;
 
-	for (plint iThread = 0; iThread<(plint)blockRanges.size(); ++iThread) {
-		for (plint iBlock = blockRanges[iThread].first; iBlock <= blockRanges[iThread].second; ++iBlock) {
-			threadAttribution->addBlock(iBlock, iThread);
-			if (iThread == global::mpi().getRank()) {
-				myBlockIds.push_back(iBlock);
-			}
-		}
-	}
+    for (plint iThread = 0; iThread<(plint)blockRanges.size(); ++iThread) {
+        for (plint iBlock = blockRanges[iThread].first; iBlock <= blockRanges[iThread].second; ++iBlock) {
+            threadAttribution->addBlock(iBlock, iThread);
+            if (iThread == global::mpi().getRank()) {
+                myBlockIds.push_back(iBlock);
+            }
+        }
+    }
 
-	MultiBlockManagement3D management(blockStructure, threadAttribution, envelopeWidth, gridLevel);
-	MultiBlock3D* newBlock = meta::multiBlockRegistration3D().generate(dataType, descriptor, family, management, cellDim);
+    MultiBlockManagement3D management(blockStructure, threadAttribution, envelopeWidth, gridLevel);
+    MultiBlock3D* newBlock = meta::multiBlockRegistration3D().generate(dataType, descriptor, family, management, cellDim);
 
-	PLB_ASSERT(newBlock);
+    PLB_ASSERT(newBlock);
 
-	//joel note: As i understand, the atomic block are listed in xml file, but they depend on the number of proc when saved
-	//which might be different when loaded, so the code above recomput a load balancing with the loaded block, 
-	//doing so create a new myBlockIds 
+    std::vector<std::vector<char>> data;
+    data = readParallelHDF5(myBlockIds, offsets, global::mpi().getRank(), global::mpi().getGlobalCommunicator());
 
-	//std::cout << " my_block_Id " << myBlockIds.size() << " " << global::mpi().getRank() << std::endl;
-	
-	std::vector<std::vector<char>> data;
-	data = readParallelHDF5(myBlockIds, offsets, global::mpi().getRank(), global::mpi().getGlobalCommunicator());
+    std::map<int, std::string> foreignIds;
+    createDynamicsForeignIds3D(Parsed_xml, foreignIds);
+    //intepreting binary blobs as lattice append here
+    dumpRestoreData(*newBlock, dynamicContent, myBlockIds, data, foreignIds);
+    readXmlProcessors(Parsed_xml, *newBlock);
+    closeHDFfile();
 
-	std::map<int, std::string> foreignIds;
-	createDynamicsForeignIds3D(Parsed_xml, foreignIds);
-	//intepreting binary blobs as lattice append here
-	dumpRestoreData(*newBlock, dynamicContent, myBlockIds, data, foreignIds);
-	readXmlProcessors(Parsed_xml, *newBlock);
-	closeHDFfile();
-
-	return newBlock;	
+    return newBlock;    
 }
 #endif
 
@@ -341,7 +342,7 @@ MultiBlock3D* load3D(FileName fName)
     std::vector<Box3D> components;
     bool dynamicContent;
     plint cellDim;
-	
+    
     readXmlSpec( fName, boundingBox, offsets, envelopeWidth, gridLevel, cellDim, dataType,
                  descriptor, family, components, dynamicContent, data_fName );
 
@@ -372,16 +373,13 @@ MultiBlock3D* load3D(FileName fName)
 
     PLB_ASSERT( newBlock );
     std::vector<std::vector<char>>data(myBlockIds.size());
-	//joel note: As i understand, the atomic block are listed in xml file, but they depend on the number of proc when saved
-	//which might be different when loaded, so the code above recomput a load balancing with the loaded block, 
-	//doing so create a new myBlockIds 
 
-	loadRawData( data_fName, myBlockIds, offsets, data);
-	std::map<int,std::string> foreignIds;
-	createDynamicsForeignIds3D(fName, foreignIds);
-	//intepreting binary blobs as lattice append here
-	dumpRestoreData(*newBlock, dynamicContent, myBlockIds, data, foreignIds);
-	readXmlProcessors(fName, *newBlock);
+    loadRawData( data_fName, myBlockIds, offsets, data);
+    std::map<int,std::string> foreignIds;
+    createDynamicsForeignIds3D(fName, foreignIds);
+    //intepreting binary blobs as lattice append here
+    dumpRestoreData(*newBlock, dynamicContent, myBlockIds, data, foreignIds);
+    readXmlProcessors(fName, *newBlock);
 
     return newBlock;
 }
@@ -389,15 +387,14 @@ MultiBlock3D* load3D(FileName fName)
 #ifdef HDF5
 void loadHDF(FileName fName, MultiBlock3D& intoBlock, bool dynamicContent)
 {
-	//load3D_hdf(fName);
-	
-	std::unique_ptr<MultiBlock3D> loadedBlock (load3dHDF(fName));
-	
-	modif::ModifT typeOfVariables = dynamicContent ?
-		modif::dataStructure : modif::staticVariables;
-	copy_generic(*loadedBlock, loadedBlock->getBoundingBox(),
-		intoBlock, intoBlock.getBoundingBox(), typeOfVariables);
-	
+    
+    std::unique_ptr<MultiBlock3D> loadedBlock (load3dHDF(fName));
+    
+    modif::ModifT typeOfVariables = dynamicContent ?
+        modif::dataStructure : modif::staticVariables;
+    copy_generic(*loadedBlock, loadedBlock->getBoundingBox(),
+        intoBlock, intoBlock.getBoundingBox(), typeOfVariables);
+    
 }
 #endif
 

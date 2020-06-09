@@ -1,25 +1,34 @@
 /* This file is part of the Palabos library.
- *
- * Copyright (C) 2011-2017 FlowKit Sarl
- * Route d'Oron 2
- * 1010 Lausanne, Switzerland
- * E-mail contact: contact@flowkit.com
- *
- * The most recent release of Palabos can be downloaded at 
- * <http://www.palabos.org/>
- *
- * The library Palabos is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * The library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+* The Palabos softare is developed since 2011 by FlowKit-Numeca Group Sarl
+* (Switzerland) and the University of Geneva (Switzerland), which jointly
+* own the IP rights for most of the code base. Since October 2019, the
+* Palabos project is maintained by the University of Geneva and accepts
+* source code contributions from the community.
+*
+* Contact:
+* Jonas Latt
+* Computer Science Department
+* University of Geneva
+* 7 Route de Drize
+* 1227 Carouge, Switzerland
+* jonas.latt@unige.ch
+*
+* The most recent release of Palabos can be downloaded at
+* <https://palabos.unige.ch/>
+*
+* The library Palabos is free software: you can redistribute it and/or
+* modify it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* The library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /** \file
@@ -41,9 +50,9 @@ class XMLreaderProxy;
 
 class XMLreader {
 public:
-	XMLreader();
+    XMLreader();
     XMLreader( std::string fName );
-	void XMLreader_parse_from_string( const char *raw_xml);
+    void XMLreader_parse_from_string( const char *raw_xml);
     XMLreader( std::vector<TiXmlNode*> pParentVect );
     ~XMLreader();
     void print(int indent) const;
@@ -61,13 +70,13 @@ private:
     void mainProcessorIni(TiXmlNode* pParent);
     void mainProcessorIni(std::vector<TiXmlNode*> pParentVect);
     void slaveProcessorIni();
-   // XMLreader();
+
 private:
     struct Data {
         std::string text;
         std::vector<XMLreader*> children;
     };
-private: 
+private:
     std::string name;
     std::map<plint,Data> data_map;
     static XMLreader notFound;
@@ -106,11 +115,11 @@ public:
     XMLwriter& operator[] (std::string name);
     XMLwriter& operator[] (plint id);
     template<typename ostrT>
-	void toOutputStream_parrallel(ostrT& ostr, int indent=0) const;
-	template<typename ostrT>
+    void toOutputStream_parrallel(ostrT& ostr, int indent=0) const;
+    template<typename ostrT>
     void toOutputStream(ostrT& ostr, int indent=0) const;
     void print(std::string fName) const;
-	std::string sprint();
+    std::string sprint();
 private:
     XMLwriter( std::string name_ );
 private:
