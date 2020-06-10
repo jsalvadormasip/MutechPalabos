@@ -85,9 +85,11 @@ add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 # To link palabos in directories other than this
 cmake_policy(SET CMP0079 NEW)
 
-# codesByTopic
+###############################################################################
+# examples directory
+###############################################################################
+# benchmarks
 add_subdirectory(examples/benchmarks/cavity3d)
-
 # codesByTopic
 add_subdirectory(examples/codesByTopic/asinariDynamics)
 add_subdirectory(examples/codesByTopic/bounceBack)
@@ -114,7 +116,6 @@ add_subdirectory(examples/codesByTopic/shanChenMultiPhase)
 add_subdirectory(examples/codesByTopic/smagorinskyModel)
 add_subdirectory(examples/codesByTopic/transientStatistics)
 add_subdirectory(examples/codesByTopic/userInput)
-
 # showCases
 add_subdirectory(examples/showCases/aneurysm)
 add_subdirectory(examples/showCases/bloodFlowDefoBodies)
@@ -138,8 +139,34 @@ add_subdirectory(examples/showCases/poiseuille)
 add_subdirectory(examples/showCases/rectangularChannel3d)
 add_subdirectory(examples/showCases/vofMultiPhase)
 add_subdirectory(examples/showCases/womersley)
-
 # tutorial
 add_subdirectory(examples/tutorial/permeability)
 add_subdirectory(examples/tutorial/tutorial_1)
 add_subdirectory(examples/tutorial/tutorial_2)
+
+###############################################################################
+# utility directory
+###############################################################################
+# stl
+add_subdirectory(utility/stl/cutSTL)
+add_subdirectory(utility/stl/mergeSTL)
+add_subdirectory(utility/stl/refineByAreaSTL)
+add_subdirectory(utility/stl/refineSTL)
+add_subdirectory(utility/stl/reverseOrientationSTL)
+add_subdirectory(utility/stl/revoxelize)
+add_subdirectory(utility/stl/rotateAtOriginSTL)
+add_subdirectory(utility/stl/scaleDirectionallySTLraw)
+add_subdirectory(utility/stl/scaleSTL)
+add_subdirectory(utility/stl/scaleSTLraw)
+add_subdirectory(utility/stl/shiftSTLraw)
+add_subdirectory(utility/stl/stlCheck)
+add_subdirectory(utility/stl/stlInfo)
+add_subdirectory(utility/stl/stlProjectedArea)
+add_subdirectory(utility/stl/stlShadowArea)
+add_subdirectory(utility/stl/stlToHtml)
+add_subdirectory(utility/stl/stlToX3D)
+add_subdirectory(utility/stl/toAsciiSTL)
+add_subdirectory(utility/stl/toBinarySTL)
+# vtk
+add_subdirectory(utility/vtk/plb2vtk2D)
+add_subdirectory(utility/vtk/plb2vtk3D)

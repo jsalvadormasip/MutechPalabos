@@ -9,9 +9,8 @@ cache:
 stages:
     - build_examples
     - build_utility
+    - build_cmake
     - deploy
-    - build_examples_cmake
-    - build_utility_cmake
 
 #test_pypal:
 #    stage: build
@@ -48,10 +47,10 @@ utility:
         - pwd
         - cd utility
         - make optimize="false"
-        
-## Test compilation with CMake, everything in examples directory
-examples_cmake:
-    stage: build_examples
+
+## Test compilation with CMake, everything in examples & utility directory
+cmake:
+    stage: build_cmake
 
     only:
         - master
@@ -61,19 +60,6 @@ examples_cmake:
         - cd build
         - cmake ..
         - make -j4
-
-## Test compilation in the utility directory
-utility_cmake:
-    stage: build_utility
-
-    only:
-        - master
-        - cmake
-    
-    script: 
-        - pwd
-        - cd utility
-        - ./cmake_all.sh
 
 pages:
     stage: deploy
