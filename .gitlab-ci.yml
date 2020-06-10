@@ -49,18 +49,18 @@ utility:
         - cd utility
         - make optimize="false"
         
-## Test compilation in the examples directory
+## Test compilation with CMake, everything in examples directory
 examples_cmake:
     stage: build_examples
 
     only:
         - master
-        - cmake
     
     script: 
         - pwd
-        - cd examples
-        - ./cmake_all.sh
+        - cd build
+        - cmake ..
+        - make -j4
 
 ## Test compilation in the utility directory
 utility_cmake:
