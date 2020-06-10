@@ -16,20 +16,26 @@ npFEM is a heavily modified version of ShapeOp (https://www.shapeop.org/). The d
 
 Palabos-npFEM has been tested in both UNIX and Windows (provided CMake File):
 
-1. mkdir build
-2. cd build
-3. cmake ..
-4. make -j && make -j gpu (if ENABLE_CUDA ON)
+1. ```mkdir build```
+2. ```cd build```
+3. ```cmake ..```
+4. ```make -j && make -j gpu``` (if ENABLE_CUDA ON)
+
+In Windows, step 4 is executed by opening the Visual Studio solution file (.sln) in the build folder, and building the project/solution using the top **Build** tab. After finishing compilation in /bloodFlowDefoBodies/Release(or)Debug you can find the executable. Move it outside this folder and execute the application with the help of the xml files.
 
 ## Perform Cell Packing
 
 Cell Packing is the software that randomly initializes RBCs & PLTs in the flow field, and after some iterations it resolves all the collisions/interpenetrations. The resolved positions per blood cell are stored in the folder CPs. Open/Explore the cellPacking_params.xml to decide the geometry, hematocrit and many other parameters.
 
-CPU-version:
+**CPU-version**:
+```
 mpirun -n X ./bloodFlowDefoBodies cellPacking_params.xml
+```
 
-GPU-version:
+**GPU-version**:
+```
 mpirun -n X ./bloodFlowDefoBodies_gpu cellPacking_params.xml NumberOfNodes NumberOfGPUsPerNode
+```
 NumberOfNodes: 1 for a workstation, varies in a cluster
 NumberOfGPUsPerNode: number of GPUs per node
 
@@ -41,11 +47,15 @@ After having the initial positions of the blood cells (stored in the CPs folder)
 
 These simulations either start from a given CPs folder (generated through Cell Packing or provided) or from a file (initialPlacing.pos) that stores the position (center of mass) and orientation of the blood cells. The initialPlacing.pos stores first the RBCs as ID (0: RBC, 1: PLT), position and orientation (in degrees) and after the PLTs. Cell Packing is the prefered way to generate complex flow fields with many parameters.
 
-CPU-version:
+**CPU-version**:
+```
 mpirun -n X ./bloodFlowDefoBodies shear_params/poiseuille_params.xml
+```
 
-GPU-version:
+**GPU-version**:
+```
 mpirun -n X ./bloodFlowDefoBodies_gpu shear_params/poiseuille_params.xml NumberOfNodes NumberOfGPUsPerNode
+```
 
 ## Case study: Collision at an obstacle
 
