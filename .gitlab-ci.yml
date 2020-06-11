@@ -9,8 +9,8 @@ cache:
     key: "$CI_PROJECT_ID"
     
 stages:
-    - build_examples
-    - build_utility
+#    - build_examples
+#    - build_utility
     - build_cmake
     - deploy
 
@@ -27,28 +27,28 @@ stages:
 #        - make
         
 # Test compilation in the examples directory
-examples:
-    stage: build_examples
-
-    only:
-        - master
-    
-    script: 
-        - pwd
-        - cd examples
-        - make optimize="false"
+#examples:
+#    stage: build_examples
+#
+#    only:
+#        - master
+#    
+#    script: 
+#        - pwd
+#        - cd examples
+#        - make optimize="false"
 
 # Test compilation in the utility directory
-utility:
-    stage: build_utility
-
-    only:
-        - master
-    
-    script: 
-        - pwd
-        - cd utility
-        - make optimize="false"
+#utility:
+#    stage: build_utility
+#
+#    only:
+#        - master
+#    
+#    script: 
+#        - pwd
+#        - cd utility
+#        - make optimize="false"
 
 ## Test compilation with CMake, everything in examples & utility directory
 cmake:
