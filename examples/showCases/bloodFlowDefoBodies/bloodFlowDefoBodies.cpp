@@ -305,7 +305,7 @@ void writeVTK(BlockLatticeT& lattice, T dx, T dt, pluint iter)
 #ifdef MSVC
 	VtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, fileNamePadding), dx);
 #else
-	ParallelVtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, fileNamePadding), 1, dx);
+	ParallelVtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, sp.fileNamePadding), 1, dx);
 #endif
 
 	// From lattice to physical
