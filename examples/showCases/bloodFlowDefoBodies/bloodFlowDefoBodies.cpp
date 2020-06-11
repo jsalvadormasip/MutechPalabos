@@ -1190,8 +1190,8 @@ int main(int argc, char* argv[])
 		PLB_ASSERT(false);
 	}
 #else
-	mkdir(OutputDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	mkdir(CP_OutputDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	mkdir(sp.OutputDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	mkdir(sp.CP_OutputDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #endif
 	global::directories().setOutputDir(sp.OutputDir);
 	global::IOpolicy().activateParallelIO(true);
