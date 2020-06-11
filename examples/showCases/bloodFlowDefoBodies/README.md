@@ -47,6 +47,10 @@ After having the initial positions of the blood cells (stored in the CPs folder)
 
 These simulations either start from a given CPs folder (generated through Cell Packing or provided) or from a file (initialPlacing.pos) that stores the position (center of mass) and orientation of the blood cells. The initialPlacing.pos stores first the RBCs as ID (0: RBC, 1: PLT), position and orientation (in degrees) and after the PLTs. Cell Packing is the prefered way to generate complex flow fields with many parameters.
 
+For a quick start just extract the provided CPs_X.tar.gz and perform the corresponding Cellular Blood Flow Simuation.
+
+***It is very important to understand that without the right CPs folder (generated through Cell Packing or provided) or initialPlacing.pos file, the Cellular Blood Flow Simuation is not going to start (it crashes).***
+
 **CPU-version**:
 ```
 mpirun -n X ./bloodFlowDefoBodies shear_params/poiseuille_params.xml
@@ -60,7 +64,3 @@ mpirun -n X ./bloodFlowDefoBodies_gpu shear_params/poiseuille_params.xml NumberO
 ## Case study: Collision at an obstacle
 
 We provide one case study that uses the initialPlacing.pos. It can be executed as normally with the obstacle_params.xml and it involves 1 RBC colliding with a cubic obstacle.
-
-## Fast Track
-
-Just extract the provided CPs_X.tar.gz and perform a Cellular Blood Flow Simuation as described above. You can find out about the simulation parameters by opening the relevant xml file.

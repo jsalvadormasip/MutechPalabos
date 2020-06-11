@@ -19,6 +19,7 @@ endif()
 # npFEM Library (Compile npFEM separately)
 ###############################################################################
 
+include_directories("../../../coupledSimulators")
 include_directories("../../../coupledSimulators/npFEM")
 
 file(GLOB NPFEM_H "../../../coupledSimulators/npFEM/*.h")
@@ -187,6 +188,7 @@ add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 # npFEM Library (Compile npFEM separately)
 ###############################################################################
 
+include_directories("../../../coupledSimulators")
 include_directories("../../../coupledSimulators/npFEM")
 if(ENABLE_CUDA)
     include_directories("${CUDA_TOOLKIT_ROOT_DIR}")
