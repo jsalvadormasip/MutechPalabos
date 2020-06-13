@@ -140,13 +140,13 @@ void writeGifs(BlockLatticeT& lattice,
     const plint nx = parameters.getNx();
     const plint ny = parameters.getNy();
     const plint nz = parameters.getNz();
-    const plint zComponent = 2;
+    const plint xComponent = 0;
 
-    Box3D slice(0, nx-1, 0, ny-1, nz/2, nz/2);
+    Box3D slice(0, nx-1, ny/2, ny/2, 0, nz-1);
     ImageWriter<T> imageWriter("leeloo");
 
-    imageWriter.writeScaledGif( createFileName("uz", iter, 6),
-                                *computeVelocityComponent (lattice, slice, zComponent),
+    imageWriter.writeScaledGif( createFileName("ux", iter, 6),
+                                *computeVelocityComponent (lattice, slice, xComponent),
                                 imSize, imSize );
 
     imageWriter.writeScaledGif( createFileName("uNorm", iter, 6),
