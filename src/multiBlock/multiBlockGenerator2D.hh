@@ -699,10 +699,10 @@ std::unique_ptr<MultiTensorField2D<T,nDim> > generateMultiTensorField (
     return std::unique_ptr<MultiTensorField2D<T,nDim> >(field);
 }
 
-
+// QUESTION: why unnamed arg?
 template<typename T, int nDim>
 std::unique_ptr<MultiTensorField2D<T,nDim> > defaultGenerateMultiTensorField2D (
-        MultiBlockManagement2D const& management, plint unnamedDummyArg )
+        MultiBlockManagement2D const& management, [[maybe_unused]] plint unnamedDummyArg )
 {
     Array<T,nDim> iniVal;
     iniVal.resetToZero();
@@ -965,9 +965,10 @@ std::unique_ptr<MultiBlockLattice2D<T,Descriptor> > generateMultiBlockLattice (
     );
 }
 
+// QUESTION: Why this dummy arg
 template<typename T, template<typename U> class Descriptor>
 std::unique_ptr<MultiBlockLattice2D<T,Descriptor> > defaultGenerateMultiBlockLattice2D (
-        MultiBlockManagement2D const& management, plint unnamedDummyArg )
+        MultiBlockManagement2D const& management, [[maybe_unused]] plint unnamedDummyArg )
 {
     return std::unique_ptr<MultiBlockLattice2D<T,Descriptor> > (
         new MultiBlockLattice2D<T,Descriptor> (

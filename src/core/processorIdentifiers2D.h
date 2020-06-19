@@ -79,9 +79,10 @@ public:
     EntryMap::const_iterator begin() const;
     EntryMap::const_iterator end() const;
 private:
-    ProcessorRegistration2D(ProcessorRegistration2D const& rhs) { }
+    // QUESTION: why copy and = do nothing?
+    ProcessorRegistration2D([[maybe_unused]] ProcessorRegistration2D const& rhs) { }
     ProcessorRegistration2D& operator= (
-            ProcessorRegistration2D const& rhs )
+            [[maybe_unused]] ProcessorRegistration2D const& rhs )
     { return *this; }
 private:
     EntryMap processorByName;

@@ -81,7 +81,7 @@ struct ExternalForceAccess {
 /// Specialization of ExternalForceAccess: return 0 if there is no external force.
 template<typename T, template<typename U> class Descriptor>
 struct ExternalForceAccess<T,Descriptor,0> {
-    static T getComponent(Cell<T,Descriptor> const& cell, plint iD) {
+    static T getComponent([[maybe_unused]] Cell<T,Descriptor> const& cell, [[maybe_unused]] plint iD) {
         return T();
     }
 

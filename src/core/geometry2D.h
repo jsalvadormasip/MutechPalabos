@@ -242,7 +242,7 @@ inline bool contained(Array<T,2> const& x, Box2D const& box) {
 }
 
 template<>
-inline bool contained<plint>(Array<plint,2> const& x, Box2D const& box) {
+inline bool contained<plint>([[maybe_unused]] Array<plint,2> const& x, [[maybe_unused]] Box2D const& box) {
     //IMPORTANT: the behavior of this function (for int) has changed in Palabos!
     //use contained(plint, plint, Box2D) instead.
     //TODO: In the future, this function will do the following instead of an assert:
