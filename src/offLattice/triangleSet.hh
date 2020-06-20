@@ -539,14 +539,15 @@ void TriangleSet<T>::readAsciiOFF(FILE* fp, TriangleSelector<T>* selector)
     }
 
     char fmt[32];
-    if (sizeof(T) == sizeof(float))
+    if (sizeof(T) == sizeof(float)) {
         strcpy(fmt, "%f%f%f");
-    else if (sizeof(T) == sizeof(double))
+    } else if (sizeof(T) == sizeof(double)) {
         strcpy(fmt, "%lf%lf%lf");
-    else if (sizeof(T) == sizeof(long double))
+    } else if (sizeof(T) == sizeof(long double)) {
         strcpy(fmt, "%Lf%Lf%Lf");
-    else
+    } else {
         PLB_ASSERT(false); // The input file cannot be read.
+    }
 
     std::vector<Array<T,3> > vertices(NVertices);
     for (long iVertex = 0; iVertex < NVertices; iVertex++) {

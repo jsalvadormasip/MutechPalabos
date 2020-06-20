@@ -1622,7 +1622,7 @@ void NoDynamics<T,Descriptor>::decompose (
 
 template<typename T, template<typename U> class Descriptor>
 void NoDynamics<T,Descriptor>::recompose (
-        [[maybe_unused]] Cell<T,Descriptor>& cell, std::vector<T> const& rawData, plint order ) const
+        [[maybe_unused]] Cell<T,Descriptor>& cell, [[maybe_unused]] std::vector<T> const& rawData, [[maybe_unused]] plint order ) const
 {
     PLB_PRECONDITION( (plint)rawData.size() == numDecomposedVariables(order) );
 }
