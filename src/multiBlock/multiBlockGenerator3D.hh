@@ -737,9 +737,10 @@ std::unique_ptr<MultiTensorField3D<T,nDim> > generateMultiTensorField (
     return std::unique_ptr<MultiTensorField3D<T,nDim> >(field);
 }
 
+// QUESTION: Why do we have this unnamedDummyArg ?
 template<typename T, int nDim>
 std::unique_ptr<MultiTensorField3D<T,nDim> > defaultGenerateMultiTensorField3D (
-        MultiBlockManagement3D const& management, plint unnamedDummyArg )
+        MultiBlockManagement3D const& management, [[maybe_unused]] plint unnamedDummyArg )
 {
     Array<T,nDim> iniVal;
     iniVal.resetToZero();
@@ -1015,9 +1016,10 @@ std::unique_ptr<MultiBlockLattice3D<T,Descriptor> > generateMultiBlockLattice (
     );
 }
 
+// QUESTION: Why do we have this unnamedDummyArg?
 template<typename T, template<typename U> class Descriptor>
 std::unique_ptr<MultiBlockLattice3D<T,Descriptor> > defaultGenerateMultiBlockLattice3D (
-        MultiBlockManagement3D const& management, plint unnamedDummyArg )
+        MultiBlockManagement3D const& management, [[maybe_unused]] plint unnamedDummyArg )
 {
     return std::unique_ptr<MultiBlockLattice3D<T,Descriptor> > (
         new MultiBlockLattice3D<T,Descriptor> (

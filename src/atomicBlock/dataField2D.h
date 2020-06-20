@@ -54,9 +54,9 @@ public:
     ScalarFieldDataTransfer2D(ScalarField2D<T>& field_);
     virtual plint staticCellSize() const;
     /// Send data from the block into a byte-stream.
-    virtual void send(Box2D domain, std::vector<char>& buffer, modif::ModifT kind) const;
+    virtual void send(Box2D domain, std::vector<char>& buffer, [[maybe_unused]] modif::ModifT kind) const;
     /// Receive data from a byte-stream into the block.
-    virtual void receive(Box2D domain, std::vector<char> const& buffer, modif::ModifT kind);
+    virtual void receive(Box2D domain, std::vector<char> const& buffer, [[maybe_unused]] modif::ModifT kind);
     virtual void receive(Box2D domain, std::vector<char> const& buffer, modif::ModifT kind, [[maybe_unused]] Dot2D offset) {
         receive(domain, buffer, kind);
     }
@@ -67,7 +67,7 @@ public:
     }
     /// Attribute data between two blocks.
     virtual void attribute(Box2D toDomain, plint deltaX, plint deltaY,
-                           AtomicBlock2D const& from, modif::ModifT kind);
+                           AtomicBlock2D const& from, [[maybe_unused]] modif::ModifT kind);
     virtual void attribute(Box2D toDomain, plint deltaX, plint deltaY,
                            AtomicBlock2D const& from, modif::ModifT kind, [[maybe_unused]] Dot2D absoluteOffset)
     {

@@ -843,7 +843,7 @@ inline T edgeYderiv (
 template<typename T, int nDim>
 inline T cornerXderiv (
         TensorField2D<T,nDim> const& velocity,
-        int normalX, int normalY,
+        int normalX, [[maybe_unused]] int normalY,
         plint iX, plint iY, int iD )
 {
     int orientation = normalX;
@@ -855,7 +855,7 @@ inline T cornerXderiv (
 template<typename T, int nDim>
 inline T cornerYderiv (
         TensorField2D<T,nDim> const& velocity,
-        int normalX, int normalY,
+        [[maybe_unused]] int normalX, int normalY,
         plint iX, plint iY, int iD )
 {
     int orientation = normalY;

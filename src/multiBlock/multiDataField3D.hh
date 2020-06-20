@@ -566,7 +566,7 @@ int MultiTensorField3D<T,nDim>::getStaticId() const {
 template<typename T, int nDim>
 void MultiTensorField3D<T,nDim>::copyReceive (
                 MultiBlock3D const& fromBlock, Box3D const& fromDomain,
-                Box3D const& toDomain, modif::ModifT whichData )
+                Box3D const& toDomain, [[maybe_unused]] modif::ModifT whichData )
 {
     MultiTensorField3D<T,nDim> const* fromField =
         dynamic_cast<MultiTensorField3D<T,nDim> const* >(&fromBlock);
