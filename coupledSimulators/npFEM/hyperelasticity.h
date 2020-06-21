@@ -43,6 +43,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "Types.h"
 ///////////////////////////////////////////////////////////////////////////////
+
+// QUESTION: Looks like kappa is never used here. Why keep it?
+
 namespace plb {
 namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,7 +57,7 @@ namespace npfem {
 // Trianglular Elements
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE Scalar f_tr(const Scalar& x, const Scalar& miu,
-    const Scalar& lambda, const Scalar& kappa){
+    const Scalar& lambda, [[maybe_unused]] const Scalar& kappa){
     // Custom Energy
     //return miu * (1. / 4.) * std::pow(x - 1., 4.);
 
@@ -66,7 +69,7 @@ SHAPEOP_INLINE Scalar f_tr(const Scalar& x, const Scalar& miu,
 }
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE Scalar f_prime_tr(const Scalar& x, const Scalar& miu,
-    const Scalar& lambda, const Scalar& kappa){
+    const Scalar& lambda, [[maybe_unused]] const Scalar& kappa){
     // Custom Energy
     //return miu * std::pow(x - 1., 3.);
 
@@ -77,8 +80,8 @@ SHAPEOP_INLINE Scalar f_prime_tr(const Scalar& x, const Scalar& miu,
     return miu*std::pow(x - 1., 3.) + (lambda/2.)*std::pow(x, 3.) - (lambda/2.)*x;
 }
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE Scalar g_tr(const Scalar& x, const Scalar& miu,
-    const Scalar& lambda, const Scalar& kappa)
+SHAPEOP_INLINE Scalar g_tr([[maybe_unused]] const Scalar& x, [[maybe_unused]] const Scalar& miu,
+    [[maybe_unused]] const Scalar& lambda, [[maybe_unused]] const Scalar& kappa)
 {
     // Custom Energy
     //return lambda * (1. / 4.) * std::pow(x - 1., 4.);
@@ -90,8 +93,8 @@ SHAPEOP_INLINE Scalar g_tr(const Scalar& x, const Scalar& miu,
     return 0.;
 }
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE Scalar g_prime_tr(const Scalar& x, const Scalar& miu,
-    const Scalar& lambda, const Scalar& kappa)
+SHAPEOP_INLINE Scalar g_prime_tr([[maybe_unused]] const Scalar& x, [[maybe_unused]] const Scalar& miu,
+    [[maybe_unused]] const Scalar& lambda, [[maybe_unused]] const Scalar& kappa)
 {
     // Custom Energy
     //return lambda * std::pow(x - 1., 3.);
@@ -105,38 +108,38 @@ SHAPEOP_INLINE Scalar g_prime_tr(const Scalar& x, const Scalar& miu,
 ///////////////////////////////////////////////////////////////////////////////
 // Tetrahedra
 ///////////////////////////////////////////////////////////////////////////////
-inline Scalar f_tet(const Scalar& x, const Scalar& miu, const Scalar& lambda,
-    const Scalar& kappa)
+inline Scalar f_tet(const Scalar& x, const Scalar& miu, [[maybe_unused]] const Scalar& lambda,
+    [[maybe_unused]] const Scalar& kappa)
 {
     return miu * (1. / 4.) * std::pow(x - 1., 4.);
 }
 ///////////////////////////////////////////////////////////////////////////////
 inline Scalar f_prime_tet(const Scalar& x, const Scalar& miu,
-    const Scalar& lambda, const Scalar& kappa)
+    [[maybe_unused]] const Scalar& lambda, [[maybe_unused]] const Scalar& kappa)
 {
     return miu * std::pow(x - 1., 3.);
 }
 ///////////////////////////////////////////////////////////////////////////////
-inline Scalar g_tet(const Scalar& x, const Scalar& miu, const Scalar& lambda,
-    const Scalar& kappa)
+inline Scalar g_tet([[maybe_unused]] const Scalar& x, [[maybe_unused]] const Scalar& miu, [[maybe_unused]] const Scalar& lambda,
+    [[maybe_unused]] const Scalar& kappa)
 {
     return 0.;
 }
 ///////////////////////////////////////////////////////////////////////////////
-inline Scalar g_prime_tet(const Scalar& x, const Scalar& miu,
-    const Scalar& lambda, const Scalar& kappa)
+inline Scalar g_prime_tet([[maybe_unused]] const Scalar& x, [[maybe_unused]] const Scalar& miu,
+    [[maybe_unused]] const Scalar& lambda, [[maybe_unused]] const Scalar& kappa)
 {
     return 0.;
 }
 ///////////////////////////////////////////////////////////////////////////////
-inline Scalar h_tet(const Scalar& x, const Scalar& miu, const Scalar& lambda,
-    const Scalar& kappa)
+inline Scalar h_tet(const Scalar& x, [[maybe_unused]] const Scalar& miu, const Scalar& lambda,
+    [[maybe_unused]] const Scalar& kappa)
 {
     return lambda * (1. / 4.) * std::pow(x - 1., 4.);
 }
 ///////////////////////////////////////////////////////////////////////////////
-inline Scalar h_prime_tet(const Scalar& x, const Scalar& miu,
-    const Scalar& lambda, const Scalar& kappa)
+inline Scalar h_prime_tet(const Scalar& x, [[maybe_unused]] const Scalar& miu,
+    const Scalar& lambda, [[maybe_unused]] const Scalar& kappa)
 {
     return lambda * std::pow(x - 1., 3.);
 }

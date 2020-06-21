@@ -74,7 +74,7 @@ void cavitySetup( MultiBlockLattice3D<T,DESCRIPTOR>& lattice,
 
 template<class BlockLatticeT>
 void writeGifs(BlockLatticeT& lattice,
-               IncomprFlowParam<T> const& parameters, plint iter)
+                plint iter)
 {
     const plint imSize = 600;
     const plint nx = lattice.getNx();
@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
         if (iT%100==0) {
         //if (iT%parameters.nStep(imSave)==0) {
             pcout << "Writing Gif ..." << endl;
-            writeGifs(*lattice, parameters, iT);
+            writeGifs(*lattice, iT);
         }
 
         if (iT%parameters.nStep(vtkSave)==0 && iT>0) {

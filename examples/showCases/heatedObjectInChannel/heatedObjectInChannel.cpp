@@ -330,7 +330,7 @@ public:
         : C(C_),
           maxN(maxN_)
     { }
-    void operator()(plint iX, plint iY, plint iZ, T &rho, Array<T,3>& u) const
+    void operator()([[maybe_unused]] plint iX, plint iY, plint iZ, T &rho, Array<T,3>& u) const
     {
         rho = (T) 1;
         u[0] = C * poiseuilleVelocity(iY, iZ, maxN);
@@ -349,7 +349,7 @@ public:
         : C(C_),
           maxN(maxN_)
     { }
-    void operator()(plint iX, plint iY, plint iZ, Array<T,3>& u) const
+    void operator()([[maybe_unused]] plint iX, plint iY, plint iZ, Array<T,3>& u) const
     {
         u[0] = C * poiseuilleVelocity(iY, iZ, maxN);
         u[1] = T();

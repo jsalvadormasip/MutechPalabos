@@ -30,13 +30,13 @@ namespace plb {
 namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void SimplicialLDLTSolver::initialize(
-    const SparseMatrix& A, unsigned int iteration)
+    const SparseMatrix& A, [[maybe_unused]] unsigned int iteration)
 {
     solver_.compute(A);
 }
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE VectorX SimplicialLDLTSolver::solve(
-    const VectorX& b, const VectorX& x0) const
+    const VectorX& b, [[maybe_unused]] const VectorX& x0) const
 {
     return solver_.solve(b);
 }
