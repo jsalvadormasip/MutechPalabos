@@ -312,7 +312,8 @@ public:
                 ++j;
             }
 
-            T mx, my, mz;
+            // QUESTION: Why not use the return value of median to test if everything is ok?
+            T mx = T(), my = T(), mz = T();
             median(vx, mx);
             median(vy, my);
             median(vz, mz);

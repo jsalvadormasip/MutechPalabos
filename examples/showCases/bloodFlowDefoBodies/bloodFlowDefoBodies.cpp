@@ -1544,6 +1544,7 @@ int main(int argc, char* argv[])
 				Vtot = sp.PI_ * (sp.pipeRadius_LB * sp.dx_p) * (sp.pipeRadius_LB * sp.dx_p) * sp.lz_p;
 			}
 
+			// QUESTION: should we add an "else" here?
 			T Vrbcs = (sp.ht / 100.) * Vtot;
 			T Vrbc = sp.RBC_shapeOpSolverTemplate.Volume0_;
 
