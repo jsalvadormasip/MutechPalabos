@@ -76,9 +76,10 @@ inline void transferDataProcessors(MultiBlock2D const& from, MultiBlock2D& to)
 
 /* *************** 1. MultiScalarField ************************************** */
 
+// QUESTION: Does it make sense to have a useless domain here?
 template<typename T>
 void transferScalarFieldLocal (
-        MultiScalarField2D<T>& from, MultiScalarField2D<T>& to, Box2D const& domain )
+        MultiScalarField2D<T>& from, MultiScalarField2D<T>& to, [[maybe_unused]] Box2D const& domain )
 {
     // 1. Copy all data from the old to the new field.
     plb::copy(from, to, from.getBoundingBox());
@@ -926,10 +927,11 @@ std::unique_ptr<MultiTensorField2D<T,nDim> > reparallelize (
 
 /* *************** 4. MultiBlockLattice ************************************** */
 
+// QUESTION: Does it make sense to have a useless domain here?
 template<typename T, template<typename U> class Descriptor>
 void transferBlockLatticeLocal (
         MultiBlockLattice2D<T,Descriptor>& from,
-        MultiBlockLattice2D<T,Descriptor>& to, Box2D const& domain )
+        MultiBlockLattice2D<T,Descriptor>& to, [[maybe_unused]] Box2D const& domain )
 {
     // 1. Copy static and dynamic data to the new block.
     copyRegenerate(from, to, from.getBoundingBox());

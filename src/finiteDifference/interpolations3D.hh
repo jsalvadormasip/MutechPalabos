@@ -175,7 +175,7 @@ Array<T,3> predictorCorrectorNTensorField (
 template<typename T>
 void predictorCorrectorRhoBarJ (
         NTensorField3D<T>& rhoBarJ, Array<T,3> const& position,
-        bool velIsJ, Array<T,3>& j, T& rhoBar )
+        Array<T,3>& j, T& rhoBar )
 {
     PLB_ASSERT( rhoBarJ.getNdim()==4 );
     Array<T,3> position1(position);

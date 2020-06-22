@@ -57,7 +57,7 @@ static T bgk_ma1_equilibrium(plint iPop, T rhoBar, Array<T,D::d> const& jEq)
 /// Regularization
 static void regularize( Array<T,D::q>& f, T rhoBar,
                         Array<T,D::d> const& jAdvDiff,
-                        Array<T,D::d> const& jEq )
+                        [[maybe_unused]] Array<T,D::d> const& jEq )
 {
     f[0] = D::t[0] * rhoBar;
     

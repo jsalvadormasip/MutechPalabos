@@ -196,7 +196,7 @@ void PointParticle3D<T,Descriptor>::rhoBarJtoParticle (
 {
     T rhoBar;
     Array<T,3> j;
-    predictorCorrectorRhoBarJ(rhoBarJfield, this->getPosition(), velIsJ, j, rhoBar);
+    predictorCorrectorRhoBarJ(rhoBarJfield, this->getPosition(), j, rhoBar);
     if (velIsJ) {
         velocity = j*scaling;
     }
@@ -468,7 +468,7 @@ void RestParticle3D<T,Descriptor>::velocityToParticle([[maybe_unused]] NTensorFi
 
 template<typename T, template<typename U> class Descriptor>
 void RestParticle3D<T,Descriptor>::rhoBarJtoParticle (
-        NTensorField3D<T>& rhoBarJfield, bool velIsJ, T scaling )
+        [[maybe_unused]] NTensorField3D<T>& rhoBarJfield, [[maybe_unused]] bool velIsJ, [[maybe_unused]] T scaling )
 { }
 
 template<typename T, template<typename U> class Descriptor>

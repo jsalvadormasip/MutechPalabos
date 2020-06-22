@@ -487,7 +487,7 @@ inline T edgeZderiv (
 template<typename T, int nDim>
 inline T cornerXderiv (
         TensorField3D<T,nDim> const& velocity,
-        int normalX, int normalY, int normalZ,
+        int normalX, [[maybe_unused]] int normalY, [[maybe_unused]] int normalZ,
         plint iX, plint iY, plint iZ, int iD )
 {
     int orientation = normalX;
@@ -499,7 +499,7 @@ inline T cornerXderiv (
 template<typename T, int nDim>
 inline T cornerYderiv (
         TensorField3D<T,nDim> const& velocity,
-        int normalX, int normalY, int normalZ,
+        [[maybe_unused]] int normalX, int normalY, [[maybe_unused]] int normalZ,
         plint iX, plint iY, plint iZ, int iD )
 {
     int orientation = normalY;
@@ -511,7 +511,7 @@ inline T cornerYderiv (
 template<typename T, int nDim>
 inline T cornerZderiv (
         TensorField3D<T,nDim> const& velocity,
-        int normalX, int normalY, int normalZ,
+        [[maybe_unused]] int normalX, [[maybe_unused]] int normalY, int normalZ,
         plint iX, plint iY, plint iZ, int iD )
 {
     int orientation = normalZ;

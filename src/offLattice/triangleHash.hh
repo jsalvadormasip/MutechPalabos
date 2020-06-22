@@ -320,7 +320,7 @@ CreateTriangleHash<T>::CreateTriangleHash (
 
 template<typename T>
 void CreateTriangleHash<T>::processGenericBlocks (
-        Box3D domain, std::vector<AtomicBlock3D*> blocks )
+        [[maybe_unused]] Box3D domain, std::vector<AtomicBlock3D*> blocks )
 {
     PLB_PRECONDITION( blocks.size()==1 );
     AtomicContainerBlock3D* container =

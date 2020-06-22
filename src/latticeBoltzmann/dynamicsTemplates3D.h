@@ -1989,7 +1989,7 @@ static T complete_bgk_ma2_equilibrium(plint iPop, T rhoBar, T invRho, Array<T,D:
 }
 
 static void complete_bgk_ma2_regularize(Array<T,D::q> &f, T rhoBar, T invRho, Array<T,D::d> const& j, T jSqr,
-                                        Array<T,SymmetricTensorImpl<T,D::d>::n> const& piNeq, T omega, T omegaNonPhys, plint iPhys) 
+                                        Array<T,SymmetricTensorImpl<T,D::d>::n> const& piNeq, [[maybe_unused]] T omega, [[maybe_unused]] T omegaNonPhys, [[maybe_unused]] plint iPhys) 
 {
     complete_bgk_ma2_equilibria( rhoBar, invRho, j, jSqr, f);
     Array<T,D::q> fNeq;

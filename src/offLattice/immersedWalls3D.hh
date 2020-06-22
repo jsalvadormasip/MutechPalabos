@@ -241,7 +241,7 @@ InamuroIteration3D<T,VelFunction>::InamuroIteration3D(VelFunction velFunction_, 
 
 template<typename T, class VelFunction>
 void InamuroIteration3D<T,VelFunction>::processGenericBlocks (
-        Box3D domain, std::vector<AtomicBlock3D*> blocks )
+        [[maybe_unused]] Box3D domain, std::vector<AtomicBlock3D*> blocks )
 {
     PLB_PRECONDITION( blocks.size()==3 );
     ScalarField3D<T>* rhoBar = dynamic_cast<ScalarField3D<T>*>(blocks[0]);
@@ -377,7 +377,7 @@ IndexedInamuroIteration3D<T,VelFunction>::IndexedInamuroIteration3D(VelFunction 
 
 template<typename T, class VelFunction>
 void IndexedInamuroIteration3D<T,VelFunction>::processGenericBlocks (
-        Box3D domain, std::vector<AtomicBlock3D*> blocks )
+        [[maybe_unused]] Box3D domain, std::vector<AtomicBlock3D*> blocks )
 {
     PLB_PRECONDITION( blocks.size()==3 );
     ScalarField3D<T>* rhoBar = dynamic_cast<ScalarField3D<T>*>(blocks[0]);
@@ -1241,7 +1241,7 @@ RecomputeImmersedForce3D<T,Descriptor,NormalFunction>::RecomputeImmersedForce3D(
 
 template<typename T, template<typename U> class Descriptor, class NormalFunction>
 void RecomputeImmersedForce3D<T,Descriptor,NormalFunction>::processGenericBlocks(
-        Box3D domain, std::vector<AtomicBlock3D*> blocks)
+        [[maybe_unused]] Box3D domain, std::vector<AtomicBlock3D*> blocks)
 {
     PLB_PRECONDITION(blocks.size() == 3);
 

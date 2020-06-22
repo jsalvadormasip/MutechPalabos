@@ -55,7 +55,7 @@ public:
             AtomicBlock3D& lattice, AtomicContainerBlock3D& container,
             std::vector<AtomicBlock3D *> const& args );
     virtual ContainerBlockData* generateOffLatticeInfo() const;
-    virtual Array<T,3> getLocalForce(AtomicContainerBlock3D& container) const { return Array<T,3>(T(),T(),T()); }
+    virtual Array<T,3> getLocalForce([[maybe_unused]] AtomicContainerBlock3D& container) const { return Array<T,3>(T(),T(),T()); }
     void selectSecondOrder(bool flag) { secondOrderFlag = flag; }
     bool usesSecondOrder() const { return secondOrderFlag; }
 private:

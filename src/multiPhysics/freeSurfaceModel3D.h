@@ -879,7 +879,7 @@ private:
 
 template<typename T,template<typename U> class Descriptor>
 class InitializeInterfaceLists3D : public BoxProcessingFunctional3D {
-    virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> atomicBlocks)
+    virtual void processGenericBlocks([[maybe_unused]] Box3D domain, std::vector<AtomicBlock3D*> atomicBlocks)
     {
         PLB_ASSERT(atomicBlocks.size()==1);
         
