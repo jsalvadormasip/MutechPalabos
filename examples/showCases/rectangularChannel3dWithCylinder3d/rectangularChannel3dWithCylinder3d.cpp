@@ -50,6 +50,26 @@ typedef double T;
 
 const T pi = (T)4.*std::atan((T)1.);
 
+template<typename T>
+class CylinderShapeDomain3D : public plb::DomainFunctional3D {
+public:
+    CylinderShapeDomain3D(plb::plint cx_, plb::plint cz_, plb::plint radius)
+        : cx(cx_),
+        cz(cz_),
+        radiusSqr(plb::util::sqr(radius))
+    { }
+    virtual bool operator() (plb::plint iX, plb::plint iY, plb::plint iZ) const {
+        return plb::util::sqr(iX - cx) + plb::util::sqr(iZ - cz) <= radiusSqr;
+    }
+    virtual CylinderShapeDomain3D<T>* clone() const {
+        return new CylinderShapeDomain3D<T>(*this);
+    }
+private:
+    plb::plint cx;
+    plb::plint cz;
+    plb::plint radiusSqr;
+};
+
 static T poiseuillePressure(IncomprFlowParam<T> const &parameters, plint maxN)
 {
     const T a = parameters.getNx()-1;
@@ -145,37 +165,40 @@ private:
     plint maxN;
 };
 
-void squarePoiseuilleSetup( MultiBlockLattice3D<T,DESCRIPTOR>& lattice,
-                            IncomprFlowParam<T> const& parameters,
-                            OnLatticeBoundaryCondition3D<T,DESCRIPTOR>& boundaryCondition )
+void simulationSetup( MultiBlockLattice3D<T,DESCRIPTOR>& lattice,
+                      IncomprFlowParam<T> const& parameters,
+                      OnLatticeBoundaryCondition3D<T,DESCRIPTOR>& boundaryCondition,
+                      Array<plint,3> &forceIds )
 {
+    // No periodic boundaries
     lattice.periodicity().toggleAll(false);
 
     const plint nx = parameters.getNx();
     const plint ny = parameters.getNy();
     const plint nz = parameters.getNz();
 
-    Box3D top    = Box3D(0,    nx-1, ny-1, ny-1, 0, nz-1);
-    Box3D bottom = Box3D(0,    nx-1, 0,    0,    0, nz-1);
+    // Flow direction: z
+    // Top/Bottom direction: y
+    Box3D top    = Box3D(0, nx-1, ny-1, ny-1, 0, nz-1); // Full Area
+    Box3D bottom = Box3D(0, nx-1, 0, 0, 0, nz-1); // Full Area
     
-    Box3D inlet    = Box3D(0,    nx-1, 0,    ny-1, 0,    0);
-    Box3D outlet = Box3D(1,    nx-2, 1,    ny-2, nz-1, nz-1);
+    Box3D inlet  = Box3D(0, nx-1, 0, ny-1, 0, 0); // Full Area
+    Box3D outlet = Box3D(1, nx-2, 1, ny-2, nz-1, nz-1); // Offset from wall boundaries by 1 lattice unit
     
-    Box3D left   = Box3D(0,    0,    1,    ny-2, 0, nz-1);
-    Box3D right  = Box3D(nx-1, nx-1, 1,    ny-2, 0, nz-1);
+    Box3D left   = Box3D(0, 0, 0, ny-1, 0, nz-1); // Full Area
+    Box3D right  = Box3D(nx-1, nx-1, 0, ny-1, 0, nz-1); // Full Area
     
-    boundaryCondition.setVelocityConditionOnBlockBoundaries ( lattice, inlet );
+    boundaryCondition.setVelocityConditionOnBlockBoundaries(lattice, inlet);
     boundaryCondition.addVelocityBoundary2P(outlet, lattice, boundary::neumann);
 
-    boundaryCondition.setVelocityConditionOnBlockBoundaries ( lattice, top );
-    boundaryCondition.setVelocityConditionOnBlockBoundaries ( lattice, bottom );
+    boundaryCondition.setVelocityConditionOnBlockBoundaries(lattice, top);
+    boundaryCondition.setVelocityConditionOnBlockBoundaries(lattice, bottom);
     
-    boundaryCondition.setVelocityConditionOnBlockBoundaries ( lattice, left );
-    boundaryCondition.setVelocityConditionOnBlockBoundaries ( lattice, right );
+    boundaryCondition.setVelocityConditionOnBlockBoundaries(lattice, left);
+    boundaryCondition.setVelocityConditionOnBlockBoundaries(lattice, right);
     
     setBoundaryVelocity(lattice, inlet, SquarePoiseuilleVelocity<T>(parameters, NMAX));
-    //setBoundaryVelocity(lattice, outlet, SquarePoiseuilleVelocity<T>(parameters, NMAX));
-    
+
     setBoundaryVelocity(lattice, top, Array<T,3>((T)0.0,(T)0.0,(T)0.0));
     setBoundaryVelocity(lattice, bottom, Array<T,3>((T)0.0,(T)0.0,(T)0.0));
     setBoundaryVelocity(lattice, left, Array<T,3>((T)0.0,(T)0.0,(T)0.0));
@@ -183,24 +206,48 @@ void squarePoiseuilleSetup( MultiBlockLattice3D<T,DESCRIPTOR>& lattice,
 
     initializeAtEquilibrium(lattice, lattice.getBoundingBox(), SquarePoiseuilleDensityAndVelocity<T>(parameters, NMAX));
 
+    // Add the obstacle: cylinder 3d
+    plint cx     = nx/2 + 2; // cx is slightly offset to avoid full symmetry,
+                             // and to get a Von Karman Vortex street.
+    plint cz     = nz/4;
+    plint radius = parameters.getResolution() / 2; // the diameter is the reference length
+
+    lattice.toggleInternalStatistics(true);
+    forceIds[0] = lattice.internalStatSubscription().subscribeSum();
+    forceIds[1] = lattice.internalStatSubscription().subscribeSum();
+    forceIds[2] = lattice.internalStatSubscription().subscribeSum();
+
+    defineDynamics(lattice, lattice.getBoundingBox(),
+                   new CylinderShapeDomain3D<T>(cx, cz, radius),
+                   new plb::MomentumExchangeBounceBack<T,DESCRIPTOR>(forceIds));
+    initializeMomentumExchange(lattice, lattice.getBoundingBox());
+
     lattice.initialize();
 }
 
-T computeRMSerror ( MultiBlockLattice3D<T,DESCRIPTOR>& lattice,
-                    IncomprFlowParam<T> const& parameters )
+template<class BlockLatticeT>
+void writeGifs(BlockLatticeT& lattice,
+    IncomprFlowParam<T> const& parameters, plint iter)
 {
-    MultiTensorField3D<T,3> analyticalVelocity(lattice);
-    setToFunction( analyticalVelocity, analyticalVelocity.getBoundingBox(),
-                   SquarePoiseuilleVelocity<T>(parameters, NMAX) );
-    MultiTensorField3D<T,3> numericalVelocity(lattice);
-    computeVelocity(lattice, numericalVelocity, lattice.getBoundingBox());
+    const plint imSize = 600;
+    const plint nx = parameters.getNx();
+    const plint ny = parameters.getNy();
+    const plint nz = parameters.getNz();
+    const plint xComponent = 2;
 
-           // Divide by lattice velocity to normalize the error
-    return 1./parameters.getLatticeU() *
-           // Compute RMS difference between analytical and numerical solution
-           std::sqrt( computeAverage( *computeNormSqr(
-                          *subtract(analyticalVelocity, numericalVelocity)
-                     ) ) );
+    Box3D slice(0, nx - 1, ny / 2, ny / 2, 0, nz - 1);
+    ImageWriter<T> imageWriter("leeloo");
+
+    imageWriter.writeScaledGif(createFileName("uz", iter, 6),
+        *computeVelocityComponent(lattice, slice, zComponent),
+        imSize, imSize);
+    imageWriter.writeScaledGif(createFileName("uNorm", iter, 6),
+        *computeVelocityNorm(lattice, slice),
+        imSize, imSize);
+    imageWriter.writeScaledGif(createFileName("omega", iter, 6),
+        *computeNorm(*computeVorticity(
+            *computeVelocity(lattice)), slice),
+        imSize, imSize);
 }
 
 template<class BlockLatticeT>
@@ -210,8 +257,11 @@ void writeVTK(BlockLatticeT& lattice,
     T dx = parameters.getDeltaX();
     T dt = parameters.getDeltaT();
 
-    //VtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), dx);
-    ParallelVtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), 3, dx);
+#ifdef MSVC
+	VtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), dx);
+#else
+	ParallelVtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), 3, dx);
+#endif
 
     vtkOut.writeData<3,float>(*computeVelocity(lattice), "velocity", dx/dt);
     vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx/dt);
@@ -223,31 +273,34 @@ int main(int argc, char* argv[]) {
     plbInit(&argc, &argv);
     global::directories().setOutputDir("./tmp/");
 
-    if (argc != 2) {
-        pcout << "Error the parameters are wrong. The structure must be :\n";
-        pcout << "1 : N\n";
+    if (argc != 2)
+    {
+        pcout << "Error: the parameters are wrong. Give resolution.";
         exit(1);
     }
 
-    const plint N = atoi(argv[1]);
-    const T Re = 10.0;
-    const plint Nref = 50;
-    const T uMaxRef = 0.01;
-    const T uMax = uMaxRef /(T)N * (T)Nref; // Needed to avoid compressibility errors.
+    T W_ = 21.0;
+    T L_ = 75.0;
+    T h_ = 6.0;
+    T D_ = 6.0;
 
+    // Use the class IncomprFlowParam to convert from
+    // dimensionless variables to lattice units, in the
+    // context of incompressible flows.
     IncomprFlowParam<T> parameters(
-            uMax,
-            Re,
-            N,
-            1.,        // lx
-            1.,        // ly
-            1.         // lz
+        0.01, // Reference velocity (the maximum velocity in the Poiseuille profile) in lattice units.
+        100., // Reynolds number
+        atoi(argv[1]), // Resolution of the reference length (cylinder diameter)
+        W_/D_, // dimensionless: channel lateral length
+        h_/D_, // dimensionless: channel height
+        L_/D_ // dimensionless: channel length
     );
     
-    const T vtkSave  = (T)1/(T)100;
-    const T maxT     = (T)10.0;
+    const T vtkSave = (T) 0.1; // Time intervals at which to save GIF VTKs, in dimensionless time units
+    const T maxT    = (T)10.0; // Total simulation time, in dimensionless time units
 
-    writeLogFile(parameters, "3D square Poiseuille");
+    pcout << "omega= " << parameters.getOmega() << std::endl;
+    writeLogFile(parameters, "3D square Poiseuille with Cylinder as an obstacle");
 
     MultiBlockLattice3D<T, DESCRIPTOR> lattice (
         parameters.getNx(), parameters.getNy(), parameters.getNz(), 
@@ -256,30 +309,21 @@ int main(int argc, char* argv[]) {
     OnLatticeBoundaryCondition3D<T,DESCRIPTOR>* boundaryCondition
         = createLocalBoundaryCondition3D<T,DESCRIPTOR>();
 
-    squarePoiseuilleSetup(lattice, parameters, *boundaryCondition);
+    Array<plint,3> forceIds;
+    simulationSetup(lattice, parameters, *boundaryCondition, forceIds);
 
     // Loop over main time iteration.
-    util::ValueTracer<T> converge(parameters.getLatticeU(),parameters.getResolution(),1.0e-3);
     for (plint iT=0; iT<parameters.nStep(maxT); ++iT)
     {
-        if (iT%parameters.nStep(vtkSave)==0 && iT>0) {
-            pcout << "Saving VTK file ..." << endl;
-            writeVTK(lattice, parameters, iT);
-        }
-
-        converge.takeValue(getStoredAverageEnergy(lattice),true);
-        if (converge.hasConverged())
+        if (iT%parameters.nStep(vtkSave)==0 && iT>0)
         {
-            pcout << "Simulation converged." << endl;
-            break;
+            pcout << "step " << iT << "; t=" << iT*parameters.getDeltaT() << std::endl;
+            writeVTK(lattice, parameters, iT);
         }
 
         // Execute a time iteration.
         lattice.collideAndStream();
-
     }
-    pcout << "For N = " << N << ", Error = "
-          << computeRMSerror ( lattice,parameters) << endl;
-
+    
     delete boundaryCondition;
 }
