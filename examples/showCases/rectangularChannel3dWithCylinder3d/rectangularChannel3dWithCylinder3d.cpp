@@ -50,6 +50,15 @@ typedef double T;
 
 const T pi = (T)4.*std::atan((T)1.);
 
+struct Param
+{
+    plint numOutletSpongeCells;         // Number of the lattice nodes contained in the outlet sponge zone.
+    int outletSpongeZoneType;           // Type of the outlet sponge zone (Viscosity or Smagorinsky).
+    T targetSpongeCSmago;               // Target Smagorinsky parameter at the end of the Smagorinsky sponge Zone.
+};
+
+Param param;
+
 template<typename T>
 class CylinderShapeDomain3D : public plb::DomainFunctional3D {
 public:
@@ -204,12 +213,68 @@ void simulationSetup( MultiBlockLattice3D<T,DESCRIPTOR>& lattice,
     setBoundaryVelocity(lattice, left, Array<T,3>((T)0.0,(T)0.0,(T)0.0));
     setBoundaryVelocity(lattice, right, Array<T,3>((T)0.0,(T)0.0,(T)0.0));
 
+    /*
+    * Implement the outlet sponge zone.
+    */
+    param.outletSpongeZoneType = 0; // Outlet sponge zone type ("Viscosity":0 or "Smagorinsky":1)
+    param.targetSpongeCSmago = 0.6; // Target local Smagorinsky parameter at the end of the outlet sponge zone.This parameter is relevant only if the chosen sponge zone is of "Smagorinsky" type.
+    param.numOutletSpongeCells = 1;
+
+    if (param.numOutletSpongeCells > 0)
+    {
+        T bulkValue;
+        Array<plint, 6> numSpongeCells;
+
+        if (param.outletSpongeZoneType == 0) {
+            pcout << "Generating an outlet viscosity sponge zone." << std::endl;
+            bulkValue = parameters.getOmega();
+        }
+        else if (param.outletSpongeZoneType == 1) {
+            pcout << "Generating an outlet Smagorinsky sponge zone." << std::endl;
+            bulkValue = 0.14; // Parameter for the Smagorinsky LES model
+        }
+        else {
+            pcout << "Error: unknown type of sponge zone." << std::endl;
+            exit(-1);
+        }
+
+        // Number of sponge zone lattice nodes at all the outer domain boundaries.
+        // So: 0 means the boundary at x = 0
+        //     1 means the boundary at x = nx-1
+        //     2 means the boundary at y = 0
+        //     and so on...
+        numSpongeCells[0] = 0;
+        numSpongeCells[1] = 0;
+        numSpongeCells[2] = 0;
+        numSpongeCells[3] = 0;
+        numSpongeCells[4] = 0;
+        numSpongeCells[5] = param.numOutletSpongeCells;
+
+        const plint nx = parameters.getNx();
+        const plint ny = parameters.getNy();
+        const plint nz = parameters.getNz();
+
+        std::vector<MultiBlock3D*> args;
+        args.push_back(&lattice);
+
+        if (param.outletSpongeZoneType == 0) {
+            applyProcessingFunctional(new ViscositySpongeZone3D<T, DESCRIPTOR>(
+                nx, ny, nz, bulkValue, numSpongeCells),
+                lattice.getBoundingBox(), args);
+        }
+        else {
+            applyProcessingFunctional(new SmagorinskySpongeZone3D<T, DESCRIPTOR>(
+                nx, ny, nz, bulkValue, param.targetSpongeCSmago, numSpongeCells),
+                lattice.getBoundingBox(), args);
+        }
+    }
+
     initializeAtEquilibrium(lattice, lattice.getBoundingBox(), SquarePoiseuilleDensityAndVelocity<T>(parameters, NMAX));
 
     // Add the obstacle: cylinder 3d
     plint cx     = nx/2 + 2; // cx is slightly offset to avoid full symmetry,
                              // and to get a Von Karman Vortex street.
-    plint cz     = nz/4;
+    plint cz     = nz/6;
     plint radius = parameters.getResolution() / 2; // the diameter is the reference length
 
     lattice.toggleInternalStatistics(true);
@@ -289,15 +354,15 @@ int main(int argc, char* argv[]) {
     // context of incompressible flows.
     IncomprFlowParam<T> parameters(
         0.01, // Reference velocity (the maximum velocity in the Poiseuille profile) in lattice units.
-        100., // Reynolds number
+        500., // Reynolds number
         atoi(argv[1]), // Resolution of the reference length (cylinder diameter)
         W_/D_, // dimensionless: channel lateral length
         h_/D_, // dimensionless: channel height
         L_/D_ // dimensionless: channel length
     );
-    
+
     const T vtkSave = (T) 0.1; // Time intervals at which to save GIF VTKs, in dimensionless time units
-    const T maxT    = (T)10.0; // Total simulation time, in dimensionless time units
+    const T maxT    = (T)50.0; // Total simulation time, in dimensionless time units
 
     pcout << "omega= " << parameters.getOmega() << std::endl;
     writeLogFile(parameters, "3D square Poiseuille with Cylinder as an obstacle");
