@@ -354,7 +354,7 @@ int main(int argc, char* argv[]) {
     // context of incompressible flows.
     IncomprFlowParam<T> parameters(
         0.01, // Reference velocity (the maximum velocity in the Poiseuille profile) in lattice units.
-        500., // Reynolds number
+        100., // Reynolds number
         atoi(argv[1]), // Resolution of the reference length (cylinder diameter)
         W_/D_, // dimensionless: channel lateral length
         h_/D_, // dimensionless: channel height
