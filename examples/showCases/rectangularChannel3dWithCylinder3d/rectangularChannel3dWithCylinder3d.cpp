@@ -338,24 +338,28 @@ int main(int argc, char* argv[]) {
     plbInit(&argc, &argv);
     global::directories().setOutputDir("./tmp/");
 
-    if (argc != 2)
+    if (argc != 7)
     {
-        pcout << "Error: the parameters are wrong. Give resolution.";
+        pcout << "Error: the parameters are wrong. \n";
+        pcout << "Give Re Resolution CylinderDiameter ChannelWidth ChannelHeight ChannhelLength \n";
         exit(1);
     }
 
-    T W_ = 21.0;
-    T L_ = 75.0;
-    T h_ = 6.0;
-    T D_ = 6.0;
+    T Re_    = atof(argv[1]);
+    plint N_ = atoi(argv[2]);
+    // Physical units, reference length is the cylinder diameter (D_)
+    T D_     = atof(argv[3]);
+    T W_     = atof(argv[4]);
+    T h_     = atof(argv[5]);
+    T L_     = atof(argv[6]);
 
     // Use the class IncomprFlowParam to convert from
     // dimensionless variables to lattice units, in the
     // context of incompressible flows.
     IncomprFlowParam<T> parameters(
         0.01, // Reference velocity (the maximum velocity in the Poiseuille profile) in lattice units.
-        100., // Reynolds number
-        atoi(argv[1]), // Resolution of the reference length (cylinder diameter)
+        Re_, // Reynolds number
+        N_, // Resolution of the reference length (cylinder diameter)
         W_/D_, // dimensionless: channel lateral length
         h_/D_, // dimensionless: channel height
         L_/D_ // dimensionless: channel length
