@@ -36,4 +36,5 @@
  */
 
 #include "offLattice/makeSparse2D.h"
+#include "offLattice/immersedWalls2D.h"
 
