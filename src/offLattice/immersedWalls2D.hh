@@ -93,7 +93,7 @@ void InamuroIteration2D<T,VelFunction>::processGenericBlocks (
                         Array<plint,2> pos(intPos+Array<plint,2>(dx,dy));
                         Array<T,2> nextJ = j->get(pos[0]+ofsJ.x, pos[1]+ofsJ.y);
                         Array<T,2> r(pos[0]-vertex[0],pos[1]-vertex[1]);
-                        T W = inamuroDeltaFunction<T>().W(r);
+                        T W = inamuroDeltaFunction2D<T>().W(r);
                         averageJ += W*nextJ;
                 }
             }
@@ -118,7 +118,7 @@ void InamuroIteration2D<T,VelFunction>::processGenericBlocks (
                         T nextRhoBar = rhoBar->get(pos[0], pos[1]);
                         Array<T,2> nextJ = j->get(pos[0]+ofsJ.x, pos[1]+ofsJ.y);
                         Array<T,2> r(pos[0]-vertex[0],pos[1]-vertex[1]);
-                        T W = inamuroDeltaFunction<T>().W(r);
+                        T W = inamuroDeltaFunction2D<T>().W(r);
                         averageJ += W*nextJ;
                         averageRhoBar += W*nextRhoBar;
                 }
@@ -141,7 +141,7 @@ void InamuroIteration2D<T,VelFunction>::processGenericBlocks (
                     Array<plint,2> pos(intPos+Array<plint,2>(dx,dy));
                     Array<T,2> nextJ = j->get(pos[0]+ofsJ.x, pos[1]+ofsJ.y);
                     Array<T,2> r(pos[0]-vertex[0],pos[1]-vertex[1]);
-                    T W = inamuroDeltaFunction<T>().W(r);
+                    T W = inamuroDeltaFunction2D<T>().W(r);
                     nextJ += tau*W*deltaG[i];
                     j->get(pos[0]+ofsJ.x, pos[1]+ofsJ.y) = nextJ;
             }
@@ -218,7 +218,7 @@ void IndexedInamuroIteration2D<T,VelFunction>::processGenericBlocks (
             Array<plint,2> pos(intPos+Array<plint,2>(dx,dy));
             Array<T,2> nextJ = j->get(pos[0]+ofsJ.x, pos[1]+ofsJ.y);
             Array<T,2> r(pos[0]-vertex[0],pos[1]-vertex[1]);
-            T W = inamuroDeltaFunction<T>().W(r);
+            T W = inamuroDeltaFunction2D<T>().W(r);
             averageJ += W*nextJ;
         }
       }
@@ -242,7 +242,7 @@ void IndexedInamuroIteration2D<T,VelFunction>::processGenericBlocks (
             if(nextRhoBar == -1) continue;
             Array<T,2> nextJ = j->get(pos[0]+ofsJ.x, pos[1]+ofsJ.y);
             Array<T,2> r(pos[0]-vertex[0],pos[1]-vertex[1]);
-            T W = inamuroDeltaFunction<T>().W(r);
+            T W = inamuroDeltaFunction2D<T>().W(r);
             averageJ += W*nextJ;
             averageRhoBar += W*nextRhoBar;
         }
@@ -268,7 +268,7 @@ void IndexedInamuroIteration2D<T,VelFunction>::processGenericBlocks (
 
           Array<T,2> nextJ = j->get(pos[0]+ofsJ.x, pos[1]+ofsJ.y);
           Array<T,2> r(pos[0]-vertex[0],pos[1]-vertex[1]);
-          T W = inamuroDeltaFunction<T>().W(r);
+          T W = inamuroDeltaFunction2D<T>().W(r);
           nextJ += tau*W*deltaG[i];
           j->get(pos[0]+ofsJ.x, pos[1]+ofsJ.y) = nextJ;
       }

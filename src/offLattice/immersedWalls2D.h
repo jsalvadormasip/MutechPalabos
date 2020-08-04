@@ -48,12 +48,12 @@ namespace plb {
 
 /* ******** FavierDeltaFunction ************************************ */
 
-/* ******** InamuroDeltaFunction ************************************ */
+/* ******** InamuroDeltaFunction2D ************************************ */
 
 template<typename T>
-class InamuroDeltaFunction {
+class InamuroDeltaFunction2D {
 public:
-    InamuroDeltaFunction(int N_)
+    InamuroDeltaFunction2D(int N_)
         : N(N_),
           dx(4./(T)N),
           invDx(1./dx)
@@ -100,8 +100,8 @@ private:
 };
 
 template<typename T>
-inline InamuroDeltaFunction<T> const& inamuroDeltaFunction() {
-    static InamuroDeltaFunction<T> deltaFunction(1000);
+inline InamuroDeltaFunction2D<T> const& inamuroDeltaFunction2D() {
+    static InamuroDeltaFunction2D<T> deltaFunction(1000);
     return deltaFunction;
 }
 
