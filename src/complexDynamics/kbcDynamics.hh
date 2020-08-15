@@ -80,7 +80,7 @@ int KBCDynamics<T,Descriptor>::getId() const {
 
 template<typename T, template<typename U> class Descriptor>
 T KBCDynamics<T,Descriptor>::computeEquilibrium (
-        plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j, T jSqr, T thetaBar ) const
+        plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j, T jSqr, [[maybe_unused]] T thetaBar ) const
 {
     typedef Descriptor<T> L;
 //    typedef kbcTemplates<T,Descriptor> kbc;

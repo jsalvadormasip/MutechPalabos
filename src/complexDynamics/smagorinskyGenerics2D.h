@@ -80,17 +80,17 @@ private:
 };
 
 template<typename T>
-T constOmegaFromOmega0(plint iX, plint iY, T omega0) {
+T constOmegaFromOmega0([[maybe_unused]] plint iX, [[maybe_unused]] plint iY, T omega0) {
     return omega0;
 }
 
 template<typename T, template<typename U> class Descriptor>
-void instantiateStaticSmagorinsky(BlockLattice2D<T,Descriptor>& lattice, Box2D domain, T cSmago) {
+void instantiateStaticSmagorinsky(BlockLattice2D<T,Descriptor>& lattice, Box2D domain, [[maybe_unused]] T cSmago) {
     instantiateStaticSmagorinsky(lattice, domain, constOmegaFromOmega0<T>);
 }
 
 template<typename T, template<typename U> class Descriptor>
-void instantiateStaticSmagorinsky(MultiBlockLattice2D<T,Descriptor>& lattice, Box2D domain, T cSmago) {
+void instantiateStaticSmagorinsky(MultiBlockLattice2D<T,Descriptor>& lattice, Box2D domain, [[maybe_unused]] T cSmago) {
     instantiateStaticSmagorinsky(lattice, domain, constOmegaFromOmega0<T>);
 }
 
