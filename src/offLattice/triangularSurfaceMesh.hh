@@ -89,7 +89,7 @@ void TriangularSurfaceMesh<T>::resetVertices(Array<T,3> const& defaultVertex)
 }
 
 template<typename T>
-inline void TriangularSurfaceMesh<T>::assertVertex(Array<T,3> const& vertex) const
+inline void TriangularSurfaceMesh<T>::assertVertex([[maybe_unused]] Array<T,3> const& vertex) const
 {
 #ifdef PLB_DEBUG
     if (global::IOpolicy().stlFilesHaveLowerBound()) {

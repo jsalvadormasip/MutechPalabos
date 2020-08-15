@@ -256,7 +256,7 @@ bool TriangleSet<T>::isAsciiSTL(FILE* fp)
         PLB_ASSERT(!ferror(fp));
     }
 #else
-    (void) fread(buf, sizeof(char), PLB_CBUFSIZ, fp);
+    (void) fread(buf, sizeof(char), PLB_CBUFSIZ, fp);// TODO: (void) does not suppress warning. We should alway check return. throw exception.
 #endif
     buf[PLB_CBUFSIZ] = '\0';
     rewind(fp);
@@ -278,7 +278,7 @@ bool TriangleSet<T>::isAsciiSTL(FILE* fp)
         PLB_ASSERT(!ferror(fp));
     }
 #else
-    (void) fread(buf, sizeof(char), PLB_CBUFSIZ, fp);
+    (void) fread(buf, sizeof(char), PLB_CBUFSIZ, fp); // TODO: (void) does not suppress warning. We should alway check return. throw exception.
 #endif
     buf[PLB_CBUFSIZ] = '\0';
     rewind(fp);
@@ -299,7 +299,7 @@ void TriangleSet<T>::readAsciiSTL(FILE* fp, TriangleSelector<T>* selector)
 #ifdef PLB_DEBUG
     char *sp = fgets(buf, PLB_CBUFSIZ, fp);
 #else
-    (void) fgets(buf, PLB_CBUFSIZ, fp);
+    (void) fgets(buf, PLB_CBUFSIZ, fp); // TODO: (void) does not suppress warning. We should alway check return. throw exception.
 #endif
     PLB_ASSERT(sp != NULL); // The input file is badly structured.
     PLB_ASSERT(checkForBufferOverflow(buf)); // Problem with reading one line of text.
@@ -495,7 +495,7 @@ void TriangleSet<T>::readOFF(std::string fname, TriangleSelector<T>* selector)
 #ifdef PLB_DEBUG
     char *sp = fgets(buf, PLB_CBUFSIZ, fp);
 #else
-    (void) fgets(buf, PLB_CBUFSIZ, fp);
+    (void) fgets(buf, PLB_CBUFSIZ, fp); // TODO: (void) does not suppress warning. We should alway check return. throw exception.
 #endif
     PLB_ASSERT(sp != NULL); // The input file cannot be read.
 
