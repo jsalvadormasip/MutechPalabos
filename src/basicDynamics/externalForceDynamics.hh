@@ -115,7 +115,7 @@ void IncExternalForceDynamics<T,Descriptor>::computeVelocity (
 
 template<typename T, template<typename U> class Descriptor>
 void IncExternalForceDynamics<T,Descriptor>::computeVelocityExternal (
-        Cell<T,Descriptor> const& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j,
+        Cell<T,Descriptor> const& cell, [[maybe_unused]] T rhoBar, Array<T,Descriptor<T>::d> const& j,
         Array<T,Descriptor<T>::d>& u ) const
 {
     Array<T,Descriptor<T>::d> force;
@@ -181,7 +181,7 @@ void NaiveExternalForceBGKdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 void NaiveExternalForceBGKdynamics<T,Descriptor>::collideExternal (
-        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat)
+        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, [[maybe_unused]] T thetaBar, BlockStatistics& stat)
 {
     T uSqr = dynamicsTemplates<T,Descriptor>::bgk_ma2_collision(cell, rhoBar, j, this->getOmega());
     externalForceTemplates<T,Descriptor>::addNaiveForce(cell);
@@ -194,7 +194,7 @@ void NaiveExternalForceBGKdynamics<T,Descriptor>::collideExternal (
 template<typename T, template<typename U> class Descriptor>
 T NaiveExternalForceBGKdynamics<T,Descriptor>::computeEquilibrium (
         plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-        T jSqr, T thetaBar) const
+        T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -251,7 +251,7 @@ void NaiveExternalForcePrecondBGKdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 void NaiveExternalForcePrecondBGKdynamics<T,Descriptor>::collideExternal (
-        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat)
+        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, [[maybe_unused]] T thetaBar, BlockStatistics& stat)
 {
     T uSqr = dynamicsTemplates<T,Descriptor>::precond_bgk_ma2_collision(cell, rhoBar, j, this->getOmega(), invGamma);
     externalForceTemplates<T,Descriptor>::addNaiveForce(cell);
@@ -264,7 +264,7 @@ void NaiveExternalForcePrecondBGKdynamics<T,Descriptor>::collideExternal (
 template<typename T, template<typename U> class Descriptor>
 T NaiveExternalForcePrecondBGKdynamics<T,Descriptor>::computeEquilibrium (
         plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-        T jSqr, T thetaBar) const
+        T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::precond_bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr, invGamma);
@@ -434,7 +434,7 @@ void GuoExternalForceCompleteRegularizedBGKdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 void GuoExternalForceCompleteRegularizedBGKdynamics<T,Descriptor>::collideExternal (
-        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat)
+        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, [[maybe_unused]] T thetaBar, BlockStatistics& stat)
 {
     Array<T,Descriptor<T>::d> u;
     this->computeVelocityExternal(cell, rhoBar, j, u);
@@ -465,7 +465,7 @@ void GuoExternalForceCompleteRegularizedBGKdynamics<T,Descriptor>::collideExtern
 
 template<typename T, template<typename U> class Descriptor>
 void GuoExternalForceCompleteRegularizedBGKdynamics<T,Descriptor>::computeEquilibria( Array<T,Descriptor<T>::q>& fEq,  T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                    T jSqr, T thetaBar ) const
+                                    T jSqr, [[maybe_unused]] T thetaBar ) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     dynamicsTemplates<T,Descriptor>::complete_bgk_ma2_equilibria( rhoBar, invRho, j, jSqr, fEq );
@@ -473,7 +473,7 @@ void GuoExternalForceCompleteRegularizedBGKdynamics<T,Descriptor>::computeEquili
 
 template<typename T, template<typename U> class Descriptor>
 T GuoExternalForceCompleteRegularizedBGKdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
+                                                T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::complete_bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -481,7 +481,7 @@ T GuoExternalForceCompleteRegularizedBGKdynamics<T,Descriptor>::computeEquilibri
 
 template<typename T, template<typename U> class Descriptor>
 void GuoExternalForceCompleteRegularizedBGKdynamics<T,Descriptor>::regularize(Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                            T jSqr, Array<T,SymmetricTensor<T,Descriptor>::n> const& PiNeq, T thetaBar) const
+                            T jSqr, Array<T,SymmetricTensor<T,Descriptor>::n> const& PiNeq, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     dynamicsTemplates<T,Descriptor>::complete_bgk_ma2_regularize(cell,rhoBar,invRho,j,jSqr,PiNeq, this->getOmega(), this->getOmega());
@@ -668,7 +668,7 @@ void GuoExternalForceConsistentSmagorinskyCompleteRegularizedBGKdynamics<T,Descr
 
 template<typename T, template<typename U> class Descriptor>
 void GuoExternalForceConsistentSmagorinskyCompleteRegularizedBGKdynamics<T,Descriptor>::collideExternal (
-        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat)
+        [[maybe_unused]] Cell<T,Descriptor>& cell, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T,Descriptor<T>::d> const& j, [[maybe_unused]] T thetaBar, [[maybe_unused]] BlockStatistics& stat)
 {
     PLB_ASSERT(false);
     // Array<T,Descriptor<T>::d> u;
@@ -757,7 +757,7 @@ void ShanChenExternalForceBGKdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 void ShanChenExternalForceBGKdynamics<T,Descriptor>::collideExternal (
-        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat)
+        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, [[maybe_unused]] T thetaBar, BlockStatistics& stat)
 {
     T invOmega = 1./this->getOmega();
     Array<T,Descriptor<T>::d> force;
@@ -778,7 +778,7 @@ void ShanChenExternalForceBGKdynamics<T,Descriptor>::collideExternal (
 template<typename T, template<typename U> class Descriptor>
 T ShanChenExternalForceBGKdynamics<T,Descriptor>::computeEquilibrium (
         plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-        T jSqr, T thetaBar ) const
+        T jSqr, [[maybe_unused]] T thetaBar ) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -832,7 +832,7 @@ void HeExternalForceBGKdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 void HeExternalForceBGKdynamics<T,Descriptor>::collideExternal (
-        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat)
+        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, [[maybe_unused]] T thetaBar, BlockStatistics& stat)
 {
     T uSqr = externalForceTemplates<T,Descriptor>::heForcedBGKCollision (
             cell, rhoBar, j, this->getOmega());
@@ -844,7 +844,7 @@ void HeExternalForceBGKdynamics<T,Descriptor>::collideExternal (
 template<typename T, template<typename U> class Descriptor>
 T HeExternalForceBGKdynamics<T,Descriptor>::computeEquilibrium (
         plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-        T jSqr, T thetaBar) const
+        T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -903,7 +903,7 @@ void IncGuoExternalForceBGKdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 void IncGuoExternalForceBGKdynamics<T,Descriptor>::collideExternal (
-        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat)
+        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, [[maybe_unused]] T thetaBar, BlockStatistics& stat)
 {
     Array<T,Descriptor<T>::d> u;
     this->computeVelocityExternal(cell, rhoBar, j, u);
@@ -924,7 +924,7 @@ void IncGuoExternalForceBGKdynamics<T,Descriptor>::collideExternal (
 template<typename T, template<typename U> class Descriptor>
 T IncGuoExternalForceBGKdynamics<T,Descriptor>::computeEquilibrium (
         plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-        T jSqr, T thetaBar) const
+        T jSqr, [[maybe_unused]] T thetaBar) const
 {
     // Inc => invRho = 1.0;
     T invRho = (T)1;
@@ -999,7 +999,7 @@ void ShanChenExternalForceRegularizedBGKdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 void ShanChenExternalForceRegularizedBGKdynamics<T,Descriptor>::collideExternal (
-        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat)
+        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, [[maybe_unused]] T thetaBar, BlockStatistics& stat)
 {
     Array<T,SymmetricTensor<T,Descriptor>::n> PiNeq;
     momentTemplates<T,Descriptor>::compute_PiNeq(cell, rhoBar, j, PiNeq);
@@ -1025,7 +1025,7 @@ void ShanChenExternalForceRegularizedBGKdynamics<T,Descriptor>::collideExternal 
 
 template<typename T, template<typename U> class Descriptor>
 T ShanChenExternalForceRegularizedBGKdynamics<T,Descriptor>::computeEquilibrium (
-        plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j, T jSqr, T thetaBar ) const
+        plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j, T jSqr, [[maybe_unused]] T thetaBar ) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);

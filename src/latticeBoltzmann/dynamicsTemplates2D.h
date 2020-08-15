@@ -166,7 +166,7 @@ static void bgk_ma2_equilibria( T rhoBar, T invRho, Array<T,D::d> const& j,
 }
 
 static void complete_bgk_ma2_equilibria( T rhoBar, T invRho, Array<T,D::d> const& j,
-                                T jSqr, Array<T,D::q>& eqPop )
+                                [[maybe_unused]] T jSqr, Array<T,D::q>& eqPop )
 {
     // T t0 = D::t[0];
     // T t1 = D::t[1];
@@ -346,7 +346,7 @@ static void computeInvMmNeq(const Array<T,D::q> &mNeq, Array<T,D::q> &f) {
     f[8] = D::t[2]*(sym-asym);
 }
 
-static void complete_neq_ma2_moments_from_phys_moments(Array<T,D::q>& mNeq, T rhoBar, T invRho, const Array<T,D::d> &j, 
+static void complete_neq_ma2_moments_from_phys_moments(Array<T,D::q>& mNeq, [[maybe_unused]] T rhoBar, T invRho, const Array<T,D::d> &j, 
                     const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, plint order, T omega, T omegaNonPhys) 
 {
     T omegaRatio = omega / omegaNonPhys;

@@ -84,9 +84,9 @@ public:
     ///  for now to fix a parse error in older GCCs.
     ParticleRegistration3D() { }
 private:
-    ParticleRegistration3D(ParticleRegistration3D<T,Descriptor> const& rhs) { }
+    ParticleRegistration3D([[maybe_unused]] ParticleRegistration3D<T,Descriptor> const& rhs) { }
     ParticleRegistration3D<T,Descriptor>& operator= (
-            ParticleRegistration3D<T,Descriptor> const& rhs )
+            [[maybe_unused]] ParticleRegistration3D<T,Descriptor> const& rhs )
     {
         return *this;
     }

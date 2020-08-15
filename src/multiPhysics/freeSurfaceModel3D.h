@@ -1992,8 +1992,8 @@ public:
     }
 
     template<class VelFunction>
-    Actions3D immersedWallActions (
-            plint numIBIterations, MultiContainerBlock3D& container,
+    Actions3D immersedWallActions ( // TODO: maybe remove container?
+            plint numIBIterations, [[maybe_unused]] MultiContainerBlock3D& container,
             std::vector<Array<T,3> > const& vertices,
             std::vector<T> const& areas, std::vector<int> const& flags,
             VelFunction velFunction, bool strongRepelling )

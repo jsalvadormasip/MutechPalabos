@@ -164,7 +164,7 @@ T WaveDynamics<T,Descriptor>::waveCollision (
 
 template<typename T, template<typename U> class Descriptor>
 T WaveDynamics<T,Descriptor>::waveEquilibrium (
-        plint iPop, T rhoBar, [[maybe_unused]] T invRho, Array<T,Descriptor<T>::d> const& j, T jSqr, T vs2)
+        plint iPop, T rhoBar, [[maybe_unused]] T invRho, Array<T,Descriptor<T>::d> const& j, [[maybe_unused]] T jSqr, T vs2)
 {
     T kappa = vs2 - Descriptor<T>::cs2;
     if (iPop==0) {

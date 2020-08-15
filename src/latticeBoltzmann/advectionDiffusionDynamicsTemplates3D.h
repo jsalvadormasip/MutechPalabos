@@ -180,10 +180,10 @@ static T no_corr_rlb_collision (
     return jSqr*invRho*invRho;
 }
 
-static void complete_bgk_ma2_regularized_collision(Array<T,D::q>& f, T rhoPhiBar, T rhoBar,
-                                                   Array<T,D::d> const& jEq, Array<T,D::d> const& jNeq, 
-                                                   const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, T omega, T omegaNonPhys, 
-                                                   T omegaFluid, T omegaFluidNonPhys )
+static void complete_bgk_ma2_regularized_collision([[maybe_unused]] Array<T,D::q>& f, [[maybe_unused]] T rhoPhiBar, [[maybe_unused]] T rhoBar,
+                                                   [[maybe_unused]] Array<T,D::d> const& jEq, [[maybe_unused]] Array<T,D::d> const& jNeq, 
+                                                   [[maybe_unused]] const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, [[maybe_unused]] T omega, [[maybe_unused]] T omegaNonPhys, 
+                                                   [[maybe_unused]] T omegaFluid, [[maybe_unused]] T omegaFluidNonPhys )
 {
     PLB_ASSERT(false && "method not implemented for d3q7");
 }
@@ -197,7 +197,7 @@ struct advectionDiffusionDynamicsTemplatesImpl<T,descriptors::D3Q15DescriptorBas
     
 typedef descriptors::D3Q15DescriptorBase<T> D;
 
-static T computePsiComplete(T omega) {
+static T computePsiComplete([[maybe_unused]] T omega) {
     PLB_ASSERT(false && "method not implemented for d3q15");
 }
 
@@ -230,8 +230,8 @@ static T no_corr_bgk_collision ( Array<T,D::q>& f, T rhoBar, Array<T,D::d> const
 }
 
 static T no_corr_bgk_collision(
-        Array<T,D::q>& f, T rhoBar, Array<T,D::d> const& jEq, 
-        T omega, T source) 
+        [[maybe_unused]] Array<T,D::q>& f, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T,D::d> const& jEq, 
+        [[maybe_unused]] T omega, [[maybe_unused]] T source) 
 {
     PLB_ASSERT(false && "no correction bgk collision with source not implemented yet for d3q15.");
 }
@@ -298,8 +298,8 @@ static void bgk_ma2_off_equilibra(T phi, Array<T,D::d> const& u, Array<T,D::d> c
 
 static void complete_bgk_ma2_regularize(Array<T,D::q>& f, T rhoPhiBar, T rhoBar,
                                         Array<T,D::d> const& jEq, Array<T,D::d> const& jNeq, 
-                                        const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, T omega, T omegaNonPhys, T omegaFluid, T omegaFluidNonPhys )
-{
+                                        const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, T omega, [[maybe_unused]] T omegaNonPhys, T omegaFluid, [[maybe_unused]] T omegaFluidNonPhys )
+{ // TODO: should check omegaNonPhys, and omegaNonPhysFluid that are unused. Looks suspicious.
     T invRho = D::invRho(rhoBar);
     T phi = invRho*D::fullRho(rhoPhiBar);
     T invRhoPhi = D::invRho(rhoPhiBar);
@@ -349,7 +349,7 @@ struct advectionDiffusionDynamicsTemplatesImpl<T,descriptors::D3Q19DescriptorBas
     
 typedef descriptors::D3Q19DescriptorBase<T> D;
 
-static T computePsiComplete(T omega) {
+static T computePsiComplete([[maybe_unused]] T omega) {
     PLB_ASSERT(false && "method not implemented for d3q19");
 }
 
@@ -417,8 +417,8 @@ static T no_corr_bgk_collision ( Array<T,D::q>& f, T rhoBar, Array<T,D::d> const
 }
 
 static T no_corr_bgk_collision(
-        Array<T,D::q>& f, T rhoBar, Array<T,D::d> const& jEq, 
-        T omega, T source) 
+        [[maybe_unused]] Array<T,D::q>& f, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T,D::d> const& jEq, 
+        [[maybe_unused]] T omega, [[maybe_unused]] T source) 
 {
     PLB_ASSERT(false && "no correction bgk collision with source not implemented yet for d3q19.");
 }
@@ -453,8 +453,8 @@ static T no_corr_rlb_collision (
 
 static void complete_bgk_ma2_regularize(Array<T,D::q>& f, T rhoPhiBar, T rhoBar,
                                         Array<T,D::d> const& jEq, Array<T,D::d> const& jNeq, 
-                                        const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, T omega, T omegaNonPhys, T omegaFluid, T omegaFluidNonPhys )
-{
+                                        const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, T omega, [[maybe_unused]] T omegaNonPhys, T omegaFluid, [[maybe_unused]] T omegaFluidNonPhys )
+{ // TODO: check both unused seem suspicious (and misleading)
     T invRho = D::invRho(rhoBar);
     T phi = invRho*D::fullRho(rhoPhiBar);
     T invRhoPhi = D::invRho(rhoPhiBar);
@@ -470,9 +470,9 @@ static void complete_bgk_ma2_regularize(Array<T,D::q>& f, T rhoPhiBar, T rhoBar,
 
 static T complete_bgk_ma2_regularized_collision(Array<T,D::q>& f, T rhoPhiBar, T rhoBar,
                                                    Array<T,D::d> const& jEq, Array<T,D::d> const& jNeq, 
-                                                   const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, T omega, T omegaNonPhys, 
-                                                   T omegaFluid, T omegaFluidNonPhys )
-{
+                                                   const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, T omega, [[maybe_unused]] T omegaNonPhys, 
+                                                   T omegaFluid, [[maybe_unused]] T omegaFluidNonPhys )
+{ // TODO: check both unused omegas. Misleading.
     T invRho = D::invRho(rhoBar);
     T phi = invRho*D::fullRho(rhoPhiBar);
     T invRhoPhi = D::invRho(rhoPhiBar);
