@@ -362,7 +362,7 @@ ReAssignTriangleHash<T,ParticleFieldT>::ReAssignTriangleHash (
 
 template<typename T, class ParticleFieldT>
 void ReAssignTriangleHash<T,ParticleFieldT>::processGenericBlocks (
-        Box3D domain, std::vector<AtomicBlock3D*> blocks )
+        [[maybe_unused]] Box3D domain, std::vector<AtomicBlock3D*> blocks )
 {
     PLB_PRECONDITION( blocks.size()==2 );
     AtomicContainerBlock3D* container =
@@ -402,7 +402,7 @@ BruteReAssignTriangleHash<T>::BruteReAssignTriangleHash (
 
 template<typename T>
 void BruteReAssignTriangleHash<T>::processGenericBlocks (
-        Box3D domain, std::vector<AtomicBlock3D*> blocks )
+        [[maybe_unused]] Box3D domain, std::vector<AtomicBlock3D*> blocks )
 {
     PLB_PRECONDITION( blocks.size()==1 );
     AtomicContainerBlock3D* container =

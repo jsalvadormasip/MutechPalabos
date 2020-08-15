@@ -68,7 +68,7 @@ void OneCellFunctional2D<T,Descriptor>::getTypeOfModification(std::vector<modif:
 
 
 template<typename T, template<class U> class Descriptor>
-void OneCellFunctional2D<T,Descriptor>::setscale(int dxScale, int dtScale)
+void OneCellFunctional2D<T,Descriptor>::setscale([[maybe_unused]] int dxScale, [[maybe_unused]] int dtScale)
 { }
 
 

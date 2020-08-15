@@ -97,7 +97,7 @@ void GuoExternalForceMRTdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 T GuoExternalForceMRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
+                                                T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -189,7 +189,7 @@ void GuoExternalForceSmagorinskyMRTdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 T GuoExternalForceSmagorinskyMRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
+                                                T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -284,7 +284,7 @@ void GuoExternalForceSmagorinskyIncMRTdynamics<T,Descriptor>::collide (
 template<typename T, template<typename U> class Descriptor>
 T GuoExternalForceSmagorinskyIncMRTdynamics<T,Descriptor>::
     computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                       T jSqr, T thetaBar) const
+                       T jSqr, [[maybe_unused]] T thetaBar) const
 {
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, (T)1, j, jSqr);
 }
@@ -368,7 +368,7 @@ void GuoExternalForceConsistentSmagorinskyMRTdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 T GuoExternalForceConsistentSmagorinskyMRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
+                                                T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -457,7 +457,7 @@ void GuoExternalForceConsistentSmagorinskyIncMRTdynamics<T,Descriptor>::collide 
 template<typename T, template<typename U> class Descriptor>
 T GuoExternalForceConsistentSmagorinskyIncMRTdynamics<T,Descriptor>::
     computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                       T jSqr, T thetaBar) const
+                       T jSqr, [[maybe_unused]] T thetaBar) const
 {
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, (T)1, j, jSqr);
 }
@@ -515,7 +515,7 @@ void GuoExternalForceAndMomentMRTdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 T GuoExternalForceAndMomentMRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
+                                                T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -579,7 +579,7 @@ void HeExternalForceMRTdynamics<T,Descriptor>::collide (
 
 template<typename T, template<typename U> class Descriptor>
 T HeExternalForceMRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
+                                                T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
