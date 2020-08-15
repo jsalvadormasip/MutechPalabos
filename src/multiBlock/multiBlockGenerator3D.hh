@@ -447,7 +447,8 @@ MultiNTensorField3D<T>* generateMultiNTensorField3D(Box3D const& domain, plint n
 
 template<typename T>
 void transferNTensorFieldLocal (
-        MultiNTensorField3D<T>& from, MultiNTensorField3D<T>& to, Box3D const& domain )
+        MultiNTensorField3D<T>& from, MultiNTensorField3D<T>& to, [[maybe_unused]] Box3D const& domain )
+// TODO: Remove the domain argument. Not used and misleading.
 {
     // 1. Copy all data from the old to the new field.
     plb::copy(from, to, from.getBoundingBox());
@@ -672,7 +673,8 @@ MultiNTensorField3D<T>* reparallelize (
 
 template<typename T, int nDim>
 void transferTensorFieldLocal (
-        MultiTensorField3D<T,nDim>& from, MultiTensorField3D<T,nDim>& to, Box3D const& domain )
+        MultiTensorField3D<T,nDim>& from, MultiTensorField3D<T,nDim>& to, [[maybe_unused]] Box3D const& domain )
+// TODO: Remove thedomain argument. Not used and misleading.
 {
     // 1. Copy all data from the old to the new field.
     plb::copy(from, to, from.getBoundingBox());

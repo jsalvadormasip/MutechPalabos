@@ -98,7 +98,7 @@ public:
             std::map<plint,NTensorField3D<T>*> const& fields ) const;
     virtual ParallelNTensorAccess3D<T>* clone() const;
 private:
-    ParallelNTensorAccess3D<T>& operator=(ParallelNTensorAccess3D<T> const& rhs) { return *this; }
+    ParallelNTensorAccess3D<T>& operator=([[maybe_unused]] ParallelNTensorAccess3D<T> const& rhs) { return *this; }
 private:
     mutable T* distributedNTensor;
     mutable plint locatedBlock;

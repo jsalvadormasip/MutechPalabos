@@ -430,7 +430,8 @@ MultiNTensorField2D<T>* generateMultiNTensorField2D(Box2D const& domain, plint n
 
 template<typename T>
 void transferNTensorFieldLocal (
-        MultiNTensorField2D<T>& from, MultiNTensorField2D<T>& to, Box2D const& domain )
+        MultiNTensorField2D<T>& from, MultiNTensorField2D<T>& to, [[maybe_unused]] Box2D const& domain )
+// TODO: Remove the domain argument. Not used and can be misleading.
 {
     // 1. Copy all data from the old to the new field.
     plb::copy(from, to, from.getBoundingBox());
@@ -634,7 +635,8 @@ MultiNTensorField2D<T>* reparallelize (
 
 template<typename T, int nDim>
 void transferTensorFieldLocal (
-        MultiTensorField2D<T,nDim>& from, MultiTensorField2D<T,nDim>& to, Box2D const& domain )
+        MultiTensorField2D<T,nDim>& from, MultiTensorField2D<T,nDim>& to, [[maybe_unused]] Box2D const& domain )
+// TODO: remove the domain argument. It is not used and can be misleading.
 {
     // 1. Copy all data from the old to the new field.
     plb::copy(from, to, from.getBoundingBox());
