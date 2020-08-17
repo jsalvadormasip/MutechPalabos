@@ -1609,8 +1609,10 @@ plint RawTriangleMesh<T>::getTriangleTag(std::string tagName) const {
     }
     return -1;
 }
-template<typename T>
-std::string RawTriangleMesh<T>::getTriangleTagName(plint tag) const {
+
+// TODO: maybe replace ASSERTS by exceptions?
+template<typename T> 
+std::string RawTriangleMesh<T>::getTriangleTagName([[maybe_unused]] plint tag) const {
     PLB_ASSERT(tag==0);
     return "Part";
 }

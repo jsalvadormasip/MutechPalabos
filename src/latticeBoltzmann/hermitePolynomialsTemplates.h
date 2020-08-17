@@ -55,7 +55,7 @@ struct HermiteTemplate {
     /// Number of dimensions for current lattice
     static const int d = Descriptor<T>::d;
     /// Compute order0 hermite polynomial
-    static T order0(plint iPop) {
+    static T order0([[maybe_unused]] plint iPop) {
         PLB_ASSERT(iPop < Descriptor<T>::q && iPop >= 0);
         return (T)1;
     }

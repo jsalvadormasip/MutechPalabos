@@ -2213,7 +2213,8 @@ public:
         return incompressibleModel;
     }
 private:
-    bool fieldExists(std::string name, plint envelopeWidth)
+    // TODO: maybe replace ASSERTS with exceptions.
+    bool fieldExists(std::string name, [[maybe_unused]] plint envelopeWidth)
     {
         if (group.hasBlock(name)) {
             PLB_ASSERT( group.get(name).getMultiBlockManagement().getEnvelopeWidth() >= envelopeWidth );
@@ -3318,7 +3319,8 @@ public:
         return reductionData.numInterfaceCells;
     }
 private:
-    bool fieldExists(std::string name, plint envelopeWidth)
+    // TODO: maybe replace ASSERTS with exceptions.
+    bool fieldExists(std::string name, [[maybe_unused]] plint envelopeWidth)
     {
         if (group.hasBlock(name)) {
             PLB_ASSERT( group.get(name).getMultiBlockManagement().getEnvelopeWidth() >= envelopeWidth );

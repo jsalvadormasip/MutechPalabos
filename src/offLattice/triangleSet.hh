@@ -2079,7 +2079,9 @@ int TriangleSet<T>::cutWithPlane (
     newPlane.point = plane.point;
     newPlane.normal = plane.normal / norm_normal;
 
+#ifdef PLB_DEBUG
     T norm_diagonal = norm(cuboid.upperRightCorner - cuboid.lowerLeftCorner);
+#endif
     PLB_ASSERT(!util::isZero(norm_diagonal, eps));
 
     newTriangleSet.triangles.clear();
