@@ -99,8 +99,8 @@ private:
             std::vector<BubbleTransition3D>& bubbleTransitions );
     static T getCutoffVolume() { return 2.0; }
 private:
-    BubbleHistory3D(BubbleHistory3D<T> const& rhs) { PLB_ASSERT( false ); }
-    BubbleHistory3D<T>& operator=(BubbleHistory3D<T> const& rhs) { PLB_ASSERT( false ); return *this; }
+    BubbleHistory3D([[maybe_unused]] BubbleHistory3D<T> const& rhs) { PLB_ASSERT( false ); }
+    BubbleHistory3D<T>& operator=([[maybe_unused]] BubbleHistory3D<T> const& rhs) { PLB_ASSERT( false ); return *this; }
 private:
     MultiContainerBlock3D *bubbleAnalysisContainer, *bubbleCorrelationContainer, *bubbleRemapContainer;
     BubbleMPIdata mpiData;

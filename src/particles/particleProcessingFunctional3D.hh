@@ -1549,7 +1549,7 @@ AdvanceParticlesEveryWhereFunctional3D<T,Descriptor>::AdvanceParticlesEveryWhere
 
 template<typename T, template<typename U> class Descriptor>
 void AdvanceParticlesEveryWhereFunctional3D<T,Descriptor>::processGenericBlocks (
-        Box3D domain, std::vector<AtomicBlock3D*> blocks )
+        [[maybe_unused]] Box3D domain, std::vector<AtomicBlock3D*> blocks )
 {
     PLB_PRECONDITION( blocks.size()==1 );
     ParticleField3D<T,Descriptor>& particleField =

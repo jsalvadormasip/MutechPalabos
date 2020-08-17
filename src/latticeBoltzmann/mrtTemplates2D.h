@@ -258,7 +258,7 @@ template<typename T> struct mrtTemplatesImpl<T, descriptors::MRTD2Q9DescriptorBa
     
 	static void addHeForce( Array<T,Descriptor::q>& f, const Array<T,Descriptor::d>& force,
                              const T &rhoBar, Array<T,Descriptor::d> const& uLB,
-                             const T &omega, T amplitude )
+                             const T &omega, [[maybe_unused]] T amplitude )
     {
      		
 		///////////// new 

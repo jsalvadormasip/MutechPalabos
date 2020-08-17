@@ -93,7 +93,7 @@ public:
     virtual ~IsoSurfaceDefinition3D() { }
     virtual bool isInside (
             plint surfaceId, Array<plint,3> const& position ) const =0;
-    virtual bool isValid(Array<plint,3> const& position) const { return true; }
+    virtual bool isValid([[maybe_unused]] Array<plint,3> const& position) const { return true; }
     virtual Array<T,3> getSurfacePosition (
              plint surfaceId, Array<plint,3> const& p1, Array<plint,3> const& p2 ) const =0;
     virtual void setArguments(std::vector<AtomicBlock3D*> const& arguments) =0;
@@ -133,7 +133,7 @@ public:
             plint surfaceId, Array<plint,3> const& position ) const;
     virtual Array<T,3> getSurfacePosition (
             plint surfaceId, Array<plint,3> const& p1, Array<plint,3> const& p2 ) const;
-    virtual void setArguments(std::vector<AtomicBlock3D*> const& arguments) { }
+    virtual void setArguments([[maybe_unused]] std::vector<AtomicBlock3D*> const& arguments) { }
     virtual AnalyticalIsoSurface3D<T,Function>* clone() const;
     virtual plint getNumArgs() const { return 0; }
     virtual std::vector<plint> getSurfaceIds() const;
@@ -437,7 +437,6 @@ public:
 private:
     void marchingCubeImpl (
              plint iX, plint iY, plint iZ, plint surfaceId,
-             std::vector<Triangle>& triangles,
              int& cubeIndex, std::vector<Array<T,3> >& vertlist );
     void polygonize (
              plint iX, plint iY, plint iZ, plint surfaceId,

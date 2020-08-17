@@ -1646,7 +1646,7 @@ void TwoPhaseIniInterfaceToAnyNodes3D<T,Descriptor>
 
 template< typename T,template<typename U> class Descriptor>
 void TwoPhaseIniEmptyToInterfaceNodes3D<T,Descriptor>
-        ::processGenericBlocks(Box3D domain,std::vector<AtomicBlock3D*> atomicBlocks)
+        ::processGenericBlocks([[maybe_unused]] Box3D domain,std::vector<AtomicBlock3D*> atomicBlocks)
 {
     typedef typename TwoPhaseInterfaceLists<T,Descriptor>::Node Node;
     typedef typename TwoPhaseInterfaceLists<T,Descriptor>::ExtrapolInfo ExtrapolInfo;

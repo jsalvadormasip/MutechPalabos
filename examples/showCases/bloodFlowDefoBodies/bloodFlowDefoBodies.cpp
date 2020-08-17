@@ -218,7 +218,7 @@ public:
 		, radius(radius_)
 	{ }
 
-	virtual bool operator()(plint iX, plint iY, plint iZ) const
+	virtual bool operator()(plint iX, plint iY, [[maybe_unused]] plint iZ) const
 	{
 		// True if solid
 		return (std::sqrt(util::sqr((T)iX - center[0]) + util::sqr((T)iY - center[1])) >= radius);
@@ -1347,18 +1347,18 @@ int main(int argc, char* argv[])
 
 	// See Kruger-LBM-Book p.273
 	if (sp.dt_p < 0. && sp.u_lb < 0.) {
-		PLB_ASSERT(tau_lb <= 3.);
+		PLB_ASSERT(sp.tau_lb <= 3.);
 
         sp.dt_p = DESCRIPTOR<T>::cs2 * (sp.tau_lb - 0.5) * sp.dx_p * sp.dx_p / sp.nu_p;
 		plb::global::logfile("DATA.log").flushEntry("dt_p: " + util::val2str(sp.dt_p));
 
         sp.u_lb = sp.u_p * (sp.dt_p / sp.dx_p);
 		plb::global::logfile("DATA.log").flushEntry("u_lb: " + util::val2str(sp.u_lb));
-		PLB_ASSERT(u_lb <= 0.04);
+		PLB_ASSERT(sp.u_lb <= 0.04);
 	}
 	else if (sp.tau_lb < 0. && sp.u_lb < 0.) {
         sp.tau_lb = (sp.dt_p * sp.nu_p) / (DESCRIPTOR<T>::cs2 * sp.dx_p * sp.dx_p) + 0.5;
-		PLB_ASSERT(tau_lb <= 3.);
+		PLB_ASSERT(sp.tau_lb <= 3.);
 		plb::global::logfile("DATA.log").flushEntry("tau_lb: " + util::val2str(sp.tau_lb));
 
         sp.u_lb = sp.u_p * (sp.dt_p / sp.dx_p);
@@ -1370,7 +1370,7 @@ int main(int argc, char* argv[])
 		plb::global::logfile("DATA.log").flushEntry("dt_p: " + util::val2str(sp.dt_p));
 
         sp.tau_lb = (sp.dt_p * sp.nu_p) / (DESCRIPTOR<T>::cs2 * sp.dx_p * sp.dx_p) + 0.5;
-		PLB_ASSERT(tau_lb <= 3.);
+		PLB_ASSERT(sp.tau_lb <= 3.);
 		plb::global::logfile("DATA.log").flushEntry("tau_lb: " + util::val2str(sp.tau_lb));
 	}
 
@@ -1544,6 +1544,7 @@ int main(int argc, char* argv[])
 				Vtot = sp.PI_ * (sp.pipeRadius_LB * sp.dx_p) * (sp.pipeRadius_LB * sp.dx_p) * sp.lz_p;
 			}
 
+			// QUESTION: should we add an "else" here?
 			T Vrbcs = (sp.ht / 100.) * Vtot;
 			T Vrbc = sp.RBC_shapeOpSolverTemplate.Volume0_;
 
@@ -2378,7 +2379,7 @@ int main(int argc, char* argv[])
                     pluint numRBCs_toPrint_tmp = 0;
                     pluint numPLTs_toPrint_tmp = 0;
 
-					for (pluint j = 0; j < sp.centers_log.cols(); j += 3)
+					for (pluint j = 0; j < (pluint)sp.centers_log.cols(); j += 3)
 					{
 						if ((j / 3) < sp.shapeOpRBCs.size())
 						{
@@ -2400,17 +2401,23 @@ int main(int argc, char* argv[])
 							bodyID_tmp = sp.shapeOpPLTs[cnt]->bodyID_;
 						}
 
-                        if (RBC_printing)
-                            if (numRBCs_toPrint_tmp > numRBCs_toPrint_COMs)
+						// QUESTION: Why not write this as:
+						// print = !(numRBCs_toPrint_tmp > numRBCs_toPrint_COMs) ?
+                        if (RBC_printing) {
+                            if (numRBCs_toPrint_tmp > numRBCs_toPrint_COMs) {
                                 print = false;
-                            else
+							} else {
                                 print = true;
+							}
+						}
                         
-                        if (PLT_printing)
-                            if (numPLTs_toPrint_tmp > numPLTs_toPrint_COMs)
+                        if (PLT_printing) {
+                            if (numPLTs_toPrint_tmp > numPLTs_toPrint_COMs) {
                                 print = false;
-                            else
+							} else {
                                 print = true;
+							}
+						}
 
                         if (print)
                         {

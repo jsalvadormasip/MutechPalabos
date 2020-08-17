@@ -144,7 +144,7 @@ CouplingAction2D* CouplingAction2D::clone() const {
     return new CouplingAction2D(*this);
 }
 
-void CouplingAction2D::execute(std::vector<id_t>& allMultiBlocks) {
+void CouplingAction2D::execute([[maybe_unused]] std::vector<id_t>& allMultiBlocks) {
     coupling->execute();
 }
 
@@ -171,7 +171,7 @@ void CommunicateAction2D::execute(std::vector<id_t>& allMultiBlocks) {
     block -> duplicateOverlaps( whichData );
 }
 
-void CommunicateAction2D::regenerate(std::vector<id_t>& allMultiBlocks)
+void CommunicateAction2D::regenerate([[maybe_unused]] std::vector<id_t>& allMultiBlocks)
 { }
 
 
@@ -194,7 +194,7 @@ void ExecuteInternalProcAction2D::execute(std::vector<id_t>& allMultiBlocks) {
     block -> executeInternalProcessors(level, communicate);
 }
 
-void ExecuteInternalProcAction2D::regenerate(std::vector<id_t>& allMultiBlocks)
+void ExecuteInternalProcAction2D::regenerate([[maybe_unused]] std::vector<id_t>& allMultiBlocks)
 { }
 
 
@@ -215,7 +215,7 @@ void EvaluateStatsAction2D::execute(std::vector<id_t>& allMultiBlocks) {
     block -> evaluateStatistics();
 }
 
-void EvaluateStatsAction2D::regenerate(std::vector<id_t>& allMultiBlocks)
+void EvaluateStatsAction2D::regenerate([[maybe_unused]] std::vector<id_t>& allMultiBlocks)
 { }
 
 

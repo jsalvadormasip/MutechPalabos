@@ -89,7 +89,7 @@ void TriangularSurfaceMesh<T>::resetVertices(Array<T,3> const& defaultVertex)
 }
 
 template<typename T>
-inline void TriangularSurfaceMesh<T>::assertVertex(Array<T,3> const& vertex) const
+inline void TriangularSurfaceMesh<T>::assertVertex([[maybe_unused]] Array<T,3> const& vertex) const
 {
 #ifdef PLB_DEBUG
     if (global::IOpolicy().stlFilesHaveLowerBound()) {
@@ -1747,9 +1747,10 @@ void TriangularSurfaceMesh<T>::writeHTML(std::string fname)
     writeHTML(fname, "Palabos html output", T(), Array<T,3>((T)0.,(T)0.,(T)0.));
 }
 
+// QUESTION: title unused could we remove it?
 template<typename T>
 void TriangularSurfaceMesh<T>::writeHTML (
-        std::string fname, std::string title, T phys_dx, Array<T,3> phys_location)
+        std::string fname, [[maybe_unused]] std::string title, T phys_dx, Array<T,3> phys_location)
 {
     if (!global::mpi().isMainProcessor()) {
         return;
@@ -1852,9 +1853,11 @@ void TriangularSurfaceMesh<T>::writeX3D(std::string fname)
     writeX3D(fname, "Palabos X3D output", T(), Array<T,3>((T)0.,(T)0.,(T)0.));
 }
 
+
+// QUESTION: title, phys_dx and phys_location unused could we remove them?
 template<typename T>
 void TriangularSurfaceMesh<T>::writeX3D (
-        std::string fname, std::string title, T phys_dx, Array<T,3> phys_location)
+        std::string fname, [[maybe_unused]] std::string title, [[maybe_unused]] T phys_dx, [[maybe_unused]] Array<T,3> phys_location)
 {
     if (!global::mpi().isMainProcessor()) {
         return;

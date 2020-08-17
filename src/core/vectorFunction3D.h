@@ -61,7 +61,7 @@ public:
         : constantVector(constantVector_)
     { }
 
-    virtual Array<T,3> operator()(Array<T,3> const& position) const
+    virtual Array<T,3> operator()([[maybe_unused]] Array<T,3> const& position) const
     {
         return constantVector;
     }
@@ -560,7 +560,7 @@ public:
           tOffset(tOffset_)
     { }
 
-    virtual Array<T,3> operator()(Array<T,3> const& position) const
+    virtual Array<T,3> operator()([[maybe_unused]] Array<T,3> const& position) const
     {
         T t = (T) lattice.getTimeCounter().getTime() + tOffset;
         return std::cos(angularFrequency * t + phase) * vectorAmplitude;

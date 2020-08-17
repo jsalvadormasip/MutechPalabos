@@ -209,7 +209,7 @@ void BouzidiOffLatticeModel3D<T,Descriptor>::cellCompletion (
         Dot3D const& boundaryNode,
         std::vector<int> const& solidDirections, std::vector<plint> const& boundaryIds,
         std::vector<bool> const& hasFluidNeighbor, Dot3D const& absoluteOffset,
-        Array<T,3>& localForce, std::vector<AtomicBlock3D *> const& args )
+        Array<T,3>& localForce, [[maybe_unused]] std::vector<AtomicBlock3D *> const& args )
 {
     typedef Descriptor<T> D;
     Array<T,D::d> deltaJ;

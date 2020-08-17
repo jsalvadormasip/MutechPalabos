@@ -617,7 +617,8 @@ SHAPEOP_INLINE bool Solver::solve(int m
     unsigned int avg_line_search_loops = 0;
 
     // convergence related
-    bool stagnation = false;
+    // QUESTION: Stagnation is unused, is that normal?
+    [[maybe_unused]] bool stagnation = false;
     unsigned int attempts_to_solve_stagnation = 0;
     Scalar convergence_criterion;
     std::vector<Scalar> objective_history;

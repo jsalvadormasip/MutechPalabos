@@ -68,7 +68,7 @@ Array<T,3> predictorCorrectorNTensorField (
 template<typename T>
 void predictorCorrectorRhoBarJ (
         NTensorField3D<T>& rhoBarJ, Array<T,3> const& position,
-        bool velIsJ, Array<T,3>& j, T& rhoBar );
+        Array<T,3>& j, T& rhoBar );
 
 template<typename T>
 T linearInterpolateScalarField (

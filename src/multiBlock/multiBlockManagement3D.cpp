@@ -268,9 +268,9 @@ MultiBlockManagement3D intersect( MultiBlockManagement3D const& management1,
             management1.getRefinementLevel() );
 }
 
-
+// QUESTION: Suspicious that this unique bulk is not used
 MultiBlockManagement3D extend( MultiBlockManagement3D const& management,
-                               Box3D addedBulk, Box3D addedUniqueBulk )
+                               Box3D addedBulk, [[maybe_unused]] Box3D addedUniqueBulk )
 {
     std::vector<plint> newIds;
     SparseBlockStructure3D resultStructure =

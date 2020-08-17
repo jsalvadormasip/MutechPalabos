@@ -63,12 +63,11 @@ class SVGWriter2D {
             out << "</defs>\n";
         }
         
-        void writeDomainsWithDynamicsInfo(std::string fileName, int dynamicsNumber,
+        void writeDomainsWithDynamicsInfo(std::string fileName,
                                           std::vector<MultiScalarField2D<int> > dynamicsInfo,
                                           std::vector<std::map<int, std::string> >& idToName,
                                           std::map<std::string,int>& nameToColor)
         {
-            //std::vector<std::string> colors = createColors(dynamicsNumber);
             out.open(fileName.c_str());
             Box2D finestBoundingBox = management.getBoundingBox(management.getNumLevels()-1);
             Dot2D size(finestBoundingBox.getNx(),finestBoundingBox.getNy());
@@ -102,13 +101,12 @@ class SVGWriter2D {
             
         }
         
-        void writeDomainsWithDynamicsInfo(std::string fileName, int dynamicsNumber,
+        void writeDomainsWithDynamicsInfo(std::string fileName,
                                           std::vector<std::vector<Box2D> > blocks,
                                           std::vector<MultiScalarField2D<int> > dynamicsInfo,
                                           std::vector<std::map<int, std::string> >& idToName,
                                           std::map<std::string,int>& nameToColor)
         {
-            //std::vector<std::string> colors = createColors(dynamicsNumber);
             out.open(fileName.c_str());
             Box2D finestBoundingBox = management.getBoundingBox(management.getNumLevels()-1);
             Dot2D size(finestBoundingBox.getNx(),finestBoundingBox.getNy());

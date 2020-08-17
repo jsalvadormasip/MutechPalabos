@@ -82,8 +82,7 @@ void setupInletAndBulk( MultiBlockLattice2D<T,DESCRIPTOR>& lattice,
 }
 
 void copyUnknownOnOutlet( MultiBlockLattice2D<T,DESCRIPTOR>& lattice,
-                          IncomprFlowParam<T> const& parameters,
-                          OnLatticeBoundaryCondition2D<T,DESCRIPTOR>& boundaryCondition )
+                          IncomprFlowParam<T> const& parameters )
 {
     const plint nx = parameters.getNx();
     const plint ny = parameters.getNy();
@@ -155,7 +154,7 @@ int main(int argc, char* argv[]) {
 
     defineCylinderGeometry(lattice, parameters);
     setupInletAndBulk(lattice, parameters, *boundaryCondition);
-    //copyUnknownOnOutlet(lattice, parameters, *boundaryCondition);
+    //copyUnknownOnOutlet(lattice, parameters);
     velocityNeumannOutlet(lattice, parameters, *boundaryCondition);
     lattice.initialize();
 
