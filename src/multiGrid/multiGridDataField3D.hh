@@ -346,7 +346,7 @@ MultiGridTensorField3D<T,nDim>::MultiGridTensorField3D (
 }
                 
 template<typename T, int nDim>
-MultiGridTensorField3D<T,nDim>::MultiGridTensorField3D(MultiGridTensorField3D<T,nDim> const& rhs)
+MultiGridTensorField3D<T,nDim>::MultiGridTensorField3D([[maybe_unused]] MultiGridTensorField3D<T,nDim> const& rhs)
 {
     allocateFields();
 }

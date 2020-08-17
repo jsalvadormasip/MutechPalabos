@@ -98,7 +98,7 @@ public:
     virtual int getStaticId() const;
     virtual void copyReceive (
                 MultiBlock2D const& fromBlock, Box2D const& fromDomain,
-                Box2D const& toDomain, modif::ModifT whichData=modif::dataStructure );
+                Box2D const& toDomain, [[maybe_unused]] modif::ModifT whichData = modif::dataStructure );
     virtual std::string getBlockName() const;
     virtual std::vector<std::string> getTypeInfo() const;
     static std::string blockName();

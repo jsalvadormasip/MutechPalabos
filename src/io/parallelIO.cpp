@@ -75,12 +75,13 @@ plb_ofstream::plb_ofstream(const char* filename, std::ostream::openmode mode)
             new std::ofstream(filename,mode) : 0 )
 { }
 
-plb_ofstream::plb_ofstream(plb_ofstream const& rhs)
+// QUESTION: Why is the copy const and equal doing nothing?
+plb_ofstream::plb_ofstream([[maybe_unused]] plb_ofstream const& rhs)
     : devNullStream(&devNullBuffer),
       original(0)
 { }
 
-plb_ofstream& plb_ofstream::operator=(plb_ofstream const& rhs) {
+plb_ofstream& plb_ofstream::operator=([[maybe_unused]] plb_ofstream const& rhs) {
     return *this;
 }
 
@@ -156,12 +157,13 @@ plb_ifstream::plb_ifstream(const char * filename, std::istream::openmode mode)
             new std::ifstream(filename,mode) : 0 )
 { }
 
-plb_ifstream::plb_ifstream(plb_ifstream const& rhs)
+// QUESTION: Why copy and equal are doing nothing?
+plb_ifstream::plb_ifstream([[maybe_unused]] plb_ifstream const& rhs)
     : devNullStream(&devNullBuffer),
       original(0)
 { }
 
-plb_ifstream& plb_ifstream::operator=(plb_ifstream const& rhs) {
+plb_ifstream& plb_ifstream::operator=([[maybe_unused]] plb_ifstream const& rhs) {
     return *this;
 }
 

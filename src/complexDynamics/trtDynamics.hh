@@ -135,7 +135,7 @@ void TRTdynamics<T,Descriptor>::collide (
 template<typename T, template<typename U> class Descriptor>
 void TRTdynamics<T,Descriptor>::collideExternal (
         Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-        T thetaBar, BlockStatistics& statistics )
+        [[maybe_unused]] T thetaBar, BlockStatistics& statistics )
 {
     const T sPlus = this->getOmega();
     // Pan's model: bounce-back exactly half-way between nodes.
@@ -178,7 +178,7 @@ void TRTdynamics<T,Descriptor>::collideExternal (
 
 template<typename T, template<typename U> class Descriptor>
 T TRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
+                                                T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -258,7 +258,7 @@ void IncTRTdynamics<T,Descriptor>::collide (
 template<typename T, template<typename U> class Descriptor>
 void IncTRTdynamics<T,Descriptor>::collideExternal (
         Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-        T thetaBar, BlockStatistics& statistics )
+        [[maybe_unused]] T thetaBar, BlockStatistics& statistics )
 {
     const T sPlus = this->getOmega();
 
@@ -293,7 +293,7 @@ void IncTRTdynamics<T,Descriptor>::collideExternal (
 
 template<typename T, template<typename U> class Descriptor>
 T IncTRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
+                                                T jSqr, [[maybe_unused]] T thetaBar) const
 {
     return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, (T)1, j, jSqr);
 }

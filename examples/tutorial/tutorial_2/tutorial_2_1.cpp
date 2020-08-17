@@ -61,13 +61,13 @@ public:
     { }
     /// This version of the operator returns the velocity only,
     ///    to instantiate the boundary condition.
-    void operator()(plint iX, plint iY, Array<T,2>& u) const {
+    void operator()([[maybe_unused]] plint iX, plint iY, Array<T,2>& u) const {
         u[0] = poiseuilleVelocity(iY, parameters);
         u[1] = T();
     }
     /// This version of the operator returns also a constant value for
     ///    the density, to create the initial condition.
-    void operator()(plint iX, plint iY, T& rho, Array<T,2>& u) const {
+    void operator()([[maybe_unused]] plint iX, plint iY, T& rho, Array<T,2>& u) const {
         u[0] = poiseuilleVelocity(iY, parameters);
         u[1] = T();
         rho  = (T)1;

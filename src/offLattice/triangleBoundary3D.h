@@ -396,7 +396,7 @@ public:
     TriangleBoundary3D<T> const& getBoundary() const { return boundary; }
     int getFlowType() const { return flowType; }
 private:
-    VoxelizedDomain3D<T>& operator=(VoxelizedDomain3D<T> const& rhs) { }
+    VoxelizedDomain3D<T>& operator=([[maybe_unused]] VoxelizedDomain3D<T> const& rhs) { }
     void createSparseVoxelMatrix (
         MultiScalarField3D<int>& fullVoxelMatrix,
         plint blockSize_, plint envelopeWidth_ );

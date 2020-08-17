@@ -235,8 +235,9 @@ void sendBodiesVelocities(std::vector<ShapeOpBody<T>>& shapeOpBodies)
 }
 
 // This is the "receive" part of the MPI communication for velocities (ShapeOp->Palabos).
+// QUESTION: Is it normal that rho is unused here?
 template <typename T>
-void receiveBodiesVelocities(std::map<pluint, pluint>& bodyToProc, std::vector<ShapeOpBody<T>>& shapeOpBodies, T dx, T dt, T rho)
+void receiveBodiesVelocities(std::map<pluint, pluint>& bodyToProc, std::vector<ShapeOpBody<T>>& shapeOpBodies, T dx, T dt, [[maybe_unused]] T rho)
 {
     // From physical to lattice units (From ShapeOp to Palabos)
     T Cu = dt / dx;

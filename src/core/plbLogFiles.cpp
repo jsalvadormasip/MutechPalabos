@@ -64,10 +64,11 @@ PlbLogFile::~PlbLogFile() {
     delete ofile;
 }
 
-PlbLogFile::PlbLogFile(PlbLogFile const& rhs)
+// QUESTION: Why copy const and equal do nothing?
+PlbLogFile::PlbLogFile([[maybe_unused]] PlbLogFile const& rhs)
 { }
 
-PlbLogFile& PlbLogFile::operator=(PlbLogFile const& rhs)
+PlbLogFile& PlbLogFile::operator=([[maybe_unused]] PlbLogFile const& rhs)
 {
     return *this;
 }
@@ -109,10 +110,11 @@ LogFileCollection::~LogFileCollection() {
     }
 }
 
-LogFileCollection::LogFileCollection(LogFileCollection const& rhs)
+// QUESTION: Why do copy const and equal do nothing?
+LogFileCollection::LogFileCollection([[maybe_unused]] LogFileCollection const& rhs)
 { }
 
-LogFileCollection& LogFileCollection::operator=(LogFileCollection const& rhs) {
+LogFileCollection& LogFileCollection::operator=([[maybe_unused]] LogFileCollection const& rhs) {
     return *this;
 }
 

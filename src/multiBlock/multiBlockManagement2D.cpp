@@ -255,9 +255,9 @@ MultiBlockManagement2D intersect( MultiBlockManagement2D const& management1,
             management1.getRefinementLevel() );
 }
 
-
+// QUESTION: Suspicious that this unique bulk is not used
 MultiBlockManagement2D extend( MultiBlockManagement2D const& management,
-                               Box2D addedBulk, Box2D addedUniqueBulk )
+                               Box2D addedBulk, [[maybe_unused]] Box2D addedUniqueBulk )
 {
     std::vector<plint> newIds;
     SparseBlockStructure2D resultStructure =

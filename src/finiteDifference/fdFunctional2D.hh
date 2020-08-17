@@ -123,7 +123,7 @@ void BoxXderivativeFunctional2D<T>::processEdge (
 
 template<typename T>
 void BoxXderivativeFunctional2D<T>::processCorner (
-        int normalX, int normalY,  Box2D domain,
+        int normalX, [[maybe_unused]] int normalY,  Box2D domain,
         ScalarField2D<T>& value, ScalarField2D<T>& derivative )
 {
     Dot2D offset = computeRelativeDisplacement(value, derivative);
@@ -204,7 +204,7 @@ void BoxYderivativeFunctional2D<T>::processEdge (
 
 template<typename T>
 void BoxYderivativeFunctional2D<T>::processCorner (
-        int normalX, int normalY,  Box2D domain,
+        [[maybe_unused]] int normalX, int normalY,  Box2D domain,
         ScalarField2D<T>& value, ScalarField2D<T>& derivative )
 {
     Dot2D offset = computeRelativeDisplacement(value, derivative);

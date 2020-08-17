@@ -68,8 +68,8 @@ struct ThreadAttribution {
               std::vector<plint> const& ids,
               std::vector<plint> const& mpiProcesses, std::vector<plint> const& localThreads ) const =0;
     virtual bool hasCoProcessors() const { return false; }
-    virtual void setCoProcessors(std::map<plint,int> processorHandles) { }
-    virtual int getCoProcessorHandle(plint id) const { return 0; }
+    virtual void setCoProcessors([[maybe_unused]] std::map<plint,int> processorHandles) { }
+    virtual int getCoProcessorHandle([[maybe_unused]] plint id) const { return 0; }
     virtual ThreadAttribution* clone() const =0;
 };
 

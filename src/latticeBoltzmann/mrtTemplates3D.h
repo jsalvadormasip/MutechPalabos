@@ -409,7 +409,7 @@ template<typename T> struct mrtTemplatesImpl<T, descriptors::MRTD3Q19DescriptorB
     
     	static void addHeForce( Array<T,Descriptor::q>& f, const Array<T,Descriptor::d>& force,
                              const T &rhoBar, Array<T,Descriptor::d> const& uLB,
-                             const T &omega, T amplitude )
+                             const T &omega, [[maybe_unused]] T amplitude )
     {
      		
 		///////////// new 
@@ -686,7 +686,7 @@ template<typename T> struct mrtTemplatesImpl<T, descriptors::MRTD3Q19DescriptorB
     
     /// Smagorinsky MRT collision step
     static T incSmagorinskyMrtCollisionWithForce( Array<T,Descriptor::q>& f,
-                                                       const T &rhoBar, const Array<T,Descriptor::d> & u,
+                                                       [[maybe_unused]] const T &rhoBar, const Array<T,Descriptor::d> & u,
                                                        const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n > &strain, T omega, T cSmago, 
                                                        const Array<T,Descriptor::d> &force, T amplitude) 
     {

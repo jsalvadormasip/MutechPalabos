@@ -188,8 +188,9 @@ ParallelBlockCommunicator3D::ParallelBlockCommunicator3D()
       communication(0)
 { }
 
+// QUESTION: Why copy construction does nothing?
 ParallelBlockCommunicator3D::ParallelBlockCommunicator3D (
-        ParallelBlockCommunicator3D const& rhs )
+        [[maybe_unused]] ParallelBlockCommunicator3D const& rhs )
     : overlapsModified(true),
       communication(0)
 { }
@@ -320,8 +321,9 @@ BlockingCommunicator3D::BlockingCommunicator3D()
     pcout << "Using the blocking version of the communicator." << std::endl;
 }
 
+// QUESTION: Why is copy constructor doing nothing?
 BlockingCommunicator3D::BlockingCommunicator3D (
-        BlockingCommunicator3D const& rhs )
+        [[maybe_unused]] BlockingCommunicator3D const& rhs )
     : overlapsModified(true),
       communication(0)
 { }

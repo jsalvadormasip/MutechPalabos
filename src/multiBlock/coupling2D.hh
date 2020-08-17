@@ -66,7 +66,7 @@ void FullDomainCollideAndStreamAction2D<T,Descriptor>::execute(std::vector<id_t>
 }
 
 template<typename T, template<typename U> class Descriptor>
-void FullDomainCollideAndStreamAction2D<T,Descriptor>::regenerate(std::vector<id_t>& allMultiBlocks)
+void FullDomainCollideAndStreamAction2D<T,Descriptor>::regenerate([[maybe_unused]] std::vector<id_t>& allMultiBlocks)
 { }
 
 
@@ -94,7 +94,7 @@ void CollideAndStreamAction2D<T,Descriptor>::execute(std::vector<id_t>& allMulti
     lattice->collideAndStream(domain);
 }
 template<typename T, template<typename U> class Descriptor>
-void CollideAndStreamAction2D<T,Descriptor>::regenerate(std::vector<id_t>& allMultiBlocks)
+void CollideAndStreamAction2D<T,Descriptor>::regenerate([[maybe_unused]] std::vector<id_t>& allMultiBlocks)
 { }
 
 
@@ -122,7 +122,7 @@ void FullDomainStreamAction2D<T,Descriptor>::execute(std::vector<id_t>& allMulti
 }
 
 template<typename T, template<typename U> class Descriptor>
-void FullDomainStreamAction2D<T,Descriptor>::regenerate(std::vector<id_t>& allMultiBlocks)
+void FullDomainStreamAction2D<T,Descriptor>::regenerate([[maybe_unused]] std::vector<id_t>& allMultiBlocks)
 { }
 
 
@@ -150,7 +150,7 @@ void StreamAction2D<T,Descriptor>::execute(std::vector<id_t>& allMultiBlocks) {
     lattice->stream(domain);
 }
 template<typename T, template<typename U> class Descriptor>
-void StreamAction2D<T,Descriptor>::regenerate(std::vector<id_t>& allMultiBlocks)
+void StreamAction2D<T,Descriptor>::regenerate([[maybe_unused]] std::vector<id_t>& allMultiBlocks)
 { }
 
 /* ********************  IncrementTimeAction2D ************************** */
@@ -176,7 +176,7 @@ void IncrementTimeAction2D<T,Descriptor>::execute(std::vector<id_t>& allMultiBlo
     lattice->incrementTime();
 }
 template<typename T, template<typename U> class Descriptor>
-void IncrementTimeAction2D<T,Descriptor>::regenerate(std::vector<id_t>& allMultiBlocks)
+void IncrementTimeAction2D<T,Descriptor>::regenerate([[maybe_unused]] std::vector<id_t>& allMultiBlocks)
 { }
 
 

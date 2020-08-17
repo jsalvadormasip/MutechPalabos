@@ -110,7 +110,7 @@ static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& r
     }
 };
 
-static void RMcomputeEquilibriumMoments(T rho, Array<T,D::d> const& u, Array<T, D::q>& RMeq) {
+static void RMcomputeEquilibriumMoments([[maybe_unused]] T rho, Array<T,D::d> const& u, Array<T, D::q>& RMeq) {
     // Order 0
     RMeq[M00] = 1.;
 
@@ -256,7 +256,7 @@ static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& r
 };
 
 
-static void HMcomputeEquilibriumMoments(T rho, Array<T,D::d> const& u, Array<T, D::q>& HMeq) {
+static void HMcomputeEquilibriumMoments([[maybe_unused]] T rho, Array<T,D::d> const& u, Array<T, D::q>& HMeq) {
 
     // Order 0
     HMeq[M00] = 1.;
@@ -1003,7 +1003,7 @@ static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& r
     }
 };
 
-static void GHcomputeEquilibriumMoments(T rho, Array<T,D::d> const& u, Array<T, D::q>& GHeq) {
+static void GHcomputeEquilibriumMoments([[maybe_unused]] T rho, Array<T,D::d> const& u, Array<T, D::q>& GHeq) {
 
     // Order 0
     GHeq[M00] = 1.;
@@ -1145,7 +1145,7 @@ static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& r
     }
 };
 
-static void RRcomputeEquilibriumMoments(T rho, Array<T,D::d> const& u, Array<T, D::q>& RReq) {
+static void RRcomputeEquilibriumMoments([[maybe_unused]] T rho, Array<T,D::d> const& u, Array<T, D::q>& RReq) {
 
     // Order 0
     RReq[M00] = 1.;

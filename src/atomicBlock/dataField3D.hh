@@ -181,7 +181,7 @@ plint ScalarFieldDataTransfer3D<T>::staticCellSize() const {
 }
 
 template<typename T>
-void ScalarFieldDataTransfer3D<T>::send(Box3D domain, std::vector<char>& buffer, modif::ModifT kind) const
+void ScalarFieldDataTransfer3D<T>::send(Box3D domain, std::vector<char>& buffer, [[maybe_unused]] modif::ModifT kind) const
 {
     PLB_PRECONDITION( constField );
     PLB_PRECONDITION( contained(domain, constField->getBoundingBox()) );
@@ -204,7 +204,7 @@ void ScalarFieldDataTransfer3D<T>::send(Box3D domain, std::vector<char>& buffer,
 
 template<typename T>
 void ScalarFieldDataTransfer3D<T>::receive (
-        Box3D domain, std::vector<char> const& buffer, modif::ModifT kind )
+        Box3D domain, std::vector<char> const& buffer, [[maybe_unused]] modif::ModifT kind )
 {
     PLB_PRECONDITION( field );
     PLB_PRECONDITION( contained(domain, field->getBoundingBox()) );
@@ -226,7 +226,7 @@ void ScalarFieldDataTransfer3D<T>::receive (
 template<typename T>
 void ScalarFieldDataTransfer3D<T>::attribute (
         Box3D toDomain, plint deltaX, plint deltaY, plint deltaZ,
-        AtomicBlock3D const& from, modif::ModifT kind )
+        AtomicBlock3D const& from, [[maybe_unused]] modif::ModifT kind )
 {
     PLB_PRECONDITION (typeid(from) == typeid(ScalarField3D<T> const&));
     PLB_PRECONDITION( contained(toDomain, field->getBoundingBox()) );
@@ -397,7 +397,7 @@ plint TensorFieldDataTransfer3D<T,nDim>::staticCellSize() const {
 }
 
 template<typename T, int nDim>
-void TensorFieldDataTransfer3D<T,nDim>::send(Box3D domain, std::vector<char>& buffer, modif::ModifT kind) const
+void TensorFieldDataTransfer3D<T,nDim>::send(Box3D domain, std::vector<char>& buffer, [[maybe_unused]] modif::ModifT kind) const
 {
     PLB_PRECONDITION( constField );
     PLB_PRECONDITION( contained(domain, constField->getBoundingBox()) );
@@ -420,7 +420,7 @@ void TensorFieldDataTransfer3D<T,nDim>::send(Box3D domain, std::vector<char>& bu
 
 template<typename T, int nDim>
 void TensorFieldDataTransfer3D<T,nDim>::receive (
-        Box3D domain, std::vector<char> const& buffer, modif::ModifT kind )
+        Box3D domain, std::vector<char> const& buffer, [[maybe_unused]] modif::ModifT kind )
 {
     PLB_PRECONDITION( field );
     PLB_PRECONDITION( contained(domain, field->getBoundingBox()) );
@@ -442,7 +442,7 @@ void TensorFieldDataTransfer3D<T,nDim>::receive (
 template<typename T, int nDim>
 void TensorFieldDataTransfer3D<T,nDim>::attribute (
         Box3D toDomain, plint deltaX, plint deltaY, plint deltaZ,
-        AtomicBlock3D const& from, modif::ModifT kind )
+        AtomicBlock3D const& from, [[maybe_unused]] modif::ModifT kind )
 {
     PLB_PRECONDITION (typeid(from) == typeid(TensorField3D<T,nDim> const&));
     PLB_PRECONDITION( contained(toDomain, field->getBoundingBox()) );
@@ -636,7 +636,7 @@ plint NTensorFieldDataTransfer3D<T>::staticCellSize() const {
 }
 
 template<typename T>
-void NTensorFieldDataTransfer3D<T>::send(Box3D domain, std::vector<char>& buffer, modif::ModifT kind) const
+void NTensorFieldDataTransfer3D<T>::send(Box3D domain, std::vector<char>& buffer, [[maybe_unused]] modif::ModifT kind) const
 {
     PLB_PRECONDITION( constField );
     PLB_PRECONDITION( contained(domain, constField->getBoundingBox()) );
@@ -657,7 +657,7 @@ void NTensorFieldDataTransfer3D<T>::send(Box3D domain, std::vector<char>& buffer
 
 template<typename T>
 void NTensorFieldDataTransfer3D<T>::receive (
-        Box3D domain, std::vector<char> const& buffer, modif::ModifT kind )
+        Box3D domain, std::vector<char> const& buffer, [[maybe_unused]] modif::ModifT kind )
 {
     PLB_PRECONDITION( field );
     PLB_PRECONDITION( contained(domain, field->getBoundingBox()) );
@@ -678,7 +678,7 @@ void NTensorFieldDataTransfer3D<T>::receive (
 template<typename T>
 void NTensorFieldDataTransfer3D<T>::attribute (
         Box3D toDomain, plint deltaX, plint deltaY, plint deltaZ,
-        AtomicBlock3D const& from, modif::ModifT kind )
+        AtomicBlock3D const& from, [[maybe_unused]] modif::ModifT kind )
 {
     PLB_PRECONDITION (typeid(from) == typeid(NTensorField3D<T> const&));
     PLB_PRECONDITION( contained(toDomain, field->getBoundingBox()) );

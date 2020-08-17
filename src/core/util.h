@@ -559,8 +559,10 @@ public:
         assignedIds.erase(it);
     }
 private:
-    UniqueId(UniqueId const& rhs) { }
-    UniqueId& operator=(UniqueId const& rhs) { return *this; }
+    // QUESTION: Why is copy constructor doing nothing?
+    UniqueId([[maybe_unused]] UniqueId const& rhs) { }
+    // QUESTION: Why is equal doing nothing?
+    UniqueId& operator=([[maybe_unused]] UniqueId const& rhs) { return *this; }
 private:
     id_t currentId;
     std::set<id_t> assignedIds;

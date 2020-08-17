@@ -344,10 +344,10 @@ struct mrtTemplatesImpl {
     }
     
     /// smagorinsky MRT collision step
-    static T smagorinskyMrtCollision( Array<T,Descriptor::q>& f,
-                                      const T &rhoBar, const Array<T,Descriptor::d> & j,
-                                      const T &omega, 
-                                      const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, T cSmago ) 
+    static T smagorinskyMrtCollision( [[maybe_unused]] Array<T,Descriptor::q>& f,
+                                      [[maybe_unused]] const T &rhoBar, [[maybe_unused]] const Array<T,Descriptor::d> & j,
+                                      [[maybe_unused]] const T &omega, 
+                                      [[maybe_unused]] const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, [[maybe_unused]] T cSmago ) 
     {
         PLB_ASSERT(false);
     }
@@ -409,7 +409,7 @@ struct mrtTemplatesImpl {
     
     static void addHeForce( Array<T,Descriptor::q>& f, const Array<T,Descriptor::d> &force,
                              const T &rhoBar, Array<T,Descriptor::d> const& uLB,
-                             const T &omega, T amplitude )
+                             const T &omega, [[maybe_unused]] T amplitude )
     {
         
 		// 1st calculate the forcing term
@@ -484,11 +484,11 @@ struct mrtTemplatesImpl {
         
     
     /// MRT collision step with force
-    static T smagorinskyMrtCollisionWithForce( Array<T,Descriptor::q>& f,
-                                               const T &rhoBar, const Array<T,Descriptor::d> & u,
-                                               const T &omega, 
-                                               const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, T cSmago,
-                                               const Array<T,Descriptor::d>& force, T amplitude) 
+    static T smagorinskyMrtCollisionWithForce( [[maybe_unused]] Array<T,Descriptor::q>& f,
+                                               [[maybe_unused]] const T &rhoBar, [[maybe_unused]] const Array<T,Descriptor::d> & u,
+                                               [[maybe_unused]] const T &omega, 
+                                               [[maybe_unused]] const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, [[maybe_unused]] T cSmago,
+                                               [[maybe_unused]] const Array<T,Descriptor::d>& force, [[maybe_unused]] T amplitude) 
     {
         PLB_ASSERT(false);
     }
@@ -507,11 +507,11 @@ struct mrtTemplatesImpl {
     }
     
     /// quasi incompressible MRT collision step with force
-    static T incSmagorinskyMrtCollisionWithForce( Array<T,Descriptor::q>& f,
-                                                       const T &rhoBar, const Array<T,Descriptor::d> & u,
-                                                       const T &omega, 
-                                                       const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, T cSmago,
-                                                       const Array<T,Descriptor::d>& force, T amplitude ) 
+    static T incSmagorinskyMrtCollisionWithForce( [[maybe_unused]] Array<T,Descriptor::q>& f,
+                                                  [[maybe_unused]] const T &rhoBar, [[maybe_unused]] const Array<T,Descriptor::d> & u,
+                                                  [[maybe_unused]] const T &omega, 
+                                                  [[maybe_unused]] const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, [[maybe_unused]] T cSmago,
+                                                  [[maybe_unused]] const Array<T,Descriptor::d>& force, [[maybe_unused]] T amplitude ) 
     {
         PLB_ASSERT(false);
     }
@@ -533,10 +533,10 @@ struct mrtTemplatesImpl {
     }
     
     /// Computation of all equilibrium distribution (in moments space)
-    static void computeIncSmagorinskyEquilibrium( Array<T,Descriptor::q>& momentsEq, 
-                                            T rhoBar, Array<T,Descriptor::d> const& j,
-                                            const T jSqr,
-                                            const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, T cSmago )
+    static void computeIncSmagorinskyEquilibrium( [[maybe_unused]] Array<T,Descriptor::q>& momentsEq, 
+                                            [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T,Descriptor::d> const& j,
+                                            [[maybe_unused]] const T jSqr,
+                                            [[maybe_unused]] const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, [[maybe_unused]] T cSmago )
     {
         PLB_ASSERT(false);
     }
@@ -598,10 +598,10 @@ struct mrtTemplatesImpl {
     }
     
     /// Smagorinsky MRT collision step
-    static T incSmagorinskyMrtCollision( Array<T,Descriptor::q>& f,
-                                   const T &rhoBar, const Array<T,Descriptor::d> & j,
-                                   const T &omega,
-                                   const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, T cSmago) 
+    static T incSmagorinskyMrtCollision( [[maybe_unused]] Array<T,Descriptor::q>& f,
+                                   [[maybe_unused]] const T &rhoBar, [[maybe_unused]] const Array<T,Descriptor::d> & j,
+                                   [[maybe_unused]] const T &omega,
+                                   [[maybe_unused]] const Array<T,SymmetricTensorImpl<T,Descriptor::d>::n >& strain, [[maybe_unused]] T cSmago) 
     {
         PLB_ASSERT(false);
     }
