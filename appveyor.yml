@@ -1,0 +1,13 @@
+version: 1.0.{build}
+branches:
+  only:
+  - warnings
+build_script:
+- pwsh: >-
+    cd C:\projects\palabos\build
+
+    cmake ..
+
+    cmake --build . -j4
+test: off
+deploy: off
