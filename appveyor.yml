@@ -2,6 +2,7 @@ version: 1.0.{build}
 branches:
   only:
   - appveyor
+image: Previous Visual Studio 2019
 install:
 - pwsh: >-
     $msmpidl = 'https://download.microsoft.com/download/2/9/e/29efe9b1-16d7-4912-a229-6734b0c4e235/msmpisdk.msi'
@@ -15,7 +16,7 @@ build_script:
 - pwsh: >-
     cd C:\projects\palabos\build
 
-    cmake .. -DBUILD_HDF5=OFF
+    cmake ..
 
     cmake --build . -j4
 test: off
