@@ -28,7 +28,7 @@ release_clang_serial:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
-        - make -j4
+        - cmake --build . -j4
 
 release_clang_parallel:
     stage: build_cmake
@@ -37,7 +37,7 @@ release_clang_parallel:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
-        - make -j4
+        - cmake --build . -j4
 
 release_gcc_serial:
     stage: build_cmake
@@ -46,7 +46,7 @@ release_gcc_serial:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
-        - make -j4
+        - cmake --build . -j4
         
 release_gcc_parallel:
     stage: build_cmake
@@ -55,7 +55,7 @@ release_gcc_parallel:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
-        - make -j4
+        - cmake --build . -j4
 
 debug_clang_serial:
     stage: build_cmake
@@ -64,7 +64,7 @@ debug_clang_serial:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
-        - make -j4
+        - cmake --build . -j4
 
 debug_clang_parallel:
     stage: build_cmake
@@ -73,7 +73,7 @@ debug_clang_parallel:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
-        - make -j4
+        - cmake --build . -j4
 
 debug_gcc_serial:
     stage: build_cmake
@@ -82,7 +82,7 @@ debug_gcc_serial:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
-        - make -j4
+        - cmake --build . -j4
         
 debug_gcc_parallel:
     stage: build_cmake
@@ -91,7 +91,7 @@ debug_gcc_parallel:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
-        - make -j4
+        - cmake --build . -j4
         
 pages:
     stage: deploy
