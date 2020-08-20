@@ -8,8 +8,6 @@ install:
 
     Start-FileDownload $msmpidl -FileName msmpisdk.msi
 
-    Downloading msmpisdk.msi (2,543,616 bytes)...100%
-
     msiexec /i "C:\projects\palabos\msmpisdk.msi" /qn /norestart /log install.log
 
     sleep 5; restart-computer -f; sleep 5
