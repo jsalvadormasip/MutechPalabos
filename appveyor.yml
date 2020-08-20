@@ -18,18 +18,18 @@ install:
 
       sleep 5; restart-computer -f; sleep 5
     } else {
-      brew install open-mpi
+      brew install open-mpi hdf5-mpi
     }
     
 build_script:
 - pwsh: >-
     if ($isWindows) {
         cd C:\projects\palabos\build
+        cmake .. -DBUILD_HDF5=OFF
     } else {
         cd build
+        cmake ..
     }
-
-    cmake .. -DBUILD_HDF5=OFF
 
     cmake --build . -j4
 test: off
