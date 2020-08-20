@@ -23,7 +23,11 @@ install:
     
 build_script:
 - pwsh: >-
-    cd C:\projects\palabos\build
+    if ($isWindows) {
+        cd C:\projects\palabos\build
+    } else {
+        cd projects\palabos\build
+    }
 
     cmake .. -DBUILD_HDF5=OFF
 
