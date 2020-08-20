@@ -16,7 +16,7 @@ build_script:
 - pwsh: >-
     cd C:\projects\palabos\build
 
-    cmake ..
+    cmake .. -DBUILD_HDF5=OFF
 
     cmake --build . -j4
 test: off
