@@ -11,6 +11,12 @@
 #ifndef EIGEN_TRANSPOSE_H
 #define EIGEN_TRANSPOSE_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen { 
 
 namespace internal {
@@ -399,5 +405,7 @@ void check_for_aliasing(const Dst &dst, const Src &src)
 #endif // EIGEN_NO_DEBUG
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_TRANSPOSE_H
