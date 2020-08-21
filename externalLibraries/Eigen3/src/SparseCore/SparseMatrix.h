@@ -10,6 +10,12 @@
 #ifndef EIGEN_SPARSEMATRIX_H
 #define EIGEN_SPARSEMATRIX_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen { 
 
 /** \ingroup SparseCore_Module
@@ -1399,5 +1405,7 @@ struct evaluator<SparseMatrix<_Scalar,_Options,_StorageIndex> >
 }
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_SPARSEMATRIX_H
