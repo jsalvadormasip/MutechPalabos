@@ -10,6 +10,12 @@
 #ifndef EIGEN_ARRAYBASE_H
 #define EIGEN_ARRAYBASE_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen { 
 
 template<typename ExpressionType> class MatrixWrapper;
@@ -223,4 +229,6 @@ ArrayBase<Derived>::operator/=(const ArrayBase<OtherDerived>& other)
 
 } // end namespace Eigen
 
+DISABLE_WARNING_POP
+ 
 #endif // EIGEN_ARRAYBASE_H

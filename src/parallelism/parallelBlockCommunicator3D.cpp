@@ -43,7 +43,10 @@
 #include "core/plbProfiler.h"
 #include <algorithm>
 #ifdef PLB_MPI_PARALLEL
+DISABLE_WARNING_PUSH
+DISABLE_WARNING_CAST_FUNCTION_TYPE
 #include <mpi.h>
+DISABLE_WARNING_POP
 #endif
 
 namespace plb {

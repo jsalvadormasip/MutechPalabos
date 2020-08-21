@@ -69,7 +69,11 @@
     #define DISABLE_WARNING_POP            DO_PRAGMA(GCC diagnostic pop) 
     #define DISABLE_WARNING(warningName)   DO_PRAGMA(GCC diagnostic ignored #warningName)
     
-    #define DISABLE_WARNING_CAST_FUNCTION_TYPE    DISABLE_WARNING(-Wcast-function-type)
+    #if defined(__clang__) // GNUC is defined for clang too
+        #define DISABLE_WARNING_CAST_FUNCTION_TYPE    
+    #else
+        #define DISABLE_WARNING_CAST_FUNCTION_TYPE    DISABLE_WARNING(-Wcast-function-type)
+    #endif
     #define DISABLE_WARNING_INT_IN_BOOL           DISABLE_WARNING(-Wint-in-bool-context)
     #define DISABLE_WARNING_DEPRECATED_COPY       DISABLE_WARNING(-Wdeprecated-copy)
     

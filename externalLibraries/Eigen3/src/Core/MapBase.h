@@ -11,6 +11,12 @@
 #ifndef EIGEN_MAPBASE_H
 #define EIGEN_MAPBASE_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 #define EIGEN_STATIC_ASSERT_INDEX_BASED_ACCESS(Derived) \
       EIGEN_STATIC_ASSERT((int(internal::evaluator<Derived>::Flags) & LinearAccessBit) || Derived::IsVectorAtCompileTime, \
                           YOU_ARE_TRYING_TO_USE_AN_INDEX_BASED_ACCESSOR_ON_AN_EXPRESSION_THAT_DOES_NOT_SUPPORT_THAT)
@@ -295,5 +301,7 @@ template<typename Derived> class MapBase<Derived, WriteAccessors>
 #undef EIGEN_STATIC_ASSERT_INDEX_BASED_ACCESS
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_MAPBASE_H

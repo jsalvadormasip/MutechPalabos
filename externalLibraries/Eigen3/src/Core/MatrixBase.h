@@ -11,6 +11,12 @@
 #ifndef EIGEN_MATRIXBASE_H
 #define EIGEN_MATRIXBASE_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen {
 
 /** \class MatrixBase
@@ -526,5 +532,7 @@ inline void MatrixBase<Derived>::applyOnTheLeft(const EigenBase<OtherDerived> &o
 }
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_MATRIXBASE_H
