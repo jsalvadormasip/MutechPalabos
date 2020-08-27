@@ -211,7 +211,7 @@ int main(int argc, char* argv[]) {
 
     const T logT     = (T)0.02;
 #ifdef PLB_REGRESSION
-    const T maxT     = (T)1.0;
+    const T maxT     = (T)0.1;
 #else
     const T imSave   = (T)0.06;
     const T vtkSave  = (T)1.;

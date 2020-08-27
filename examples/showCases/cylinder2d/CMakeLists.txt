@@ -26,6 +26,12 @@ endif()
 
 cmake_minimum_required(VERSION 2.8.12)
 
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+    message("ccache used.")
+endif() 
+
 project(palabosExample)
 enable_language(CXX)
 
@@ -117,10 +123,22 @@ if(ENABLE_MPI)
     target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
 endif()
 
+if(BUILD_TESTING)
+    add_custom_target(run_test
+        COMMAND ${EXECUTABLE_NAME} > bla.dat
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
+        SOURCES ./${EXECUTABLE_NAME}.cpp
+    )
+endif()
 
-add_custom_target(test_${EXECUTABLE_NAME}
-  COMMAND ${EXECUTABLE_NAME}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT "run generated test2 in ${CMAKE_CURRENT_SOURCE_DIR}"
-  SOURCES ./${EXECUTABLE_NAME}.cpp
-)
+
+if (BUILD_TESTING)
+    enable_testing()
+    add_test(NAME cylinder_test_cmp
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat bla.dat)
+endif()
+
+
+
