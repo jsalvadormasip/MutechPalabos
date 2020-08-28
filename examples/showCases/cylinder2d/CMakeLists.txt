@@ -26,6 +26,12 @@ endif()
 
 cmake_minimum_required(VERSION 2.8.12)
 
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+    message("ccache used.")
+endif() 
+
 project(palabosExample)
 enable_language(CXX)
 
@@ -33,11 +39,15 @@ set(EXECUTABLE_NAME "cylinder2d")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
-    #set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+    set(CMAKE_BUILD_TYPE "Test")
+    #set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Test")
 endif()
 message("Generated with config types: ${CMAKE_CONFIGURATION_TYPES}")
 message(${CMAKE_BUILD_TYPE})
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Test")
+    set(BUILD_TESTING ON)
+endif()
 
 # Compiler flags
 # Append flags: set(CMAKE_XXX_FLAGS "${CMAKE_XXX_FLAGS} ...")
@@ -46,15 +56,18 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
+    set(CMAKE_CXX_FLAGS_TEST "-g -DPLB_DEBUG -DPLB_REGRESSION -O3")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     message("Clang.")
     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
+    set(CMAKE_CXX_FLAGS_TEST "-g -DPLB_DEBUG -DPLB_REGRESSION -O3")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
     message("MSVC.")
     set(CMAKE_CXX_FLAGS_RELEASE "/Ox /Ot /GS- /GL /DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "/DPLB_DEBUG")
+    set(CMAKE_CXX_FLAGS_TEST "/Ox /Ot /GS- /GL /DPLB_DEBUG /DPLB_REGRESSION")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/LTCG /INCREMENTAL:NO /OPT:REF")
 else()
     message( FATAL_ERROR "CXX compiler not recognized. CMake will quit." )
@@ -113,3 +126,23 @@ target_link_libraries(${EXECUTABLE_NAME} palabos)
 if(ENABLE_MPI)
     target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
 endif()
+
+if(BUILD_TESTING)
+    add_custom_target(run_test
+        COMMAND ${EXECUTABLE_NAME} > test/output.dat
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
+        SOURCES ./${EXECUTABLE_NAME}.cpp
+    )
+endif()
+
+
+if (BUILD_TESTING)
+    enable_testing()
+    add_test(NAME cylinder_test_cmp
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
+endif()
+
+
+
