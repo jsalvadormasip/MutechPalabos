@@ -18,6 +18,7 @@ cache:
     
 stages:
     - build_cmake
+    - test
     - deploy
 
 ## Test compilation with CMake, everything in examples & utility directory
@@ -29,6 +30,15 @@ cmake:
         - cd build
         - cmake ..
         - make -j4
+
+test:
+    script: 
+        - pwd
+        - cd examples/showCases/cylinder2d/build
+        - cmake .. -DCMAKE_BUILD_TYPE=Test
+        - make -j4
+        - make run_test
+        - make test
 
 pages:
     stage: deploy
