@@ -45,6 +45,10 @@ endif()
 message("Generated with config types: ${CMAKE_CONFIGURATION_TYPES}")
 message(${CMAKE_BUILD_TYPE})
 
+if (${CMAKE_BUILD_TYPE} STREQUAL "Test")
+    set(BUILD_TESTING ON)
+endif()
+
 # Compiler flags
 # Append flags: set(CMAKE_XXX_FLAGS "${CMAKE_XXX_FLAGS} ...")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
@@ -125,7 +129,7 @@ endif()
 
 if(BUILD_TESTING)
     add_custom_target(run_test
-        COMMAND ${EXECUTABLE_NAME} > bla.dat
+        COMMAND ${EXECUTABLE_NAME} > test/output.dat
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
         SOURCES ./${EXECUTABLE_NAME}.cpp
@@ -136,8 +140,8 @@ endif()
 if (BUILD_TESTING)
     enable_testing()
     add_test(NAME cylinder_test_cmp
-             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat bla.dat)
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
 endif()
 
 
