@@ -18,7 +18,7 @@ cache:
     
 stages:
     - build_cmake
-    - test
+    - regression_tests
     - deploy
 
 ## Test compilation with CMake, everything in examples & utility directory
@@ -32,6 +32,8 @@ cmake:
         - make -j4
 
 test:
+    stage: regression_tests
+
     script: 
         - pwd
         - cd examples/showCases/cylinder2d/build
