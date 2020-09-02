@@ -16,9 +16,6 @@ if(ENABLE_MPI)
     target_link_libraries(${PROJECT_NAME} ${MPI_CXX_LIBRARIES})
 endif()
 
-string(REPLACE "/" "_" NICE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-message(${NICE_SOURCE_DIR})
-
 if(BUILD_TESTING)
     add_custom_target(run_test_${NICE_SOURCE_DIR}
         DEPENDS ${EXECUTABLE_NAME}
