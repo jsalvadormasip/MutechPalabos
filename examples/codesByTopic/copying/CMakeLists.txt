@@ -16,28 +16,6 @@ if(ENABLE_MPI)
     target_link_libraries(${PROJECT_NAME} ${MPI_CXX_LIBRARIES})
 endif()
 
-string(REPLACE "/" "_" NICE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-message(${NICE_SOURCE_DIR})
-
-if(BUILD_TESTING)
-    add_custom_target(${PROJECT_NAME}_test
-        ALL
-        DEPENDS ${PROJECT_NAME}
-        COMMAND ${PROJECT_NAME} > test/output.dat
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
-        SOURCES ./${EXECUTABLE_NAME}.cpp
-    )
-endif()
-
-
-if (BUILD_TESTING)
-    enable_testing()
-    add_test(NAME test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
-endif()
-
 ###############################################################################
 
 # This returns when you compile Palabos and all the examples (root CMakeLists.txt)
