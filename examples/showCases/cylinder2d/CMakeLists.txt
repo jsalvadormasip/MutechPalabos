@@ -16,6 +16,27 @@ if(ENABLE_MPI)
     target_link_libraries(${PROJECT_NAME} ${MPI_CXX_LIBRARIES})
 endif()
 
+string(REPLACE "/" "_" NICE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+message(${NICE_SOURCE_DIR})
+
+if(BUILD_TESTING)
+    add_custom_target(run_test_${NICE_SOURCE_DIR}
+        DEPENDS ${EXECUTABLE_NAME}
+        COMMAND ${EXECUTABLE_NAME} > test/output.dat
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
+        SOURCES ./${EXECUTABLE_NAME}.cpp
+    )
+endif()
+
+
+if (BUILD_TESTING)
+    enable_testing()
+    add_test(NAME test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
+endif()
+
 ###############################################################################
 
 # This returns when you compile Palabos and all the examples (root CMakeLists.txt)
@@ -37,6 +58,11 @@ enable_language(CXX)
 
 set(EXECUTABLE_NAME "cylinder2d")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+    message("ccache used.")
+endif() 
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Test")
@@ -128,7 +154,8 @@ if(ENABLE_MPI)
 endif()
 
 if(BUILD_TESTING)
-    add_custom_target(run_test
+    add_custom_target(run_test_${NICE_SOURCE_DIR}
+        DEPENDS ${EXECUTABLE_NAME}
         COMMAND ${EXECUTABLE_NAME} > test/output.dat
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
@@ -139,7 +166,7 @@ endif()
 
 if (BUILD_TESTING)
     enable_testing()
-    add_test(NAME cylinder_test_cmp
+    add_test(NAME test
              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
              COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
 endif()

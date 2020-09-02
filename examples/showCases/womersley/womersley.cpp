@@ -220,8 +220,11 @@ int main(int argc, char *argv[])
     lattice.resetTime(1);
     
     pcout << "Omega = " << omega << ", it period = " << tPeriod << endl;
-
+#ifndef PLB_REGRESSION
     util::ValueTracer<T> converge(uMax,N,1.0e-3);
+#else
+    util::ValueTracer<T> converge(1.0,N,1.0e-3);
+#endif
     plint iT = 0;
     for (iT = 0; iT < maxIter; ++iT) {
 //         Updating the force in the whole domain

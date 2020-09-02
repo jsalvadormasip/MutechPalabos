@@ -18,6 +18,27 @@ if(ENABLE_MPI)
     target_link_libraries(${PROJECT_NAME} ${MPI_CXX_LIBRARIES})
 endif()
 
+string(REPLACE "/" "_" NICE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+message(${NICE_SOURCE_DIR})
+
+if(BUILD_TESTING)
+    add_custom_target(run_test_${NICE_SOURCE_DIR}
+        DEPENDS ${EXECUTABLE_NAME}
+        COMMAND ${EXECUTABLE_NAME} > test/output.dat
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
+        SOURCES ./${EXECUTABLE_NAME}.cpp
+    )
+endif()
+
+
+if (BUILD_TESTING)
+    enable_testing()
+    add_test(NAME test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
+endif()
+
 ###############################################################################
 
 # This returns when you compile Palabos and all the examples (root CMakeLists.txt)
@@ -33,6 +54,11 @@ enable_language(CXX)
 
 set(EXECUTABLE_NAME "coupleVelocityField")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+    message("ccache used.")
+endif() 
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
@@ -48,15 +74,18 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
+    set(CMAKE_CXX_FLAGS_TEST "-g -DPLB_DEBUG -DPLB_REGRESSION -O3")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     message("Clang.")
     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
+    set(CMAKE_CXX_FLAGS_TEST "-g -DPLB_DEBUG -DPLB_REGRESSION -O3")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
     message("MSVC.")
     set(CMAKE_CXX_FLAGS_RELEASE "/Ox /Ot /GS- /GL /DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "/DPLB_DEBUG")
+    set(CMAKE_CXX_FLAGS_TEST "/Ox /Ot /GS- /GL /DPLB_DEBUG /DPLB_REGRESSION")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/LTCG /INCREMENTAL:NO /OPT:REF")
 else()
     message( FATAL_ERROR "CXX compiler not recognized. CMake will quit." )

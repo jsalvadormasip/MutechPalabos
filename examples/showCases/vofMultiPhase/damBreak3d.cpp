@@ -55,7 +55,9 @@ const T lz = 1.0;
 
 const T rhoEmpty = T(1);
     
+#ifndef PLB_REGRESSION
 plint writeImagesIter   = 100;
+#endif
 plint getStatisticsIter = 20;
 
 plint maxIter;
@@ -251,12 +253,14 @@ int main(int argc, char **argv)
             pcout << "Interface cells: " << fields.lattice.getInternalStatistics().getIntSum(0) << std::endl;
         }
 
+#ifndef PLB_REGRESSION
         if (iT % writeImagesIter == 0) {
             global::timer("images").start();
             writeResults(fields.lattice, fields.volumeFraction, iT);
             pcout << "Total time spent for writing images: "
                 << global::timer("images").stop() << std::endl;
-        }                           
+        }                
+#endif
 
         // This includes the collision-streaming cycle, plus all free-surface operations.
         fields.lattice.executeInternalProcessors();

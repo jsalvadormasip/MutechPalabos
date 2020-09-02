@@ -164,11 +164,12 @@ int main(int argc, char* argv[]) {
                   << "; av rho="
                   << getStoredAverageDensity<T>(lattice) << endl;
         }
-
+#ifndef PLB_REGRESSION
         if (iT%200==0) {
             pcout << "Saving Gif ..." << endl;
             writeGifs(lattice, iT);
         }
+#endif
 
         // Lattice Boltzmann iteration step.
         lattice.collideAndStream();

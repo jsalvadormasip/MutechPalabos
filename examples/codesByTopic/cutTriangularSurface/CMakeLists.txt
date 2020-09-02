@@ -31,6 +31,11 @@ enable_language(CXX)
 
 set(EXECUTABLE_NAME "cutTriangularSurface")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+    message("ccache used.")
+endif() 
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
