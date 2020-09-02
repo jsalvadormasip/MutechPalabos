@@ -20,9 +20,10 @@ string(REPLACE "/" "_" NICE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 message(${NICE_SOURCE_DIR})
 
 if(BUILD_TESTING)
-    add_custom_target(run_test_${NICE_SOURCE_DIR}
-        DEPENDS ${EXECUTABLE_NAME}
-        COMMAND ${EXECUTABLE_NAME} > test/output.dat
+    add_custom_target(${PROJECT_NAME}_test
+        ALL
+        DEPENDS ${PROJECT_NAME}
+        COMMAND ${PROJECT_NAME} > test/output.dat
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
         SOURCES ./${EXECUTABLE_NAME}.cpp
@@ -154,9 +155,10 @@ if(ENABLE_MPI)
 endif()
 
 if(BUILD_TESTING)
-    add_custom_target(run_test_${NICE_SOURCE_DIR}
-        DEPENDS ${EXECUTABLE_NAME}
-        COMMAND ${EXECUTABLE_NAME} > test/output.dat
+    add_custom_target(${PROJECT_NAME}_test
+        ALL
+        DEPENDS ${PROJECT_NAME}
+        COMMAND ${PROJECT_NAME} > test/output.dat
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
         SOURCES ./${EXECUTABLE_NAME}.cpp
