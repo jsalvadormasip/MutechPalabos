@@ -29,17 +29,16 @@ cmake:
         - pwd
         - cd build
         - cmake ..
-        - make -j4
+        - make -j 4
 
 test:
     stage: regression_tests
 
     script: 
         - pwd
-        - cd examples/showCases/cylinder2d/build
+        - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Test
-        - make -j4
-        - make run_test
+        - make -j 4
         - make test
 
 pages:
