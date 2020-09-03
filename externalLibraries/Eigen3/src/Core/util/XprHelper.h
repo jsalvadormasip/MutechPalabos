@@ -11,6 +11,12 @@
 #ifndef EIGEN_XPRHELPER_H
 #define EIGEN_XPRHELPER_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 // just a workaround because GCC seems to not really like empty structs
 // FIXME: gcc 4.3 generates bad code when strict-aliasing is enabled
 // so currently we simply disable this optimization for gcc 4.3
@@ -817,5 +823,7 @@ struct ScalarBinaryOpTraits<void,void,BinaryOp>
     YOU_MIXED_DIFFERENT_NUMERIC_TYPES__YOU_NEED_TO_USE_THE_CAST_METHOD_OF_MATRIXBASE_TO_CAST_NUMERIC_TYPES_EXPLICITLY)
     
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_XPRHELPER_H

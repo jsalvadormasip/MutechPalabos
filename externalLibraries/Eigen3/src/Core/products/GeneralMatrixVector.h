@@ -10,6 +10,12 @@
 #ifndef EIGEN_GENERAL_MATRIX_VECTOR_H
 #define EIGEN_GENERAL_MATRIX_VECTOR_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_INT_IN_BOOL
+
 namespace Eigen {
 
 namespace internal {
@@ -616,4 +622,6 @@ EIGEN_DONT_INLINE void general_matrix_vector_product<Index,LhsScalar,LhsMapper,R
 
 } // end namespace Eigen
 
+DISABLE_WARNING_POP
+ 
 #endif // EIGEN_GENERAL_MATRIX_VECTOR_H

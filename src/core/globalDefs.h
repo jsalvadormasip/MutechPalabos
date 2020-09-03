@@ -38,7 +38,11 @@
 #define GLOBAL_DEFS_H
 
 #ifdef PLB_MPI_PARALLEL
-#include "mpi.h"
+#include "core/plbDebug.h"
+DISABLE_WARNING_PUSH
+DISABLE_WARNING_CAST_FUNCTION_TYPE
+#include <mpi.h>
+DISABLE_WARNING_POP
 #endif
 
 #include "core/plbDebug.h"

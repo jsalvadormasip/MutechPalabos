@@ -11,6 +11,12 @@
 #ifndef EIGEN_DIAGONAL_H
 #define EIGEN_DIAGONAL_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen { 
 
 /** \class Diagonal
@@ -253,5 +259,7 @@ MatrixBase<Derived>::diagonal() const
 }
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_DIAGONAL_H

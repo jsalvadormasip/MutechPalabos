@@ -11,6 +11,12 @@
 #ifndef EIGEN_BLOCK_H
 #define EIGEN_BLOCK_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen { 
 
 namespace internal {
@@ -449,4 +455,6 @@ class BlockImpl_dense<XprType,BlockRows,BlockCols, InnerPanel,true>
 
 } // end namespace Eigen
 
+DISABLE_WARNING_POP
+ 
 #endif // EIGEN_BLOCK_H

@@ -313,7 +313,7 @@ static void bgk_ma2_equilibria( T rhoBar, T invRho, Array<T,D::d> const& j,
 // because of an huge gain in computational efficiency the rhoBar trick is not used....
 // t[iPop] is removed manually at the end of the computation.
 static void complete_bgk_ma2_equilibria( T rhoBar, T invRho, Array<T,D::d> const& j,
-                                         T jSqr, Array<T,D::q>& eqPop )
+                                         [[maybe_unused]] T jSqr, Array<T,D::q>& eqPop )
 {
     T rho = D::fullRho(rhoBar);
     T ux = j[0]*invRho; T uy = j[1]*invRho; T uz = j[2]*invRho;
@@ -369,7 +369,7 @@ static void complete_bgk_ma2_equilibria( T rhoBar, T invRho, Array<T,D::d> const
 // because of an huge gain in computational efficiency the rhoBar trick is not used....
 // t[iPop] is removed manually at the end of the computation.
 static void complete_bgk_ma2_equilibria_2( T rhoBar, T invRho, Array<T,D::d> const& j,
-                                         T jSqr, Array<T,D::q>& eqPop )
+                                         [[maybe_unused]] T jSqr, Array<T,D::q>& eqPop )
 {
     T rho = D::fullRho(rhoBar);
     Array<T,D::d> u = invRho*j;
@@ -1158,7 +1158,7 @@ static T complete_mrt_ma2_collision_base(Array<T,D::q>& f, plint order, T omega,
     return invRho*invRho*jSqr;
 }
 
-static void complete_neq_ma2_moments_from_phys_moments(Array<T,D::q>& mNeq, T rhoBar, T invRho, const Array<T,D::d> &j, 
+static void complete_neq_ma2_moments_from_phys_moments(Array<T,D::q>& mNeq, [[maybe_unused]] T rhoBar, T invRho, const Array<T,D::d> &j, 
                     const Array<T,SymmetricTensorImpl<T,D::d>::n> &piNeq, plint order, T omega, T omegaNonPhys) 
 {
     T omegaRatio = omega / omegaNonPhys;
@@ -1989,7 +1989,7 @@ static T complete_bgk_ma2_equilibrium(plint iPop, T rhoBar, T invRho, Array<T,D:
 }
 
 static void complete_bgk_ma2_regularize(Array<T,D::q> &f, T rhoBar, T invRho, Array<T,D::d> const& j, T jSqr,
-                                        Array<T,SymmetricTensorImpl<T,D::d>::n> const& piNeq, T omega, T omegaNonPhys, plint iPhys) 
+                                        Array<T,SymmetricTensorImpl<T,D::d>::n> const& piNeq, [[maybe_unused]] T omega, [[maybe_unused]] T omegaNonPhys, [[maybe_unused]] plint iPhys) 
 {
     complete_bgk_ma2_equilibria( rhoBar, invRho, j, jSqr, f);
     Array<T,D::q> fNeq;

@@ -49,7 +49,7 @@ class FlatAdiabaticBoundaryFunctional2D : public BoxProcessingFunctional2D_L<T,D
 {
 public:
     virtual plint extent() const { return 2; }
-    virtual plint extent(int whichDirection) const { return 2; }
+    virtual plint extent([[maybe_unused]] int whichDirection) const { return 2; }
     virtual void process(Box2D domain, BlockLattice2D<T,Descriptor>& lattice);
     virtual FlatAdiabaticBoundaryFunctional2D<T,Descriptor,direction,orientation>* clone() const;
     virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;

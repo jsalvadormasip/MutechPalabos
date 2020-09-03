@@ -45,6 +45,11 @@
 #include "palabos3D.h"
 #include "palabos3D.hh"
 
+// QUESTION: dt, rho, bool writeVertexNormals = false, std::string vertexNormalsName = ""
+// are unused. Is that normal? Also these MIN/MAX/Distance2 are not very elegant.
+// Should we make them functions?
+
+
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define Distance2(x, y)                                                        \
@@ -61,9 +66,9 @@ void multiProcWriteVTK(
 	// Visualization purposes
 	pluint nx, pluint ny, pluint nz,
 	// Conversion from Lattice to Physical units for visualization
-	T dx, T dt, T rho,
+	T dx, [[maybe_unused]] T dt, [[maybe_unused]] T rho,
 	// Legacy reasons
-	bool writeVertexNormals = false, std::string vertexNormalsName = ""
+	[[maybe_unused]] bool writeVertexNormals = false, [[maybe_unused]] std::string vertexNormalsName = ""
     )
 {
 	if (mesh.getNumTriangles() == 0)

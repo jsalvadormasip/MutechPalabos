@@ -118,7 +118,7 @@ void ConvectiveRefinementParameters<T>::createParameters(){
 
 template <typename T>
 DiffusiveRefinementParameters<T>::DiffusiveRefinementParameters( plint levels, plint reference, 
-                                                                 IncomprFlowParam<T> params ) 
+                                                                 [[maybe_unused]] IncomprFlowParam<T> params ) 
         : RefinementParameters<T>(levels, reference)
 {
     createParameters();

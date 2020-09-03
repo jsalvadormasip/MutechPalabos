@@ -41,7 +41,10 @@
 #include "core/globalDefs.h"
 
 #ifdef PLB_MPI_PARALLEL
-#include "mpi.h"
+DISABLE_WARNING_PUSH
+DISABLE_WARNING_CAST_FUNCTION_TYPE
+#include <mpi.h>
+DISABLE_WARNING_POP
 #include <vector>
 #include <string>
 #endif
@@ -188,7 +191,7 @@ friend MpiManager& mpi();
 class MpiManager {
 public:
     /// Initializes the mpi manager
-    void init(int *argc, char ***argv, bool verbous=false) { }
+    void init([[maybe_unused]] int *argc, [[maybe_unused]] char ***argv, [[maybe_unused]] bool verbous=false) { }
     /// Initializes the MPI manager, but assumes that the MPI
     ///   machine is handled by another instance.
     void init() { }
@@ -202,11 +205,11 @@ public:
     bool isMainProcessor() const { return true; }
     /// Broadcast data from one processor to multiple processors
     template <typename T>
-    void bCast(T* sendBuf, int sendCount, int root = 0) { }
+    void bCast([[maybe_unused]] T* sendBuf, [[maybe_unused]] int sendCount, [[maybe_unused]] int root = 0) { }
     /// Special case for broadcasting strings. Memory handling is automatic.
-    void bCast(std::string& message, int root = 0) { }
+    void bCast([[maybe_unused]] std::string& message, [[maybe_unused]] int root = 0) { }
     /// Special case for sending strings. Memory handling is automatic.
-    void sendToMaster( std::string& message, bool iAmRoot ) { }
+    void sendToMaster( [[maybe_unused]] std::string& message, [[maybe_unused]] bool iAmRoot ) { }
     /// Synchronizes the processes
     void barrier() { }
 

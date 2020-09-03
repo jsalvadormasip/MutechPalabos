@@ -11,6 +11,12 @@
 #ifndef EIGEN_ORTHOMETHODS_H
 #define EIGEN_ORTHOMETHODS_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen { 
 
 /** \geometry_module \ingroup Geometry_Module
@@ -230,5 +236,7 @@ MatrixBase<Derived>::unitOrthogonal() const
 }
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_ORTHOMETHODS_H

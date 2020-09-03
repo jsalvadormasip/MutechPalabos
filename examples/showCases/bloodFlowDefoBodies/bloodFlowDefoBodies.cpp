@@ -218,7 +218,7 @@ public:
 		, radius(radius_)
 	{ }
 
-	virtual bool operator()(plint iX, plint iY, plint iZ) const
+	virtual bool operator()(plint iX, plint iY, [[maybe_unused]] plint iZ) const
 	{
 		// True if solid
 		return (std::sqrt(util::sqr((T)iX - center[0]) + util::sqr((T)iY - center[1])) >= radius);
@@ -1544,6 +1544,7 @@ int main(int argc, char* argv[])
 				Vtot = sp.PI_ * (sp.pipeRadius_LB * sp.dx_p) * (sp.pipeRadius_LB * sp.dx_p) * sp.lz_p;
 			}
 
+			// QUESTION: should we add an "else" here?
 			T Vrbcs = (sp.ht / 100.) * Vtot;
 			T Vrbc = sp.RBC_shapeOpSolverTemplate.Volume0_;
 
@@ -2378,7 +2379,7 @@ int main(int argc, char* argv[])
                     pluint numRBCs_toPrint_tmp = 0;
                     pluint numPLTs_toPrint_tmp = 0;
 
-					for (pluint j = 0; j < sp.centers_log.cols(); j += 3)
+					for (pluint j = 0; j < (pluint)sp.centers_log.cols(); j += 3)
 					{
 						if ((j / 3) < sp.shapeOpRBCs.size())
 						{
@@ -2400,17 +2401,23 @@ int main(int argc, char* argv[])
 							bodyID_tmp = sp.shapeOpPLTs[cnt]->bodyID_;
 						}
 
-                        if (RBC_printing)
-                            if (numRBCs_toPrint_tmp > numRBCs_toPrint_COMs)
+						// QUESTION: Why not write this as:
+						// print = !(numRBCs_toPrint_tmp > numRBCs_toPrint_COMs) ?
+                        if (RBC_printing) {
+                            if (numRBCs_toPrint_tmp > numRBCs_toPrint_COMs) {
                                 print = false;
-                            else
+							} else {
                                 print = true;
+							}
+						}
                         
-                        if (PLT_printing)
-                            if (numPLTs_toPrint_tmp > numPLTs_toPrint_COMs)
+                        if (PLT_printing) {
+                            if (numPLTs_toPrint_tmp > numPLTs_toPrint_COMs) {
                                 print = false;
-                            else
+							} else {
                                 print = true;
+							}
+						}
 
                         if (print)
                         {

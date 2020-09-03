@@ -79,9 +79,11 @@ public:
     EntryMap::const_iterator begin() const;
     EntryMap::const_iterator end() const;
 private:
-    ProcessorRegistration3D(ProcessorRegistration3D const& rhs) { }
+    // QUESTION: Why empty copy constructor?
+    ProcessorRegistration3D([[maybe_unused]] ProcessorRegistration3D const& rhs) { }
+    // QUESTION: Why only *this?
     ProcessorRegistration3D& operator= (
-            ProcessorRegistration3D const& rhs )
+            [[maybe_unused]] ProcessorRegistration3D const& rhs )
     { return *this; }
 private:
     EntryMap processorByName;

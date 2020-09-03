@@ -163,7 +163,7 @@ std::unique_ptr<MultiParticleField3D<DenseParticleField3D<T,Descriptor> > >
             VoxelizedDomain3D<T>& voxelizedDomain,
             MultiScalarField3D<T>& scalarField, Box3D domain,
             const std::vector<int> &usableFlowTypes,
-            plint whichScalar, bool dynamicMesh )
+            [[maybe_unused]] plint whichScalar, bool dynamicMesh )
 {
     if (dynamicMesh) {
         // Select Dynamic, Open mesh.

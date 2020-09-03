@@ -98,7 +98,7 @@ public:
             std::map<plint,NTensorField2D<T>*> const& fields ) const;
     virtual ParallelNTensorAccess2D<T>* clone() const;
 private:
-    ParallelNTensorAccess2D<T>& operator=(ParallelNTensorAccess2D<T> const& rhs) { return *this; }
+    ParallelNTensorAccess2D<T>& operator=([[maybe_unused]] ParallelNTensorAccess2D<T> const& rhs) { return *this; }
 private:
     mutable T* distributedNTensor;
     mutable plint locatedBlock;

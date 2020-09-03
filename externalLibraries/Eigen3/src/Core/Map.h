@@ -11,6 +11,12 @@
 #ifndef EIGEN_MAP_H
 #define EIGEN_MAP_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen { 
 
 namespace internal {
@@ -160,5 +166,7 @@ template<typename PlainObjectType, int MapOptions, typename StrideType> class Ma
 
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_MAP_H

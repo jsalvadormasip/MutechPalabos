@@ -10,6 +10,12 @@
 #ifndef EIGEN_PRODUCT_H
 #define EIGEN_PRODUCT_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen {
 
 template<typename Lhs, typename Rhs, int Option, typename StorageKind> class ProductImpl;
@@ -182,5 +188,7 @@ class ProductImpl<Lhs,Rhs,Option,Dense>
 };
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_PRODUCT_H

@@ -10,6 +10,12 @@
 #ifndef EIGEN_SELFADJOINTRANK2UPTADE_H
 #define EIGEN_SELFADJOINTRANK2UPTADE_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen { 
 
 namespace internal {
@@ -89,5 +95,7 @@ SelfAdjointView<MatrixType,UpLo>& SelfAdjointView<MatrixType,UpLo>
 }
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_SELFADJOINTRANK2UPTADE_H

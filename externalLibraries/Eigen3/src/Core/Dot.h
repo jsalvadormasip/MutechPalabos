@@ -10,6 +10,12 @@
 #ifndef EIGEN_DOT_H
 #define EIGEN_DOT_H
 
+#include "core/plbDebug.h"
+
+DISABLE_WARNING_PUSH
+ 
+DISABLE_WARNING_DEPRECATED_COPY
+
 namespace Eigen { 
 
 namespace internal {
@@ -311,5 +317,7 @@ bool MatrixBase<Derived>::isUnitary(const RealScalar& prec) const
 }
 
 } // end namespace Eigen
+
+DISABLE_WARNING_POP
 
 #endif // EIGEN_DOT_H

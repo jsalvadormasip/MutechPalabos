@@ -102,7 +102,7 @@ public:
     virtual int getStaticId() const;
     virtual void copyReceive (
                 MultiBlock3D const& fromBlock, Box3D const& fromDomain,
-                Box3D const& toDomain, modif::ModifT whichData=modif::dataStructure );
+                Box3D const& toDomain, [[maybe_unused]] modif::ModifT whichData=modif::dataStructure );
     virtual std::string getBlockName() const;
     virtual std::vector<std::string> getTypeInfo() const;
     static std::string blockName();
@@ -263,7 +263,7 @@ public:
     virtual int getStaticId() const;
     virtual void copyReceive (
                 MultiBlock3D const& fromBlock, Box3D const& fromDomain,
-                Box3D const& toDomain, modif::ModifT whichData=modif::dataStructure );
+                Box3D const& toDomain, [[maybe_unused]] modif::ModifT whichData=modif::dataStructure );
     virtual std::string getBlockName() const;
     virtual std::vector<std::string> getTypeInfo() const;
     static std::string blockName();

@@ -1367,24 +1367,24 @@ void MpiManager::scatterv_impl<__float128 >(__float128 *sendBuf, int* sendCounts
 #endif
 
 template <>
-void MpiManager::scatterv_impl<Complex<float> >(Complex<float> *sendBuf, int* sendCounts, int* displs,
-                                       Complex<float>* recvBuf, int recvCount, int root)
+void MpiManager::scatterv_impl<Complex<float> >([[maybe_unused]] Complex<float> *sendBuf, [[maybe_unused]] int* sendCounts, [[maybe_unused]] int* displs,
+                                       [[maybe_unused]] Complex<float>* recvBuf, [[maybe_unused]] int recvCount, [[maybe_unused]] int root)
 {
     if (!ok) return;
     PLB_ASSERT( false ); // Not yet implemented.
 }
 
 template <>
-void MpiManager::scatterv_impl<Complex<double> >(Complex<double> *sendBuf, int* sendCounts, int* displs,
-                                       Complex<double>* recvBuf, int recvCount, int root)
+void MpiManager::scatterv_impl<Complex<double> >([[maybe_unused]] Complex<double> *sendBuf, [[maybe_unused]] int* sendCounts, [[maybe_unused]] int* displs,
+                                       [[maybe_unused]] Complex<double>* recvBuf, [[maybe_unused]] int recvCount, [[maybe_unused]] int root)
 {
     if (!ok) return;
     PLB_ASSERT( false ); // Not yet implemented.
 }
 
 template <>
-void MpiManager::scatterv_impl<Complex<long double> >(Complex<long double> *sendBuf, int* sendCounts, int* displs,
-                                                      Complex<long double>* recvBuf, int recvCount, int root)
+void MpiManager::scatterv_impl<Complex<long double> >([[maybe_unused]] Complex<long double> *sendBuf, [[maybe_unused]] int* sendCounts, [[maybe_unused]] int* displs,
+                                                      [[maybe_unused]] Complex<long double>* recvBuf, [[maybe_unused]] int recvCount, [[maybe_unused]] int root)
 {
     if (!ok) return;
     PLB_ASSERT( false ); // Not yet implemented.
@@ -1478,27 +1478,27 @@ void MpiManager::gatherv_impl<__float128 >(__float128 * sendBuf, int sendCount,
 #endif
 
 template <>
-void MpiManager::gatherv_impl<Complex<float> >(Complex<float> * sendBuf, int sendCount,
-                                  Complex<float> * recvBuf, int* recvCounts, int* displs,
-                                  int root)
+void MpiManager::gatherv_impl<Complex<float> >([[maybe_unused]] Complex<float> * sendBuf, [[maybe_unused]] int sendCount,
+                                  [[maybe_unused]] Complex<float> * recvBuf, [[maybe_unused]] int* recvCounts, [[maybe_unused]] int* displs,
+                                  [[maybe_unused]] int root)
 {
     if (!ok) return;
     PLB_ASSERT( false ); // Not yet implemented.
 }
 
 template <>
-void MpiManager::gatherv_impl<Complex<double> >(Complex<double> * sendBuf, int sendCount,
-                                  Complex<double> * recvBuf, int* recvCounts, int* displs,
-                                  int root)
+void MpiManager::gatherv_impl<Complex<double> >([[maybe_unused]] Complex<double> * sendBuf, [[maybe_unused]] int sendCount,
+                                  [[maybe_unused]] Complex<double> * recvBuf, [[maybe_unused]] int* recvCounts, [[maybe_unused]] int* displs,
+                                  [[maybe_unused]] int root)
 {
     if (!ok) return;
     PLB_ASSERT( false ); // Not yet implemented.
 }
 
 template <>
-void MpiManager::gatherv_impl<Complex<long double> >(Complex<long double> * sendBuf, int sendCount,
-                                  Complex<long double> * recvBuf, int* recvCounts, int* displs,
-                                  int root)
+void MpiManager::gatherv_impl<Complex<long double> >([[maybe_unused]] Complex<long double> * sendBuf, [[maybe_unused]] int sendCount,
+                                  [[maybe_unused]] Complex<long double> * recvBuf, [[maybe_unused]] int* recvCounts, [[maybe_unused]] int* displs,
+                                  [[maybe_unused]] int root)
 {
     if (!ok) return;
     PLB_ASSERT( false ); // Not yet implemented.

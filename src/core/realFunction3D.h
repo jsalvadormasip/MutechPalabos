@@ -61,7 +61,7 @@ public:
         : constantValue(constantValue_)
     { }
 
-    virtual T operator()(Array<T,3> const& position) const
+    virtual T operator()([[maybe_unused]] Array<T,3> const& position) const
     {
         return constantValue;
     }
@@ -84,7 +84,7 @@ public:
           maxT(maxT_)
     { }
 
-    virtual T operator()(Array<T,3> const& position) const
+    virtual T operator()([[maybe_unused]] Array<T,3> const& position) const
     {
         T t = (T) lattice.getTimeCounter().getTime() + tOffset;
         T value = util::sinIncreasingFunction<T>(t, maxT) * maxValue;
@@ -113,7 +113,7 @@ public:
           tOffset(tOffset_)
     { }
 
-    virtual T operator()(Array<T,3> const& position) const
+    virtual T operator()([[maybe_unused]] Array<T,3> const& position) const
     {
         T t = (T) lattice.getTimeCounter().getTime() + tOffset;
         return amplitude * std::cos(angularFrequency * t + phase);

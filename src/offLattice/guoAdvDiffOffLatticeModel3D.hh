@@ -145,7 +145,7 @@ template<typename T, template<typename U> class Descriptor>
 void GuoAdvDiffOffLatticeModel3D<T,Descriptor>::boundaryCompletion (
         AtomicBlock3D& nonTypeLattice,
         AtomicContainerBlock3D& container,
-            std::vector<AtomicBlock3D *> const& args )
+            [[maybe_unused]] std::vector<AtomicBlock3D *> const& args )
 {
     BlockLattice3D<T,Descriptor>& lattice =
         dynamic_cast<BlockLattice3D<T,Descriptor>&> (nonTypeLattice);
@@ -258,8 +258,8 @@ void GuoAdvDiffOffLatticeModel3D<T,Descriptor>::cellCompletion (
 template<typename T, template<typename U> class Descriptor>
 void GuoAdvDiffOffLatticeModel3D<T,Descriptor>::computeRhoBarJNeq (
           BlockLattice3D<T,Descriptor> const& lattice, Dot3D const& guoNode,
-          Dot3D const& fluidDirection, int depth, Array<T,3> const& wallNode, T delta,
-          Array<T,2> wallData, OffBoundary::Type bdType, Array<T,3> const& wallNormal,
+          Dot3D const& fluidDirection, int depth, [[maybe_unused]] Array<T,3> const& wallNode, T delta,
+          Array<T,2> wallData, OffBoundary::Type bdType, [[maybe_unused]] Array<T,3> const& wallNormal,
           T& rhoBar, Array<T,Descriptor<T>::d>& jNeq ) const
 {
     if (!usesSecondOrder()) {

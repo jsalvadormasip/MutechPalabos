@@ -69,7 +69,7 @@ public:
     TwoLayerInitializer<T,Descriptor>* clone() const {
         return new TwoLayerInitializer<T,Descriptor>(*this);
     }
-    virtual void execute(plint iX, plint iY, T rand_val, Cell<T,Descriptor>& cell) const {
+    virtual void execute([[maybe_unused]] plint iX, plint iY, T rand_val, Cell<T,Descriptor>& cell) const {
         T densityFluctuations = 1.e-2;
         T almostNoFluid       = 1.e-4;
         Array<T,2> zeroVelocity (0.,0.);

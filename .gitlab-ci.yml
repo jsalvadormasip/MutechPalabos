@@ -21,16 +21,6 @@ stages:
     - regression_tests
     - deploy
 
-## Test compilation with CMake, everything in examples & utility directory
-cmake:
-    stage: build_cmake
-    
-    script: 
-        - pwd
-        - cd build
-        - cmake ..
-        - make -j 4
-
 test:
     stage: regression_tests
 
@@ -38,9 +28,82 @@ test:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Test
-        - make -j 4
-        - make test
+        - cmake --build . -j4
+        - cmake --build . -- test
 
+## Test compilation with CMake, everything in examples & utility directory
+release_clang_serial:
+    stage: build_cmake
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
+        - cmake --build . -j4
+
+release_clang_parallel:
+    stage: build_cmake
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
+        - cmake --build . -j4
+
+release_gcc_serial:
+    stage: build_cmake
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
+        - cmake --build . -j4
+        
+release_gcc_parallel:
+    stage: build_cmake
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
+        - cmake --build . -j4
+
+debug_clang_serial:
+    stage: build_cmake
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
+        - cmake --build . -j4
+
+debug_clang_parallel:
+    stage: build_cmake
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
+        - cmake --build . -j4
+
+debug_gcc_serial:
+    stage: build_cmake
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
+        - cmake --build . -j4
+        
+debug_gcc_parallel:
+    stage: build_cmake
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
+        - cmake --build . -j4
+        
 pages:
     stage: deploy
     script:

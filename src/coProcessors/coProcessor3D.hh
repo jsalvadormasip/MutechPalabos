@@ -134,7 +134,7 @@ D3Q19CudaCoProcessor3D<T>::~D3Q19CudaCoProcessor3D()
     }
 
 template<typename T>
-int D3Q19CudaCoProcessor3D<T>::addDomain(plint nx, plint ny, plint nz, T omega, int& domainHandle)
+int D3Q19CudaCoProcessor3D<T>::addDomain([[maybe_unused]] plint nx, [[maybe_unused]] plint ny, [[maybe_unused]] plint nz, [[maybe_unused]] T omega, [[maybe_unused]] int& domainHandle)
 //int D3Q19CudaCoProcessor3D<T>::addDomain(Box3D const& domain, T omega)
     {
         /*
@@ -187,7 +187,7 @@ int D3Q19CudaCoProcessor3D<T>::addDomain(plint nx, plint ny, plint nz, T omega, 
 #define PALABOSD3Q19(x, y, z, b) (x*strideYPalabos+y*strideZPalabos+z*basis+b)
 
 template<typename T>
-int D3Q19CudaCoProcessor3D<T>::send(int domainHandle, Box3D const& subDomain, std::vector<char> const& data)
+int D3Q19CudaCoProcessor3D<T>::send([[maybe_unused]] int domainHandle, [[maybe_unused]] Box3D const& subDomain, [[maybe_unused]] std::vector<char> const& data)
     {
         /*
         PyObject *memories, *memory, *args;
@@ -276,7 +276,7 @@ int D3Q19CudaCoProcessor3D<T>::send(int domainHandle, Box3D const& subDomain, st
         return 1;
     }
 template<typename T>
-int D3Q19CudaCoProcessor3D<T>::receive(int domainHandle, Box3D const& subDomain, std::vector<char>& data) const
+int D3Q19CudaCoProcessor3D<T>::receive([[maybe_unused]] int domainHandle, [[maybe_unused]] Box3D const& subDomain, [[maybe_unused]] std::vector<char>& data) const
     {
         /*
         PyObject *memories, *memory, *args;
@@ -367,7 +367,7 @@ int D3Q19CudaCoProcessor3D<T>::receive(int domainHandle, Box3D const& subDomain,
     }
 
 template<typename T>
-int D3Q19CudaCoProcessor3D<T>::collideAndStream(int domainHandle)
+int D3Q19CudaCoProcessor3D<T>::collideAndStream([[maybe_unused]] int domainHandle)
     {
         /*
         PyObject_CallMethod(this->simulation, "sim_step", NULL);
