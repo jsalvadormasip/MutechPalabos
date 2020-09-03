@@ -23,6 +23,7 @@ message(${CMAKE_BUILD_TYPE})
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Test")
     set(BUILD_TESTING ON)
+    enable_testing()
 endif()
 
 # Compiler flags
