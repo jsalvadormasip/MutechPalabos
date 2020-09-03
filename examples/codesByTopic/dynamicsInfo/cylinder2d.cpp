@@ -264,8 +264,11 @@ int main(int argc, char* argv[]) {
 
     cylinderSetup(lattice, parameters, *boundaryCondition);
     std::map<int,std::string> nameOfDynamics;
+    auto dynChain = extractDynamicsChain(lattice, nameOfDynamics);
+#ifndef PLB_REGRESSION
     ImageWriter<int>("earth").writeScaledGif("dynamics",
-                                             *extractDynamicsChain(lattice,nameOfDynamics), 600,600 );
+                                             *dynChain, 600,600 );
+#endif
     //ImageWriter<int>("air").writeScaledGif("dynamics",
     //                                       *extractTopMostDynamics(lattice), 600,600 );
     for (std::map<int,std::string>::const_iterator it = nameOfDynamics.begin();
