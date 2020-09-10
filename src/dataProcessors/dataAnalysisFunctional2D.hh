@@ -91,6 +91,35 @@ T BoxSumRhoBarFunctional2D<T,Descriptor>::getSumRhoBar() const {
     return this->getStatistics().getSum(sumRhoBarId);
 }
 
+template<typename T, template<typename U> class Descriptor> 
+DotSumRhoBarFunctional2D<T,Descriptor>::DotSumRhoBarFunctional2D()
+    : sumRhoBarId(this->getStatistics().subscribeSum())
+{ }
+
+template<typename T, template<typename U> class Descriptor> 
+void DotSumRhoBarFunctional2D<T,Descriptor>::process (
+        DotList2D const& dotList, BlockLattice2D<T,Descriptor>& lattice )
+{
+    BlockStatistics& statistics = this->getStatistics();
+    for (plint index=0; index<dotList.getN(); ++index) {
+		Cell<T,Descriptor> const& cell = lattice.get(dotList.getDot(index).x,dotList.getDot(index).y);
+		statistics.gatherSum(sumRhoBarId, cell.getDynamics().computeRhoBar(cell));
+    }
+    this->getStatistics().evaluate();
+}
+
+template<typename T, template<typename U> class Descriptor> 
+DotSumRhoBarFunctional2D<T,Descriptor>*
+     DotSumRhoBarFunctional2D<T,Descriptor>::clone() const
+{
+    return new DotSumRhoBarFunctional2D(*this);
+}
+
+template<typename T, template<typename U> class Descriptor> 
+T DotSumRhoBarFunctional2D<T,Descriptor>::getSumRhoBar() const {
+    //cout << this->getStatistics().getSum(sumRhoBarId) << endl;
+    return this->getStatistics().getSum(sumRhoBarId);
+}
 
 template<typename T, template<typename U> class Descriptor> 
 BoxSumEnergyFunctional2D<T,Descriptor>::BoxSumEnergyFunctional2D()
@@ -138,7 +167,37 @@ void BoxSumEnergyFunctional2D<T,Descriptor>::getDimensionsT(std::vector<int>& di
     dimensions[0] = -2;
 }
 
+template<typename T, template<typename U> class Descriptor>
+DotSumVelocityComponentFunctional2D<T,Descriptor>::DotSumVelocityComponentFunctional2D(int iComponent_)
+    : sumVelocityComponentId(this->getStatistics().subscribeSum()),
+    iComponent(iComponent_)
+{ }
 
+template<typename T, template<typename U> class Descriptor>
+void DotSumVelocityComponentFunctional2D<T,Descriptor>::process (
+    DotList2D const& dotList, BlockLattice2D<T,Descriptor>& lattice )
+{
+    BlockStatistics& statistics = this->getStatistics();
+    for (plint index=0; index<dotList.getN(); ++index) {
+        Cell<T,Descriptor> const& cell = lattice.get(dotList.getDot(index).x,dotList.getDot(index).y);
+        Array<T, Descriptor<T>::d> velocity(0.0, 0.0);
+        cell.getDynamics().computeVelocity(cell, velocity);
+        statistics.gatherSum(sumVelocityComponentId, velocity[iComponent]);
+    }
+    this->getStatistics().evaluate();
+}
+
+template<typename T, template<typename U> class Descriptor>
+DotSumVelocityComponentFunctional2D<T,Descriptor>*
+DotSumVelocityComponentFunctional2D<T,Descriptor>::clone() const
+{
+    return new DotSumVelocityComponentFunctional2D(*this);
+}
+
+template<typename T, template<typename U> class Descriptor>
+T DotSumVelocityComponentFunctional2D<T,Descriptor>::getSumVelocityComponent() const {
+    return this->getStatistics().getSum(sumVelocityComponentId);
+}
 /* *************** Data Functionals for BlockLattice ***************** */
 
 template<typename T, template<typename U> class Descriptor> 
