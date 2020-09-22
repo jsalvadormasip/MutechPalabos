@@ -61,6 +61,7 @@
 #include "palabos3D.h"
 #include "palabos3D.hh"
 
+#define NPFEM_CUDA
 // Load npFEM Lib
 #include "npFEM/rbcShapeOp.h"
 #include "npFEM/rbcGlobal.h"
@@ -128,7 +129,6 @@ struct SimulationParameters {
     Solver_GPU sGPU;
     Solver_GPU sGPU_plt;
 #endif
-
     // _p  : physical system
     // _lb : lattice/ non-dimensional system
     // Paramenters to be read from the XML file or to be defined manually
@@ -1326,6 +1326,19 @@ int main(int argc, char* argv[])
     params_plt.miu = 35.0;
     params_plt.lambda = 5.0;
     params_plt.kappa = 0.0;
+    std::cout << "dtP " << sp.dt_p << "s_template.Cbeta_ " << std::endl;
+    /*
+    std::cout << "rho " << sp.rho_ShapeOp_RBC<< std::endl;
+    std::cout << "afsadds  col thres " << sp.collisions_threshold_rep*sp.dx_p << " "<< sp.collisions_threshold_rep <<" " <<sp.dx_p << "couille"<< std::endl;
+    std::cout << "afsadds threshold_nonRep " << sp.collisions_threshold_nonRep*sp.dx_p << " "<< sp.collisions_threshold_nonRep << std::endl;
+    std::cout << "afsadds  weight coll " << sp.collisions_weight_rep << std::endl;
+    std::cout << "afsadds weight_col_nonRep " << sp.collisions_weight_nonRep << std::endl;
+    std::cout << "beta_morse " << sp.beta_morse<< std::endl;
+    std::cout << "params_plt.volume_weight " << sp.globalVolumeConservationWeight_ShapeOp_RBC<< std::endl;;
+    std::cout << " params_plt.calpha " << params_plt.calpha << std::endl;
+    std::cout << " params_plt.vel_cap " << params_plt.vel_cap<<std::endl;
+    std::cout << " params_plt.vel_cap_fin" << params_plt.vel_cap_fin<< std::endl;
+    */
 #endif // GPU
 
 	///////////////////////////////////////////////////////////////////////////
@@ -2152,6 +2165,15 @@ int main(int argc, char* argv[])
 			timer("shapeop").start();
 #ifdef NPFEM_CUDA
 			if (sp.shapeOpRBCs.size()) {
+                /*
+                std::cout << "sp.max_iterations_ShapeOp" << sp.max_iterations_ShapeOp << std::endl;
+                std::cout << "sp.tol_ShapeOp" << sp.tol_ShapeOp << std::endl;
+                std::cout << "sp.gamma_ShapeOp" << sp.gamma_ShapeOp << std::endl;
+                std::cout << "sp.max_line_search_loops_ShapeOp "<< sp.max_line_search_loops_ShapeOp << std::endl;
+                std::cout << "sp.m_ShapeOp" << sp.m_ShapeOp << std::endl;
+                std::cout << "sp.gamma2_ShapeOp " << sp.gamma2_ShapeOp << std::endl;
+                */
+
 				copy_data_to_gpu(sp.sGPU, sp.shapeOpRBCs);
                 sp.sGPU.Palabos_iT_ = sp.iT;
                 sp.sGPU.solve(sp.max_iterations_ShapeOp, sp.tol_ShapeOp, true, sp.gamma_ShapeOp, sp.max_line_search_loops_ShapeOp, sp.m_ShapeOp, sp.gamma2_ShapeOp);

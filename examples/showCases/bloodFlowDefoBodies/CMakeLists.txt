@@ -53,8 +53,9 @@ project(bloodFlowDefoBodies)
 
 enable_language(CXX)
 
-option(ENABLE_CUDA "Enabling CUDA" OFF)
+option(ENABLE_CUDA "Enabling CUDA" ON)
 if(ENABLE_CUDA)
+  find_package(CUDA)
   enable_language(CUDA)
 endif()
 
@@ -204,10 +205,10 @@ if(ENABLE_CUDA)
     # cu files
     file(GLOB NPFEM_CUDA_SOURCES_CPP "../../../coupledSimulators/npFEM/src_GPU/*.cpp")
     file(GLOB NPFEM_CUDA_SOURCES_CU  "../../../coupledSimulators/npFEM/src_GPU/*.cu")
-    set(NPFEM_CUDA_SOURCES ${NPFEM_CUDA_SOURCES_CPP} ${NPFEM_CUDA_SOURCES_CU})  
+    set(NPFEM_CUDA_SOURCES ${NPFEM_CUDA_SOURCES_CPP} ${NPFEM_CUDA_SOURCES_CU})
 endif()
 
-# By adding the NPFEM_H, we manage to show the headers in a separate folder 
+# By adding the NPFEM_H, we manage to show the headers in a separate folder
 # in the project tree (quite handy for development)
 
 if(NOT ENABLE_CUDA)

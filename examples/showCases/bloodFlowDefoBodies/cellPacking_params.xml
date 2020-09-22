@@ -25,7 +25,7 @@
     <inamuro_iT> 1 </inamuro_iT>
 
     <u_p> 0 </u_p> <!--> Physical Velocity (um/us) || Poiseuille Flow: Velocity at the center of the tube (desired) <-->
-    <shear_rate> 0 </shear_rate> <!--> in sec^-1 <-->
+    <shear_rate> 100 </shear_rate> <!--> in sec^-1 <-->
   
     <dt_p> 5 </dt_p> <!--> Fluid solver time step: Physical Length (us) <-->
     <u_lb> -1 </u_lb>

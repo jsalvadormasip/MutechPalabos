@@ -77,8 +77,9 @@
 namespace plb {
 namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
+/*
 Solver_GPU::Solver_GPU(const MatrixXX &points,
-		const std::vector< std::vector<int> > &triangles,
+		const std::vector< std::vector<int>> &triangles,
 		const std::vector<bool> &onSurfaceParticle,
 		std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
 		const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyId, std::vector<int> *graph): mesh_info_(params)
@@ -87,12 +88,58 @@ Solver_GPU::Solver_GPU(const MatrixXX &points,
 	bodyID_ = bodyId;
 	setPoints(points, nb_cells);
 	constraints_ = constraints;
-	setConnectivityList(triangles);
-	set_onSurfaceParticle(onSurfaceParticle);
-	make_gpu_graph(graph, points.cols());
-	Cbeta_ = cbeta;
-	initialize(phys_timestep*shapeOp_time_step);
+    setConnectivityList(triangles);
+    set_onSurfaceParticle(onSurfaceParticle);
+    make_gpu_graph(graph, points.cols());
+    Cbeta_ = cbeta;
+    initialize(phys_timestep*shapeOp_time_step);
+
 }
+*/
+    void Solver_GPU::construct(const MatrixXX &points,
+                               const std::vector< std::vector<int>> &triangles,
+                               const std::vector<bool> &onSurfaceParticle,
+                               std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
+                               const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyId, std::vector<int> *graph){
+
+        //test_prefix();
+        //exit(0);
+        solver_step_ = shapeOp_time_step;
+        bodyID_ = bodyId;
+        setPoints(points, nb_cells);
+        constraints_ = constraints;
+        setConnectivityList(triangles);
+        set_onSurfaceParticle(onSurfaceParticle);
+        make_gpu_graph(graph, points.cols());
+        Cbeta_ = cbeta;
+        initialize(phys_timestep*shapeOp_time_step);
+    }
+
+
+
+    Solver_GPU::Solver_GPU(const MatrixXX &points,
+                           const std::vector< std::vector<int>> &triangles,
+                           const std::vector<bool> &onSurfaceParticle,
+                           std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
+                           const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyId, std::vector<int> *graph){
+
+        //test_prefix();
+        //exit(0);
+        this->construct(points, triangles, onSurfaceParticle, constraints, params, cbeta, nb_cells, phys_timestep, shapeOp_time_step, bodyId, graph);
+    }
+
+    Solver_GPU::Solver_GPU(const MatrixXX &points,
+                           const std::vector< std::vector<int>> &triangles,
+                           const std::vector<bool> &onSurfaceParticle,
+                           std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
+                           const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyID, int start_id) {
+
+        this->starting_ids = start_id*points.cols();
+        from_fluid_data_alloc(&from_fluid_data_d, &from_fluid_data_h, points.cols()*nb_cells);
+        this->construct(points, triangles, onSurfaceParticle, constraints, params, cbeta, nb_cells, phys_timestep, shapeOp_time_step, bodyID, NULL);
+    }
+
+
 /////////////////////////////////////////////////////////////////////////////
 void Solver_GPU::make_gpu_graph(std::vector<int> *graph, int nb)
 {
@@ -345,7 +392,7 @@ SHAPEOP_INLINE void Solver_GPU::setConnectivityList(const std::vector<std::vecto
 
     connectivity_list_ = connectivity_list;
 	nb_tri_ = connectivity_list_.size();
-	mesh_data_h_.triangles = new short[nb_tri_ * 3];
+	mesh_data_h_.triangles = new short[nb_tri_*3];
 	mesh_info_.n_triangles = nb_tri_;
 
 	for (int i = 0; i < nb_tri_; i++) {
@@ -419,11 +466,10 @@ double compute_volume_cpu(double *points, short *triangle, int n_tri, int n_p) {
 
 		volume += ((a + b + c).dot(n)*area) * 1 / 9;
 
-		grad[p0] += (area*n) / 3;
-		grad[p1] += (area*n) / 3;
-		grad[p2] += (area*n) / 3;
-		//double n[3] = 
-
+		grad[p0] += (area*n)/3;
+		grad[p1] += (area*n)/3;
+		grad[p2] += (area*n)/3;
+		//double n[3] =
 	}
 	//std::cout << grad[0] <<"\n";
 
@@ -473,6 +519,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
 	  // PD Energies
 	  constraints_[i]->addConstraint(triplets, idO);
   }
+
   mesh_info_.idO = idO;
   mesh_info_.volume = compute_volume_cpu(simulation_input_h_.points, mesh_data_h_.triangles, mesh_info_.n_triangles, mesh_info_.n_points);
   mesh_info_.n_constraints = n_constraints;
@@ -480,6 +527,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   SparseMatrix A = SparseMatrix(idO, n_points);
   A.setFromTriplets(triplets.begin(), triplets.end());
   At_ = A.transpose();
+
 
   // Build LAPLACIAN considering the contribution of nonePD energies as well
   triplets.clear();
@@ -493,13 +541,14 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   B.setFromTriplets(triplets.begin(), triplets.end());
   Bt = B.transpose();
   // See Liu_2017 & Thesis for more
-  SparseMatrix Laplacian = Bt * B;
+  SparseMatrix Laplacian = Bt*B;
   //printf("Laplacian GPU %f %f %f %f %f \n", Laplacian.coeff(223, 221), Laplacian.coeff(223, 222), Laplacian.coeff(223, 223), Laplacian.coeff(223, 224), Laplacian.coeff(223, 225));
 
   //Dynamic
   if (velocities_.cols() == 0) {
 	  velocities_ = MatrixXXCuda::Zero(3*mesh_info_.nb_cells, n_points);
   }
+
   delta_ = timestep;
   momentum_ = Matrix3X::Zero(3, n_points);
 
@@ -534,19 +583,23 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   //Quasi-Newton
   L_ = SparseMatrix(n_points, n_points);
   J_ = SparseMatrix(At_.rows(), At_.cols());
+
   L_ = At_ * A;
   J_ = At_;
- 
-  f_int_nonePD_ = Matrix3X::Zero(3*mesh_info_.nb_cells, n_points);
+  std::cout << "mesh_info_.nb_cells &&" << mesh_info_.nb_cells  << " "  << n_points << std::endl;
+
+  //f_int_nonePD_ = Matrix3X::Zero(3*mesh_info_.nb_cells, n_points);
 
   //Palabos interface
-  Palabos_Forces_ = MatrixXXCuda::Zero(3*mesh_info_.nb_cells,n_points);
+  Palabos_Forces_ = MatrixXXCuda::Zero(3*mesh_info_.nb_cells, n_points);
 
   //Collisions
   f_collisions_ = Matrix3X::Zero(3, n_points);
   E_collisions_ = 0.;
   std::vector<bool>().swap(collision_state_);
   for (int i = 0; i < n_points; ++i) collision_state_.push_back(false);
+
+
   
   solver_ = std::make_shared<plb::npfem::SimplicialLDLTSolver>();
 
@@ -795,14 +848,27 @@ SHAPEOP_INLINE void Solver_GPU::rotatePoints(const std::string& axis, const Scal
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE void Solver_GPU::set_onSurfaceParticle(
-	const std::vector<bool>& onSurfaceParticle)
-{
+SHAPEOP_INLINE void Solver_GPU::set_onSurfaceParticle(const std::vector<bool>& onSurfaceParticle){
 	onSurfaceParticle_ = onSurfaceParticle;
 }
+/////////////////////////////////////////////////////////////////////////////////
+void Solver_GPU::send_fluid_data(){
+    send_fluid_data_(&from_fluid_data_d, &from_fluid_data_h);
+}
+
+void Solver_GPU::read_fluid_data(){
+    read_fluid_data_(&from_fluid_data_d, &from_fluid_data_h);
+}
+void Solver_GPU::copy_force_from_fluid(){
+    plb::npfem::copy_force_from_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, starting_ids, 0);
+}
+
+void Solver_GPU::copy_point_to_fluid(){
+    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, starting_ids, 0);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE const std::vector<bool>& Solver_GPU::get_onSurfaceParticle() const
-{
+SHAPEOP_INLINE const std::vector<bool>& Solver_GPU::get_onSurfaceParticle() const {
 	return onSurfaceParticle_;
 }
 ///////////////////////////////////////////////////////////////////////////////

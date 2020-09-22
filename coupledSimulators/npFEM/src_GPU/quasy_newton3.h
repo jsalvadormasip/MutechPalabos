@@ -419,9 +419,9 @@ __device__ void momentum_points_first_guess3(double *points, const double *veloc
 		A_coef = M_tild_inv[ID_COL(threadIdx.x, j, n)];
 		int local_id = j + 3*n*blockIdx.x;
 		//if (threadIdx.x == 0)printf("m_tild %f h %f force %f \n", A_coef, h, force_extern[local_id]);
-		Ax_x += A_coef *(M[j] * h*velocities[local_id      ] + h*h*force_extern[local_id      ]);
-		Ax_y += A_coef *(M[j] * h*velocities[local_id +   n] + h*h*force_extern[local_id +   n]);
-		Ax_z += A_coef *(M[j] * h*velocities[local_id + 2*n] + h*h*force_extern[local_id + 2*n]);
+		Ax_x += A_coef*(M[j]*h*velocities[local_id      ] + h*h*force_extern[local_id      ]);
+		Ax_y += A_coef*(M[j]*h*velocities[local_id +   n] + h*h*force_extern[local_id +   n]);
+		Ax_z += A_coef*(M[j]*h*velocities[local_id + 2*n] + h*h*force_extern[local_id + 2*n]);
 	}
 	
 	momentum[id      ] = points[id      ] + Ax_x;

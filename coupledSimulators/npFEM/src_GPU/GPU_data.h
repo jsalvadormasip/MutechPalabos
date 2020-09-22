@@ -50,7 +50,11 @@ namespace npfem {
 struct matrix3{
 	float data[9];
 };
-
+struct From_fluid_data {
+    int nb;
+    double *data;
+    int *ids;
+};
 //MESH
 struct Mesh_info {
 	float rho = 1125.0;

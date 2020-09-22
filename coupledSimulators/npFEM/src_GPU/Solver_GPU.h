@@ -67,13 +67,27 @@ typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> M
 ///////////////////////////////////////////////////////////////////////////////
 /** \brief ShapeOp Solver. This class implements the main ShapeOp solver based on \cite Bouaziz2012 and \cite Bouaziz2014.*/
 class SHAPEOP_API Solver_GPU {
- public:
-  Solver_GPU(){};
-  Solver_GPU(const MatrixXX &points, 
-			 const std::vector< std::vector<int> > &triangles, 
-			 const std::vector<bool> &onSurfaceParticle, 
-			 std::vector<std::shared_ptr<Constraint>>& constraints, Mesh_info params, float cbeta,
-			 const int nb_cells = 1, Scalar phys_timestep = 1, Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
+private:
+    void construct(const MatrixXX &points,
+                   const std::vector< std::vector<int> > &triangles,
+                   const std::vector<bool> &onSurfaceParticle,
+                   std::vector<std::shared_ptr<Constraint>>& constraints, Mesh_info params, float cbeta,
+                   const int nb_cells = 1, Scalar phys_timestep = 1, Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
+    int starting_ids = 0;
+
+public:
+    Solver_GPU(){};
+    Solver_GPU(const MatrixXX &points,
+               const std::vector< std::vector<int> > &triangles,
+               const std::vector<bool> &onSurfaceParticle,
+               std::vector<std::shared_ptr<Constraint>>& constraints, Mesh_info params, float cbeta,
+               const int nb_cells = 1, Scalar phys_timestep = 1, Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
+
+    Solver_GPU(const MatrixXX &points,
+               const std::vector< std::vector<int>> &triangles,
+               const std::vector<bool> &onSurfaceParticle,
+               std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
+               const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyID, int start_id);
 
   void make_gpu_graph(std::vector<int> *graph, int nb);
 
@@ -132,6 +146,11 @@ class SHAPEOP_API Solver_GPU {
   void flatten_constraints();
   void rotatePoints(const std::string& axis, const Scalar& theta);
   void set_onSurfaceParticle(const std::vector<bool>& onSurfaceParticle);
+
+  void send_fluid_data();
+  void read_fluid_data();
+  void copy_force_from_fluid();
+  void copy_point_to_fluid();
   const std::vector<bool>& get_onSurfaceParticle() const;
   const MatrixXXCuda& getVelocities() const;
   const Matrix3X& get_Palabos_Forces() const;
@@ -148,6 +167,9 @@ class SHAPEOP_API Solver_GPU {
   short *triangles_h_;
   int  nb_tri_ = 0;
   Mesh_info mesh_info_;
+
+  From_fluid_data from_fluid_data_h;
+  From_fluid_data from_fluid_data_d;
 
  private:
   //Palabos interface

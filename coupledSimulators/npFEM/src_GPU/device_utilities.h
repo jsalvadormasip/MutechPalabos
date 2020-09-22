@@ -73,6 +73,13 @@ struct gradient_functor;
 ///////////////////////////////////////////////////////////////////////////////
 void median_filter(graph_data graph, ShapeOpScalar *force, int nb_cells, int nb);
 ///////////////////////////////////////////////////////////////////////////////
+void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int nb);
+///////////////////////////////////////////////////////////////////////////////
+void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h);
+void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h);
+void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, int start_id, int iter);
+void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, int start_id, int iter);
+////////////////////////////////////////////////////////////////////////
 void send_graph(graph_data *graph_h, graph_data *graph_d, int n);
 ///////////////////////////////////////////////////////////////////////////////
 void first_center(Mesh_info info, Simulation_input input, Simulation_data sim, double *center_d);

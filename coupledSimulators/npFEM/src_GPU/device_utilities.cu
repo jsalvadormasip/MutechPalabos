@@ -203,6 +203,69 @@ void send_graph(graph_data *graph_h, graph_data *graph_d, int n)
 	CUDA_HANDLE_ERROR(cudaMemcpy(graph_d->indexs, graph_h->indexs, n * sizeof(int), cudaMemcpyHostToDevice));
 	CUDA_HANDLE_ERROR(cudaMemcpy(graph_d->edges, graph_h->edges, graph_h->nb_edges * sizeof(int), cudaMemcpyHostToDevice));
 }
+////////////////////////////////////////////////////////////////////////////////////////
+void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int nb){
+    data_h->nb   = nb;
+    data_h->data = new double[nb*3];
+    data_h->ids  = new int[nb];
+
+    data_d->nb	= nb;
+
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data, nb*3*sizeof(double)));
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->ids , nb*sizeof(int)));
+}
+
+void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h){
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data, data_h->data, 3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->ids , data_h->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyHostToDevice));
+}
+
+void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h){
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_h->data, data_d->data, 3*data_h->nb*sizeof(double), cudaMemcpyDeviceToHost));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_h->ids , data_d->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyDeviceToHost));
+}
+//////////////////////////////////////////////////////////////////////////////////////////
+//Copy in place data from others solver (fluid solver) from communication buffer to external_forces and from points to buffer
+__launch_bounds__(258, 1)
+__global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, From_fluid_data data_fluid, int start_id, int iter) {
+
+    int x_n = info.n_points;
+    int fluid_id = blockIdx.x*blockDim.x + threadIdx.x;
+
+    int rbc_id = data_fluid.ids[fluid_id] - start_id;
+    int which_rbc = rbc_id/x_n;
+
+    int point_id = (which_rbc*x_n)*3 + rbc_id%x_n;
+
+    input.forces_ex[point_id        ] = data_fluid.data[3*fluid_id  ];
+    input.forces_ex[point_id +   x_n] = data_fluid.data[3*fluid_id+1];
+    input.forces_ex[point_id + 2*x_n] = data_fluid.data[3*fluid_id+2];
+
+}
+///////////////////////////////////////////////////////////////////////////////////////////
+
+__launch_bounds__(258, 1)
+__global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, From_fluid_data data_fluid, int start_id, int iter) {
+
+    int x_n = info.n_points;
+    int fluid_id = blockIdx.x*blockDim.x + threadIdx.x;
+
+    int rbc_id = data_fluid.ids[fluid_id] - start_id;
+    int which_rbc = rbc_id/x_n;
+
+    int point_id = (which_rbc*x_n)*3 + rbc_id%x_n;
+
+    data_fluid.data[3*fluid_id  ] = input.points[point_id        ];
+    data_fluid.data[3*fluid_id+1] = input.points[point_id +   x_n];
+    data_fluid.data[3*fluid_id+2] = input.points[point_id + 2*x_n];
+}
+void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, int start_id, int iter){
+    HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, start_id, iter));
+}
+
+void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, int start_id, int iter){
+    HANDLE_KERNEL_ERROR(copy_point_to_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, start_id, iter));
+}
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void clone_cells_points(Mesh_info info, Simulation_input input, Simulation_data sim) {
 
@@ -461,12 +524,12 @@ void points_from_Host_to_Device(int n_points, ShapeOpScalar *points_d, ShapeOpSc
 	//CUDA_HANDLE_ERROR(cudaMemcpyAsync(Palabos_Forces_d, Palabos_Forces_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice, stream));
 }
 void external_forces_from_Host_to_Device(int n_points, ShapeOpScalar *Palabos_Forces_h, ShapeOpScalar *Palabos_Forces_d, cudaStream_t stream){
-	 CUDA_HANDLE_ERROR(cudaMemcpy(Palabos_Forces_d, Palabos_Forces_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
+	 CUDA_HANDLE_ERROR(cudaMemcpy(Palabos_Forces_d, Palabos_Forces_h, 3*n_points*sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
 	 //CUDA_HANDLE_ERROR(cudaMemcpyAsync(Palabos_Forces_d, Palabos_Forces_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice, stream));
 }
 ///////////////////////////////////////////////////////////////////////////////
 void points_from_Device_to_Host(int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h, cudaStream_t stream){
-	CUDA_HANDLE_ERROR(cudaMemcpy(points_h, points_d, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyDeviceToHost));
+	CUDA_HANDLE_ERROR(cudaMemcpy(points_h, points_d, 3*n_points*sizeof(ShapeOpScalar), cudaMemcpyDeviceToHost));
 	//CUDA_HANDLE_ERROR(cudaMemcpyAsync(points_h, points_d, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyDeviceToHost, stream));
 }
 //////////////////////////////////////////////////////////////////////////////
@@ -483,8 +546,7 @@ void send_GPU_collinding_points(ShapeOpScalar *points, ShapeOpScalar **colid_poi
 	CUDA_HANDLE_ERROR(cudaMemcpy(*colid_normals_d, normals, 3 * nb * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
-void free_GPU_pointer(void *pointer)
-{
+void free_GPU_pointer(void *pointer){
 	cudaFree(pointer);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
