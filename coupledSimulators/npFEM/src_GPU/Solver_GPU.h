@@ -136,6 +136,8 @@ public:
   void get_data_from_GPU();
 
   void rotate_points(const cuda_scalar *matrices);
+  void solve_only( unsigned int max_iterations = ((int)(1e3)), Scalar tol = 1e-6, bool Quasi_Newton = true, Scalar gamma = 0.3,
+                  int max_line_search_loops = ((int)(1e3)), int m = 7, Scalar gamma2 = 0.9, Scalar collisions_weight = 500.);
 
   double solve( unsigned int max_iterations = ((int)(1e3)), Scalar tol = 1e-6, bool Quasi_Newton = true, Scalar gamma = 0.3, 
               int max_line_search_loops = ((int)(1e3)), int m = 7, Scalar gamma2 = 0.9, Scalar collisions_weight = 500.);

@@ -206,23 +206,28 @@ void send_graph(graph_data *graph_h, graph_data *graph_d, int n)
 ////////////////////////////////////////////////////////////////////////////////////////
 void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int nb){
     data_h->nb   = nb;
-    data_h->data = new double[nb*3];
+    data_h->data_in  = new double[nb*3];
+    data_h->data_out = new double[nb*3];
+
+    data_h->shift = new int[MAXFLUIDNODE];
+    data_h->fluid_nodes_rank = new int[MAXFLUIDNODE];
     data_h->ids  = new int[nb];
 
     data_d->nb	= nb;
 
-    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data, nb*3*sizeof(double)));
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data_out, nb*3*sizeof(double)));
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data_in, nb*3*sizeof(double)));
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->ids , nb*sizeof(int)));
 }
 
 void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h){
-    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data, data_h->data, 3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data_in, data_h->data_in, 3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->ids , data_h->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyHostToDevice));
 }
 
 void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h){
-    CUDA_HANDLE_ERROR(cudaMemcpy(data_h->data, data_d->data, 3*data_h->nb*sizeof(double), cudaMemcpyDeviceToHost));
-    CUDA_HANDLE_ERROR(cudaMemcpy(data_h->ids , data_d->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyDeviceToHost));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_h->data_out, data_d->data_out, 3*data_h->nb*sizeof(double), cudaMemcpyDeviceToHost));
+    //CUDA_HANDLE_ERROR(cudaMemcpy(data_h->ids , data_d->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyDeviceToHost));
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 //Copy in place data from others solver (fluid solver) from communication buffer to external_forces and from points to buffer
@@ -237,9 +242,11 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
 
     int point_id = (which_rbc*x_n)*3 + rbc_id%x_n;
 
-    input.forces_ex[point_id        ] = data_fluid.data[3*fluid_id  ];
-    input.forces_ex[point_id +   x_n] = data_fluid.data[3*fluid_id+1];
-    input.forces_ex[point_id + 2*x_n] = data_fluid.data[3*fluid_id+2];
+    input.forces_ex[point_id        ] = data_fluid.data_in[3*fluid_id  ];
+    input.forces_ex[point_id +   x_n] = data_fluid.data_in[3*fluid_id+1];
+    input.forces_ex[point_id + 2*x_n] = data_fluid.data_in[3*fluid_id+2];
+
+    if(data_fluid.ids[fluid_id] == 300)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.forces_ex[point_id + 2*x_n], data_fluid.data_in[3*fluid_id+2]  );
 
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -255,9 +262,10 @@ __global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, Fr
 
     int point_id = (which_rbc*x_n)*3 + rbc_id%x_n;
 
-    data_fluid.data[3*fluid_id  ] = input.points[point_id        ];
-    data_fluid.data[3*fluid_id+1] = input.points[point_id +   x_n];
-    data_fluid.data[3*fluid_id+2] = input.points[point_id + 2*x_n];
+    data_fluid.data_out[3*fluid_id  ] = input.points[point_id        ];
+    data_fluid.data_out[3*fluid_id+1] = input.points[point_id +   x_n];
+    data_fluid.data_out[3*fluid_id+2] = input.points[point_id + 2*x_n];
+    //if(data_fluid.ids[fluid_id] == 209)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.points[point_id + 2*x_n], data_fluid.data[3*fluid_id+2]  );
 }
 void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, int start_id, int iter){
     HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, start_id, iter));
@@ -567,6 +575,15 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	cuda_scalar gradient_norm = 100;
 	cuda_scalar *volume_der = (cuda_scalar*)(buffer + x_n);
 
+	if(threadIdx.x == 42 && blockIdx.x == 1){
+	    printf("Solid solver before id %d input.points %f %f %f input.force %f %f %f\n",point_id + 2*x_n,
+               input.points[point_id], input.points[point_id +  x_n], input.points[point_id + 2*x_n],
+               input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n] );
+	}
+	//if(fabs(input.forces_ex[point_id]) > 10e-10 || fabs(input.forces_ex[point_id+ x_n] ) > 10e-10 || fabs(input.forces_ex[point_id + 2*x_n]) > 10e-10 ){
+	//    printf("FORCE ! blockIdx.x %d threadIdx.x %d [%f %f %f]\n", blockIdx.x, threadIdx.x,input.forces_ex[point_id],  input.forces_ex[point_id+ x_n], input.forces_ex[point_id + 2*x_n] );
+    //}
+
 	sim.points_last_iter[point_id        ] = input.points[point_id        ];
 	sim.points_last_iter[point_id +   x_n] = input.points[point_id +   x_n];
 	sim.points_last_iter[point_id + 2*x_n] = input.points[point_id + 2*x_n];
@@ -810,6 +827,12 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	input.points[point_id        ] = sim.points_last_iter[point_id        ] + input.velocities[point_id        ]*h;
 	input.points[point_id +   x_n] = sim.points_last_iter[point_id +   x_n] + input.velocities[point_id +   x_n]*h;
 	input.points[point_id + 2*x_n] = sim.points_last_iter[point_id + 2*x_n] + input.velocities[point_id + 2*x_n]*h;
+
+    if(threadIdx.x == 42 && blockIdx.x == 1){
+        printf("Solid solver after id %d input.points %f %f %f input.force %f %f %f\n",point_id + 2*x_n,
+               input.points[point_id], input.points[point_id +  x_n], input.points[point_id + 2*x_n],
+               input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n] );
+    }
 
 	//DEBUG
 	//if(threadIdx.x == 0)printf("vel GPU in kernel:\n%f \n%f \n%f \n", input.velocities[point_id], input.velocities[point_id + x_n] , input.velocities[point_id + 2*x_n]);

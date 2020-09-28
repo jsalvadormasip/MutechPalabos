@@ -50,10 +50,17 @@ namespace npfem {
 struct matrix3{
 	float data[9];
 };
+//heuristic how many fluid nodes we may communicate may vary
+#define MAXFLUIDNODE 256
+
 struct From_fluid_data {
+    int nb_fluid_nodes = 0;
     int nb;
-    double *data;
+    double *data_in;
+    double *data_out;
     int *ids;
+    int *shift;
+    int *fluid_nodes_rank;
 };
 //MESH
 struct Mesh_info {

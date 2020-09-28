@@ -712,7 +712,11 @@ SHAPEOP_INLINE void Solver_GPU::rotate_points(const cuda_scalar *matrices) {
 
 	points_time_mat_3X3(matrices_d_,  matrices, simulation_input_d_.points, mesh_info_.nb_cells, mesh_info_.n_points);
 }
-
+////////////////////////////////////////////////////////////////////////////////
+SHAPEOP_INLINE void Solver_GPU::solve_only(unsigned int max_iterations, Scalar tol, bool Quasi_Newton, Scalar gamma, int max_line_search_loops, int m, Scalar gamma2, Scalar collisions_weight){
+            compute_next_frame_rbc(&mesh_info_, &mesh_data_d_, &simulation_input_d_,
+                                   &simulation_data_d_, &collision_data_d_, delta_, solver_step_, max_iterations, stream);
+}
 ///////////////////////////////////////////////////////////////////////////////
 // solve computes one time step! The algorithms are iterative and so we need some iterations until convergence to the min of the variational problem
 SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol, bool Quasi_Newton, Scalar gamma, int max_line_search_loops, int m, Scalar gamma2, Scalar collisions_weight) 
@@ -725,15 +729,6 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
 	#endif
 
 	simulation_input_h_.forces_ex = Palabos_Forces_.data();
-	//printf("palabos force %f %f %f  delta_ %f\n", Palabos_Forces_(0, 223), Palabos_Forces_(1, 223), Palabos_Forces_(2, 223), delta_ );
-	/*
-	std::cout << Palabos_Forces_.col(56) << "\n";
-
-	for (int i = 56; i < 60; i++) {
-		printf("%f %f %f \n", Palabos_Forces_h_[i], Palabos_Forces_h_[i + Palabos_Forces_.cols()], Palabos_Forces_h_[i + 2*Palabos_Forces_.cols()]);
-	}
-	*/
-	//compute_volume_cpu(simulation_input_h_.points, mesh_data_h_.triangles, mesh_info_.n_triangles, mesh_info_.n_points);
 
 	#ifdef STREAM
 		memcpy(cuda_forces, simulation_input_h_.forces_ex, 3 * mesh_info_.n_points * sizeof(ShapeOpScalar));
@@ -763,40 +758,13 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
         points_from_Device_to_Host(mesh_info_.nb_cells, simulation_data_d_.center, simulation_data_h_.center, stream);
 
 		//printf("%f %f %f | %d \n\n", simulation_data_h_.center[0], simulation_data_h_.center[1], simulation_data_h_.center[2], bodyID_ );
-		
-		for(int i = 0; i < 3*mesh_info_.nb_cells; i+=3){
-			/*
-			std::ofstream ofile;
-			ofile.open("./tmp/body_" + plb::util::val2str(bodyID_ + i/3) + "_ComPos.log", std::ofstream::out | std::ofstream::app);
-	
-			ofile << plb::util::val2str(Palabos_iT_) + "," +
-					 plb::util::val2str(simulation_data_h_.center[i]) + "," +
-					 plb::util::val2str(simulation_data_h_.center[i + 1]) + "," +
-					 plb::util::val2str(simulation_data_h_.center[i + 2]) << std::endl;
 
-			ofile.close();
-			*/
-			/*
-			plb::global::logfile_nonparallel("body_" + plb::util::val2str(bodyID_ + i/3) + "_ComPos.log").flushEntry(plb::util::val2str(Palabos_iT_) + "," +
-					plb::util::val2str(simulation_data_h_.center[i    ]) + "," +
-					plb::util::val2str(simulation_data_h_.center[i + 1]) + "," +
-					plb::util::val2str(simulation_data_h_.center[i + 2]));
-			*/
-		//points_ += velocities_;
-		}
-		
 		#ifdef DEBUG
 			std::cout << "velo GPU: \n" << velocities_.col(102) << std::endl;
 		#endif
 		//points_.block(0, 0, 3, Points_rowMajor_.cols()) = Points_rowMajor_;
 	#endif
 
-	/*
-	for (int i = 56; i < 57; i++) {
-		std::cout << points_.col(i) << "\n";
-		//printf("%f %f %f \n", points_[i], points_[i + Palabos_Forces_.cols()], points_[i + 2 * Palabos_Forces_.cols()]);
-	}
-	*/
 	clock_t end = clock();
 	//std::cout << "temps one iter" << (double)(end - start) / CLOCKS_PER_SEC << "\n";
 	// DEBUGGING!
@@ -815,7 +783,7 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
 	return (double)(end - start);
 }
 ///////////////////////////////////////////////////////////////////////////////
-//Rotat point can be done on GPU
+//Rotate point can be done on GPU
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void Solver_GPU::rotatePoints(const std::string& axis, const Scalar& theta)
 {
@@ -823,16 +791,16 @@ SHAPEOP_INLINE void Solver_GPU::rotatePoints(const std::string& axis, const Scal
 
 	if (axis.compare("x") == 0) {
 		R.col(0) = Vector3(1., 0., 0.);
-		R.col(1) = Vector3(0., std::cos(theta), std::sin(theta));
+		R.col(1) = Vector3(0., std::cos(theta) , std::sin(theta));
 		R.col(2) = Vector3(0., -std::sin(theta), std::cos(theta));
-	}
-	else if (axis.compare("y") == 0) {
+
+	}else if (axis.compare("y") == 0) {
 		R.col(0) = Vector3(std::cos(theta), 0., -std::sin(theta));
 		R.col(1) = Vector3(0., 1., 0.);
 		R.col(2) = Vector3(std::sin(theta), 0., std::cos(theta));
-	}
-	else {
-		R.col(0) = Vector3(std::cos(theta), std::sin(theta), 0.);
+
+	}else {
+		R.col(0) = Vector3( std::cos(theta), std::sin(theta), 0.);
 		R.col(1) = Vector3(-std::sin(theta), std::cos(theta), 0.);
 		R.col(2) = Vector3(0., 0., 1.);
 	}
