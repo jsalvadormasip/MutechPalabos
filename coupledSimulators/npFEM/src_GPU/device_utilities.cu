@@ -260,9 +260,12 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     sim.nearest_normals[point_id +   x_n] = data_fluid.normal_in[3*fluid_id+1];
     sim.nearest_normals[point_id + 2*x_n] = data_fluid.normal_in[3*fluid_id+2];
 
-    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ];
-    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1];
-    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2];
+    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] -= sim.center[3*blockIdx.x    ];
+    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] -= sim.center[3*blockIdx.x + 1];
+    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] -= sim.center[3*blockIdx.x + 2];
+
+    //printf("sim.nearest_normals.x %f \n", sim.nearest_normals[point_id]);
+    if(data_fluid.ids[fluid_id] == 256)printf("copied nearest normal %f %f %f \n", sim.nearest_normals[point_id], sim.nearest_normals[point_id + x_n], sim.nearest_normals[point_id + 2*x_n]);
     //if(data_fluid.ids[fluid_id] == 300)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.forces_ex[point_id + 2*x_n], data_fluid.data_in[3*fluid_id+2]  );
 
 }
@@ -599,15 +602,13 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	cuda_scalar gradient_norm = 100;
 	cuda_scalar *volume_der = (cuda_scalar*)(buffer + x_n);
 
+    /*
 	if(threadIdx.x == 42 && blockIdx.x == 1){
 	    printf("Solid solver before id %d input.points %f %f %f input.force %f %f %f\n",point_id + 2*x_n,
                input.points[point_id], input.points[point_id +  x_n], input.points[point_id + 2*x_n],
                input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n] );
 	}
-	//if(fabs(input.forces_ex[point_id]) > 10e-10 || fabs(input.forces_ex[point_id+ x_n] ) > 10e-10 || fabs(input.forces_ex[point_id + 2*x_n]) > 10e-10 ){
-	//    printf("FORCE ! blockIdx.x %d threadIdx.x %d [%f %f %f]\n", blockIdx.x, threadIdx.x,input.forces_ex[point_id],  input.forces_ex[point_id+ x_n], input.forces_ex[point_id + 2*x_n] );
-    //}
-
+	*/
 	sim.points_last_iter[point_id        ] = input.points[point_id        ];
 	sim.points_last_iter[point_id +   x_n] = input.points[point_id +   x_n];
 	sim.points_last_iter[point_id + 2*x_n] = input.points[point_id + 2*x_n];
@@ -852,16 +853,13 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	input.points[point_id        ] = sim.points_last_iter[point_id        ] + input.velocities[point_id        ]*h;
 	input.points[point_id +   x_n] = sim.points_last_iter[point_id +   x_n] + input.velocities[point_id +   x_n]*h;
 	input.points[point_id + 2*x_n] = sim.points_last_iter[point_id + 2*x_n] + input.velocities[point_id + 2*x_n]*h;
-
+    /*
     if(threadIdx.x == 42 && blockIdx.x == 1){
         printf("Solid solver after id %d input.points %f %f %f input.force %f %f %f\n",point_id + 2*x_n,
                input.points[point_id], input.points[point_id +  x_n], input.points[point_id + 2*x_n],
                input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n] );
     }
-
-	//DEBUG
-	//if(threadIdx.x == 0)printf("vel GPU in kernel:\n%f \n%f \n%f \n", input.velocities[point_id], input.velocities[point_id + x_n] , input.velocities[point_id + 2*x_n]);
-	
+    */
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
