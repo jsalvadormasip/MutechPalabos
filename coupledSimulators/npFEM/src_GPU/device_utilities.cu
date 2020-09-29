@@ -209,6 +209,8 @@ void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int
     data_h->data_in  = new double[nb*3];
     data_h->data_out = new double[nb*3];
     data_h->normal_out = new float[nb*3];
+    data_h->normal_in = new float[nb*3];
+    data_h->col_vertics_in = new float[nb*3];
 
     data_h->shift = new int[MAXFLUIDNODE];
     data_h->fluid_nodes_rank = new int[MAXFLUIDNODE];
@@ -218,12 +220,17 @@ void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int
 
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data_out, nb*3*sizeof(double)));
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->normal_out, nb*3*sizeof(float)));
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->normal_in , nb*3*sizeof(float)));
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->col_vertics_in , nb*3*sizeof(float)));
+
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data_in, nb*3*sizeof(double)));
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->ids , nb*sizeof(int)));
 }
 
 void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h){
-    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data_in, data_h->data_in, 3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data_in      , data_h->data_in,         3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->normal_in    , data_h->normal_in,       3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->col_vertics_in, data_h->col_vertics_in, 3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->ids , data_h->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyHostToDevice));
 }
 
@@ -235,7 +242,7 @@ void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h){
 //////////////////////////////////////////////////////////////////////////////////////////
 //Copy in place data from others solver (fluid solver) from communication buffer to external_forces and from points to buffer
 __launch_bounds__(258, 1)
-__global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, From_fluid_data data_fluid, int start_id, int iter) {
+__global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, Simulation_data sim, From_fluid_data data_fluid, int start_id, int iter) {
 
     int x_n = info.n_points;
     int fluid_id = blockIdx.x*blockDim.x + threadIdx.x;
@@ -249,6 +256,13 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     input.forces_ex[point_id +   x_n] = data_fluid.data_in[3*fluid_id+1];
     input.forces_ex[point_id + 2*x_n] = data_fluid.data_in[3*fluid_id+2];
 
+    sim.nearest_normals[point_id        ] = data_fluid.normal_in[3*fluid_id  ];
+    sim.nearest_normals[point_id +   x_n] = data_fluid.normal_in[3*fluid_id+1];
+    sim.nearest_normals[point_id + 2*x_n] = data_fluid.normal_in[3*fluid_id+2];
+
+    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ];
+    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1];
+    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2];
     //if(data_fluid.ids[fluid_id] == 300)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.forces_ex[point_id + 2*x_n], data_fluid.data_in[3*fluid_id+2]  );
 
 }
@@ -276,8 +290,8 @@ __global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, Fr
    //     normals[point_id], normals[point_id + x_n], normals[point_id + 2*x_n], data_fluid.data_out[3 * fluid_id + 2]);
     //if(data_fluid.ids[fluid_id] == 209)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.points[point_id + 2*x_n], data_fluid.data[3*fluid_id+2]  );
 }
-void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, int start_id, int iter){
-    HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, start_id, iter));
+void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, Simulation_data *sim, From_fluid_data *data_fluid, int start_id, int iter){
+    HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *sim, *data_fluid, start_id, iter));
 }
 
 void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, ShapeOpScalar *colid_normals, int start_id, int iter){
