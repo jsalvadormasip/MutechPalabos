@@ -59,7 +59,7 @@
 #include "sparse_matrix.h"
 #include "GPU_data.h"
 
-#include "palabos3D.h"
+//#include "palabos3D.h"
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef SHAPEOP_OPENMP
 #ifdef SHAPEOP_MSVC
@@ -673,8 +673,7 @@ void Solver_GPU::set_initial_velocity(double x, double y, double z){
 	speed << x, y, z;
 	printf("init vell nb %d \n", mesh_info_.n_points);
 	velocities_ = speed*MatrixXX::Ones(1, mesh_info_.n_points);
-	std::cout << velocities_.col(0) << std::endl;
-	std::cout << "couille"<< std::endl;
+	//std::cout << velocities_.col(0) << std::endl;
 	simulation_input_h_.velocities  = velocities_.data();
 	external_forces_from_Host_to_Device(mesh_info_.n_points, simulation_input_h_.velocities, simulation_input_d_.velocities, 0);
 	//velocities_.row(1) = Matrix3X::Ones(1, n_points_)*y;
@@ -832,7 +831,7 @@ void Solver_GPU::copy_force_from_fluid(){
 }
 
 void Solver_GPU::copy_point_to_fluid(){
-    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, starting_ids, 0);
+    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, collision_data_d_.colid_normals, starting_ids, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

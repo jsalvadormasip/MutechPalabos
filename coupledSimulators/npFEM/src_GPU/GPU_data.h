@@ -58,6 +58,7 @@ struct From_fluid_data {
     int nb;
     double *data_in;
     double *data_out;
+    float *normal_out;
     int *ids;
     int *shift;
     int *fluid_nodes_rank;

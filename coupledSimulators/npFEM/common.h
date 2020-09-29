@@ -1,22 +1,22 @@
 ///////////////////////////////////////////////////////////////////////////////
 /* This file is distributed as part of the Palabos library.
- *
- * It has been adapted from a file of the ShapeOp library.
- * The ShapeOp library can be downloaded at the address https://www.shapeop.org.
- * It is governed by the terms of the Mozilla Public License v. 2.0.
- *
- * This file is subject to the terms of the Mozilla Public License v. 2.0.
- * If a copy of the MPL was not distributed with this file, 
- * you can obtain one at http://mozilla.org/MPL/2.0/.
- * 
- * Contact:
- * Christos Kotsalos
- * kotsaloscv@gmail.com
- * Computer Science Department
- * University of Geneva
- * 
- * The most recent release of Palabos can be downloaded at 
- * <https://palabos.unige.ch/>
+*
+* It has been adapted from a file of the ShapeOp library.
+* The ShapeOp library can be downloaded at the address https://www.shapeop.org.
+* It is governed by the terms of the Mozilla Public License v. 2.0.
+*
+* This file is subject to the terms of the Mozilla Public License v. 2.0.
+* If a copy of the MPL was not distributed with this file,
+* you can obtain one at http://mozilla.org/MPL/2.0/.
+*
+* Contact:
+* Christos Kotsalos
+* kotsaloscv@gmail.com
+* Computer Science Department
+* University of Geneva
+*
+* The most recent release of Palabos can be downloaded at
+* <https://palabos.unige.ch/>
 */
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef COMMON_H
@@ -46,13 +46,13 @@ API.*/
 #define BL 0
 
 namespace plb {
-namespace npfem {
+    namespace npfem {
 
-/** Defines the scalar type used by the ShapeOp solver (float or double).*/
-typedef SHAPEOP_SCALAR ShapeOpScalar;
-typedef double cuda_scalar;
+        /** Defines the scalar type used by the ShapeOp solver (float or double).*/
+        typedef SHAPEOP_SCALAR ShapeOpScalar;
+        typedef double cuda_scalar;
 
-}
+    }
 }
 ///////////////////////////////////////////////////////////////////////////////
 #define LU_GPU // Faster than the other 2
@@ -62,14 +62,15 @@ typedef double cuda_scalar;
 /** Defines the API prefix for the current platform.*/
 #if defined(_WIN32) || defined(_WIN64)
 #pragma warning(disable : 4251) // Disable warnings about templates and std
-                                // types exposed in the c++ interface.
+// types exposed in the c++ interface.
 #pragma warning(disable : 4244) // conversion from 'double' to
-                                // 'plb::npfem::Scalar', possible loss of data
+// 'plb::npfem::Scalar', possible loss of data
 #pragma warning(disable : 4996) // dll window function
 #ifdef SHAPEOP_EXPORT
 #define SHAPEOP_API __declspec(dllexport)
 #else
-#define SHAPEOP_API __declspec(dllimport)
+#define SHAPEOP_API
+//#define SHAPEOP_API __declspec(dllimport)
 #endif
 #else
 #define SHAPEOP_API
@@ -78,7 +79,7 @@ typedef double cuda_scalar;
 #ifdef SHAPEOP_HEADER_ONLY
 #define SHAPEOP_INLINE inline
 #else
-#define SHAPEOP_INLINE
+#define SHAPEOP_INLINE 
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 #endif // COMMON_H

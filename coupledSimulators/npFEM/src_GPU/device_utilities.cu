@@ -208,6 +208,7 @@ void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int
     data_h->nb   = nb;
     data_h->data_in  = new double[nb*3];
     data_h->data_out = new double[nb*3];
+    data_h->normal_out = new float[nb*3];
 
     data_h->shift = new int[MAXFLUIDNODE];
     data_h->fluid_nodes_rank = new int[MAXFLUIDNODE];
@@ -216,6 +217,7 @@ void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int
     data_d->nb	= nb;
 
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data_out, nb*3*sizeof(double)));
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->normal_out, nb*3*sizeof(float)));
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data_in, nb*3*sizeof(double)));
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->ids , nb*sizeof(int)));
 }
@@ -226,7 +228,8 @@ void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h){
 }
 
 void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h){
-    CUDA_HANDLE_ERROR(cudaMemcpy(data_h->data_out, data_d->data_out, 3*data_h->nb*sizeof(double), cudaMemcpyDeviceToHost));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_h->data_out, data_d->data_out,     3*data_h->nb*sizeof(double), cudaMemcpyDeviceToHost));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_h->normal_out, data_d->normal_out, 3*data_h->nb*sizeof(float), cudaMemcpyDeviceToHost));
     //CUDA_HANDLE_ERROR(cudaMemcpy(data_h->ids , data_d->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyDeviceToHost));
 }
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -246,13 +249,13 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     input.forces_ex[point_id +   x_n] = data_fluid.data_in[3*fluid_id+1];
     input.forces_ex[point_id + 2*x_n] = data_fluid.data_in[3*fluid_id+2];
 
-    if(data_fluid.ids[fluid_id] == 300)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.forces_ex[point_id + 2*x_n], data_fluid.data_in[3*fluid_id+2]  );
+    //if(data_fluid.ids[fluid_id] == 300)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.forces_ex[point_id + 2*x_n], data_fluid.data_in[3*fluid_id+2]  );
 
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 __launch_bounds__(258, 1)
-__global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, From_fluid_data data_fluid, int start_id, int iter) {
+__global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, From_fluid_data data_fluid, ShapeOpScalar *normals, int start_id, int iter) {
 
     int x_n = info.n_points;
     int fluid_id = blockIdx.x*blockDim.x + threadIdx.x;
@@ -265,14 +268,20 @@ __global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, Fr
     data_fluid.data_out[3*fluid_id  ] = input.points[point_id        ];
     data_fluid.data_out[3*fluid_id+1] = input.points[point_id +   x_n];
     data_fluid.data_out[3*fluid_id+2] = input.points[point_id + 2*x_n];
+
+    data_fluid.normal_out[3*fluid_id  ] =  normals[point_id        ];
+    data_fluid.normal_out[3*fluid_id+1] =  normals[point_id +   x_n];
+    data_fluid.normal_out[3*fluid_id+2] =  normals[point_id + 2*x_n];
+    //if(data_fluid.ids[fluid_id] == 254)printf("lookup point_id + 2*x_n %d normal [%f %f %f]  buffer %f\n", point_id + 2 * x_n,
+   //     normals[point_id], normals[point_id + x_n], normals[point_id + 2*x_n], data_fluid.data_out[3 * fluid_id + 2]);
     //if(data_fluid.ids[fluid_id] == 209)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.points[point_id + 2*x_n], data_fluid.data[3*fluid_id+2]  );
 }
 void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, int start_id, int iter){
     HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, start_id, iter));
 }
 
-void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, int start_id, int iter){
-    HANDLE_KERNEL_ERROR(copy_point_to_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, start_id, iter));
+void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, ShapeOpScalar *colid_normals, int start_id, int iter){
+    HANDLE_KERNEL_ERROR(copy_point_to_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, colid_normals, start_id, iter));
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void clone_cells_points(Mesh_info info, Simulation_input input, Simulation_data sim) {
@@ -406,6 +415,7 @@ void GPU_Init(Mesh_info        *mesh_info,
   CUDA_HANDLE_ERROR(cudaMalloc(&simulation_data_d->center,						  3* nb_cells * sizeof(ShapeOpScalar)));
   //collision data
   CUDA_HANDLE_ERROR(cudaMalloc(&collision_data_d->nb_neighbours,  (nb_cells + 1)*sizeof(int)));
+  CUDA_HANDLE_ERROR(cudaMalloc(&collision_data_d->colid_normals, 3*n_points*nb_cells*sizeof(ShapeOpScalar)));
   // Matrices
   CUDA_HANDLE_ERROR(cudaMalloc(&mesh_data_d->N_inv_dense, n_points * n_points * sizeof(ShapeOpScalar)));
   CUDA_HANDLE_ERROR(cudaMalloc(&mesh_data_d->M_tild_inv,  n_points * n_points * sizeof(ShapeOpScalar)));
@@ -550,8 +560,8 @@ void send_GPU_collinding_points(ShapeOpScalar *points, ShapeOpScalar **colid_poi
 	CUDA_HANDLE_ERROR(cudaMalloc(colid_points_d, 3*nb*sizeof(ShapeOpScalar)));
 	CUDA_HANDLE_ERROR(cudaMemcpy(*colid_points_d, points, 3*nb*sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
 
-	CUDA_HANDLE_ERROR(cudaMalloc(colid_normals_d, 3 * nb * sizeof(ShapeOpScalar)));
-	CUDA_HANDLE_ERROR(cudaMemcpy(*colid_normals_d, normals, 3 * nb * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
+	CUDA_HANDLE_ERROR(cudaMalloc(colid_normals_d, 3*nb*sizeof(ShapeOpScalar)));
+	CUDA_HANDLE_ERROR(cudaMemcpy(*colid_normals_d, normals, 3*nb*sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
 void free_GPU_pointer(void *pointer){
@@ -632,7 +642,8 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 			  mesh.ConstraintType, mesh.idO, mesh.rangeMin, mesh.rangeMax, mesh.Scalar1, mesh.weight, sim.E_nonePD,
 			  mesh.idI, mesh.vectorx, mesh.matrix22, mesh.matrix33, mesh.A, info.miu, info.lambda, info.kappa);
 
-	project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, volume_der, point_id, info.volume_weight);
+    //
+	project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, volume_der, coll.colid_normals, point_id, info.volume_weight);
 	project_collision_d(x_n, info.nb_cells, input.points, sim.nearest_points, sim.nearest_normals, sim.force_npd, sim.E_nonePD, point_id, info.n_constraints, info.weight_col_rep, info.threshold_rep, info.weight_col_nonRep, info.threshold_nonRep, info.beta_morse);
 
 	__syncthreads();
@@ -735,7 +746,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 				mesh.ConstraintType, mesh.idO, mesh.rangeMin, mesh.rangeMax, mesh.Scalar1, mesh.weight, sim.E_nonePD,
 				mesh.idI, mesh.vectorx, mesh.matrix22, mesh.matrix33, mesh.A, info.miu, info.lambda, info.kappa);
 
-			project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, volume_der, point_id, info.volume_weight);
+			project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, volume_der, coll.colid_normals, point_id, info.volume_weight);
 			project_collision_d(x_n, info.nb_cells, input.points, sim.nearest_points, sim.nearest_normals, sim.force_npd, sim.E_nonePD, point_id, info.n_constraints, info.weight_col_rep, info.threshold_rep, info.weight_col_nonRep, info.threshold_nonRep, info.beta_morse);
 			__syncthreads();
 			//gradient = gradient(xk + 1);

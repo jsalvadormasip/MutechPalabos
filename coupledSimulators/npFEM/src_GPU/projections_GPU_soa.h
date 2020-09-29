@@ -51,7 +51,7 @@ namespace plb {
 namespace npfem {
 ////////////////////////////////////////////////////////////////////////////////
 __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, double *points_d, short *triangles_d, cuda_scalar *force, 
-								 double *E_nonePD, cuda_scalar volume0, const int nb_sum_thread, double *buffer_double, cuda_scalar *grad_c, const int id, const float volume_weight) {
+								 double *E_nonePD, cuda_scalar volume0, const int nb_sum_thread, double *buffer_double, cuda_scalar *grad_c, ShapeOpScalar *normals, const int id, const float volume_weight) {
 
 	grad_c[threadIdx.x             ] = 0;
 	grad_c[threadIdx.x +   n_points] = 0;
@@ -105,6 +105,18 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
 	
 		buffer_double[threadIdx.x]  += area*(n0*(p0x + p1x + p2x) + n1*(p0y + p1y + p2y) + n2*(p0z + p1z + p2z))/9;
 
+		atomicAdd(normals + blockIdx.x*3*n_points + id0             , n0);
+		atomicAdd(normals + blockIdx.x*3*n_points + id0 +   n_points, n1);
+		atomicAdd(normals + blockIdx.x*3*n_points + id0 + 2*n_points, n2);
+
+		atomicAdd(normals +  blockIdx.x*3*n_points + id1             , n0);
+		atomicAdd(normals +  blockIdx.x*3*n_points + id1 +   n_points, n1);
+		atomicAdd(normals +  blockIdx.x*3*n_points + id1 + 2*n_points, n2);
+
+		atomicAdd(normals +  blockIdx.x*3*n_points + id2             , n0);
+		atomicAdd(normals +  blockIdx.x*3*n_points + id2 +   n_points, n1);
+		atomicAdd(normals +  blockIdx.x*3*n_points + id2 + 2*n_points, n2);
+
 		atomicAdd(grad_c + id0             , (area*n0)/3);
 		atomicAdd(grad_c + id0 +   n_points, (area*n1)/3);
 		atomicAdd(grad_c + id0 + 2*n_points, (area*n2)/3);
@@ -146,6 +158,7 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
 	
 	E_nonePD[blockIdx.x*n_constraints + threadIdx.x] += 0.5*volume_weight*(dx*dx + dy*dy + dz*dz);
 	
+	Normalize_3(normals[id], normals[id + n_points], normals[id + 2*n_points]);
 	//if(threadIdx.x == 224)printf("force volume %f %f %f | %d\n", force[id], force[id + n_points], force[id + 2 * n_points], threadIdx.x);
 }
 ///////////////////////////////////////////////////////////////////////////////
