@@ -173,7 +173,7 @@ public:
   From_fluid_data from_fluid_data_h;
   From_fluid_data from_fluid_data_d;
 
- private:
+ //private:
   //Palabos interface
   Scalar Cbeta_;
   Scalar delta_, solver_step_;

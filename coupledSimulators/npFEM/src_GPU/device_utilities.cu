@@ -47,6 +47,7 @@
 #include "projections_GPU_soa.h"
 #include "GPU_data.h"
 #include "quasy_newton3.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 namespace plb {
 namespace npfem {
@@ -260,12 +261,18 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     sim.nearest_normals[point_id +   x_n] = data_fluid.normal_in[3*fluid_id+1];
     sim.nearest_normals[point_id + 2*x_n] = data_fluid.normal_in[3*fluid_id+2];
 
-    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] -= sim.center[3*blockIdx.x    ];
-    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] -= sim.center[3*blockIdx.x + 1];
-    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] -= sim.center[3*blockIdx.x + 2];
+    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] - sim.center[3*which_rbc    ];
+    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] - sim.center[3*which_rbc + 1];
+    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] - sim.center[3*which_rbc + 2];
 
     //printf("sim.nearest_normals.x %f \n", sim.nearest_normals[point_id]);
-    if(data_fluid.ids[fluid_id] == 256)printf("copied nearest normal %f %f %f \n", sim.nearest_normals[point_id], sim.nearest_normals[point_id + x_n], sim.nearest_normals[point_id + 2*x_n]);
+   /*
+    if(data_fluid.ids[fluid_id] == 258 + 254){
+            printf("rbc_id %d threadIdx %d copied nearest point %f %f %f  object %d \n", 
+            rbc_id, threadIdx.x,
+            data_fluid.col_vertics_in[3*fluid_id], data_fluid.col_vertics_in[3*fluid_id + 1], data_fluid.col_vertics_in[3*fluid_id + 2], which_rbc);
+     }
+     */
     //if(data_fluid.ids[fluid_id] == 300)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.forces_ex[point_id + 2*x_n], data_fluid.data_in[3*fluid_id+2]  );
 
 }

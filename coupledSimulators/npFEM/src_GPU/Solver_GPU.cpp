@@ -715,6 +715,14 @@ SHAPEOP_INLINE void Solver_GPU::rotate_points(const cuda_scalar *matrices) {
 SHAPEOP_INLINE void Solver_GPU::solve_only(unsigned int max_iterations, Scalar tol, bool Quasi_Newton, Scalar gamma, int max_line_search_loops, int m, Scalar gamma2, Scalar collisions_weight){
             compute_next_frame_rbc(&mesh_info_, &mesh_data_d_, &simulation_input_d_,
                                    &simulation_data_d_, &collision_data_d_, delta_, solver_step_, max_iterations, stream);
+
+            simulation_input_h_.points = Points_rowMajor_.data();
+
+            cudaStream_t stream;
+
+            points_from_Device_to_Host(mesh_info_.n_points*mesh_info_.nb_cells, simulation_input_d_.points, simulation_input_h_.points, stream);
+
+
 }
 ///////////////////////////////////////////////////////////////////////////////
 // solve computes one time step! The algorithms are iterative and so we need some iterations until convergence to the min of the variational problem
