@@ -61,7 +61,7 @@
 #include "palabos3D.h"
 #include "palabos3D.hh"
 
-#define NPFEM_CUDA
+// #define NPFEM_CUDA
 // Load npFEM Lib
 #include "npFEM/rbcShapeOp.h"
 #include "npFEM/rbcGlobal.h"

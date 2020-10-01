@@ -53,7 +53,7 @@ project(bloodFlowDefoBodies)
 
 enable_language(CXX)
 
-option(ENABLE_CUDA "Enabling CUDA" ON)
+option(ENABLE_CUDA "Enabling CUDA" OFF)
 if(ENABLE_CUDA)
   find_package(CUDA)
   enable_language(CUDA)
@@ -234,6 +234,7 @@ endif()
 
 # GPU Version of the code
 if(ENABLE_CUDA)
+	message("cuda or not ?")
     add_executable(${EXECUTABLE_NAME_GPU} EXCLUDE_FROM_ALL "./${EXECUTABLE_NAME}.cpp" ${DEPS_H} ${PARAMS_1} ${PARAMS_2})
     target_compile_options(${EXECUTABLE_NAME_GPU} PUBLIC -DNPFEM_CUDA=1)
     set_property(TARGET ${EXECUTABLE_NAME_GPU} PROPERTY CUDA_SEPARABLE_COMPILATION ON)
