@@ -625,13 +625,17 @@ __device__ void damping(const double *points, const double *points_prev, double 
 	ShapeOpScalar vel_lattx = velocities[id      ]/(dx_p*one_over_h*h2);
 	ShapeOpScalar vel_latty = velocities[id +   n]/(dx_p*one_over_h*h2);
 	ShapeOpScalar vel_lattz = velocities[id + 2*n]/(dx_p*one_over_h*h2);
+
+    //if(threadIdx.x == 0)printf("velz %f cp_vel %f\n", vel_lattz, vel_cap_fin);
+    
 	cuda_scalar norm_vel =  Magnitude_3(vel_lattx, vel_latty, vel_lattz);
 	if (norm_vel >= vel_cap) {
 		velocities[id      ] = vel_lattx/norm_vel*vel_cap_fin*(dx_p*one_over_h*h2);
 		velocities[id +   n] = vel_latty/norm_vel*vel_cap_fin*(dx_p*one_over_h*h2);
 		velocities[id + 2*n] = vel_lattz/norm_vel*vel_cap_fin*(dx_p*one_over_h*h2);
-	}
+	}   
 #endif
+
 }
 
 

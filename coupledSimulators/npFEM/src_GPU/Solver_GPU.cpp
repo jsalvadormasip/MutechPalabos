@@ -121,7 +121,7 @@ Solver_GPU::Solver_GPU(const MatrixXX &points,
                            const std::vector< std::vector<int>> &triangles,
                            const std::vector<bool> &onSurfaceParticle,
                            std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
-                           const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyId, std::vector<int> *graph){
+                           const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyId, std::vector<int> *graph):mesh_info_(params) {
 
         //test_prefix();
         //exit(0);
@@ -132,7 +132,7 @@ Solver_GPU::Solver_GPU(const MatrixXX &points,
                            const std::vector< std::vector<int>> &triangles,
                            const std::vector<bool> &onSurfaceParticle,
                            std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
-                           const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyID, int start_id) {
+                           const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyID, int start_id):mesh_info_(params){
 
         this->starting_ids = start_id*points.cols();
         from_fluid_data_alloc(&from_fluid_data_d, &from_fluid_data_h, points.cols()*nb_cells);
