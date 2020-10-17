@@ -662,6 +662,11 @@ void plb::npfem::Solver_GPU::set_initial_positions(const double *centers){
 	set_cells_initial_position(centers, simulation_data_d_.center, mesh_info_.nb_cells, mesh_info_, mesh_data_d_, simulation_input_d_ , simulation_data_d_);
 		
 }
+void plb::npfem::Solver_GPU::set_initial_positions(const double *centers, cuda_scalar *local_mat, double mat[16]) {
+    set_cells_initial_position(centers, simulation_data_d_.center, matrices_d_, local_mat, mat, mesh_info_.nb_cells, mesh_info_, mesh_data_d_, simulation_input_d_, simulation_data_d_);
+
+}
+
 void plb::npfem::Solver_GPU::reset_position(const double *centers) {
 	//reset_position(const double *center_h, double *center_d, Simulation_input *input_h, Mesh_info info, Mesh_data mesh, Simulation_input *input_d, Simulation_data sim)
 	reset_position_d(centers, simulation_data_d_.center, points_.data(), mesh_info_, mesh_data_d_, simulation_input_d_, simulation_data_d_);
@@ -709,7 +714,7 @@ void Solver_GPU::get_data_from_GPU() {
 //////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void Solver_GPU::rotate_points(const cuda_scalar *matrices) {
 
-	points_time_mat_3X3(matrices_d_,  matrices, simulation_input_d_.points, mesh_info_.nb_cells, mesh_info_.n_points);
+    points_time_mat_3X3(matrices_d_, matrices, simulation_input_d_.points, simulation_data_d_.center, mesh_info_.nb_cells, mesh_info_.n_points);
 }
 ////////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void Solver_GPU::solve_only(unsigned int max_iterations, Scalar tol, bool Quasi_Newton, Scalar gamma, int max_line_search_loops, int m, Scalar gamma2, Scalar collisions_weight){

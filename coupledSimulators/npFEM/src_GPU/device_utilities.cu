@@ -256,15 +256,14 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     input.forces_ex[point_id        ] = data_fluid.data_in[3*fluid_id  ];
     input.forces_ex[point_id +   x_n] = data_fluid.data_in[3*fluid_id+1];
     input.forces_ex[point_id + 2*x_n] = data_fluid.data_in[3*fluid_id+2];
-   // if(rbc_id%x_n == 256 && which_rbc == 1)printf("force ex z %f poz %f which_rbc %d\n", input.forces_ex[point_id + 2*x_n], input.points[point_id +  2*x_n], which_rbc);
-
+    //if(rbc_id%x_n == 256 && which_rbc + start_id/x_n == 1)printf("fluid_id %d force ex z %f %f %f poz %f %f %f which_rbc %d body_id %d\n", fluid_id, input.forces_ex[point_id ], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n], input.points[point_id],input.points[point_id + x_n], input.points[point_id +  2*x_n], which_rbc, start_id);
     sim.nearest_normals[point_id        ] = data_fluid.normal_in[3*fluid_id  ];
     sim.nearest_normals[point_id +   x_n] = data_fluid.normal_in[3*fluid_id+1];
     sim.nearest_normals[point_id + 2*x_n] = data_fluid.normal_in[3*fluid_id+2];
-
-    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] - sim.center[3*which_rbc    ];
-    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] - sim.center[3*which_rbc + 1];
-    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] - sim.center[3*which_rbc + 2];
+    
+    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] + input.points[point_id        ] - sim.center[3*which_rbc    ];
+    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] + input.points[point_id +   x_n] - sim.center[3*which_rbc + 1];
+    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] + input.points[point_id + 2*x_n] - sim.center[3*which_rbc + 2];
 
     //printf("sim.nearest_normals.x %f \n", sim.nearest_normals[point_id]);
    /*
@@ -290,23 +289,57 @@ __global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, Fr
 
     int point_id = (which_rbc*x_n)*3 + rbc_id%x_n;
 
-    data_fluid.data_out[3*fluid_id  ] = input.points[point_id        ];
-    data_fluid.data_out[3*fluid_id+1] = input.points[point_id +   x_n];
-    data_fluid.data_out[3*fluid_id+2] = input.points[point_id + 2*x_n];
 
-    data_fluid.normal_out[3*fluid_id  ] =  normals[point_id        ];
-    data_fluid.normal_out[3*fluid_id+1] =  normals[point_id +   x_n];
-    data_fluid.normal_out[3*fluid_id+2] =  normals[point_id + 2*x_n];
-    //if(data_fluid.ids[fluid_id] == 254)printf("lookup point_id + 2*x_n %d normal [%f %f %f]  buffer %f\n", point_id + 2 * x_n,
-   //     normals[point_id], normals[point_id + x_n], normals[point_id + 2*x_n], data_fluid.data_out[3 * fluid_id + 2]);
+    data_fluid.data_out[3*fluid_id  ] = input.velocities[point_id        ];
+    data_fluid.data_out[3*fluid_id+1] = input.velocities[point_id +   x_n];
+    data_fluid.data_out[3*fluid_id+2] = input.velocities[point_id + 2*x_n];
+
+    data_fluid.normal_out[3*fluid_id  ] = normals[point_id        ];
+    data_fluid.normal_out[3*fluid_id+1] = normals[point_id +   x_n];
+    data_fluid.normal_out[3*fluid_id+2] = normals[point_id + 2*x_n];
+    //if(data_fluid.ids[fluid_id] == 256 + 258)printf("fluid_id %d body_id %d which_rbc %d velocities [%f %f %.14g]  position [%f %f %f]\n", fluid_id, start_id, which_rbc,
+    //    input.velocities[point_id], input.velocities[point_id + x_n], data_fluid.data_out[3*fluid_id+2],
+    //    input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n]);
     //if(data_fluid.ids[fluid_id] == 209)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.points[point_id + 2*x_n], data_fluid.data[3*fluid_id+2]  );
 }
 void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, Simulation_data *sim, From_fluid_data *data_fluid, int start_id, int iter){
     HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *sim, *data_fluid, start_id, iter));
+    //printf("start_id %d \n", start_id);
 }
 
 void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, ShapeOpScalar *colid_normals, int start_id, int iter){
     HANDLE_KERNEL_ERROR(copy_point_to_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, colid_normals, start_id, iter));
+}
+//////////////////////////////////////////////////////////////////////////////////////////
+__global__ void clone_cells_points_mat_mult(Mesh_info info, Simulation_input input, Simulation_data sim, cuda_scalar *mat) {
+
+    const cuda_scalar *m = mat + 9*(blockIdx.x + 1);
+
+    double px = input.points[threadIdx.x                  ];
+    double py = input.points[threadIdx.x +   info.n_points];
+    double pz = input.points[threadIdx.x + 2*info.n_points];
+
+    //if (threadIdx.x == 0) printf("points  %f %f %f | %d\n", input.points[threadIdx.x], input.points[threadIdx.x + info.n_points], input.points[threadIdx.x + 2 * info.n_points], blockIdx.x);
+    int id = (blockIdx.x + 1)*info.n_points * 3 + threadIdx.x;
+
+    input.points[id                  ] = px*m[0] + py*m[1] + pz*m[2] + sim.center[3*(blockIdx.x + 1)    ];
+    input.points[id +   info.n_points] = px*m[3] + py*m[4] + pz*m[5] + sim.center[3*(blockIdx.x + 1) + 1];
+    input.points[id + 2*info.n_points] = px*m[6] + py*m[7] + pz*m[8] + sim.center[3*(blockIdx.x + 1) + 2];
+
+#ifdef DEBUG
+    if (threadIdx.x == 0) printf("center  %f %f %f | %d\n", sim.center[3 * blockIdx.x], sim.center[3 * blockIdx.x + 1], sim.center[3 * blockIdx.x + 2], blockIdx.x);
+#endif
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+__global__ void move_first_mat_mult(Mesh_info info, Simulation_input input, Simulation_data sim, cuda_scalar *mat) {
+
+    double px = input.points[threadIdx.x                  ];
+    double py = input.points[threadIdx.x  +  info.n_points];
+    double pz = input.points[threadIdx.x + 2*info.n_points];
+
+    input.points[threadIdx.x                  ] = px*mat[0] + py*mat[1] + pz*mat[2] + sim.center[0];
+    input.points[threadIdx.x +   info.n_points] = px*mat[3] + py*mat[4] + pz*mat[5] + sim.center[1];
+    input.points[threadIdx.x + 2*info.n_points] = px*mat[6] + py*mat[7] + pz*mat[8] + sim.center[2];
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void clone_cells_points(Mesh_info info, Simulation_input input, Simulation_data sim) {
@@ -331,6 +364,23 @@ __global__ void move_first(Mesh_info info, Simulation_input input, Simulation_da
 	input.points[threadIdx.x                  ] += sim.center[0];
 	input.points[threadIdx.x +   info.n_points] += sim.center[1];
 	input.points[threadIdx.x + 2*info.n_points] += sim.center[2];
+}
+//////////////////////////////////////////////////////////////////////////////////////////
+__global__ void global_transform(Mesh_info info, Simulation_input input, Simulation_data sim, double *mat) {
+
+    int id = blockIdx.x*info.n_points * 3 + threadIdx.x;
+
+    double px = input.points[id];
+    double py = input.points[id + info.n_points];
+    double pz = input.points[id + 2 * info.n_points];
+
+    input.points[id                  ] = px*mat[0] + py*mat[1] + pz*mat[2] + mat[3];
+    input.points[id +   info.n_points] = px*mat[4] + py*mat[5] + pz*mat[6] + mat[7];
+    input.points[id + 2*info.n_points] = px*mat[8] + py*mat[9] + pz*mat[10] + mat[11];
+
+#ifdef DEBUG
+    if (threadIdx.x == 0) printf("center  %f %f %f | %d\n", sim.center[3 * blockIdx.x], sim.center[3 * blockIdx.x + 1], sim.center[3 * blockIdx.x + 2], blockIdx.x);
+#endif
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void shift_cells_points_g(ShapeOpScalar *points, ShapeOpScalar *center, int n) {
@@ -364,7 +414,7 @@ __global__ void first_centerG(Mesh_info info,  Simulation_input input, Simulatio
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 void first_center(Mesh_info info, Simulation_input input, Simulation_data sim, double *center_d) {
-	HANDLE_KERNEL_ERROR(first_centerG<<<info.nb_cells, info.n_points, 3 * info.n_points * sizeof(double)>>>(info, input, sim, center_d));
+	HANDLE_KERNEL_ERROR(first_centerG<<<info.nb_cells, info.n_points, 3*info.n_points*sizeof(double)>>>(info, input, sim, center_d));
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 void set_cells_initial_position(const double *center_h, double *center_d,const int nb_cells, Mesh_info info, Mesh_data mesh, Simulation_input input, Simulation_data sim) {
@@ -375,7 +425,31 @@ void set_cells_initial_position(const double *center_h, double *center_d,const i
 		HANDLE_KERNEL_ERROR(clone_cells_points <<< nb_clone, info.n_points>>>(info, input, sim));
 	}
 	HANDLE_KERNEL_ERROR(move_first<<<1, info.n_points >>>(info, input, sim));
-	HANDLE_KERNEL_ERROR(first_centerG <<<info.nb_cells, info.n_points, 3*info.n_points*sizeof(double) >>>(info, input, sim, center_d));
+    
+	HANDLE_KERNEL_ERROR(first_centerG<<<info.nb_cells, info.n_points, 3*info.n_points*sizeof(double) >>>(info, input, sim, center_d));
+}
+///////////////////////////////////////////////////////////////////////////////////////////////
+void set_cells_initial_position(const double *center_h, double *center_d, cuda_scalar *mat_local_d, cuda_scalar *mat_local_h, 
+                                double mat[16], const int nb_cells, Mesh_info info, Mesh_data mesh, Simulation_input input, Simulation_data sim) {
+    
+    double *mat_d;
+    CUDA_HANDLE_ERROR(cudaMalloc(&mat_d, 16*sizeof(double)));
+    CUDA_HANDLE_ERROR(cudaMemcpy(mat_d, mat, 16*sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_HANDLE_ERROR(cudaMemcpy(mat_local_d, mat_local_h, nb_cells*9*sizeof(cuda_scalar), cudaMemcpyHostToDevice));
+    
+    CUDA_HANDLE_ERROR(cudaMemcpy(center_d, center_h, nb_cells*3*sizeof(double), cudaMemcpyHostToDevice));
+    //std::cout << "cloning point "<< info.nb_cells << " " << info.n_points  <<std::endl;
+    int nb_clone = info.nb_cells - 1;
+    if (nb_clone) {
+        HANDLE_KERNEL_ERROR(clone_cells_points_mat_mult<<< nb_clone, info.n_points >>>(info, input, sim, mat_local_d));
+    }
+    HANDLE_KERNEL_ERROR(move_first_mat_mult <<<1, info.n_points >>>(info, input, sim, mat_local_d));
+
+
+    HANDLE_KERNEL_ERROR(global_transform <<< info.nb_cells, info.n_points >>>(info, input, sim, mat_d));
+
+    HANDLE_KERNEL_ERROR(first_centerG <<<info.nb_cells, info.n_points, 3*info.n_points*sizeof(double)>>>(info, input, sim, center_d));
+    HANDLE_KERNEL_ERROR(cudaFree(mat_d));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////
 void reset_position_d(const double *center_h, double *center_d, ShapeOpScalar *points, Mesh_info info, Mesh_data mesh, Simulation_input input_d, Simulation_data sim) {
@@ -609,9 +683,8 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	ShapeOpScalar newE = 0;
 	cuda_scalar gradient_norm = 100;
 	cuda_scalar *volume_der = (cuda_scalar*)(buffer + x_n);
-
     /*
-	if(threadIdx.x == 256 && blockIdx.x == 1){
+	if(threadIdx.x == 256 && blockIdx.x == 0){
 	    printf("Solid solver before id %d input.points %f %f %f input.force %f %f %f vel %f %f %f  h %f\n",point_id + 2*x_n,
                input.points[point_id], input.points[point_id +  x_n], input.points[point_id + 2*x_n],
                input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n],
@@ -863,7 +936,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	input.points[point_id +   x_n] = sim.points_last_iter[point_id +   x_n] + input.velocities[point_id +   x_n]*h;
 	input.points[point_id + 2*x_n] = sim.points_last_iter[point_id + 2*x_n] + input.velocities[point_id + 2*x_n]*h;
     /*
-    if(threadIdx.x == 42 && blockIdx.x == 1){
+    if(threadIdx.x == 256 && blockIdx.x == 0){
         printf("Solid solver after id %d input.points %f %f %f input.force %f %f %f\n",point_id + 2*x_n,
                input.points[point_id], input.points[point_id +  x_n], input.points[point_id + 2*x_n],
                input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n] );
@@ -872,23 +945,27 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-__global__ void points_time_mat_3X3d(const cuda_scalar *mat, double *points, const int n) {
+__global__ void points_time_mat_3X3d(const cuda_scalar *mat, double *points, double *center, const int n) {
 	const cuda_scalar *m = mat + 9*blockIdx.x;
 	double px, py, pz;
-	px = points[threadIdx.x      ];
-	py = points[threadIdx.x +   n];
-	pz = points[threadIdx.x + 2*n];
+	px = points[3*n*blockIdx.x + threadIdx.x      ];// - center[3*blockIdx.x    ];
+	py = points[3*n*blockIdx.x + threadIdx.x +   n];// - center[3*blockIdx.x + 1];
+	pz = points[3*n*blockIdx.x + threadIdx.x + 2*n];// - center[3*blockIdx.x + 2];
 
-	//if(threadIdx.x == 0)printf("ROTATION\n%f %f %f \n%f %f %f \n%f %f %f \n", m[0], m[3], m[6], m[1], m[4], m[7], m[2], m[5], m[8]);
+	if(threadIdx.x == 0){
+		//printf("center %f %f %f |%d\n", center[3 * blockIdx.x], center[3 * blockIdx.x + 1], center[3 * blockIdx.x + 2], n);
+		//printf("ROTATION\n%f %f %f \n%f %f %f \n%f %f %f \n", m[0], m[1], m[6], m[1], m[4], m[7], m[2], m[5], m[8]);
+	}
+	points[3*n*blockIdx.x + threadIdx.x     ] = px*m[0] + py*m[1] + pz*m[2];// + center[3*blockIdx.x    ];
+	points[3*n*blockIdx.x + threadIdx.x +  n] = px*m[3] + py*m[4] + pz*m[5];// + center[3*blockIdx.x + 1];
+	points[3*n*blockIdx.x + threadIdx.x +2*n] = px*m[6] + py*m[7] + pz*m[8];// + center[3*blockIdx.x + 2];
 
-	points[threadIdx.x     ] = px*m[0] + py*m[3] + pz*m[6];
-	points[threadIdx.x +  n] = px*m[1] + py*m[4] + pz*m[7];
-	points[threadIdx.x +2*n] = px*m[2] + py*m[5] + pz*m[8];
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////
-void points_time_mat_3X3(cuda_scalar *mat_d, const cuda_scalar *mat_h, double *points, const int nb_cells, const int n) {
+void points_time_mat_3X3(cuda_scalar *mat_d, const cuda_scalar *mat_h, double *points,  double *center, const int nb_cells, const int n) {
 	CUDA_HANDLE_ERROR(cudaMemcpy(mat_d, mat_h, nb_cells*9*sizeof(cuda_scalar), cudaMemcpyHostToDevice));
-	points_time_mat_3X3d <<<1, n >>>(mat_d, points, n);
+	points_time_mat_3X3d <<<nb_cells, n >>>(mat_d, points, center, n);
 	OTHER_ERROR;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////

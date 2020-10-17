@@ -86,6 +86,9 @@ void first_center(Mesh_info info, Simulation_input input, Simulation_data sim, d
 ///////////////////////////////////////////////////////////////////////////////
 void set_cells_initial_position(const double *center_h, double *center_d, const int nb_cells, Mesh_info info, Mesh_data mesh, Simulation_input input, Simulation_data sim);
 ///////////////////////////////////////////////////////////////////////////////
+void set_cells_initial_position(const double *center_h, double *center_d, cuda_scalar *mat_local_d, cuda_scalar *mat_local_h, 
+                                double mat[16], const int nb_cells, Mesh_info info, Mesh_data mesh, Simulation_input input, Simulation_data sim);
+///////////////////////////////////////////////////////////////////////////////
 void reset_position_d(const double *center_h, double *center_d, ShapeOpScalar *points, Mesh_info info, Mesh_data mesh, Simulation_input input_d, Simulation_data sim);
 ///////////////////////////////////////////////////////////////////////////////
 void shift_cells_points_g(ShapeOpScalar *points, ShapeOpScalar *center_h, ShapeOpScalar *center_d, int n, int nb_cells);
@@ -102,7 +105,7 @@ void points_from_Device_to_Host( int n_points, ShapeOpScalar *points_d, ShapeOpS
 ///////////////////////////////////////////////////////////////////////////////
 void debug_matrix_from_gpu(double *mat_d, int n);
 ///////////////////////////////////////////////////////////////////////////////
-void points_time_mat_3X3(cuda_scalar *mat_d, const cuda_scalar *mat_h, double *points, const int n_cells, const int n);
+void points_time_mat_3X3(cuda_scalar *mat_d, const cuda_scalar *mat_h, double *points, double *center, const int nb_cells, const int n);
 ///////////////////////////////////////////////////////////////////////////////
 void device_make_periodic(ShapeOpScalar *points_d, ShapeOpScalar *center, float nx, float ny, float nz, int ncells, int npoints,int it);
 ///////////////////////////////////////////////////////////////////////////////
