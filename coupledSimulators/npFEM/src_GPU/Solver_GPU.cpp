@@ -107,12 +107,14 @@ Solver_GPU::Solver_GPU(const MatrixXX &points,
         solver_step_ = shapeOp_time_step;
         bodyID_ = bodyId;
         setPoints(points, nb_cells);
-        constraints_ = constraints;
-        setConnectivityList(triangles);
-        set_onSurfaceParticle(onSurfaceParticle);
-        make_gpu_graph(graph, points.cols());
-        Cbeta_ = cbeta;
-        initialize(phys_timestep*shapeOp_time_step);
+        if(nb_cells){
+            constraints_ = constraints;
+            setConnectivityList(triangles);
+            set_onSurfaceParticle(onSurfaceParticle);
+            make_gpu_graph(graph, points.cols());
+            Cbeta_ = cbeta;
+            initialize(phys_timestep*shapeOp_time_step);
+        }
     }
 
 
@@ -718,18 +720,11 @@ SHAPEOP_INLINE void Solver_GPU::rotate_points(const cuda_scalar *matrices) {
 }
 ////////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void Solver_GPU::solve_only(unsigned int max_iterations, Scalar tol, bool Quasi_Newton, Scalar gamma, int max_line_search_loops, int m, Scalar gamma2, Scalar collisions_weight){
+
             compute_next_frame_rbc(&mesh_info_, &mesh_data_d_, &simulation_input_d_,
                                    &simulation_data_d_, &collision_data_d_, delta_, solver_step_, max_iterations, stream);
 
-            simulation_input_h_.points = Points_rowMajor_.data();
-
-            cudaStream_t stream;
-
-            points_from_Device_to_Host(mesh_info_.n_points*mesh_info_.nb_cells, simulation_input_d_.points, simulation_input_h_.points, stream);
-
-
 }
-///////////////////////////////////////////////////////////////////////////////
 // solve computes one time step! The algorithms are iterative and so we need some iterations until convergence to the min of the variational problem
 SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol, bool Quasi_Newton, Scalar gamma, int max_line_search_loops, int m, Scalar gamma2, Scalar collisions_weight) 
 {
@@ -795,6 +790,12 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
 	return (double)(end - start);
 }
 ///////////////////////////////////////////////////////////////////////////////
+SHAPEOP_INLINE void Solver_GPU::copy_position_to_CPU() {
+    simulation_input_h_.points = Points_rowMajor_.data();
+    cudaStream_t stream;
+    points_from_Device_to_Host(mesh_info_.n_points*mesh_info_.nb_cells, simulation_input_d_.points, simulation_input_h_.points, stream);
+}
+///////////////////////////////////////////////////////////////////////////////
 //Rotate point can be done on GPU
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void Solver_GPU::rotatePoints(const std::string& axis, const Scalar& theta)
@@ -832,8 +833,8 @@ SHAPEOP_INLINE void Solver_GPU::set_onSurfaceParticle(const std::vector<bool>& o
 	onSurfaceParticle_ = onSurfaceParticle;
 }
 /////////////////////////////////////////////////////////////////////////////////
-void Solver_GPU::send_fluid_data(){
-    send_fluid_data_(&from_fluid_data_d, &from_fluid_data_h);
+void Solver_GPU::send_fluid_data(int rank, int iter){
+    send_fluid_data_(&from_fluid_data_d, &from_fluid_data_h, rank, iter);
 }
 
 void Solver_GPU::read_fluid_data(){
@@ -843,8 +844,8 @@ void Solver_GPU::copy_force_from_fluid(){
     plb::npfem::copy_force_from_fluid(&mesh_info_, &simulation_input_d_, &simulation_data_d_, &from_fluid_data_d, starting_ids, 0);
 }
 
-void Solver_GPU::copy_point_to_fluid(){
-    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, collision_data_d_.colid_normals, starting_ids, 0);
+void Solver_GPU::copy_point_to_fluid(int iter){
+    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, collision_data_d_.colid_normals, starting_ids, iter);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

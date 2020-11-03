@@ -75,7 +75,7 @@ void median_filter(graph_data graph, ShapeOpScalar *force, int nb_cells, int nb)
 ///////////////////////////////////////////////////////////////////////////////
 void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int nb);
 ///////////////////////////////////////////////////////////////////////////////
-void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h);
+void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int rank, int iter);
 void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h);
 void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, Simulation_data *sim, From_fluid_data *data_fluid, int start_id, int iter);
 void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, ShapeOpScalar *colid_normals, int start_id, int iter);

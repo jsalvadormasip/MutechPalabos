@@ -143,6 +143,8 @@ public:
   double solve( unsigned int max_iterations = ((int)(1e3)), Scalar tol = 1e-6, bool Quasi_Newton = true, Scalar gamma = 0.3, 
               int max_line_search_loops = ((int)(1e3)), int m = 7, Scalar gamma2 = 0.9, Scalar collisions_weight = 500.);
 
+  void copy_position_to_CPU();
+
   void make_periodic(float nx,float ny, float nz, float dx, int it);
   void set_Palabos_Forces(const Matrix3X &force_matrix, const int cell_id);
   void shiftPoints(Vector3 vec);
@@ -150,10 +152,10 @@ public:
   void rotatePoints(const std::string& axis, const Scalar& theta);
   void set_onSurfaceParticle(const std::vector<bool>& onSurfaceParticle);
 
-  void send_fluid_data();
+  void send_fluid_data(int rank, int iter);
   void read_fluid_data();
   void copy_force_from_fluid();
-  void copy_point_to_fluid();
+  void copy_point_to_fluid(int iter);
   const std::vector<bool>& get_onSurfaceParticle() const;
   const MatrixXXCuda& getVelocities() const;
   const Matrix3X& get_Palabos_Forces() const;

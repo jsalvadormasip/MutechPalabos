@@ -47,7 +47,6 @@
 #include "projections_GPU_soa.h"
 #include "GPU_data.h"
 #include "quasy_newton3.h"
-
 ///////////////////////////////////////////////////////////////////////////////
 namespace plb {
 namespace npfem {
@@ -171,8 +170,6 @@ __global__ void median_filter_g(graph_data graph, ShapeOpScalar *force, int nb){
 	
 	int size = graph.indexs[threadIdx.x + 1] - graph.indexs[threadIdx.x];
 
-	if(size > 10)printf("WTF !\n");
-	
 	ShapeOpScalar mx=0, my=0, mz=0;
 	if (size % 2) {
 		mx = kselect(x, size, size/2);
@@ -213,10 +210,11 @@ void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int
     data_h->normal_in = new float[nb*3];
     data_h->col_vertics_in = new float[nb*3];
 
+    //TODO could it be more fluid rank?
     data_h->shift = new int[MAXFLUIDNODE];
     data_h->fluid_nodes_rank = new int[MAXFLUIDNODE];
     data_h->ids  = new int[nb];
-
+    data_h->nb_fluid_nodes = 
     data_d->nb	= nb;
 
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data_out, nb*3*sizeof(double)));
@@ -228,11 +226,24 @@ void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->ids , nb*sizeof(int)));
 }
 
-void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h){
+void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int rank, int iter){
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data_in      , data_h->data_in,         3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->normal_in    , data_h->normal_in,       3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->col_vertics_in, data_h->col_vertics_in, 3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->ids , data_h->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyHostToDevice));
+    /*
+    if(rank == 0){
+        char idok[516];
+        memset(idok,0,516);
+        for (int i = 0; i < data_h->nb; ++i) {
+            idok[data_h->ids[i]%258]++;
+        }
+        for (int i = 0; i < 258; ++i) {
+
+            if(idok[i] != 1)std::cout << " MISSING " << i  << " " << iter << " rank " << rank << " nb " << (int)idok[i] << std::endl;
+        }
+    }
+    */
 }
 
 void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h){
@@ -253,10 +264,14 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
 
     int point_id = (which_rbc*x_n)*3 + rbc_id%x_n;
 
-    input.forces_ex[point_id        ] = data_fluid.data_in[3*fluid_id  ];
-    input.forces_ex[point_id +   x_n] = data_fluid.data_in[3*fluid_id+1];
-    input.forces_ex[point_id + 2*x_n] = data_fluid.data_in[3*fluid_id+2];
-    //if(rbc_id%x_n == 256 && which_rbc + start_id/x_n == 1)printf("fluid_id %d force ex z %f %f %f poz %f %f %f which_rbc %d body_id %d\n", fluid_id, input.forces_ex[point_id ], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n], input.points[point_id],input.points[point_id + x_n], input.points[point_id +  2*x_n], which_rbc, start_id);
+    input.forces_ex[point_id        ] = 10*data_fluid.data_in[3*fluid_id  ];
+    input.forces_ex[point_id +   x_n] = 10*data_fluid.data_in[3*fluid_id+1];
+    input.forces_ex[point_id + 2*x_n] = 10*data_fluid.data_in[3*fluid_id+2];
+
+    //if(isnan(data_fluid.data_in[3*fluid_id + 2]) || isnan(data_fluid.data_in[3*fluid_id + 1]) || isnan(data_fluid.data_in[3*fluid_id ]))printf("NAN %d \n", data_fluid.ids[fluid_id]);
+
+    //if(data_fluid.ids[fluid_id] != (int)round(data_fluid.data_in[3*fluid_id + 2]*10000) )printf("fluid_id %d force ex z %f %f %f poz %f %f %f which_rbc %d body_id %d\n", fluid_id, input.forces_ex[point_id ], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n], input.points[point_id],input.points[point_id + x_n], input.points[point_id +  2*x_n], which_rbc, start_id);
+ 
     sim.nearest_normals[point_id        ] = data_fluid.normal_in[3*fluid_id  ];
     sim.nearest_normals[point_id +   x_n] = data_fluid.normal_in[3*fluid_id+1];
     sim.nearest_normals[point_id + 2*x_n] = data_fluid.normal_in[3*fluid_id+2];
@@ -264,13 +279,13 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] + input.points[point_id        ] - sim.center[3*which_rbc    ];
     sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] + input.points[point_id +   x_n] - sim.center[3*which_rbc + 1];
     sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] + input.points[point_id + 2*x_n] - sim.center[3*which_rbc + 2];
-
     //printf("sim.nearest_normals.x %f \n", sim.nearest_normals[point_id]);
-   /*
-    if(data_fluid.ids[fluid_id] == 258 + 254){
-            printf("rbc_id %d threadIdx %d copied nearest point %f %f %f  object %d \n", 
+    /*
+    if(data_fluid.ids[fluid_id] == 256 + 258){
+            printf("SOLID SOVLER rbc_id %d threadIdx %d copied nearest point [ %f %f %f ] [ %f %f %f ] object %d \n", 
             rbc_id, threadIdx.x,
-            data_fluid.col_vertics_in[3*fluid_id], data_fluid.col_vertics_in[3*fluid_id + 1], data_fluid.col_vertics_in[3*fluid_id + 2], which_rbc);
+            sim.nearest_points[point_id],  sim.nearest_points[point_id + x_n],  sim.nearest_points[point_id + 2 * x_n],
+            sim.nearest_normals[point_id], sim.nearest_normals[point_id + x_n], sim.nearest_normals[point_id + 2*x_n], which_rbc);
      }
      */
     //if(data_fluid.ids[fluid_id] == 300)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.forces_ex[point_id + 2*x_n], data_fluid.data_in[3*fluid_id+2]  );
@@ -289,7 +304,6 @@ __global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, Fr
 
     int point_id = (which_rbc*x_n)*3 + rbc_id%x_n;
 
-
     data_fluid.data_out[3*fluid_id  ] = input.velocities[point_id        ];
     data_fluid.data_out[3*fluid_id+1] = input.velocities[point_id +   x_n];
     data_fluid.data_out[3*fluid_id+2] = input.velocities[point_id + 2*x_n];
@@ -297,18 +311,23 @@ __global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, Fr
     data_fluid.normal_out[3*fluid_id  ] = normals[point_id        ];
     data_fluid.normal_out[3*fluid_id+1] = normals[point_id +   x_n];
     data_fluid.normal_out[3*fluid_id+2] = normals[point_id + 2*x_n];
-    //if(data_fluid.ids[fluid_id] == 256 + 258)printf("fluid_id %d body_id %d which_rbc %d velocities [%f %f %.14g]  position [%f %f %f]\n", fluid_id, start_id, which_rbc,
-    //    input.velocities[point_id], input.velocities[point_id + x_n], data_fluid.data_out[3*fluid_id+2],
-    //    input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n]);
+    /*
+    if(data_fluid.ids[fluid_id] == 770)printf(" COPY_BACK fluid_id %d body_id %d which_rbc %d normals[%f %f %f]  position [%f %f %f]\n", fluid_id, start_id, which_rbc,
+        normals[point_id], normals[point_id + x_n], normals[point_id + 2*x_n],
+        input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n]);
+    */
     //if(data_fluid.ids[fluid_id] == 209)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.points[point_id + 2*x_n], data_fluid.data[3*fluid_id+2]  );
+    
 }
 void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, Simulation_data *sim, From_fluid_data *data_fluid, int start_id, int iter){
-    HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *sim, *data_fluid, start_id, iter));
+    if(info->nb_cells)
+        HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *sim, *data_fluid, start_id, iter));
     //printf("start_id %d \n", start_id);
 }
 
 void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, ShapeOpScalar *colid_normals, int start_id, int iter){
-    HANDLE_KERNEL_ERROR(copy_point_to_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, colid_normals, start_id, iter));
+    if (info->nb_cells)
+        HANDLE_KERNEL_ERROR(copy_point_to_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, colid_normals, start_id, iter));
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void clone_cells_points_mat_mult(Mesh_info info, Simulation_input input, Simulation_data sim, cuda_scalar *mat) {
@@ -374,8 +393,8 @@ __global__ void global_transform(Mesh_info info, Simulation_input input, Simulat
     double py = input.points[id + info.n_points];
     double pz = input.points[id + 2 * info.n_points];
 
-    input.points[id                  ] = px*mat[0] + py*mat[1] + pz*mat[2] + mat[3];
-    input.points[id +   info.n_points] = px*mat[4] + py*mat[5] + pz*mat[6] + mat[7];
+    input.points[id                  ] = px*mat[0] + py*mat[1] + pz*mat[2 ] + mat[3 ];
+    input.points[id +   info.n_points] = px*mat[4] + py*mat[5] + pz*mat[6 ] + mat[7 ];
     input.points[id + 2*info.n_points] = px*mat[8] + py*mat[9] + pz*mat[10] + mat[11];
 
 #ifdef DEBUG
@@ -1002,8 +1021,9 @@ void device_make_periodic(ShapeOpScalar * points_d, ShapeOpScalar *center, float
 void compute_next_frame_rbc(Mesh_info  *info, Mesh_data *mesh, Simulation_input *input,
 	                        Simulation_data *sim, Collision_data *coll, ShapeOpScalar h, ShapeOpScalar h_2, int it_max, cudaStream_t stream){
 
-	//std::cout << "wtf " << info->nb_cells << " "<< info->n_points  << " " << h << " " << h_2  << " it max " << it_max << std::endl;
-	HANDLE_KERNEL_ERROR(compute_next_frame_rbc_g<<< info->nb_cells, info->n_points, info->n_points*(sizeof(double) + 3*sizeof(cuda_scalar)), stream >>>(*info,*mesh,*input, *sim, *coll, h, h_2, it_max));
+	//std::cout << "WTF " << info->nb_cells << " "<< info->n_points  << " " << h << " " << h_2  << " it max " << it_max << std::endl;
+    if(info->nb_cells)
+	    HANDLE_KERNEL_ERROR(compute_next_frame_rbc_g<<< info->nb_cells, info->n_points, info->n_points*(sizeof(double) + 3*sizeof(cuda_scalar)), stream >>>(*info,*mesh,*input, *sim, *coll, h, h_2, it_max));
 
 }
 
