@@ -170,7 +170,7 @@ void writeVTK(MultiBlockLattice3D<T,NSDESCRIPTOR>& nsLattice,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Image outputs
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-void writePpm(MultiBlockLattice3D<T,NSDESCRIPTOR>& nsLattice,
+void writeGif(MultiBlockLattice3D<T,NSDESCRIPTOR>& nsLattice,
               MultiScalarField3D<T>& volfracField,
               MultiScalarField3D<T>& densityField, int iT)
 {
@@ -180,20 +180,20 @@ void writePpm(MultiBlockLattice3D<T,NSDESCRIPTOR>& nsLattice,
     const plint nz = nsLattice.getNz();
     Box3D slice((nx-1)/2, (nx-1)/2, 0, ny-1, 0, nz-1);
     ImageWriter<T> imageWriter("leeloo.map");
-    imageWriter.writePpm(createFileName("u", iT, 6),
+    imageWriter.writeScaledGif(createFileName("u", iT, 6),
                                *computeVelocityNorm(nsLattice, slice),
                                imSize, imSize);
 
-    imageWriter.writePpm(createFileName("VolFrac", iT, 6),
+    imageWriter.writeScaledGif(createFileName("VolFrac", iT, 6),
                                *extractSubDomain(volfracField, slice),
                                imSize, imSize);
 
-    imageWriter.writePpm(createFileName("Density", iT, 6),
+    imageWriter.writeScaledGif(createFileName("Density", iT, 6),
                                 *extractSubDomain(densityField, slice),
                                 imSize, imSize);
 
 
-    imageWriter.writePpm( createFileName("Vorticity", iT, 6),
+    imageWriter.writeScaledGif( createFileName("Vorticity", iT, 6),
                                 *computeNorm(*computeVorticity (
                                         *computeVelocity(nsLattice) ), slice ),
                                 imSize, imSize );
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
     const T Dp = 40e-6;                       //Equivalent particle diameter
     const T TotalVolFrac = 0.00198472;        //Particle volume fraction
 
-    const plint resolution = 500;             //Mesh resolution
+    const plint resolution = 250;             //Mesh resolution
 
     global::directories().setOutputDir("./tmp/");
 
@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
         {
 
             pcout << iT * parameters.getDeltaT() << " : Writing gif." << endl;
-            writePpm(nsLattice,volfracField, densityField, iT);
+            writeGif(nsLattice,volfracField, densityField, iT);
 
         }
 
@@ -510,7 +510,7 @@ int main(int argc, char *argv[])
     saveBinaryBlock(volfracField, "checkpoint_vf.dat");
     saveBinaryBlock(densityField, "checkpoint_dens.dat");
 
-    writePpm(nsLattice,volfracField, densityField, iT);
+    writeGif(nsLattice,volfracField, densityField, iT);
 
     T tEnd = global::timer("simTime").stop();
 
