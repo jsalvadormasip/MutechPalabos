@@ -5,7 +5,7 @@
  * own the IP rights for most of the code base. Since October 2019, the
  * Palabos project is maintained by the University of Geneva and accepts
  * source code contributions from the community.
- * 
+ *
  * Contact:
  * Jonas Latt
  * Computer Science Department
@@ -14,7 +14,7 @@
  * 1227 Carouge, Switzerland
  * jonas.latt@unige.ch
  *
- * The most recent release of Palabos can be downloaded at 
+ * The most recent release of Palabos can be downloaded at
  * <https://palabos.unige.ch/>
  *
  * The library Palabos is free software: you can redistribute it and/or
@@ -54,7 +54,7 @@ class VelocityToPassiveAdvDiff3D :
     public BoxProcessingFunctional3D_LT<T,TemperatureDescriptor,T,3>
 {
 public:
-    
+
     virtual void process( Box3D domain,
                           BlockLattice3D<T,TemperatureDescriptor>& temperature,
                           TensorField3D<T,3>& velocity );
@@ -71,7 +71,7 @@ class N_VelocityToPassiveAdvDiff3D :
     public BoxProcessingFunctional3D_LN<T,TemperatureDescriptor,T>
 {
 public:
-    
+
     virtual void process( Box3D domain,
                           BlockLattice3D<T,TemperatureDescriptor>& temperature,
                           NTensorField3D<T>& velocity );
@@ -89,7 +89,7 @@ void NVelocityToPassiveAdvDiff(MultiBlockLattice3D<T,TemperatureDescriptor>& tem
 * to the advection-diffusion field, which is advected passively.
 */
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 class LatticeToPassiveAdvDiff3D :
@@ -108,19 +108,19 @@ private:
 };
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void latticeToPassiveAdvDiff(MultiBlockLattice3D<T,FluidDescriptor>& fluid, MultiBlockLattice3D<T,ScalarDescriptor>& scalar, Box3D domain);
 
 /**
 * Multiphysics class for one-way coupling between Navier-Stokes and
-* advection-diffusion equations in the complete regularized advection diffusion case: 
-* the fluid density, velocity and stress is copied 
+* advection-diffusion equations in the complete regularized advection diffusion case:
+* the fluid density, velocity and stress is copied
 * to the advection-diffusion field, which is advected passively.
 */
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 class LatticeToPassiveComplRegAdvDiff3D :
@@ -139,7 +139,7 @@ private:
 };
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void latticeToPassiveComplRegAdvDiff (
@@ -154,7 +154,7 @@ void latticeToPassiveComplRegAdvDiff (
 * the provided value of the turbulent Prandtl number.
 */
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 class TurbulentLatticeToPassiveAdvDiff3D :
@@ -174,13 +174,13 @@ private:
 };
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void turbulentLatticeToPassiveAdvDiff(MultiBlockLattice3D<T,FluidDescriptor>& fluid, MultiBlockLattice3D<T,ScalarDescriptor>& scalar, T Pr_t, Box3D domain);
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 class MaskedTurbulentLatticeToPassiveAdvDiff3D : public BoxProcessingFunctional3D
@@ -198,14 +198,14 @@ private:
 };
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void maskedTurbulentLatticeToPassiveAdvDiff(MultiBlockLattice3D<T,FluidDescriptor>& fluid, MultiBlockLattice3D<T,ScalarDescriptor>& scalar,
         MultiScalarField3D<int>& mask, T Pr_t, int whichFlag, Box3D domain);
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 class N_MaskedTurbulentLatticeToPassiveAdvDiff3D : public BoxProcessingFunctional3D
@@ -223,7 +223,7 @@ private:
 };
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void NMaskedTurbulentLatticeToPassiveAdvDiff(MultiBlockLattice3D<T,FluidDescriptor>& fluid, MultiBlockLattice3D<T,ScalarDescriptor>& scalar,
@@ -251,7 +251,7 @@ void crystallizeAndAggregate(MultiBlockLattice3D<T,Descriptor>& lattice, T Ncr, 
  * The "empty space" of the free-surface simulation is approximated by an adiabatic
  * medium in the advection-diffusion simulation.
  */
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 class AdvectionDiffusionFreeSurfaceCoupling3D : public BoxProcessingFunctional3D {
 public:
     // Pr_t is the turbulent Prandtl number (the ratio between the eddy kinematic viscosity and the eddy diffusivity).
@@ -273,7 +273,7 @@ private:
     T C;
 };
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 class MaskedAdvectionDiffusionFreeSurfaceCoupling3D : public BoxProcessingFunctional3D {
 public:
     // Pr_t is the turbulent Prandtl number (the ratio between the eddy kinematic viscosity and the eddy diffusivity).
@@ -296,7 +296,7 @@ private:
     int maskValue;
 };
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 class N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D : public BoxProcessingFunctional3D {
 public:
     // Pr_t is the turbulent Prandtl number (the ratio between the eddy kinematic viscosity and the eddy diffusivity).
@@ -335,6 +335,20 @@ private:
 
 
 template<typename T>
+class AdvectionDiffusionFd3D_neumann : public BoxProcessingFunctional3D
+{
+public:
+    AdvectionDiffusionFd3D_neumann(T d_, bool upwind_, bool neumann_, plint nx_, plint ny_, plint nz_);
+    virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> fields );
+    virtual AdvectionDiffusionFd3D_neumann<T>* clone() const;
+    virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
+private:
+    T d;
+    bool upwind, neumann;
+    plint nx, ny, nz;
+};
+
+template<typename T>
 class VariableDiffusivityAdvectionDiffusionFd3D : public BoxProcessingFunctional3D {
 public:
     VariableDiffusivityAdvectionDiffusionFd3D(bool upwind_);
@@ -348,7 +362,7 @@ private:
 
 // The class ADCellT describes an "advection-diffusion cell type". It needs to implement
 // four functions:
-// 
+//
 // bool isSingular(int flag);
 // bool isFixed(int flag, T& phi);
 // bool isZeroFlux(int flag);
@@ -384,7 +398,7 @@ private:
 };
 
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 class TurbulentDiffusivityFunctional3D : public BoxProcessingFunctional3D_LS<T,FluidDescriptor,T> {
 public:
     // D0 is the base diffusivity.
@@ -409,7 +423,7 @@ template<typename T, template<typename U> class FluidDescriptor>
 std::unique_ptr<MultiScalarField3D<T> > computeTurbulentDiffusivity(T D0, T Pr_t, MultiBlockLattice3D<T,FluidDescriptor>& fluid);
 
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 class TurbulentDiffusivityFromFlagFunctional3D : public BoxProcessingFunctional3D {
 public:
     // D0 is the vector of base diffusivities. Its values are in one-to-one correspondence with the flags.
@@ -436,7 +450,7 @@ std::unique_ptr<MultiScalarField3D<T> > computeTurbulentDiffusivityFromFlag(std:
         MultiBlockLattice3D<T,FluidDescriptor>& fluid, MultiScalarField3D<int>& flags);
 
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 class TurbulentDiffusivityFromScalarFunctional3D : public BoxProcessingFunctional3D {
 public:
     // Pr_t is the turbulent Prandtl number (the ratio between the eddy kinematic viscosity and the eddy diffusivity).
@@ -516,4 +530,3 @@ private:
 }  // namespace plb
 
 #endif  // ADVECTION_DIFFUSION_3D_H
-

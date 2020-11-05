@@ -5,7 +5,7 @@
  * own the IP rights for most of the code base. Since October 2019, the
  * Palabos project is maintained by the University of Geneva and accepts
  * source code contributions from the community.
- * 
+ *
  * Contact:
  * Jonas Latt
  * Computer Science Department
@@ -14,7 +14,7 @@
  * 1227 Carouge, Switzerland
  * jonas.latt@unige.ch
  *
- * The most recent release of Palabos can be downloaded at 
+ * The most recent release of Palabos can be downloaded at
  * <https://palabos.unige.ch/>
  *
  * The library Palabos is free software: you can redistribute it and/or
@@ -144,7 +144,7 @@ void NVelocityToPassiveAdvDiff(MultiBlockLattice3D<T,TemperatureDescriptor>& tem
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::LatticeToPassiveAdvDiff3D(T scaling_)
@@ -152,7 +152,7 @@ LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::LatticeToPassiveA
 { }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::process (
@@ -176,7 +176,7 @@ void LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::process (
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
@@ -186,7 +186,7 @@ LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 BlockDomain::DomainT LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::appliesTo() const {
@@ -194,7 +194,7 @@ BlockDomain::DomainT LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescripto
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::getTypeOfModification (
@@ -205,7 +205,7 @@ void LatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::getTypeOfMod
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void latticeToPassiveAdvDiff (
@@ -218,7 +218,7 @@ void latticeToPassiveAdvDiff (
 
 // =====  complete regularized advection diffusion coupling implementation
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::LatticeToPassiveComplRegAdvDiff3D(T scaling_)
@@ -226,7 +226,7 @@ LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::LatticeTo
 { }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::process (
@@ -259,7 +259,7 @@ void LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::proc
                 fluid.get(iX,iY,iZ).getDynamics().computeRhoBarJPiNeq(fluid.get(iX,iY,iZ),rhoBar,j,piNeq);
 
                 Array<T,FluidDescriptor<T>::d> vel = FluidDescriptor<T>::invRho(rhoBar) * j * scaling;
-                
+
                 *scalar.get(iX+offset.x,iY+offset.y,iZ+offset.z).getExternal(omegaOffset) = fluid.get(iX,iY,iZ).getDynamics().getOmega();
                 *scalar.get(iX+offset.x,iY+offset.y,iZ+offset.z).getExternal(rhoBarOffset) = rhoBar;
                 vel.to_cArray(scalar.get(iX+offset.x,iY+offset.y,iZ+offset.z).getExternal(velocityOffset));
@@ -270,7 +270,7 @@ void LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::proc
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
@@ -280,7 +280,7 @@ LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 BlockDomain::DomainT LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::appliesTo() const {
@@ -288,7 +288,7 @@ BlockDomain::DomainT LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarD
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::getTypeOfModification (
@@ -299,7 +299,7 @@ void LatticeToPassiveComplRegAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::getT
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void latticeToPassiveComplRegAdvDiff (
@@ -312,7 +312,7 @@ void latticeToPassiveComplRegAdvDiff (
 // Implementation of lattice to passive coupling for turbulent flows.
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::TurbulentLatticeToPassiveAdvDiff3D(T Pr_t)
@@ -322,7 +322,7 @@ TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::Turbulen
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::process (
@@ -358,7 +358,7 @@ void TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::pro
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
@@ -368,7 +368,7 @@ TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 BlockDomain::DomainT TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::appliesTo() const {
@@ -376,7 +376,7 @@ BlockDomain::DomainT TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,Scalar
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::getTypeOfModification (
@@ -387,7 +387,7 @@ void TurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::get
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void turbulentLatticeToPassiveAdvDiff (
@@ -400,7 +400,7 @@ void turbulentLatticeToPassiveAdvDiff (
 // Implementation of a masked lattice to passive coupling for turbulent flows.
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::MaskedTurbulentLatticeToPassiveAdvDiff3D(
@@ -412,7 +412,7 @@ MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::Ma
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::processGenericBlocks (
@@ -457,7 +457,7 @@ void MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
@@ -467,7 +467,7 @@ MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 BlockDomain::DomainT MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::appliesTo() const {
@@ -475,7 +475,7 @@ BlockDomain::DomainT MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::getTypeOfModification (
@@ -487,7 +487,7 @@ void MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void maskedTurbulentLatticeToPassiveAdvDiff (
@@ -504,7 +504,7 @@ void maskedTurbulentLatticeToPassiveAdvDiff (
 
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::N_MaskedTurbulentLatticeToPassiveAdvDiff3D(
@@ -516,7 +516,7 @@ N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::processGenericBlocks (
@@ -561,7 +561,7 @@ void N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescript
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
@@ -571,7 +571,7 @@ N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>*
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 BlockDomain::DomainT N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::appliesTo() const {
@@ -579,7 +579,7 @@ BlockDomain::DomainT N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescripto
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescriptor>::getTypeOfModification (
@@ -591,7 +591,7 @@ void N_MaskedTurbulentLatticeToPassiveAdvDiff3D<T,FluidDescriptor,ScalarDescript
 }
 
 template< typename T,
-          template<typename U1> class FluidDescriptor, 
+          template<typename U1> class FluidDescriptor,
           template<typename U2> class ScalarDescriptor
         >
 void NMaskedTurbulentLatticeToPassiveAdvDiff (
@@ -684,7 +684,7 @@ void crystallizeAndAggregate(MultiBlockLattice3D<T,Descriptor>& lattice, T Ncr, 
 
 /* Coupling between advection-diffusion and free-surface. */
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
 AdvectionDiffusionFreeSurfaceCoupling3D(
         Dynamics<T,AD_Descriptor>* conductiveDynamics_, Dynamics<T,AD_Descriptor>* adiabaticDynamics_, T iniVal_, T Pr_t)
@@ -697,7 +697,7 @@ AdvectionDiffusionFreeSurfaceCoupling3D(
     C = FS_Descriptor<T>::cs2 * AD_Descriptor<T>::invCs2 / Pr_t;
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
 ~AdvectionDiffusionFreeSurfaceCoupling3D()
 {
@@ -705,7 +705,7 @@ AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
     delete adiabaticDynamics;
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
 AdvectionDiffusionFreeSurfaceCoupling3D(
         AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor> const& rhs)
@@ -715,7 +715,7 @@ AdvectionDiffusionFreeSurfaceCoupling3D(
       C(rhs.C)
 { }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>&
 AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::operator=(
         AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor> const& rhs)
@@ -723,7 +723,7 @@ AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::operator
     AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>(rhs).swap(*this);
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 void AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::swap(
         AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>& rhs)
 {
@@ -733,7 +733,7 @@ void AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::swa
     std::swap(C, rhs.C);
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 void AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::processGenericBlocks(
         Box3D domain, std::vector<AtomicBlock3D*> blocks)
 {
@@ -837,14 +837,14 @@ void AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::pro
     }
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>*
 AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::clone() const
 {
     return new AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>(*this);
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 void AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::getTypeOfModification(
         std::vector<modif::ModifT>& modified) const
 {
@@ -854,7 +854,7 @@ void AdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::get
 }
 
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
 MaskedAdvectionDiffusionFreeSurfaceCoupling3D(
         Dynamics<T,AD_Descriptor>* conductiveDynamics_, Dynamics<T,AD_Descriptor>* adiabaticDynamics_,
@@ -869,7 +869,7 @@ MaskedAdvectionDiffusionFreeSurfaceCoupling3D(
     C = FS_Descriptor<T>::cs2 * AD_Descriptor<T>::invCs2 / Pr_t;
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
 ~MaskedAdvectionDiffusionFreeSurfaceCoupling3D()
 {
@@ -877,7 +877,7 @@ MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
     delete adiabaticDynamics;
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
 MaskedAdvectionDiffusionFreeSurfaceCoupling3D(
         MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor> const& rhs)
@@ -888,7 +888,7 @@ MaskedAdvectionDiffusionFreeSurfaceCoupling3D(
       maskValue(rhs.maskValue)
 { }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>&
 MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::operator=(
         MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor> const& rhs)
@@ -896,7 +896,7 @@ MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::op
     MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>(rhs).swap(*this);
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 void MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::swap(
         MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>& rhs)
 {
@@ -907,7 +907,7 @@ void MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor
     std::swap(maskValue, rhs.maskValue);
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 void MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::processGenericBlocks(
         Box3D domain, std::vector<AtomicBlock3D*> blocks)
 {
@@ -1019,14 +1019,14 @@ void MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor
     }
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>*
 MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::clone() const
 {
     return new MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>(*this);
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 void MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::getTypeOfModification(
         std::vector<modif::ModifT>& modified) const
 {
@@ -1037,7 +1037,7 @@ void MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor
 }
 
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
 N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D(
         Dynamics<T,AD_Descriptor>* conductiveDynamics_, Dynamics<T,AD_Descriptor>* adiabaticDynamics_,
@@ -1052,7 +1052,7 @@ N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D(
     C = FS_Descriptor<T>::cs2 * AD_Descriptor<T>::invCs2 / Pr_t;
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
 ~N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D()
 {
@@ -1060,7 +1060,7 @@ N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
     delete adiabaticDynamics;
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
 N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D(
         N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor> const& rhs)
@@ -1071,7 +1071,7 @@ N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D(
       maskValue(rhs.maskValue)
 { }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>&
 N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::operator=(
         N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor> const& rhs)
@@ -1079,7 +1079,7 @@ N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::
     N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>(rhs).swap(*this);
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 void N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::swap(
         N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>& rhs)
 {
@@ -1090,7 +1090,7 @@ void N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descript
     std::swap(maskValue, rhs.maskValue);
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 void N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::processGenericBlocks(
         Box3D domain, std::vector<AtomicBlock3D*> blocks)
 {
@@ -1202,14 +1202,14 @@ void N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descript
     }
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>*
 N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::clone() const
 {
     return new N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>(*this);
 }
 
-template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor> 
+template<typename T, template<typename U1> class AD_Descriptor, template<typename U2> class FS_Descriptor>
 void N_MaskedAdvectionDiffusionFreeSurfaceCoupling3D<T,AD_Descriptor,FS_Descriptor>::getTypeOfModification(
         std::vector<modif::ModifT>& modified) const
 {
@@ -1307,6 +1307,176 @@ void AdvectionDiffusionFd3D<T>::getTypeOfModification(std::vector<modif::ModifT>
     modified[3] = modif::nothing;           // u
     modified[4] = modif::nothing;           // Q
 }
+
+template<typename T>
+    AdvectionDiffusionFd3D_neumann<T>::AdvectionDiffusionFd3D_neumann(T d_, bool upwind_, bool neumann_, plint nx_, plint ny_, plint nz_)
+    : d(d_),
+      upwind(upwind_), neumann(neumann_), nx(nx_), ny(ny_), nz(nz_)
+    { }
+
+    template<typename T>
+    void AdvectionDiffusionFd3D_neumann<T>::processGenericBlocks (
+            Box3D domain,  std::vector<AtomicBlock3D*> fields )
+    {
+        PLB_PRECONDITION( fields.size()==5 );
+        ScalarField3D<T>* phi_t    = dynamic_cast<ScalarField3D<T>*>(fields[0]);
+        ScalarField3D<T>* phi_tp1  = dynamic_cast<ScalarField3D<T>*>(fields[1]);
+        ScalarField3D<T>* result   = dynamic_cast<ScalarField3D<T>*>(fields[2]);
+        TensorField3D<T,3>* uField = dynamic_cast<TensorField3D<T,3>*>(fields[3]);
+        ScalarField3D<T>* Q        = dynamic_cast<ScalarField3D<T>*>(fields[4]);
+
+
+
+
+        Dot3D ofs1 = computeRelativeDisplacement(*phi_t, *phi_tp1);
+        Dot3D ofs2 = computeRelativeDisplacement(*phi_t, *result);
+        Dot3D ofs3 = computeRelativeDisplacement(*phi_t, *uField);
+        Dot3D ofs4 = computeRelativeDisplacement(*phi_t, *Q);
+
+        Dot3D absoluteOffset = phi_tp1->getLocation();
+
+
+
+        if (upwind) {
+            for (plint iX=domain.x0; iX<=domain.x1; ++iX) {
+                for (plint iY=domain.y0; iY<=domain.y1; ++iY) {
+                    for (plint iZ=domain.z0; iZ<=domain.z1; ++iZ) {
+
+                      plint absoluteX = absoluteOffset.x + iX + ofs1.x;
+                      plint absoluteY = absoluteOffset.y + iY + ofs1.y;
+                      plint absoluteZ = absoluteOffset.z + iZ + ofs1.z;
+
+
+                        T phiC = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiE = phi_tp1->get(iX+1+ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiW = phi_tp1->get(iX-1+ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiN = phi_tp1->get(iX  +ofs1.x, iY+1+ofs1.y, iZ  +ofs1.z);
+                        T phiS = phi_tp1->get(iX  +ofs1.x, iY-1+ofs1.y, iZ  +ofs1.z);
+                        T phiT = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ+1+ofs1.z);
+                        T phiB = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ-1+ofs1.z);
+
+                        Array<T,3> const& u = uField->get(iX+ofs3.x, iY+ofs3.y, iZ+ofs3.z);
+
+                        Array<T, 3> adv;
+                        T diffX, diffY, diffZ;
+
+                        adv[0] = (util::greaterThan(u[0], (T) 0) ? (phiC - phiW) : (util::lessThan(   u[0], (T) 0) ? (phiE - phiC) : (T) 0.5 * (phiE - phiW)));
+                        adv[1] = (util::greaterThan(u[1], (T) 0) ? (phiC - phiS) : (util::lessThan(   u[1], (T) 0) ? (phiN - phiC) : (T) 0.5 * (phiN - phiS)));
+                        adv[2] = (util::greaterThan(u[2], (T) 0) ? (phiC - phiB) : (util::lessThan(   u[2], (T) 0) ? (phiT - phiC) : (T) 0.5 * (phiT - phiB)));
+
+                        diffX = phiW + phiE - (T) 2 * phiC;
+                        diffY = phiS + phiN - (T) 2 * phiC;
+                        diffZ = phiT + phiB - (T) 2 * phiC;
+
+
+                        if(neumann){
+                          if(absoluteX==0) { adv[0] = 0; diffX = (T) 2 * phiE - (T) 2 * phiC;}
+
+                          if(absoluteX==nx-1) { adv[0] = 0; diffX = (T) 2 * phiW - (T) 2 * phiC;}
+
+                          if(absoluteY==0) { adv[1] = 0; diffY = (T) 2 * phiN - (T) 2 * phiC;}
+
+                          if(absoluteY==ny-1) { adv[1] = 0; diffY = (T) 2 * phiS - (T) 2 * phiC;}
+
+                          if(absoluteZ==0) { adv[2] = 0; diffZ = (T) 2 * phiT - (T) 2 * phiC;}
+
+                          if(absoluteZ==nz-1) { adv[2] = 0; diffZ = (T) 2 * phiB - (T) 2 * phiC;}
+
+                          }
+
+
+
+
+                        T advection = u[0] * adv[0] + u[1] * adv[1] + u[2] * adv[2];
+
+                        T diffusion = d * (diffX + diffY + diffZ);
+
+
+                        result->get(iX+ofs2.x,iY+ofs2.y,iZ+ofs2.z) = phi_t->get(iX,iY,iZ) +
+                            diffusion - advection + Q->get(iX+ofs4.x,iY+ofs4.y,iZ+ofs4.z);
+
+
+
+
+                    }
+                }
+            }
+        } else {
+            for (plint iX=domain.x0; iX<=domain.x1; ++iX) {
+                for (plint iY=domain.y0; iY<=domain.y1; ++iY) {
+                    for (plint iZ=domain.z0; iZ<=domain.z1; ++iZ) {
+
+
+                        plint absoluteX = absoluteOffset.x + iX + ofs1.x;
+                        plint absoluteY = absoluteOffset.y + iY + ofs1.y;
+                        plint absoluteZ = absoluteOffset.z + iZ + ofs1.z;
+
+                        T phiC = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiE = phi_tp1->get(iX+1+ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiW = phi_tp1->get(iX-1+ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiN = phi_tp1->get(iX  +ofs1.x, iY+1+ofs1.y, iZ  +ofs1.z);
+                        T phiS = phi_tp1->get(iX  +ofs1.x, iY-1+ofs1.y, iZ  +ofs1.z);
+                        T phiT = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ+1+ofs1.z);
+                        T phiB = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ-1+ofs1.z);
+
+                        Array<T,3> const& u = uField->get(iX+ofs3.x, iY+ofs3.y, iZ+ofs3.z);
+                        Array<T, 3> adv;
+                        T diffX, diffY, diffZ;
+
+                        adv[0] = (T) 0.5 * (phiE - phiW);
+                        adv[1] = (T) 0.5 * (phiN - phiS);
+                        adv[2] = (T) 0.5 * (phiT - phiB);
+
+                        diffX = phiW + phiE - (T) 2 * phiC;
+                        diffY = phiS + phiN - (T) 2 * phiC;
+                        diffZ = phiT + phiB - (T) 2 * phiC;
+
+                        if(neumann){
+                          if(absoluteX==0) { adv[0] = 0; diffX = (T) 2 * phiE - (T) 2 * phiC;}
+
+                          if(absoluteX==nx-1) { adv[0] = 0; diffX = (T) 2 * phiW - (T) 2 * phiC;}
+
+                          if(absoluteY==0) { adv[1] = 0; diffY = (T) 2 * phiN - (T) 2 * phiC;}
+
+                          if(absoluteY==ny-1) { adv[1] = 0; diffY = (T) 2 * phiS - (T) 2 * phiC;}
+
+                          if(absoluteZ==0) { adv[2] = 0; diffZ = (T) 2 * phiT - (T) 2 * phiC;}
+
+                          if(absoluteZ==nz-1) { adv[2] = 0; diffZ = (T) 2 * phiB - (T) 2 * phiC;}
+
+                          }
+
+
+                          T advection = u[0] * adv[0] + u[1] * adv[1] + u[2] * adv[2];
+
+                          T diffusion = d * (diffX + diffY + diffZ);
+
+                        result->get(iX+ofs2.x,iY+ofs2.y,iZ+ofs2.z) = phi_t->get(iX,iY,iZ) +
+                            diffusion - advection + Q->get(iX+ofs4.x,iY+ofs4.y,iZ+ofs4.z);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+  template<typename T>
+  AdvectionDiffusionFd3D_neumann<T>* AdvectionDiffusionFd3D_neumann<T>::clone() const
+  {
+      return new AdvectionDiffusionFd3D_neumann<T>(*this);
+  }
+
+  template<typename T>
+  void AdvectionDiffusionFd3D_neumann<T>::getTypeOfModification(std::vector<modif::ModifT>& modified) const {
+      modified[0] = modif::nothing;           // phi_t
+      modified[1] = modif::nothing;           // phi_tp1
+      modified[2] = modif::staticVariables;   // result
+      modified[3] = modif::nothing;           // u
+      modified[4] = modif::nothing;           // Q
+
+  }
 
 
 template<typename T>
@@ -1626,7 +1796,7 @@ void MaskedVariableDiffusivityAdvectionDiffusionFd3D<T,ADCellT>::getTypeOfModifi
 }
 
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 TurbulentDiffusivityFunctional3D<T,FluidDescriptor>::TurbulentDiffusivityFunctional3D(T D0_, T Pr_t)
     : D0(D0_)
 {
@@ -1634,7 +1804,7 @@ TurbulentDiffusivityFunctional3D<T,FluidDescriptor>::TurbulentDiffusivityFunctio
     C = FluidDescriptor<T>::cs2 / Pr_t;
 }
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 void TurbulentDiffusivityFunctional3D<T,FluidDescriptor>::process(
         Box3D domain, BlockLattice3D<T,FluidDescriptor>& fluid, ScalarField3D<T>& diffusivity)
 {
@@ -1655,13 +1825,13 @@ void TurbulentDiffusivityFunctional3D<T,FluidDescriptor>::process(
     }
 }
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 TurbulentDiffusivityFunctional3D<T,FluidDescriptor>* TurbulentDiffusivityFunctional3D<T,FluidDescriptor>::clone() const
 {
     return new TurbulentDiffusivityFunctional3D<T,FluidDescriptor>(*this);
 }
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 void TurbulentDiffusivityFunctional3D<T,FluidDescriptor>::getTypeOfModification(std::vector<modif::ModifT>& modified) const
 {
     modified[0] = modif::nothing;           // Fluid.
@@ -1692,7 +1862,7 @@ std::unique_ptr<MultiScalarField3D<T> > computeTurbulentDiffusivity(T D0, T Pr_t
 }
 
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 TurbulentDiffusivityFromFlagFunctional3D<T,FluidDescriptor>::TurbulentDiffusivityFromFlagFunctional3D(
         std::vector<T> const& D0_, T Pr_t)
     : D0(D0_)
@@ -1701,7 +1871,7 @@ TurbulentDiffusivityFromFlagFunctional3D<T,FluidDescriptor>::TurbulentDiffusivit
     C = FluidDescriptor<T>::cs2 / Pr_t;
 }
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 void TurbulentDiffusivityFromFlagFunctional3D<T,FluidDescriptor>::processGenericBlocks(
         Box3D domain, std::vector<AtomicBlock3D*> blocks)
 {
@@ -1738,13 +1908,13 @@ void TurbulentDiffusivityFromFlagFunctional3D<T,FluidDescriptor>::processGeneric
     }
 }
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 TurbulentDiffusivityFromFlagFunctional3D<T,FluidDescriptor>* TurbulentDiffusivityFromFlagFunctional3D<T,FluidDescriptor>::clone() const
 {
     return new TurbulentDiffusivityFromFlagFunctional3D<T,FluidDescriptor>(*this);
 }
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 void TurbulentDiffusivityFromFlagFunctional3D<T,FluidDescriptor>::getTypeOfModification(std::vector<modif::ModifT>& modified) const
 {
     modified[0] = modif::nothing;           // Fluid.
@@ -1780,14 +1950,14 @@ std::unique_ptr<MultiScalarField3D<T> > computeTurbulentDiffusivityFromFlag(std:
 }
 
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 TurbulentDiffusivityFromScalarFunctional3D<T,FluidDescriptor>::TurbulentDiffusivityFromScalarFunctional3D(T Pr_t)
 {
     PLB_ASSERT(!util::isZero(Pr_t));
     C = FluidDescriptor<T>::cs2 / Pr_t;
 }
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 void TurbulentDiffusivityFromScalarFunctional3D<T,FluidDescriptor>::processGenericBlocks(
         Box3D domain, std::vector<AtomicBlock3D*> blocks)
 {
@@ -1821,14 +1991,14 @@ void TurbulentDiffusivityFromScalarFunctional3D<T,FluidDescriptor>::processGener
     }
 }
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 TurbulentDiffusivityFromScalarFunctional3D<T,FluidDescriptor>*
 TurbulentDiffusivityFromScalarFunctional3D<T,FluidDescriptor>::clone() const
 {
     return new TurbulentDiffusivityFromScalarFunctional3D<T,FluidDescriptor>(*this);
 }
 
-template<typename T, template<typename U> class FluidDescriptor> 
+template<typename T, template<typename U> class FluidDescriptor>
 void TurbulentDiffusivityFromScalarFunctional3D<T,FluidDescriptor>::getTypeOfModification(std::vector<modif::ModifT>& modified) const
 {
     modified[0] = modif::nothing;           // Fluid.
@@ -1864,7 +2034,7 @@ std::unique_ptr<MultiScalarField3D<T> > computeTurbulentDiffusivityFromScalar(T 
     return computeTurbulentDiffusivityFromScalar(Pr_t, fluid, D0, fluid.getBoundingBox());
 }
 
-    
+
 template<typename T>
 T ArrheniusChemicalReactionCoupling3D<T>::R = 8.3144598;
 
@@ -1947,7 +2117,7 @@ void ArrheniusChemicalReactionCoupling3D<T>::processGenericBlocks(Box3D domain, 
                 for (plint iReaction = 0; iReaction < nReactions; iReaction++) {
                     thetaQ += r[iReaction] * reactionEnthalpies[iReaction];
                 }
-                thermalQ->get(iX + ofsTQ.x, iY + ofsTQ.y, iZ + ofsTQ.z) = 
+                thermalQ->get(iX + ofsTQ.x, iY + ofsTQ.y, iZ + ofsTQ.z) =
                     (thetaQ / VHC->get(iX + ofsVHC.x, iY + ofsVHC.y, iZ + ofsVHC.z)) * dt;
 
                 // Sources for the concentration equations.
@@ -1995,4 +2165,3 @@ void ArrheniusChemicalReactionCoupling3D<T>::getTypeOfModification(std::vector<m
 }  // namespace plb
 
 #endif  // ADVECTION_DIFFUSION_3D_HH
-
