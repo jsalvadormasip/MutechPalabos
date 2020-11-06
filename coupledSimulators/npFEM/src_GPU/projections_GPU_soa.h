@@ -947,7 +947,7 @@ void project_collision_d(int n_points, int nb_cells, double *points, double *nea
             f_int_nonePD_d[IDX(id, 1, n_points)] -= weight_col_rep*dif[1];
             f_int_nonePD_d[IDX(id, 2, n_points)] -= weight_col_rep*dif[2];
 
-            E_nonePD[blockIdx.x*n_constraints + threadIdx.x] += weight_col_rep*(dif[0] * dif[0] + dif[1] * dif[1] + dif[2] * dif[2]) / 2.0f;
+            E_nonePD[blockIdx.x*n_constraints + threadIdx.x] += weight_col_rep*(dif[0] * dif[0] + dif[1]*dif[1] + dif[2]*dif[2]) / 2.0f;
             //*/
         } else {
             f_int_nonePD_d[IDX(id, 0, n_points)] -= weight_col_nonRep*dif[0];

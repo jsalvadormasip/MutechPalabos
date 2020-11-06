@@ -841,7 +841,7 @@ void Solver_GPU::read_fluid_data(){
     read_fluid_data_(&from_fluid_data_d, &from_fluid_data_h);
 }
 void Solver_GPU::copy_force_from_fluid(){
-    plb::npfem::copy_force_from_fluid(&mesh_info_, &simulation_input_d_, &simulation_data_d_, &from_fluid_data_d, starting_ids, 0);
+    plb::npfem::copy_force_from_fluid(&mesh_info_, &simulation_input_d_, &simulation_data_d_, &from_fluid_data_d, mesh_info_.threshold_rep, starting_ids, 0);
 }
 
 void Solver_GPU::copy_point_to_fluid(int iter){
