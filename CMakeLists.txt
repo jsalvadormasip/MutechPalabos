@@ -4,7 +4,7 @@ find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
     message("ccache used.")
-endif() 
+endif()
 
 project(palabos)
 
@@ -145,6 +145,7 @@ add_subdirectory(examples/showCases/multiComponent3d)
 add_subdirectory(examples/showCases/particlesInCone)
 add_subdirectory(examples/showCases/poiseuille)
 add_subdirectory(examples/showCases/rectangularChannel3d)
+add_subdirectory(examples/showCases/settlingDrivenConvection)
 add_subdirectory(examples/showCases/vofMultiPhase)
 add_subdirectory(examples/showCases/womersley)
 # tutorial
