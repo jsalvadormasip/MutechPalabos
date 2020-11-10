@@ -674,7 +674,21 @@ void plb::npfem::Solver_GPU::reset_position(const double *centers) {
 	reset_position_d(centers, simulation_data_d_.center, points_.data(), mesh_info_, mesh_data_d_, simulation_input_d_, simulation_data_d_);
 }
 ///////////////////////////////////////////////////////////////////////////////
-//TODO make it multible cell
+void Solver_GPU::set_initial_velocities(double *vel) {
+
+    Vector3 speed;
+
+    for (int i = 0; i< mesh_info_.nb_cells * 3; i += 3) {
+        speed << vel[i], vel[i + 1], vel[i + 2];
+        velocities_.block(i, 0, 3, mesh_info_.n_points) = speed*MatrixXX::Ones(1, mesh_info_.n_points);
+        //std::cout << velocities_.block(i, 0, 3, 5) << std::endl << std::endl;
+    }
+    simulation_input_h_.velocities = velocities_.data();
+    external_forces_from_Host_to_Device(mesh_info_.n_points*mesh_info_.nb_cells, simulation_input_h_.velocities, simulation_input_d_.velocities,0);
+    //velocities_.row(1) = Matrix3X::Ones(1, n_points_)*y;
+    //velocities_.row(2) = Matrix3X::Ones(1, n_points_)*z;
+}
+
 void Solver_GPU::set_initial_velocity(double x, double y, double z){
 	Vector3 speed;
 	speed << x, y, z;
@@ -686,6 +700,7 @@ void Solver_GPU::set_initial_velocity(double x, double y, double z){
 	//velocities_.row(1) = Matrix3X::Ones(1, n_points_)*y;
 	//velocities_.row(2) = Matrix3X::Ones(1, n_points_)*z;
 }
+
 ShapeOpScalar *plb::npfem::Solver_GPU::get_centers(){
 	return simulation_data_h_.center;
 }

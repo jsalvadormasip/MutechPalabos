@@ -125,6 +125,7 @@ public:
   void set_initial_positions(const double *centers);
   void set_initial_positions(const double *centers, cuda_scalar *local_mat, double mat[16]);
   void reset_position(const double *centers);
+  void set_initial_velocities(double *vel);
   void set_initial_velocity(double x, double y, double z);
   void set_gpu_starting_position(const Matrix3X &points, int cell);
   void set_gpu_starting_velocities(const Matrix3X &vels, int cell);
