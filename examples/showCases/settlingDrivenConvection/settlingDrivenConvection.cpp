@@ -13,17 +13,16 @@ using namespace std;
 typedef double T;
 
 #define NSDESCRIPTOR descriptors::ForcedD3Q19Descriptor
-#define ADESCRIPTOR descriptors::AdvectionDiffusionD3Q7Descriptor
 #define NSDYNAMICS GuoExternalForceConsistentSmagorinskyCompleteRegularizedBGKdynamics
 //#define NSDYNAMICS GuoExternalForceBGKdynamics
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Initialization of the particle volume fraction field.
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename T, template<typename NSU> class nsDescriptor, template<typename ADU> class adDescriptor>
+template<typename T, template<typename NSU> class nsDescriptor>
 struct IniVolFracProcessor3D : public BoxProcessingFunctional3D_S<T>
 {
-    IniVolFracProcessor3D(RayleighTaylorFlowParam<T,nsDescriptor,adDescriptor> parameters_)
+    IniVolFracProcessor3D(RayleighTaylorFlowParam<T,nsDescriptor> parameters_)
         : parameters(parameters_)
     { }
     virtual void process(Box3D domain, ScalarField3D<T>& volfracField)
@@ -53,9 +52,9 @@ struct IniVolFracProcessor3D : public BoxProcessingFunctional3D_S<T>
             }
     }
 
-    virtual IniVolFracProcessor3D<T,nsDescriptor,adDescriptor>* clone() const
+    virtual IniVolFracProcessor3D<T,nsDescriptor>* clone() const
     {
-        return new IniVolFracProcessor3D<T,nsDescriptor,adDescriptor>(*this);
+        return new IniVolFracProcessor3D<T,nsDescriptor>(*this);
     }
 
     virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const {
@@ -65,16 +64,16 @@ struct IniVolFracProcessor3D : public BoxProcessingFunctional3D_S<T>
         return BlockDomain::bulkAndEnvelope;
     }
 private :
-    RayleighTaylorFlowParam<T,nsDescriptor,adDescriptor> parameters;
+    RayleighTaylorFlowParam<T,nsDescriptor> parameters;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization of the density field.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename T, template<typename NSU> class nsDescriptor, template<typename ADU> class adDescriptor>
+template<typename T, template<typename NSU> class nsDescriptor>
 struct IniDensityProcessor3D : public BoxProcessingFunctional3D_S<T>
 {
-    IniDensityProcessor3D(RayleighTaylorFlowParam<T,nsDescriptor,adDescriptor> parameters_)
+    IniDensityProcessor3D(RayleighTaylorFlowParam<T,nsDescriptor> parameters_)
         : parameters(parameters_)
     { }
     virtual void process(Box3D domain, ScalarField3D<T>& densityField)
@@ -101,9 +100,9 @@ struct IniDensityProcessor3D : public BoxProcessingFunctional3D_S<T>
                   }
               }
     }
-    virtual IniDensityProcessor3D<T,nsDescriptor,adDescriptor>* clone() const
+    virtual IniDensityProcessor3D<T,nsDescriptor>* clone() const
     {
-        return new IniDensityProcessor3D<T,nsDescriptor,adDescriptor>(*this);
+        return new IniDensityProcessor3D<T,nsDescriptor>(*this);
     }
 
     virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const {
@@ -113,7 +112,7 @@ struct IniDensityProcessor3D : public BoxProcessingFunctional3D_S<T>
         return BlockDomain::bulkAndEnvelope;
     }
 private :
-    RayleighTaylorFlowParam<T,nsDescriptor,adDescriptor> parameters;
+    RayleighTaylorFlowParam<T,nsDescriptor> parameters;
 };
 
 
@@ -125,7 +124,7 @@ void ExpSetup (
         MultiBlockLattice3D<T, NSDESCRIPTOR>& nsLattice,
         MultiScalarField3D<T>& volfracField,
         MultiScalarField3D<T>& densityField,
-        RayleighTaylorFlowParam<T,NSDESCRIPTOR,ADESCRIPTOR> &parameters )
+        RayleighTaylorFlowParam<T,NSDESCRIPTOR> &parameters )
 {
 
 
@@ -133,11 +132,11 @@ void ExpSetup (
 
 
     applyProcessingFunctional(
-            new IniVolFracProcessor3D<T,NSDESCRIPTOR,ADESCRIPTOR>(parameters),
+            new IniVolFracProcessor3D<T,NSDESCRIPTOR>(parameters),
             volfracField.getBoundingBox(), volfracField );
 
     applyProcessingFunctional(
-            new IniDensityProcessor3D<T,NSDESCRIPTOR,ADESCRIPTOR>(parameters),
+            new IniDensityProcessor3D<T,NSDESCRIPTOR>(parameters),
             densityField.getBoundingBox(), densityField );
 
 
@@ -153,7 +152,7 @@ void ExpSetup (
 void writeVTK(MultiBlockLattice3D<T,NSDESCRIPTOR>& nsLattice,
               MultiScalarField3D<T>& volfracField,
               MultiScalarField3D<T>& densityField,
-              RayleighTaylorFlowParam<T,NSDESCRIPTOR,ADESCRIPTOR> const& parameters, plint iter)
+              RayleighTaylorFlowParam<T,NSDESCRIPTOR> const& parameters, plint iter)
 {
 
     T dx = parameters.getDeltaX();
@@ -222,7 +221,7 @@ int main(int argc, char *argv[])
 
     global::directories().setOutputDir("./tmp/");
 
-    RayleighTaylorFlowParam<T,NSDESCRIPTOR,ADESCRIPTOR> parameters (
+    RayleighTaylorFlowParam<T,NSDESCRIPTOR> parameters (
             Ri,
             Gr,
             uMax,
@@ -237,7 +236,7 @@ int main(int argc, char *argv[])
     T rho0=1000;                                          //Fresh water density
     T rhoP=2519.24;                                       //Particle density
     T g=9.81;                                             //Gravity acceleration
-    T tunedg=g*parameters.getLatticeGravity();            //Gravity acceleration in lattice units
+    T g_lb=g*parameters.getLatticeGravity();            //Gravity acceleration in lattice units
     T rho0f=0.0;
     T eps = 1e-6;
 
@@ -315,7 +314,7 @@ int main(int argc, char *argv[])
 
     integrateProcessingFunctional (
             new ScalarBuoyanTermProcessor3D<T,NSDESCRIPTOR> (
-                tunedg, rho0,
+                g_lb, rho0,
                 rhoP, TotalVolFrac,parameters.getDeltaT(), forceOrientation),
             nsLattice.getBoundingBox(),
             args_f, 1 );

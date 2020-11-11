@@ -194,7 +194,7 @@ void Get_v_sedimentation<T>::getTypeOfModification(std::vector<modif::ModifT>& m
 
 
     /// A useful class for the conversion between dimensionless and lattice units.
-    template<typename T, template<typename NSU> class nsDescriptor, template<typename ADU> class adDescriptor>
+    template<typename T, template<typename NSU> class nsDescriptor>
     class RayleighTaylorFlowParam {
     public:
         /// Constructor
@@ -255,7 +255,7 @@ void Get_v_sedimentation<T>::getTypeOfModification(std::vector<modif::ModifT>& m
         /// viscosity in lattice units
         T getLatticeNu() const      { return getLatticeU()*(getNz()-1)/getRe(); }
 
-        /// thermal conductivity in lattice units
+        /// Diffusivity in lattice units
         T getLatticeKappa() const   { return (getDeltaT()/(getDeltaX()*getDeltaX())); }
         /// viscosity in lattice units
         T getLatticeGravity() const { return getDeltaT() * getDeltaT() / getDeltaX(); }
@@ -263,16 +263,13 @@ void Get_v_sedimentation<T>::getTypeOfModification(std::vector<modif::ModifT>& m
         T getSolventTau() const   { return nsDescriptor<T>::invCs2*getLatticeNu()+(T)0.5; }
         /// relaxation frequency
         T getSolventOmega() const { return (T)1 / getSolventTau(); }
-        /// relaxation time
-        T getTemperatureTau() const    { return adDescriptor<T>::invCs2*getLatticeKappa()+(T)0.5; }
-        /// relaxation frequency
-        T getTemperatureOmega() const  { return (T)1 / getTemperatureTau(); }
+
     private:
         T Ri, Gr, uMax, uCar, resolution, lx, ly, lz, Di;
     };
 
-    template<typename T, template<typename NSU> class nsDescriptor, template<typename ADU> class adDescriptor>
-    void writeLogFile(RayleighTaylorFlowParam<T,nsDescriptor,adDescriptor> const& parameters,
+    template<typename T, template<typename NSU> class nsDescriptor>
+    void writeLogFile(RayleighTaylorFlowParam<T,nsDescriptor> const& parameters,
                       std::string const& title)
     {
         std::string fullName = global::directories().getLogOutDir() + "plbLog.dat";
@@ -283,7 +280,7 @@ void Get_v_sedimentation<T>::getTypeOfModification(std::vector<modif::ModifT>& m
         ofile << "Richardson number:          Ri=" << parameters.getRi() << "\n";
         ofile << "Grasshoff number:            Gr=" << parameters.getGr() << "\n";
         ofile << "Kinematic viscosity:       Nu=" << parameters.getLatticeNu() << "\n";
-        ofile << "Thermal conductivity:   Kappa=" << parameters.getLatticeKappa() << "\n";
+        ofile << "Diffusivity:               Kappa=" << parameters.getLatticeKappa() << "\n";
         ofile << "Lattice resolution:         N=" << parameters.getResolution() << "\n";
         ofile << "Extent of the system:      lx=" << parameters.getLx() << "\n";
         ofile << "Extent of the system:      ly=" << parameters.getLy() << "\n";
@@ -291,7 +288,6 @@ void Get_v_sedimentation<T>::getTypeOfModification(std::vector<modif::ModifT>& m
         ofile << "Grid spacing deltaX:       dx=" << parameters.getDeltaX() << "\n";
         ofile << "Time step deltaT:          dt=" << parameters.getDeltaT() << "\n";
         ofile << "Solvent omega:        omega_S=" << parameters.getSolventOmega() << "\n";
-        ofile << "Temperature omega:    omega_T=" << parameters.getTemperatureOmega() << "\n";
         ofile << "Caracteristic vel:       uLb=" << parameters.getLatticeU() << "\n";
         ofile << "Number of cells x:       Nx=" << parameters.getNx() << "\n";
         ofile << "Number of cells y:       Ny=" << parameters.getNy() << "\n";
