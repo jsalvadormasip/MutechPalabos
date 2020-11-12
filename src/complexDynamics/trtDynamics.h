@@ -118,6 +118,26 @@ private:
     static int id;
 };
 
+    template<typename T, template<typename U> class Descriptor>
+    class stokesTRTdynamics : public TRTdynamics<T,Descriptor>{
+        // inherit constructors
+        using TRTdynamics<T, Descriptor>::TRTdynamics;
+
+        /* *************** Collision and Equilibrium ************************* */
+
+        /// Implementation of the collision step
+        virtual void collide(Cell<T,Descriptor>& cell,
+                             BlockStatistics& statistics_);
+
+        /// Implementation of the collision step, with imposed macroscopic variables
+        virtual void collideExternal(Cell<T,Descriptor>& cell, T rhoBar,
+                                     Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat);
+
+        /// Compute equilibrium distribution function
+        virtual T computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
+                                     T jSqr, T thetaBar=T()) const;
+    };
+
 /// Implementation of incompressible TRT dynamics.
 /** This is the TRT equivalent of IncBGKdynamics: the "rho" moment of the
  *  populations appears only as a pressure term in the equilibrium, while
