@@ -214,19 +214,19 @@ void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int
     data_h->shift = new int[MAXFLUIDNODE];
     data_h->fluid_nodes_rank = new int[MAXFLUIDNODE];
     data_h->ids  = new int[nb];
-    data_h->nb_fluid_nodes = 
+    // data_h->nb_fluid_nodes = 
     data_d->nb	= nb;
 
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data_out, nb*3*sizeof(double)));
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->normal_out, nb*3*sizeof(float)));
-    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->normal_in , nb*3*sizeof(float)));
-    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->col_vertics_in , nb*3*sizeof(float)));
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->normal_in, nb*3*sizeof(float)));
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->col_vertics_in, nb*3*sizeof(float)));
 
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->data_in, nb*3*sizeof(double)));
-    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->ids , nb*sizeof(int)));
+    CUDA_HANDLE_ERROR(cudaMalloc(&data_d->ids, nb*sizeof(int)));
 }
 
-int send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int start_id, int rank, int iter){
+int send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int nb, int start_id, int rank, int iter){
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data_in      , data_h->data_in,         3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->normal_in    , data_h->normal_in,       3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->col_vertics_in, data_h->col_vertics_in, 3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
@@ -236,12 +236,15 @@ int send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int start
     std::vector <char> idok(data_h->nb);
     memset(idok.data(),0, data_h->nb);
     
-    for (int i = 0; i < data_h->nb; ++i) {
+    for (int i = 0; i < nb; ++i) {
         idok[data_h->ids[i] - start_id]++;
     }
-    for (int i = 0; i < 258; ++i) {
-        if(idok[i] != 1)std::cout << " MISSING " << i  << " " << iter << " rank " << rank << " nb " << (int)idok[i]<< " "<< start_id << " "<< data_h->nb << std::endl;
-        if(idok[i] == 0)maybe_missing = i;
+    for (int i = 0; i < data_h->nb; ++i) {
+        if(idok[i] > 1)std::cout << " DOUBLON " << i  << " " << iter << " rank " << rank << " nb " << (int)idok[i]<< " "<< start_id << " "<< data_h->nb << std::endl;
+        if(idok[i] == 0){
+            std::cout << " MANQUANT " << i << " " << iter << " rank " << rank << " nb " << (int)idok[i] << " " << start_id << " " << data_h->nb << std::endl;
+            maybe_missing = i + start_id;
+        }
     }
     
     return maybe_missing;
