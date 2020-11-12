@@ -226,24 +226,25 @@ void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int
     CUDA_HANDLE_ERROR(cudaMalloc(&data_d->ids , nb*sizeof(int)));
 }
 
-void send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int rank, int iter){
+int send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int start_id, int rank, int iter){
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data_in      , data_h->data_in,         3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->normal_in    , data_h->normal_in,       3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->col_vertics_in, data_h->col_vertics_in, 3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->ids , data_h->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyHostToDevice));
-    /*
-    if(rank == 0){
-        char idok[516];
-        memset(idok,0,516);
-        for (int i = 0; i < data_h->nb; ++i) {
-            idok[data_h->ids[i]%258]++;
-        }
-        for (int i = 0; i < 258; ++i) {
+    int maybe_missing = -1;
 
-            if(idok[i] != 1)std::cout << " MISSING " << i  << " " << iter << " rank " << rank << " nb " << (int)idok[i] << std::endl;
-        }
+    std::vector <char> idok(data_h->nb);
+    memset(idok.data(),0, data_h->nb);
+    
+    for (int i = 0; i < data_h->nb; ++i) {
+        idok[data_h->ids[i] - start_id]++;
     }
-    */
+    for (int i = 0; i < 258; ++i) {
+        if(idok[i] != 1)std::cout << " MISSING " << i  << " " << iter << " rank " << rank << " nb " << (int)idok[i]<< " "<< start_id << " "<< data_h->nb << std::endl;
+        if(idok[i] == 0)maybe_missing = i;
+    }
+    
+    return maybe_missing;
 }
 
 void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h){

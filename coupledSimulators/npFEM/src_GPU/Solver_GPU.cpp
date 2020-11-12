@@ -848,8 +848,8 @@ SHAPEOP_INLINE void Solver_GPU::set_onSurfaceParticle(const std::vector<bool>& o
 	onSurfaceParticle_ = onSurfaceParticle;
 }
 /////////////////////////////////////////////////////////////////////////////////
-void Solver_GPU::send_fluid_data(int rank, int iter){
-    send_fluid_data_(&from_fluid_data_d, &from_fluid_data_h, rank, iter);
+int Solver_GPU::send_fluid_data(int rank, int iter){
+    return send_fluid_data_(&from_fluid_data_d, &from_fluid_data_h, starting_ids, rank, iter);
 }
 
 void Solver_GPU::read_fluid_data(){

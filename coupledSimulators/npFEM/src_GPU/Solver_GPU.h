@@ -153,7 +153,7 @@ public:
   void rotatePoints(const std::string& axis, const Scalar& theta);
   void set_onSurfaceParticle(const std::vector<bool>& onSurfaceParticle);
 
-  void send_fluid_data(int rank, int iter);
+  int send_fluid_data(int rank, int iter);
   void read_fluid_data();
   void copy_force_from_fluid();
   void copy_point_to_fluid(int iter);
