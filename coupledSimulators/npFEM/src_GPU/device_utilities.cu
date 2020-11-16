@@ -268,9 +268,9 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
 
     int point_id = (which_rbc*x_n)*3 + rbc_id%x_n;
 
-    input.forces_ex[point_id        ] = 10*data_fluid.data_in[3*fluid_id  ];
-    input.forces_ex[point_id +   x_n] = 10*data_fluid.data_in[3*fluid_id+1];
-    input.forces_ex[point_id + 2*x_n] = 10*data_fluid.data_in[3*fluid_id+2];
+    input.forces_ex[point_id        ] = 5*data_fluid.data_in[3*fluid_id  ];
+    input.forces_ex[point_id +   x_n] = 5*data_fluid.data_in[3*fluid_id+1];
+    input.forces_ex[point_id + 2*x_n] = 5*data_fluid.data_in[3*fluid_id+2];
 
     //if(isnan(data_fluid.data_in[3*fluid_id + 2]) || isnan(data_fluid.data_in[3*fluid_id + 1]) || isnan(data_fluid.data_in[3*fluid_id ]))printf("NAN %d \n", data_fluid.ids[fluid_id]);
 
@@ -283,6 +283,16 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] + input.points[point_id        ] - sim.center[3*which_rbc    ] + threshold*data_fluid.normal_in[3*fluid_id  ];
     sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] + input.points[point_id +   x_n] - sim.center[3*which_rbc + 1] + threshold*data_fluid.normal_in[3*fluid_id+1];
     sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] + input.points[point_id + 2*x_n] - sim.center[3*which_rbc + 2] + threshold*data_fluid.normal_in[3*fluid_id+2];
+
+
+    if (input.forces_ex[point_id] >= 0.2 || input.forces_ex[point_id + x_n] >= 0.2 || input.forces_ex[point_id + 2 * x_n] >= 0.2) {
+       printf(" EXTREME FORCE [%f %f %f] point [%f %f %f] id(%d) iter(%d)\n", input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n],
+       input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n], rbc_id, iter);
+    }
+    if (fabs(data_fluid.col_vertics_in[3*fluid_id]) > 2 || fabs(data_fluid.col_vertics_in[3*fluid_id + 1]) > 2 || fabs(data_fluid.col_vertics_in[3*fluid_id + 2]) >= 2) {
+       printf(" EXTREME COL [%f %f %f]  point [%f %f %f] id(%d) iter(%d)\n", data_fluid.col_vertics_in[3*fluid_id ], data_fluid.col_vertics_in[3*fluid_id+1], data_fluid.col_vertics_in[3*fluid_id +2],
+       input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n], rbc_id, iter);
+    }
     //printf("sim.nearest_normals.x %f \n", sim.nearest_normals[point_id]);
     /*
     if(data_fluid.ids[fluid_id] == 256 + 258){
