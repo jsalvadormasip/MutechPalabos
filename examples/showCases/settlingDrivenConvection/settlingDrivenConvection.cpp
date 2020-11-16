@@ -394,7 +394,9 @@ int main(int argc, char *argv[])
         plint phi_1_adv_ID = cycle.addBlock(phi_1_adv);
         plint phi_2_adv_ID = cycle.addBlock(phi_2_adv);
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Solve the advection diffusion for the density (sugar) field with 1st order finite difference
+//////////////////////////////////////////////////////////////////////////////////////////////
         cycle.addProcessor (
             new CopyConvertScalarFunctional3D<T,T>(),
             densityField_ID, D_t_ID,
@@ -410,6 +412,10 @@ int main(int argc, char *argv[])
             D_t_ID, D_tp1_ID, densityField_ID, velocity_ID, Q_d_ID,
            densityField.getBoundingBox() );
         cycle.addCommunication(densityField_ID, modif::staticVariables);
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Solve the advection-diffusion-sedimentation for the particle field with 3rd order WENO
+//////////////////////////////////////////////////////////////////////////////////////////////
         cycle.addProcessor (
             new Get_v_sedimentation<T>(rhoP, Dp, convers, mu, g),
             densityField_ID, volfracField_ID, v_sedimentation_ID,
