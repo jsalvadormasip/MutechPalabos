@@ -285,13 +285,13 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] + input.points[point_id + 2*x_n] - sim.center[3*which_rbc + 2] + threshold*data_fluid.normal_in[3*fluid_id+2];
 
 
-    if (input.forces_ex[point_id] >= 0.2 || input.forces_ex[point_id + x_n] >= 0.2 || input.forces_ex[point_id + 2 * x_n] >= 0.2) {
+    if (fabs(input.forces_ex[point_id]) >= 3 || fabs(input.forces_ex[point_id + x_n]) >= 3 || fabs(input.forces_ex[point_id + 2*x_n]) >= 3) {
        printf(" EXTREME FORCE [%f %f %f] point [%f %f %f] id(%d) iter(%d)\n", input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n],
-       input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n], rbc_id, iter);
+       input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n], data_fluid.ids[fluid_id], iter);
     }
     if (fabs(data_fluid.col_vertics_in[3*fluid_id]) > 2 || fabs(data_fluid.col_vertics_in[3*fluid_id + 1]) > 2 || fabs(data_fluid.col_vertics_in[3*fluid_id + 2]) >= 2) {
        printf(" EXTREME COL [%f %f %f]  point [%f %f %f] id(%d) iter(%d)\n", data_fluid.col_vertics_in[3*fluid_id ], data_fluid.col_vertics_in[3*fluid_id+1], data_fluid.col_vertics_in[3*fluid_id +2],
-       input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n], rbc_id, iter);
+       input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n], data_fluid.ids[fluid_id], iter);
     }
     //printf("sim.nearest_normals.x %f \n", sim.nearest_normals[point_id]);
     /*
@@ -326,6 +326,13 @@ __global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, Fr
     data_fluid.normal_out[3*fluid_id  ] = normals[point_id        ];
     data_fluid.normal_out[3*fluid_id+1] = normals[point_id +   x_n];
     data_fluid.normal_out[3*fluid_id+2] = normals[point_id + 2*x_n];
+
+
+    if (fabs(input.velocities[point_id]) >= 3 || fabs(input.velocities[point_id + x_n]) >= 3 || fabs(input.velocities[point_id + 2*x_n]) >= 3) {
+        printf(" EXTREME SOLVER VEL [%f %f %f] point [%f %f %f] id(%d) iter(%d)\n", 
+            input.velocities[point_id], input.velocities[point_id + x_n], input.velocities[point_id + 2*x_n],
+            input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], data_fluid.ids[fluid_id], iter);
+    }
     /*
     if(data_fluid.ids[fluid_id] == 770)printf(" COPY_BACK fluid_id %d body_id %d which_rbc %d normals[%f %f %f]  position [%f %f %f]\n", fluid_id, start_id, which_rbc,
         normals[point_id], normals[point_id + x_n], normals[point_id + 2*x_n],
