@@ -192,10 +192,10 @@ void TRTdynamics<T, Descriptor>::setMagicParam(T magic_) {
     this->omegaMinus = (4.-2.*omegaPlus)/(2.-omegaPlus+4.*magic_*omegaPlus);
 }
 
-/* *************** Class stokesTRTdynamics *********************************************** */
+/* *************** Class Ma1TRTdynamics *********************************************** */
 
 template<typename T, template<typename U> class Descriptor>
-void stokesTRTdynamics<T,Descriptor>::collide (
+void Ma1TRTdynamics<T,Descriptor>::collide (
         Cell<T,Descriptor>& cell, BlockStatistics& statistics )
 {
     const T omegaPlus = this->getOmega();
@@ -212,9 +212,8 @@ void stokesTRTdynamics<T,Descriptor>::collide (
     momentTemplates<T,Descriptor>::get_rhoBar_j(cell, rhoBar, j);
     T jSqr = normSqr(j);
     T invRho = Descriptor<T>::invRho(rhoBar);
-    using AdvectionDiffusion = advectionDiffusionDynamicsTemplatesImpl<T,Descriptor<T>>;
     for (int i = 0; i < Descriptor<T>::q; ++i) {
-        eq[i] = AdvectionDiffusion::bgk_ma1_equilibrium(rhoBar, invRho, j);
+        eq[i] =  dynamicsTemplatesImpl<T,Descriptor<T>>::bgk_ma1_equilibrium(i,rhoBar, j);
     }
 
     for (plint i=1; i<=Descriptor<T>::q/2; ++i) {
@@ -237,7 +236,7 @@ void stokesTRTdynamics<T,Descriptor>::collide (
 }
 
 template<typename T, template<typename U> class Descriptor>
-void stokesTRTdynamics<T,Descriptor>::collideExternal (
+void Ma1TRTdynamics<T,Descriptor>::collideExternal (
         Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j,
         T thetaBar, BlockStatistics& statistics )
 {
@@ -251,10 +250,9 @@ void stokesTRTdynamics<T,Descriptor>::collideExternal (
     Array<T,Descriptor<T>::q/2+1> eq_plus, eq_minus, f_plus, f_minus;
 
     T jSqr = normSqr(j);
-    T invRho = Descriptor<T>::invRho(rhoBar);
-    using AdvectionDiffusion = advectionDiffusionDynamicsTemplatesImpl<T,Descriptor<T>>;
+
     for (int i = 0; i < Descriptor<T>::q; ++i) {
-        eq[i] = AdvectionDiffusion::bgk_ma1_equilibrium(rhoBar, invRho, j);
+        eq[i] = dynamicsTemplatesImpl<T,Descriptor<T>>::bgk_ma1_equilibrium(i,rhoBar, j);
     }
 
     for (plint i=1; i<=Descriptor<T>::q/2; ++i) {
@@ -277,12 +275,102 @@ void stokesTRTdynamics<T,Descriptor>::collideExternal (
 }
 
 template<typename T, template<typename U> class Descriptor>
-T stokesTRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
+T Ma1TRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
+                                                   T jSqr, T thetaBar) const
 {
+
+    return dynamicsTemplatesImpl<T,Descriptor<T>>::bgk_ma1_equilibrium(iPop,rhoBar, j);
+}
+
+
+/* *************** Class Ma0TRTdynamics *********************************************** */
+
+template<typename T, template<typename U> class Descriptor>
+void Ma0TRTdynamics<T,Descriptor>::collide (
+        Cell<T,Descriptor>& cell, BlockStatistics& statistics )
+{
+    const T omegaPlus = this->getOmega();
+    const T omegaMinus = this->getOmegaMinus();
+
+    Array<T,Descriptor<T>::q> eq;
+    // In the following, we number the plus/minus variables from 1 to (Q-1)/2.
+    // So we allocate the index-zero memory location, and waste some memory
+    // for convenience.
+    Array<T,Descriptor<T>::q/2+1> eq_plus, eq_minus, f_plus, f_minus;
+
+    Array<T,Descriptor<T>::d> j;
+    T rhoBar;
+    momentTemplates<T,Descriptor>::get_rhoBar_j(cell, rhoBar, j);
+    T jSqr = normSqr(j);
     T invRho = Descriptor<T>::invRho(rhoBar);
-    using AdvectionDiffusion = advectionDiffusionDynamicsTemplatesImpl<T,Descriptor<T>>;
-    return AdvectionDiffusion::bgk_ma1_equilibrium(rhoBar, invRho, j);
+    for (int i = 0; i < Descriptor<T>::q; ++i) {
+        eq[i] =  dynamicsTemplatesImpl<T,Descriptor<T>>::bgk_ma0_equilibrium(i,rhoBar);
+    }
+
+    for (plint i=1; i<=Descriptor<T>::q/2; ++i) {
+        eq_plus[i]  = 0.5*(eq[i] + eq[i+Descriptor<T>::q/2]);
+        eq_minus[i] = 0.5*(eq[i] - eq[i+Descriptor<T>::q/2]);
+        f_plus[i]   = 0.5*(cell[i] + cell[i+Descriptor<T>::q/2]);
+        f_minus[i]  = 0.5*(cell[i] - cell[i+Descriptor<T>::q/2]);
+    }
+
+    cell[0] += -omegaPlus * cell[0] + omegaPlus * eq[0];
+
+    for (plint i=1; i<=Descriptor<T>::q/2; ++i) {
+        cell[i] += -omegaPlus * (f_plus[i] - eq_plus[i]) - omegaMinus * (f_minus[i] - eq_minus[i]);
+        cell[i+Descriptor<T>::q/2] += -omegaPlus * (f_plus[i] - eq_plus[i]) + omegaMinus * (f_minus[i] - eq_minus[i]);
+    }
+
+    if (cell.takesStatistics()) {
+        gatherStatistics(statistics, rhoBar, jSqr * invRho * invRho );
+    }
+}
+
+template<typename T, template<typename U> class Descriptor>
+void Ma0TRTdynamics<T,Descriptor>::collideExternal (
+        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j,
+        T thetaBar, BlockStatistics& statistics )
+{
+    const T sPlus = this->getOmega();
+    const T omegaMinus = this->getOmegaMinus();
+
+    Array<T,Descriptor<T>::q> eq;
+    // In the following, we number the plus/minus variables from 1 to (Q-1)/2.
+    // So we allocate the index-zero memory location, and waste some memory
+    // for convenience.
+    Array<T,Descriptor<T>::q/2+1> eq_plus, eq_minus, f_plus, f_minus;
+
+    T jSqr = normSqr(j);
+
+    for (int i = 0; i < Descriptor<T>::q; ++i) {
+        eq[i] = dynamicsTemplatesImpl<T,Descriptor<T>>::bgk_ma0_equilibrium(i,rhoBar);
+    }
+
+    for (plint i=1; i<=Descriptor<T>::q/2; ++i) {
+        eq_plus[i]  = 0.5*(eq[i] + eq[i+Descriptor<T>::q/2]);
+        eq_minus[i] = 0.5*(eq[i] - eq[i+Descriptor<T>::q/2]);
+        f_plus[i]   = 0.5*(cell[i] + cell[i+Descriptor<T>::q/2]);
+        f_minus[i]  = 0.5*(cell[i] - cell[i+Descriptor<T>::q/2]);
+    }
+
+    cell[0] += -sPlus*cell[0] + sPlus*eq[0];
+
+    for (plint i=1; i<=Descriptor<T>::q/2; ++i) {
+        cell[i] += -sPlus*(f_plus[i]-eq_plus[i]) - omegaMinus * (f_minus[i] - eq_minus[i]);
+        cell[i+Descriptor<T>::q/2] += -sPlus*(f_plus[i]-eq_plus[i]) + omegaMinus * (f_minus[i] - eq_minus[i]);
+    }
+
+    if (cell.takesStatistics()) {
+        gatherStatistics(statistics, rhoBar, jSqr * Descriptor<T>::invRho(rhoBar) * Descriptor<T>::invRho(rhoBar) );
+    }
+}
+
+template<typename T, template<typename U> class Descriptor>
+T Ma0TRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
+                                                   T jSqr, T thetaBar) const
+{
+
+    return dynamicsTemplatesImpl<T,Descriptor<T>>::bgk_ma0_equilibrium(iPop,rhoBar);
 }
 
 
