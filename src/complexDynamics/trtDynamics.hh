@@ -307,7 +307,6 @@ template<typename T, template<typename U> class Descriptor>
 T Ma1TRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
                                                    T jSqr, T thetaBar) const
 {
-
     return dynamicsTemplatesImpl<T,Descriptor<T>>::bgk_ma1_equilibrium(iPop,rhoBar, j);
 }
 

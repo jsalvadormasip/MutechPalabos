@@ -124,8 +124,13 @@ private:
 
     template<typename T, template<typename U> class Descriptor>
     class Ma1TRTdynamics : public TRTdynamics<T,Descriptor>{
+    public:
         // inherit constructors
         using TRTdynamics<T, Descriptor>::TRTdynamics;
+        /// Clone the object on its dynamic type.
+        virtual Ma1TRTdynamics<T,Descriptor>* clone() const{
+            return new Ma1TRTdynamics<T, Descriptor>(*this);
+        };
 
         /* *************** Collision and Equilibrium ************************* */
 
@@ -144,8 +149,13 @@ private:
 
     template<typename T, template<typename U> class Descriptor>
     class Ma0TRTdynamics : public TRTdynamics<T,Descriptor>{
+    public:
         // inherit constructors
         using TRTdynamics<T, Descriptor>::TRTdynamics;
+        /// Clone the object on its dynamic type.
+        virtual Ma0TRTdynamics<T,Descriptor>* clone() const{
+            return new Ma0TRTdynamics<T, Descriptor>(*this);
+        };
 
         /* *************** Collision and Equilibrium ************************* */
 
