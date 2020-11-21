@@ -45,9 +45,6 @@ namespace plb {
 
 /* *************** Class BaseTRTdynamics *********************************************** */
 
-template<typename T, template<typename U> class Descriptor>
-int BaseTRTdynamics<T,Descriptor>::id =
-    meta::registerGeneralDynamics<T,Descriptor,TRTdynamics<T,Descriptor> >("TRT");
 
 /** \param omegaPlus_ relaxation parameter, related to the dynamic viscosity
  */
@@ -55,7 +52,7 @@ template<typename T, template<typename U> class Descriptor>
     BaseTRTdynamics<T,Descriptor>::BaseTRTdynamics(T omegaPlus_, T omegaMinus_, bool constant_magic)
     : IsoThermalBulkDynamics<T,Descriptor>(omegaPlus_),keep_magic_constant_when_setting_omega(constant_magic)
 {
-          if(omegaMinus_ not_eq T())
+          if(omegaMinus_ not_eq (T)0.0)
               omegaMinus = omegaMinus_;
           else
               omegaMinus= (T)8*((T)2-omegaPlus_)/((T)8-omegaPlus_);
@@ -81,11 +78,7 @@ void BaseTRTdynamics<T,Descriptor>::unserialize(HierarchicUnserializer& unserial
     IsoThermalBulkDynamics<T,Descriptor>::unserialize(unserializer);
     omegaMinus = unserializer.readValue<T>();
 }
- 
-template<typename T, template<typename U> class Descriptor>
-int BaseTRTdynamics<T,Descriptor>::getId() const {
-    return id;
-}
+
 
 template<typename T, template<typename U> class Descriptor>
 T BaseTRTdynamics<T, Descriptor>::getOmegaMinus() const {
@@ -146,9 +139,19 @@ void BaseTRTdynamics<T, Descriptor>::setOmega(T omega_) {
 
 /* *************** Class TRTdynamics *********************************************** */
 
+
+template<typename T, template<typename U> class Descriptor>
+int TRTdynamics<T,Descriptor>::id =
+        meta::registerGeneralDynamics<T,Descriptor,TRTdynamics<T,Descriptor> >("TRT");
+
 template<typename T, template<typename U> class Descriptor>
 TRTdynamics<T,Descriptor>* TRTdynamics<T,Descriptor>::clone() const {
     return new TRTdynamics<T, Descriptor>(*this);
+}
+
+template<typename T, template<typename U> class Descriptor>
+int TRTdynamics<T,Descriptor>::getId() const {
+    return id;
 }
 
 template<typename T, template<typename U> class Descriptor>
@@ -238,6 +241,20 @@ T TRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,De
 /* *************** Class Ma1TRTdynamics *********************************************** */
 
 template<typename T, template<typename U> class Descriptor>
+int Ma1TRTdynamics<T,Descriptor>::id =
+        meta::registerGeneralDynamics<T,Descriptor,TRTdynamics<T,Descriptor> >("Ma1TRT");
+
+template<typename T, template<typename U> class Descriptor>
+Ma1TRTdynamics <T, Descriptor> *Ma1TRTdynamics<T, Descriptor>::clone() const {
+    return new Ma1TRTdynamics<T, Descriptor>(*this);
+}
+
+template<typename T, template<typename U> class Descriptor>
+int Ma1TRTdynamics<T,Descriptor>::getId() const {
+    return id;
+}
+
+template<typename T, template<typename U> class Descriptor>
 void Ma1TRTdynamics<T,Descriptor>::collide (
         Cell<T,Descriptor>& cell, BlockStatistics& statistics )
 {
@@ -324,28 +341,13 @@ T Ma1TRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T
     return dynamicsTemplatesImpl<T,Descriptor<T>>::bgk_ma1_equilibrium(iPop,rhoBar, j);
 }
 
-/* *************** Class IncTRTdynamics *********************************************** */
 
-template<typename T, template<typename U> class Descriptor>
-const T IncTRTdynamics<T,Descriptor>::omegaMinus = 1.1;
+/* *************** Class IncTRTdynamics *********************************************** */
 
 template<typename T, template<typename U> class Descriptor>
 int IncTRTdynamics<T,Descriptor>::id =
     meta::registerGeneralDynamics<T,Descriptor,IncTRTdynamics<T,Descriptor> >("IncTRT");
-    
-/** \param omega_ relaxation parameter, related to the dynamic viscosity
- */
-template<typename T, template<typename U> class Descriptor>
-IncTRTdynamics<T,Descriptor>::IncTRTdynamics(T omega_ )
-    : IsoThermalBulkDynamics<T,Descriptor>(omega_)
-{ }
 
-template<typename T, template<typename U> class Descriptor>
-IncTRTdynamics<T,Descriptor>::IncTRTdynamics(HierarchicUnserializer& unserializer)
-    : IsoThermalBulkDynamics<T,Descriptor>(T())
-{
-    this->unserialize(unserializer);
-}
 
 template<typename T, template<typename U> class Descriptor>
 IncTRTdynamics<T,Descriptor>* IncTRTdynamics<T,Descriptor>::clone() const {

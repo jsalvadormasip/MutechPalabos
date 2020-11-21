@@ -76,9 +76,6 @@ public:
     void unserialize(HierarchicUnserializer& unserializer) override;
     /// Clone the object on its dynamic type.
     virtual BaseTRTdynamics<T,Descriptor>* clone() const = 0;
-    
-    /// Return a unique ID for this class.
-    int getId() const override;
 
     /* *************** Access to Dynamics variables, e.g. omega ***************** */
     /// Get local relaxation parameter of the dynamics
@@ -116,7 +113,6 @@ public:
 private:
     T omegaMinus;
     bool keep_magic_constant_when_setting_omega;
-    static int id;
 };
 
 template<typename T, template<typename U> class Descriptor>
@@ -127,6 +123,8 @@ public:
     /// Clone the object on its dynamic type.
     TRTdynamics<T,Descriptor>* clone() const override;
 
+    /// Return a unique ID for this class.
+    int getId() const override;
     /* *************** Collision and Equilibrium ************************* */
 
     /// Implementation of the collision step
@@ -140,6 +138,9 @@ public:
     /// Compute equilibrium distribution function
     T computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
                                  T jSqr, T thetaBar=T()) const override;
+private:
+    static int id;
+
 };
 
 template<typename T, template<typename U> class Descriptor>
@@ -148,10 +149,10 @@ public:
     // inherit constructors
     using BaseTRTdynamics<T, Descriptor>::BaseTRTdynamics;
     /// Clone the object on its dynamic type.
-    Ma1TRTdynamics<T,Descriptor>* clone() const override{
-        return new Ma1TRTdynamics<T, Descriptor>(*this);
-    };
+    Ma1TRTdynamics<T,Descriptor>* clone() const override;;
 
+    /// Return a unique ID for this class.
+    int getId() const override;
     /* *************** Collision and Equilibrium ************************* */
 
     /// Implementation of the collision step
@@ -165,6 +166,9 @@ public:
     /// Compute equilibrium distribution function
     T computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
                                  T jSqr, T thetaBar=T()) const override;
+private:
+    static int id;
+
 };
 
 
@@ -172,13 +176,14 @@ public:
 /** This is the TRT equivalent of IncBGKdynamics: the "rho" moment of the
  *  populations appears only as a pressure term in the equilibrium, while
  *  the other terms are multiplied by the constant rho0.
+ *  breaking change omegaMinus != 1.1, now follows the baseClass default
  **/
 template<typename T, template<typename U> class Descriptor>
-class IncTRTdynamics : public IsoThermalBulkDynamics<T,Descriptor> {
+class IncTRTdynamics : public BaseTRTdynamics<T,Descriptor> {
 public:
 /* *************** Construction / Destruction ************************ */
-    explicit IncTRTdynamics(T omega_);
-    explicit IncTRTdynamics(HierarchicUnserializer& unserializer);
+    // inherit constructors
+    using BaseTRTdynamics<T, Descriptor>::BaseTRTdynamics;
     
     /// Clone the object on its dynamic type.
     IncTRTdynamics<T,Descriptor>* clone() const override;
@@ -208,8 +213,7 @@ public:
     virtual void computeVelocity( Cell<T,Descriptor> const& cell,
                                   Array<T,Descriptor<T>::d>& u ) const;
 private:
-    static const T omegaMinus;
-    static int id;
+        static int id;
 };
 
 }  // namespace plb
