@@ -195,7 +195,7 @@ void TRTdynamics<T,Descriptor>::collideExternal (
         Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j,
         T thetaBar, BlockStatistics& statistics )
 {
-    const T sPlus = this->getOmega();
+    const T omegaPlus = this->getOmega();
     const T omegaMinus = this->getOmegaMinus();
 
     Array<T,Descriptor<T>::q> eq;
@@ -215,11 +215,11 @@ void TRTdynamics<T,Descriptor>::collideExternal (
         f_minus[i]  = 0.5*(cell[i] - cell[i+Descriptor<T>::q/2]);
     }
 
-    cell[0] += -sPlus*cell[0] + sPlus*eq[0];
+    cell[0] += -omegaPlus * cell[0] + omegaPlus * eq[0];
 
     for (plint i=1; i<=Descriptor<T>::q/2; ++i) {
-        cell[i] += -sPlus*(f_plus[i]-eq_plus[i]) - omegaMinus * (f_minus[i] - eq_minus[i]);
-        cell[i+Descriptor<T>::q/2] += -sPlus*(f_plus[i]-eq_plus[i]) + omegaMinus * (f_minus[i] - eq_minus[i]);
+        cell[i] += -omegaPlus * (f_plus[i] - eq_plus[i]) - omegaMinus * (f_minus[i] - eq_minus[i]);
+        cell[i+Descriptor<T>::q/2] += -omegaPlus * (f_plus[i] - eq_plus[i]) + omegaMinus * (f_minus[i] - eq_minus[i]);
     }
 
     if (cell.takesStatistics()) {
@@ -327,7 +327,7 @@ T Ma1TRTdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T
 /* *************** Class IncTRTdynamics *********************************************** */
 
 template<typename T, template<typename U> class Descriptor>
-const T IncTRTdynamics<T,Descriptor>::sMinus = 1.1;
+const T IncTRTdynamics<T,Descriptor>::omegaMinus = 1.1;
 
 template<typename T, template<typename U> class Descriptor>
 int IncTRTdynamics<T,Descriptor>::id =
@@ -361,7 +361,7 @@ template<typename T, template<typename U> class Descriptor>
 void IncTRTdynamics<T,Descriptor>::collide (
         Cell<T,Descriptor>& cell, BlockStatistics& statistics )
 {
-    const T sPlus = this->getOmega();
+    const T omegaPlus = this->getOmega();
 
     Array<T,Descriptor<T>::q> eq;
     // In the following, we number the plus/minus variables from 1 to (Q-1)/2.
@@ -383,11 +383,11 @@ void IncTRTdynamics<T,Descriptor>::collide (
         f_minus[i]  = 0.5*(cell[i] - cell[i+Descriptor<T>::q/2]);
     }
 
-    cell[0] += -sPlus*cell[0] + sPlus*eq[0];
+    cell[0] += -omegaPlus * cell[0] + omegaPlus * eq[0];
 
     for (plint i=1; i<=Descriptor<T>::q/2; ++i) {
-        cell[i] += -sPlus*(f_plus[i]-eq_plus[i]) - sMinus*(f_minus[i]-eq_minus[i]);
-        cell[i+Descriptor<T>::q/2] += -sPlus*(f_plus[i]-eq_plus[i]) + sMinus*(f_minus[i]-eq_minus[i]);
+        cell[i] += -omegaPlus * (f_plus[i] - eq_plus[i]) - omegaMinus * (f_minus[i] - eq_minus[i]);
+        cell[i+Descriptor<T>::q/2] += -omegaPlus * (f_plus[i] - eq_plus[i]) + omegaMinus * (f_minus[i] - eq_minus[i]);
     }
     
     if (cell.takesStatistics()) {
@@ -400,7 +400,7 @@ void IncTRTdynamics<T,Descriptor>::collideExternal (
         Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j,
         T thetaBar, BlockStatistics& statistics )
 {
-    const T sPlus = this->getOmega();
+    const T omegaPlus = this->getOmega();
 
     Array<T,Descriptor<T>::q> eq;
     // In the following, we number the plus/minus variables from 1 to (Q-1)/2.
@@ -419,11 +419,11 @@ void IncTRTdynamics<T,Descriptor>::collideExternal (
         f_minus[i]  = 0.5*(cell[i] - cell[i+Descriptor<T>::q/2]);
     }
 
-    cell[0] += -sPlus*cell[0] + sPlus*eq[0];
+    cell[0] += -omegaPlus * cell[0] + omegaPlus * eq[0];
 
     for (plint i=1; i<=Descriptor<T>::q/2; ++i) {
-        cell[i] += -sPlus*(f_plus[i]-eq_plus[i]) - sMinus*(f_minus[i]-eq_minus[i]);
-        cell[i+Descriptor<T>::q/2] += -sPlus*(f_plus[i]-eq_plus[i]) + sMinus*(f_minus[i]-eq_minus[i]);
+        cell[i] += -omegaPlus * (f_plus[i] - eq_plus[i]) - omegaMinus * (f_minus[i] - eq_minus[i]);
+        cell[i+Descriptor<T>::q/2] += -omegaPlus * (f_plus[i] - eq_plus[i]) + omegaMinus * (f_minus[i] - eq_minus[i]);
     }
     
     if (cell.takesStatistics()) {
