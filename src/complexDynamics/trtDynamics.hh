@@ -102,9 +102,9 @@ void BaseTRTdynamics<T, Descriptor>::setMagicParam(T magic_) {
 
 template<typename T, template<typename U> class Descriptor>
 T BaseTRTdynamics<T, Descriptor>::getParameter(plint whichParameter) const {
-    if (whichParameter == dynamicParams::omega_shear) {
+    if (whichParameter == dynamicParams::omega_plus) {
         return this->getOmega();
-    } else if(whichParameter == dynamicParams::omega_q){
+    } else if(whichParameter == dynamicParams::omega_minus){
         return this->getOmegaMinus();
     }else if(whichParameter == dynamicParams::magicParameter){
         return this->getMagicParam();
@@ -117,9 +117,9 @@ T BaseTRTdynamics<T, Descriptor>::getParameter(plint whichParameter) const {
 
 template<typename T, template<typename U> class Descriptor>
 void BaseTRTdynamics<T,Descriptor>::setParameter(plint whichParameter, T value) {
-    if (whichParameter == dynamicParams::omega_shear) {
+    if (whichParameter == dynamicParams::omega_plus) {
         setOmega(value);
-    } else if(whichParameter == dynamicParams::omega_q){
+    } else if(whichParameter == dynamicParams::omega_minus){
         setOmegaMinus(value);
     } else if(whichParameter == dynamicParams::magicParameter){
         setMagicParam(value);
