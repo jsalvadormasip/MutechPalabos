@@ -364,6 +364,7 @@ void IncTRTdynamics<T,Descriptor>::collide (
         Cell<T,Descriptor>& cell, BlockStatistics& statistics )
 {
     const T omegaPlus = this->getOmega();
+    const T omegaMinus = this->getOmegaMinus();
 
     Array<T,Descriptor<T>::q> eq;
     // In the following, we number the plus/minus variables from 1 to (Q-1)/2.
@@ -403,6 +404,7 @@ void IncTRTdynamics<T,Descriptor>::collideExternal (
         T thetaBar, BlockStatistics& statistics )
 {
     const T omegaPlus = this->getOmega();
+    const T omegaMinus = this->getOmegaMinus();
 
     Array<T,Descriptor<T>::q> eq;
     // In the following, we number the plus/minus variables from 1 to (Q-1)/2.
