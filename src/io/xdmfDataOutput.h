@@ -64,7 +64,7 @@ namespace plb {
         ParallelXdmfDataWriter3D(std::string fname):xdmf_fname(fname + ".xdmf"), h5_fname(fname + ".h5") {
 
             if (global::mpi().isMainProcessor()) {
-                fhandle = new std::ofstream(xdmf_fname.c_str());
+                fhandle = new std::ofstream((plb::global::directories().getOutputDir() + xdmf_fname).c_str());
                 if (!(*fhandle)) {
                     std::cerr << "could not open file " << fname << "\n";
                     return;
@@ -150,7 +150,7 @@ namespace plb {
 
             }
 
-            writeParallelHDF5<T>(h5_fname.c_str(), set_name, myBlockIds, offset, data, "", global::mpi().getRank(), global::mpi().getGlobalCommunicator(), field > 0);
+            writeParallelHDF5<T>((plb::global::directories().getOutputDir() + h5_fname).c_str(), set_name, myBlockIds, offset, data, "", global::mpi().getRank(), global::mpi().getGlobalCommunicator(), field > 0);
             field++;
         }
     };
