@@ -1,0 +1,41 @@
+This example shows you a rectangular wall that repeatly waving along the rotation axis as y-axis in the fluid domain. 
+#### Definition of time
+"T timeLB = iT + 1.0;" while "iT" is the time step starts from 0 to maximum iteration time.
+#### Behavior of the wall
+The rectangular wall will not move along with flow but having a behavior that defined by parameters such as ampl, freq in struct Param and time t. 
+Those parameters can be manually changed by the user.
+In default the angle of this repeatly waving obeys a sinusoidal function in time.
+The sequence of utilizing the velocity of the vertices on the wall is that:
+1. calculate the angle of the wall from the getAngle(T t).
+2. have the angular velocity from the getAngularVelocity(T t).
+3. thus the velocity of every vertex can be obtained from the class SurfaceVelocity and then be used in inamuroIteration().
+4. update of new positions of vertices during iterations will be achieved by looping over every vertex,
+ and calculating coordinate z as r*cos(phi), coordinate x as r*sin(phi), while r is the distance between the vertex and the rotation axis.
+ The coordinate y doesn't need to be changed.
+#### Let rhoBar and j involved in iteration
+To perform the immersed boundary method, it is required to have rhoBar and J for the interpolation and force spreading processes.
+The code made below operations to fullfill this requirement.
+1. when defineing lattice, rhobar and j, there is a pointer.
+2. define a "rhoBarJarg" to hold for lattice, rhoBar, and j.
+3. let "rhoBarJarg" being integrated by "ExternalRhoJcollideAndStream3D" and "BoxRhoBarJfunctional3D", 
+ The "ExternalRhoJcollideAndStream3D" will make variables inside to do a "collideAndStream". 
+ So here it is for "rhoBarJarg"'s collideAndStream during iterations.
+ The "BoxRhoBarJfunctional3D" fundamentally will perform "computeRhoBarJ" for every cell of the domain and will return rhoBar and j.
+ So here it is for "rhoBarJarg"'s update of rhoBar and j during iterations.
+ The "ExternalRhoJcollideAndStream3D" was set as level 0, and "BoxRhoBarJfunctional3D" was set as level 2. 
+Then by "integrateProcessingFunctional", during every iteration those processors with non-negative level will be executed, and started from level 0.
+4. after initialization of equilibrium functions by "initializeAtEquilibrium", implement once "BoxRhoBarJfunctional3D" by "applyProcessingFunctional".
+This operation will return the rhoBar and j to the "rhoBarJarg".
+5. then the "rhoBarJarg" will be ready for "lattice->executeInternalProcessors()" and "inamuroIteration()"
+#### Create and place the immersed rectangle surface
+1. define vertices and areas
+2. use "constructRectangle" by "param.xSideLB" and so on to analyticaly create a surface "rectangleTriangleSet", 
+instantiateImmersedWallData(vertices, areas, container);
+3. define the "mount", then use translate to remove the wall to  by "rectangleTriangleSet.translate(mount);"
+ We should be careful with the subtracted half "param.ySideLB" in the defining of the "mount",
+ that is because the wall itself has length, we want to reach to the correct position by adding "param.mountPointLB" after the subtraction of y direction.
+4. use "rectangleDef" from the placed "rectangleTriangleSet" to get the information of the wall, and assign values into vertices and areas
+5. define a "container" that holds for the vertices and areas
+6. then the "container" will be ready for "inamuroIteration"
+
+
