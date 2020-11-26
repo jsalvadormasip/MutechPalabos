@@ -2,18 +2,18 @@ This example shows you a rectangular wall that repeatly waving along the rotatio
 #### Definition of time
 "T timeLB = iT + 1.0;" while "iT" is the time step starts from 0 to maximum iteration time.
 #### Behavior of the wall
-The rectangular wall will not move along with flow but having a behavior that defined by parameters such as ampl, freq in struct Param and time t. 
+The rectangular wall will not move along with flow but having a behavior that defined by parameters such as "ampl", "freq" in "struct Param" and time t. 
 Those parameters can be manually changed by the user.
 In default the angle of this repeatly waving obeys a sinusoidal function in time.
 The sequence of utilizing the velocity of the vertices on the wall is that:
-1. calculate the angle of the wall from the getAngle(T t).
-2. have the angular velocity from the getAngularVelocity(T t).
-3. thus the velocity of every vertex can be obtained from the class SurfaceVelocity and then be used in inamuroIteration().
+1. calculate the angle of the wall from the "getAngle(T t)".
+2. have the angular velocity from the "getAngularVelocity(T t)".
+3. thus the velocity of every vertex can be obtained from the "class SurfaceVelocity" and then be used in "inamuroIteration()".
 4. update of new positions of vertices during iterations will be achieved by looping over every vertex,
  and calculating coordinate z as r*cos(phi), coordinate x as r*sin(phi), while r is the distance between the vertex and the rotation   axis.
  The coordinate y doesn't need to be changed.
 #### Let rhoBar and j involved in iteration
-To perform the immersed boundary method, it is required to have rhoBar and J for the interpolation and force spreading processes.
+To perform the immersed boundary method, it is required to have rhoBar and j for the interpolation and force spreading processes.
 The code made below operations to fullfill this requirement.
 1. when defining lattice, rhobar and j, there is a pointer.
 2. define a "rhoBarJarg" to hold for lattice, rhoBar, and j.
@@ -46,6 +46,6 @@ instantiateImmersedWallData(vertices, areas, container);
 1. lattice->executeInternalProcessors(); 
  The "rhoBarJarg" will do the "collideAndStream()" and then return the rhoBar and j.
 2. update the postions of the immersed wall.
-3. Instantiate the immersed data with the "container".
+3. instantiate the immersed data with the "container".
 4. perform the immersed boundary iterations.
 
