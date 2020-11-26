@@ -42,7 +42,7 @@ instantiateImmersedWallData(vertices, areas, container);
 5. define a "container" that holds for the vertices and areas.
 6. then the "container" will be ready for "inamuroIteration".
 
-#### the main part of one iteration
+#### The main part of one iteration
 1. lattice->executeInternalProcessors(); 
  The "rhoBarJarg" will do the "collideAndStream()" and then return the rhoBar and j.
 2. update the postions of the immersed wall.
