@@ -22,6 +22,7 @@ The code made below operations to fullfill this requirement.
  So here it is for "rhoBarJarg"'s collideAndStream during iterations.
  - The "BoxRhoBarJfunctional3D" fundamentally will perform "computeRhoBarJ" for every cell of the domain and will return rhoBar and j.
  So here it is for "rhoBarJarg"'s update of rhoBar and j during iterations.
+ 
  The "ExternalRhoJcollideAndStream3D" was set as level 0, and "BoxRhoBarJfunctional3D" was set as level 2. 
  Then by "integrateProcessingFunctional", during every iteration those processors with non-negative level will be executed,
  and started from level 0.
