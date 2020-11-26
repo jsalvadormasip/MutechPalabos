@@ -36,7 +36,7 @@ The immersed surface can be analytically obtained or loaded from STL file. The i
 1. define vertices and areas
 2. use "constructRectangle" by "param.xSideLB" and so on to analytically create a surface "rectangleTriangleSet", 
 instantiateImmersedWallData(vertices, areas, container);
-3. define the "mount", then use translate to remove the wall to  by "rectangleTriangleSet.translate(mount);"
+3. define the "mount", then use translate to remove the wall to the desired location by "rectangleTriangleSet.translate(mount);"
  We should be careful with the subtracted half "param.ySideLB" in the defining of the "mount",
  that is because the wall itself has length, we want to reach to the correct position by adding "param.mountPointLB" after the subtraction of y direction.
 4. use "rectangleDef" from the placed "rectangleTriangleSet" to get the information of the wall, and assign values into vertices and areas.
