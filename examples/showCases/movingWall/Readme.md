@@ -26,6 +26,7 @@ The code made below operations to fullfill this requirement.
  The "ExternalRhoJcollideAndStream3D" was set as level 0, and "BoxRhoBarJfunctional3D" was set as level 2. 
  Then by "integrateProcessingFunctional", during every iteration those processors with non-negative level will be executed,
  and started from level 0.
+
 4. after initialization of equilibrium functions by "initializeAtEquilibrium", implement once "BoxRhoBarJfunctional3D" by "applyProcessingFunctional".
 This operation will return the rhoBar and j to the "rhoBarJarg".
 5. then the "rhoBarJarg" will be ready for "lattice->executeInternalProcessors()" and "inamuroIteration()".
