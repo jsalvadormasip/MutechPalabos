@@ -15,15 +15,17 @@ The sequence of utilizing the velocity of the vertices on the wall is that:
 #### Let rhoBar and j involved in iteration
 To perform the immersed boundary method, it is required to have rhoBar and J for the interpolation and force spreading processes.
 The code made below operations to fullfill this requirement.
-1. when defineing lattice, rhobar and j, there is a pointer.
+1. when defining lattice, rhobar and j, there is a pointer.
 2. define a "rhoBarJarg" to hold for lattice, rhoBar, and j.
 3. let "rhoBarJarg" being integrated by "ExternalRhoJcollideAndStream3D" and "BoxRhoBarJfunctional3D", 
- The "ExternalRhoJcollideAndStream3D" will make variables inside to do a "collideAndStream". 
+ - The "ExternalRhoJcollideAndStream3D" will make variables inside to do a "collideAndStream". 
  So here it is for "rhoBarJarg"'s collideAndStream during iterations.
- The "BoxRhoBarJfunctional3D" fundamentally will perform "computeRhoBarJ" for every cell of the domain and will return rhoBar and j.
+ - The "BoxRhoBarJfunctional3D" fundamentally will perform "computeRhoBarJ" for every cell of the domain and will return rhoBar and j.
  So here it is for "rhoBarJarg"'s update of rhoBar and j during iterations.
+
  The "ExternalRhoJcollideAndStream3D" was set as level 0, and "BoxRhoBarJfunctional3D" was set as level 2. 
-Then by "integrateProcessingFunctional", during every iteration those processors with non-negative level will be executed, and started from level 0.
+ Then by "integrateProcessingFunctional", during every iteration those processors with non-negative level will be executed,
+ and started from level 0.
 4. after initialization of equilibrium functions by "initializeAtEquilibrium", implement once "BoxRhoBarJfunctional3D" by "applyProcessingFunctional".
 This operation will return the rhoBar and j to the "rhoBarJarg".
 5. then the "rhoBarJarg" will be ready for "lattice->executeInternalProcessors()" and "inamuroIteration()".
@@ -40,4 +42,10 @@ instantiateImmersedWallData(vertices, areas, container);
 5. define a "container" that holds for the vertices and areas.
 6. then the "container" will be ready for "inamuroIteration".
 
+#### the main part of one iteration
+1. lattice->executeInternalProcessors(); 
+ The "rhoBarJarg" will do the "collideAndStream()" and then return the rhoBar and j.
+2. update the postions of the immersed wall.
+3. Instantiate the immersed data with the "container".
+4. perform the immersed boundary iterations.
 
