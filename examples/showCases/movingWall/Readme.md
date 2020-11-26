@@ -10,7 +10,7 @@ The sequence of utilizing the velocity of the vertices on the wall is that:
 2. have the angular velocity from the getAngularVelocity(T t).
 3. thus the velocity of every vertex can be obtained from the class SurfaceVelocity and then be used in inamuroIteration().
 4. update of new positions of vertices during iterations will be achieved by looping over every vertex,
- and calculating coordinate z as r*cos(phi), coordinate x as r*sin(phi), while r is the distance between the vertex and the rotation axis.
+ and calculating coordinate z as r*cos(phi), coordinate x as r*sin(phi), while r is the distance between the vertex and the rotation   axis.
  The coordinate y doesn't need to be changed.
 #### Let rhoBar and j involved in iteration
 To perform the immersed boundary method, it is required to have rhoBar and J for the interpolation and force spreading processes.
@@ -26,16 +26,18 @@ The code made below operations to fullfill this requirement.
 Then by "integrateProcessingFunctional", during every iteration those processors with non-negative level will be executed, and started from level 0.
 4. after initialization of equilibrium functions by "initializeAtEquilibrium", implement once "BoxRhoBarJfunctional3D" by "applyProcessingFunctional".
 This operation will return the rhoBar and j to the "rhoBarJarg".
-5. then the "rhoBarJarg" will be ready for "lattice->executeInternalProcessors()" and "inamuroIteration()"
+5. then the "rhoBarJarg" will be ready for "lattice->executeInternalProcessors()" and "inamuroIteration()".
 #### Create and place the immersed rectangle surface
+The immersed surface can be analytically obtained or loaded from STL file. The idea is to place the triangle set to the desired location,
+ then get the information of vertices and areas by the "DEFscaledMesh", and push those information to the defined "vertices" and "areas". Finally define a container for the vertices and areas for the implementation of the "inamuroIteration".
 1. define vertices and areas
-2. use "constructRectangle" by "param.xSideLB" and so on to analyticaly create a surface "rectangleTriangleSet", 
+2. use "constructRectangle" by "param.xSideLB" and so on to analytically create a surface "rectangleTriangleSet", 
 instantiateImmersedWallData(vertices, areas, container);
 3. define the "mount", then use translate to remove the wall to  by "rectangleTriangleSet.translate(mount);"
  We should be careful with the subtracted half "param.ySideLB" in the defining of the "mount",
  that is because the wall itself has length, we want to reach to the correct position by adding "param.mountPointLB" after the subtraction of y direction.
-4. use "rectangleDef" from the placed "rectangleTriangleSet" to get the information of the wall, and assign values into vertices and areas
-5. define a "container" that holds for the vertices and areas
-6. then the "container" will be ready for "inamuroIteration"
+4. use "rectangleDef" from the placed "rectangleTriangleSet" to get the information of the wall, and assign values into vertices and areas.
+5. define a "container" that holds for the vertices and areas.
+6. then the "container" will be ready for "inamuroIteration".
 
 
