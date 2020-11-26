@@ -10,7 +10,7 @@ The sequence of utilizing the velocity of the vertices on the wall is that:
 2. have the angular velocity from the "getAngularVelocity(T t)".
 3. thus the velocity of every vertex can be obtained from the "class SurfaceVelocity" and then be used in "inamuroIteration()".
 4. update of new positions of vertices during iterations will be achieved by looping over every vertex,
- and calculating coordinate z as r*cos(phi), coordinate x as r*sin(phi), while r is the distance between the vertex and the rotation   axis.
+ and calculating coordinate z as r*cos(phi), coordinate x as r*sin(phi), while r is the distance between the vertex and the rotation axis.
  The coordinate y doesn't need to be changed.
 #### Let rhoBar and j involved in iteration
 To perform the immersed boundary method, it is required to have rhoBar and j for the interpolation and force spreading processes.
