@@ -84,8 +84,10 @@ __device__ void printL(sparse_matrix_cuda L) {
 
 //trace((x-y)'*M*(x-y)) + trace(x' L x) - trace (x' J p ) + p*p/2
 __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const sparse_matrix_cuda J, const sparse_matrix_cuda M_star,
+                                 const int *vector_to_tri, const char *vertex_pos, int nb_tri,
 								 const double *m, const double *x, const double *y, const double *p, 
-								 const double *E_nonePD, cuda_scalar *f_nonePD, const double h2, const int x_n, const int p_n, const int n_const, const int nb_sum_thread, double *gradient, double *buffer, cuda_scalar *buffer2, int id) {
+								 const double *E_nonePD, ShapeOpScalar *force_intern_cont, cuda_scalar *f_nonePD,
+                                 const double h2, const int x_n, const int p_n, const int n_const, const int nb_sum_thread, double *gradient, double *buffer, cuda_scalar *buffer2, int id) {
 
 	const int x_adress_shift = blockIdx.x*x_n*3;
 	const int p_adress_shift = blockIdx.x*p_n*3;
@@ -155,11 +157,33 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 		tpy += p[column_id +     p_n]*matrix_value;
 		tpz += p[column_id + 2 * p_n]*matrix_value;
 	}
+    
+    //G -= f_nonPD
 
 	__syncthreads();
 	//E-= x'*J*p
 	buffer[threadIdx.x] -= (tpx*xx + tpy*xy + tpz*xz);
-	
+
+    //if(id == 102)printf(" -Jp tpx %.17g \n", tpx);
+
+    gradientx -= tpx;
+    gradienty -= tpy;
+    gradientz -= tpz;
+    tpx = 0;
+    tpy = 0;
+    tpz = 0;
+  
+	for (int i = threadIdx.x; i < threadIdx.x + 15*blockDim.x; i += blockDim.x) {
+
+        int tri_id = vector_to_tri[i];
+        char pos = vertex_pos[i];
+        if(tri_id == -1 )break;
+
+		tpx += force_intern_cont[IDX(3*tri_id + pos, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri];
+        tpy += force_intern_cont[IDX(3*tri_id + pos, 1, 3*nb_tri) + 9*blockIdx.x*nb_tri];
+        tpz += force_intern_cont[IDX(3*tri_id + pos, 2, 3*nb_tri) + 9*blockIdx.x*nb_tri];
+	}
+
 	gradient[id        ] = gradientx - tpx - f_nonePD[id        ];
 	gradient[id +   x_n] = gradienty - tpy - f_nonePD[id +   x_n];
 	gradient[id + 2*x_n] = gradientz - tpz - f_nonePD[id + 2*x_n];
@@ -168,9 +192,9 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 	tpx = 0;
 	for (int i = threadIdx.x; i < p_n; i += blockDim.x) {
 		column_id = p_adress_shift + i;
-		tpx += p[column_id        ] * p[column_id        ];
-		tpx += p[column_id +   p_n] * p[column_id +   p_n];
-		tpx += p[column_id + 2*p_n] * p[column_id + 2*p_n];
+		tpx += p[column_id        ]*p[column_id        ];
+		tpx += p[column_id +   p_n]*p[column_id +   p_n];
+		tpx += p[column_id + 2*p_n]*p[column_id + 2*p_n];
 	}
 	
 	tpx /= 2;
@@ -190,7 +214,8 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 }
 
 //DEAD CODE, I dont use it anymore but for some reason I don't feel like deleting it
-__device__ void eval_gradient3(const sparse_matrix_cuda L, const sparse_matrix_cuda J, const sparse_matrix_cuda M_star, const double *x, const double *y, const double *p, const double*m,
+__device__ void eval_gradient3(const sparse_matrix_cuda L, const sparse_matrix_cuda J, const sparse_matrix_cuda M_star, 
+                               const double *x, const double *y, const double *p, const double*m,
                                const cuda_scalar *force, double *result, const double h2, const int x_n, const int p_n) {
 
 	int x_adress_shift = blockIdx.x*x_n * 3;
@@ -414,11 +439,11 @@ __device__ void momentum_points_first_guess3(double *points, const double *veloc
 	
 	//TODO make it multi_cell
 	double Ax_x = 0, Ax_y = 0, Ax_z = 0, A_coef;
-
+    
 	for (int j = 0; j<n; j++) {
 		A_coef = M_tild_inv[ID_COL(threadIdx.x, j, n)];
 		int local_id = j + 3*n*blockIdx.x;
-		//if (threadIdx.x == 0)printf("m_tild %f h %f force %f \n", A_coef, h, force_extern[local_id]);
+		//if (id == 102 && j < 10)printf("j %d __ %d m_tild %.17g h %f force %.17g \n",j, local_id, A_coef, h, force_extern[local_id]);
 		Ax_x += A_coef*(M[j]*h*velocities[local_id      ] + h*h*force_extern[local_id      ]);
 		Ax_y += A_coef*(M[j]*h*velocities[local_id +   n] + h*h*force_extern[local_id +   n]);
 		Ax_z += A_coef*(M[j]*h*velocities[local_id + 2*n] + h*h*force_extern[local_id + 2*n]);
@@ -637,6 +662,7 @@ __device__ void damping(const double *points, const double *points_prev, double 
 #endif
 
 }
+
 
 __device__ void trace_x_time_y3(const double *x, const double *y, double *result, const int n, const int id, const int nb_sum_thread, double *buffer) {
 

@@ -398,9 +398,12 @@ SHAPEOP_INLINE void Solver_GPU::setConnectivityList(const std::vector<std::vecto
 	mesh_info_.n_triangles = nb_tri_;
 
 	for (int i = 0; i < nb_tri_; i++) {
+
 		mesh_data_h_.triangles[i            ] = connectivity_list_[i][0];
 		mesh_data_h_.triangles[i +   nb_tri_] = connectivity_list_[i][1];
 		mesh_data_h_.triangles[i + 2*nb_tri_] = connectivity_list_[i][2];
+
+        //std::cout << " triangle i "<< i << " " << mesh_data_h_.triangles[i] << " " << mesh_data_h_.triangles[i + nb_tri_] << " " << mesh_data_h_.triangles[i + 2 * nb_tri_] << std::endl;
 	}
 	mesh_info_.sum_triangles = 64;
 	while (mesh_info_.sum_triangles <= nb_tri_/2) mesh_info_.sum_triangles *= 2;
@@ -517,7 +520,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   for (int i = 0; i < n_constraints; ++i) {
 	  // NONE_PD Energies (may add more : TODO)
 	  if (constraints_[i]->get_ConstraintType().compare("SurfaceMaterial") == 0)
-		  continue;
+	  	  continue;
 	  // PD Energies
 	  constraints_[i]->addConstraint(triplets, idO);
   }
@@ -601,8 +604,6 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   std::vector<bool>().swap(collision_state_);
   for (int i = 0; i < n_points; ++i) collision_state_.push_back(false);
 
-
-  
   solver_ = std::make_shared<plb::npfem::SimplicialLDLTSolver>();
 
   //Prefactorize matrix
@@ -629,6 +630,29 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   mesh_data_h_.J = make_sparse_from_full( J_dense_.data(), J_dense_.rows(), J_dense_.cols());
   mesh_data_h_.M_star = make_sparse_from_full(M_star_dense_.data(), M_star_dense_.rows(), M_star_dense_.cols());
 
+  mesh_data_h_.vertex_to_tri = new int[15*n_points];
+  mesh_data_h_.vertex_pos = new char[15*n_points];
+  memset(mesh_data_h_.vertex_to_tri, -1, 15*n_points*sizeof(int));
+
+  for (int i = 0; i < 3*nb_tri_; i++) {
+      int vid = mesh_data_h_.triangles[i];
+      int tri_id = i%nb_tri_;
+      //if(vid == 125)std::cout << " tri "<< tri_id << std::endl;
+      bool succ = false;
+      for(int j = vid; j < 15*n_points; j += n_points){
+         //std::cout << " j " << j << "mesh_data_h_.vertex_to_tri[j]  " << mesh_data_h_.vertex_to_tri[j] << std::endl;
+         if (mesh_data_h_.vertex_to_tri[j] == -1) {
+              succ = true;
+              //std::cout << "  i/nb_tri_ " << i/nb_tri_<< std::endl;
+              mesh_data_h_.vertex_pos[j] = i/nb_tri_;
+              mesh_data_h_.vertex_to_tri[j] = tri_id;
+              break;
+         }
+      }
+     if(!succ)std::cout << " PROBLEME more than 15 tri connectect to a vertex " << std::endl;
+  }
+
+  //exit(666);
   mesh_data_d_.L = mesh_data_h_.L;
   mesh_data_d_.J = mesh_data_h_.J;
   mesh_data_d_.M_star = mesh_data_h_.M_star;

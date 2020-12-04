@@ -108,6 +108,8 @@ struct Mesh_data
 	//nconstraint
 	int *ConstraintType;
 	int *idO;
+    int *vertex_to_tri;
+    char *vertex_pos;
 	ShapeOpScalar *rangeMin;
 	ShapeOpScalar *rangeMax;
 	ShapeOpScalar *Scalar1;
@@ -154,8 +156,10 @@ struct Simulation_data
 	ShapeOpScalar *oldPoints;
 	ShapeOpScalar *points_last_iter;
 	ShapeOpScalar *projections;
+    ShapeOpScalar *force_intern_cont;
 	ShapeOpScalar *momentum;
 	cuda_scalar   *force_npd;
+    cuda_scalar *tri_normal;
 
 	ShapeOpScalar *gradient;
 	ShapeOpScalar *gradient_prev;
