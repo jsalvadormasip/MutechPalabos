@@ -638,7 +638,6 @@ __device__ void damping(const double *points, const double *points_prev, double 
 
 }
 
-
 __device__ void trace_x_time_y3(const double *x, const double *y, double *result, const int n, const int id, const int nb_sum_thread, double *buffer) {
 
 	if (threadIdx.x < n) {
