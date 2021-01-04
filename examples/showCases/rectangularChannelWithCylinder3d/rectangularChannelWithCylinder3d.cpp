@@ -301,16 +301,35 @@ void writeGifs(BlockLatticeT& lattice,
     Box3D slice(0, nx - 1, ny / 2, ny / 2, 0, nz - 1);
     ImageWriter<T> imageWriter("leeloo");
 
-    //imageWriter.writeScaledGif(createFileName("uz", iter, 6),
-    //    *computeVelocityComponent(lattice, slice, zComponent),
-    //    imSize, imSize);
     imageWriter.writeScaledGif(createFileName("uNorm", iter, 6),
         *computeVelocityNorm(lattice, slice),
         imSize, imSize);
+    
+    //imageWriter.writeScaledGif(createFileName("uz", iter, 6),
+    //    *computeVelocityComponent(lattice, slice, zComponent),
+    //    imSize, imSize);
+    
     //imageWriter.writeScaledGif(createFileName("omega", iter, 6),
     //    *computeNorm(*computeVorticity(
     //        *computeVelocity(lattice)), slice),
     //    imSize, imSize);
+}
+
+template<class BlockLatticeT>
+void writeGifs_flow_perp(BlockLatticeT& lattice,
+    IncomprFlowParam<T> const& parameters, plint iter)
+{
+    const plint imSize = 600;
+    const plint nx = parameters.getNx();
+    const plint ny = parameters.getNy();
+    const plint nz = parameters.getNz();
+
+    Box3D slice(0, nx-1, 0, ny-1, nz/6, nz/6); // displaced inlet
+    ImageWriter<T> imageWriter("leeloo");
+
+    imageWriter.writeScaledGif(createFileName("uNorm", iter, 6),
+        *computeVelocityNorm(lattice, slice),
+        imSize, imSize);
 }
 
 template<class BlockLatticeT>
@@ -381,7 +400,7 @@ int main(int argc, char* argv[])
     );
 
     const T vtkSave = (T) 0.1; // Time intervals at which to save GIF VTKs, in dimensionless time units
-    const T maxT    = (T)200.0; // Total simulation time, in dimensionless time units
+    const T maxT    = (T)600.0; // Total simulation time, in dimensionless time units
 
     pcout << "omega= " << parameters.getOmega() << std::endl;
     writeLogFile(parameters, "3D square Poiseuille with Cylinder as an obstacle");
@@ -403,8 +422,10 @@ int main(int argc, char* argv[])
         if (iT%parameters.nStep(vtkSave)==0 && iT>0)
         {
             pcout << "step " << iT << "; t=" << iT*parameters.getDeltaT() << std::endl;
-            //writeVTK (lattice, parameters, iT);
+            
             writeGifs(lattice, parameters, iT);
+            //writeGifs_flow_perp(lattice, parameters, iT)
+            //writeVTK (lattice, parameters, iT);
         }
 
         // Execute a time iteration.

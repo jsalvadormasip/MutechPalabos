@@ -1,7 +1,7 @@
 if(CI)
 ###############################################################################
 
-set(EXECUTABLE_NAME "rectangularChannel3dWithCylinder3d")
+set(EXECUTABLE_NAME "rectangularChannelWithCylinder3d")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(palabosExample)
 enable_language(CXX)
 
-set(EXECUTABLE_NAME "rectangularChannel3dWithCylinder3d")
+set(EXECUTABLE_NAME "rectangularChannelWithCylinder3d")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
 
 if(NOT CMAKE_BUILD_TYPE)
