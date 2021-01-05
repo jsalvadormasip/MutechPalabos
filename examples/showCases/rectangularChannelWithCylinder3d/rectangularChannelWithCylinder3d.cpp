@@ -39,9 +39,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 using namespace plb;
 using namespace std;
@@ -55,9 +52,9 @@ const T pi = (T)4.*std::atan((T)1.);
 
 struct Param
 {
-    plint numOutletSpongeCells;         // Number of the lattice nodes contained in the outlet sponge zone.
-    int outletSpongeZoneType;           // Type of the outlet sponge zone (Viscosity or Smagorinsky).
-    T targetSpongeCSmago;               // Target Smagorinsky parameter at the end of the Smagorinsky sponge Zone.
+    plint numOutletSpongeCells;  // Number of the lattice nodes contained in the outlet sponge zone.
+    int outletSpongeZoneType;    // Type of the outlet sponge zone (Viscosity or Smagorinsky).
+    T targetSpongeCSmago;        // Target Smagorinsky parameter at the end of the Smagorinsky sponge Zone.
 };
 
 Param param;
@@ -197,8 +194,8 @@ void simulationSetup( MultiBlockLattice3D<T,DESCRIPTOR>& lattice,
     Box3D inlet  = Box3D(0, nx-1, 0, ny-1, 0, 0); // Full Area
     Box3D outlet = Box3D(1, nx-2, 1, ny-2, nz-1, nz-1); // Offset from wall boundaries by 1 lattice unit
     
-    Box3D left   = Box3D(0, 0, 0, ny-1, 0, nz-1); // Full Area
-    Box3D right  = Box3D(nx-1, nx-1, 0, ny-1, 0, nz-1); // Full Area
+    Box3D right  = Box3D(0, 0, 0, ny-1, 0, nz-1); // Full Area
+    Box3D left   = Box3D(nx-1, nx-1, 0, ny-1, 0, nz-1); // Full Area
     
     boundaryCondition.setVelocityConditionOnBlockBoundaries(lattice, inlet);
     boundaryCondition.addVelocityBoundary2P(outlet, lattice, boundary::neumann);
@@ -242,16 +239,12 @@ void simulationSetup( MultiBlockLattice3D<T,DESCRIPTOR>& lattice,
         //     1 means the boundary at x = nx-1
         //     2 means the boundary at y = 0
         //     and so on...
-        numSpongeCells[0] = param.numOutletSpongeCells;
-        numSpongeCells[1] = param.numOutletSpongeCells;
-        numSpongeCells[2] = param.numOutletSpongeCells;
-        numSpongeCells[3] = param.numOutletSpongeCells;
-        numSpongeCells[4] = param.numOutletSpongeCells;
+        numSpongeCells[0] = 0;
+        numSpongeCells[1] = 0;
+        numSpongeCells[2] = 0;
+        numSpongeCells[3] = 0;
+        numSpongeCells[4] = 0;
         numSpongeCells[5] = param.numOutletSpongeCells;
-
-        const plint nx = parameters.getNx();
-        const plint ny = parameters.getNy();
-        const plint nz = parameters.getNz();
 
         std::vector<MultiBlock3D*> args;
         args.push_back(&lattice);
@@ -316,23 +309,6 @@ void writeGifs(BlockLatticeT& lattice,
 }
 
 template<class BlockLatticeT>
-void writeGifs_flow_perp(BlockLatticeT& lattice,
-    IncomprFlowParam<T> const& parameters, plint iter)
-{
-    const plint imSize = 600;
-    const plint nx = parameters.getNx();
-    const plint ny = parameters.getNy();
-    const plint nz = parameters.getNz();
-
-    Box3D slice(0, nx-1, 0, ny-1, nz/6, nz/6); // displaced inlet
-    ImageWriter<T> imageWriter("leeloo");
-
-    imageWriter.writeScaledGif(createFileName("uNorm", iter, 6),
-        *computeVelocityNorm(lattice, slice),
-        imSize, imSize);
-}
-
-template<class BlockLatticeT>
 void writeVTK(BlockLatticeT& lattice,
               IncomprFlowParam<T> const& parameters, plint iter)
 {
@@ -345,35 +321,23 @@ void writeVTK(BlockLatticeT& lattice,
 	ParallelVtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), 3, dx);
 #endif
 
-    //vtkOut.writeData<3,float>(*computeVelocity(lattice), "velocity", dx/dt);
     vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx/dt);
+    //vtkOut.writeData<3,float>(*computeVelocity(lattice), "velocity", dx/dt);
     //vtkOut.writeData<3,float>(*computeVorticity(*computeVelocity(lattice)), "vorticity", 1./dt);
 }
 
 int main(int argc, char* argv[])
 {
     plbInit(&argc, &argv);
+    global::directories().setOutputDir("./tmp/");
 
     if (argc != 10)
     {
         pcout << "Error: the parameters are wrong. \n";
         pcout << "Give Re Resolution CylinderDiameter ChannelWidth ChannelHeight ChannhelLength outletSpongeZoneType numOutletSpongeCells targetSpongeCSmago \n";
-        pcout << "Example: ./rectangularChannel3dWithCylinder3d 100 10 6 50 50 75 1 1 0.6 \n";
+        pcout << "Example: ./executable 100 20 6 50 50 75 1 1 0.6 \n";
         exit(1);
     }
-
-    std::string OutputDir; //= "tmp_";
-    std::vector<std::string> all_args;
-    if (argc > 1)
-    {
-        all_args.assign(argv, argv + argc);
-    }
-    for (auto str : all_args)
-    {
-        OutputDir += str + '_';
-    }
-    mkdir(OutputDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    global::directories().setOutputDir(OutputDir + '/');
 
     T Re_    = atof(argv[1]);
     plint N_ = atoi(argv[2]);
@@ -391,24 +355,23 @@ int main(int argc, char* argv[])
     // dimensionless variables to lattice units, in the
     // context of incompressible flows.
     IncomprFlowParam<T> parameters(
-        0.1, // Reference velocity (the maximum velocity in the Poiseuille profile) in lattice units.
-        Re_, // Reynolds number
-        N_, // Resolution of the reference length (cylinder diameter)
-        W_/D_, // dimensionless: channel lateral length
-        h_/D_, // dimensionless: channel height
-        L_/D_ // dimensionless: channel length
+        0.1,    // Reference velocity (the maximum velocity in the Poiseuille profile) in lattice units.
+        Re_,    // Reynolds number
+        N_,     // Resolution of the reference length (cylinder diameter)
+        W_/D_,  // dimensionless: channel lateral length
+        h_/D_,  // dimensionless: channel height
+        L_/D_   // dimensionless: channel length
     );
 
     const T vtkSave = (T) 0.1; // Time intervals at which to save GIF VTKs, in dimensionless time units
-    const T maxT    = (T)600.0; // Total simulation time, in dimensionless time units
+    const T maxT    = (T)200.0; // Total simulation time, in dimensionless time units
 
     pcout << "omega= " << parameters.getOmega() << std::endl;
     writeLogFile(parameters, "3D square Poiseuille with Cylinder as an obstacle");
 
     MultiBlockLattice3D<T, DESCRIPTOR> lattice (
         parameters.getNx(), parameters.getNy(), parameters.getNz(), 
-        new CompleteRegularizedBGKdynamics<T, DESCRIPTOR>(parameters.getOmega()) );
-    // BGKdynamics<T, DESCRIPTOR>(parameters.getOmega())
+        new BGKdynamics<T, DESCRIPTOR>(parameters.getOmega()) );
 
     OnLatticeBoundaryCondition3D<T,DESCRIPTOR>* boundaryCondition
         = createLocalBoundaryCondition3D<T,DESCRIPTOR>();
@@ -424,7 +387,6 @@ int main(int argc, char* argv[])
             pcout << "step " << iT << "; t=" << iT*parameters.getDeltaT() << std::endl;
             
             writeGifs(lattice, parameters, iT);
-            //writeGifs_flow_perp(lattice, parameters, iT)
             //writeVTK (lattice, parameters, iT);
         }
 
