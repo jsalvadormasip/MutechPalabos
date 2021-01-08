@@ -810,16 +810,7 @@ void project_collision_d(int n_points, int nb_cells, double *points, double *nea
                 nearest_points[IDX(id, 0, n_points)], nearest_points[IDX(id, 1, n_points)], nearest_points[IDX(id, 2, n_points)],
                 blockIdx.x, threadIdx.x);
             */
-            E_nonePD[blockIdx.x*n_constraints + threadIdx.x] += weight_col_nonRep*(dif[0] * dif[0] + dif[1] * dif[1] + dif[2] * dif[2]) / 2.0f;
-            
-            if(id == 252 )
-            printf("col force [%f %f %f ] normal [%f %f %f] actual_point [%f %f %f]  point [%f %f %f] obj %d id %d \n",
-                 dif[0], dif[1], dif[2],
-                 nearest_normals[IDX(id, 0, n_points)], nearest_normals[IDX(id, 1, n_points)], nearest_normals[IDX(id, 2, n_points)],
-                 points[IDX(id, 0, n_points)],  points[IDX(id, 1, n_points)],  points[IDX(id, 2, n_points)],
-                 nearest_points[IDX(id, 0, n_points)], nearest_points[IDX(id, 1, n_points)], nearest_points[IDX(id, 2, n_points)],
-                 blockIdx.x, threadIdx.x);
-            
+            E_nonePD[blockIdx.x*n_constraints + threadIdx.x] += weight_col_nonRep*(dif[0]*dif[0] + dif[1]*dif[1] + dif[2]*dif[2])/2.0f;          
         }
 	}
 }

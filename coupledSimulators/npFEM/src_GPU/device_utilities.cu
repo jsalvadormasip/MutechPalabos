@@ -232,7 +232,7 @@ int send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int nb, i
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->col_vertics_in, data_h->col_vertics_in, 3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->ids , data_h->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyHostToDevice));
     int maybe_missing = -1;
-
+    /*
     std::vector <char> idok(data_h->nb);
     memset(idok.data(),0, data_h->nb);
     
@@ -246,7 +246,7 @@ int send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int nb, i
             maybe_missing = i + start_id;
         }
     }
-    
+    */
     return maybe_missing;
 }
 
@@ -268,9 +268,9 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
 
     int point_id = (which_rbc*x_n)*3 + rbc_id%x_n;
 
-    input.forces_ex[point_id        ] = 0;//5*data_fluid.data_in[3*fluid_id  ];
-    input.forces_ex[point_id +   x_n] = 0;//5*data_fluid.data_in[3*fluid_id+1];
-    input.forces_ex[point_id + 2*x_n] = 0;//5*data_fluid.data_in[3*fluid_id+2];
+    input.forces_ex[point_id        ] = 5*data_fluid.data_in[3*fluid_id  ];
+    input.forces_ex[point_id +   x_n] = 5*data_fluid.data_in[3*fluid_id+1];
+    input.forces_ex[point_id + 2*x_n] = 5*data_fluid.data_in[3*fluid_id+2];
     //if(isnan(data_fluid.data_in[3*fluid_id + 2]) || isnan(data_fluid.data_in[3*fluid_id + 1]) || isnan(data_fluid.data_in[3*fluid_id ]))printf("NAN %d \n", data_fluid.ids[fluid_id]);
 
     //if(data_fluid.ids[fluid_id] != (int)round(data_fluid.data_in[3*fluid_id + 2]*10000) )printf("fluid_id %d force ex z %f %f %f poz %f %f %f which_rbc %d body_id %d\n", fluid_id, input.forces_ex[point_id ], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n], input.points[point_id],input.points[point_id + x_n], input.points[point_id +  2*x_n], which_rbc, start_id);
@@ -684,11 +684,16 @@ __device__ void project_d(int n_points, int n_constraints, int n_projected_point
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//TODO make it multicell
+
 void points_from_Host_to_Device(int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h, int cell){
-	CUDA_HANDLE_ERROR(cudaMemcpy(points_d + 3*n_points*cell, points_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
+	CUDA_HANDLE_ERROR(cudaMemcpy(points_d + 3*n_points*cell, points_h, 3*n_points*sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
 	//CUDA_HANDLE_ERROR(cudaMemcpyAsync(Palabos_Forces_d, Palabos_Forces_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice, stream));
 }
+void points_from_Host_to_Device(int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h) {
+    CUDA_HANDLE_ERROR(cudaMemcpy(points_d, points_h, 3*n_points*sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
+    //CUDA_HANDLE_ERROR(cudaMemcpyAsync(Palabos_Forces_d, Palabos_Forces_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice, stream));
+}
+
 void external_forces_from_Host_to_Device(int n_points, ShapeOpScalar *Palabos_Forces_h, ShapeOpScalar *Palabos_Forces_d, cudaStream_t stream){
 	 CUDA_HANDLE_ERROR(cudaMemcpy(Palabos_Forces_d, Palabos_Forces_h, 3*n_points*sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
 	 //CUDA_HANDLE_ERROR(cudaMemcpyAsync(Palabos_Forces_d, Palabos_Forces_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice, stream));
@@ -746,11 +751,11 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 
     __syncthreads();
 
-	//#ifdef DEBUG
+	#ifdef DEBUG
 	if (threadIdx.x == 102 && blockIdx.x == BL) {
 		printf("points %.17g %.17g %.17g | %d h %f\n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], blockIdx.x, h);
 	}
-	//#endif
+	#endif
 	//center_d(input.points, x_n, volume_der, center, point_id);
 	input.points[point_id        ] -= sim.center[3*blockIdx.x    ];
 	input.points[point_id +   x_n] -= sim.center[3*blockIdx.x + 1];

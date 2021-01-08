@@ -617,7 +617,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   //bodyID_ = 0;
   Palabos_iT_ = 0;
 
-  simulation_input_h_.velocities    = velocities_.data();
+  simulation_input_h_.velocities = velocities_.data();
 
   MatrixDyn N_dense   = MatrixDyn(N_);
   MatrixDyn M_dense_  = MatrixDyn(M_);
@@ -901,6 +901,27 @@ void Solver_GPU::set_gpu_starting_position(const Matrix3X &points, int cell){
 void plb::npfem::Solver_GPU::set_gpu_starting_velocities(const Matrix3X & vels, int cell){
 	MatrixXXCuda tp_vel = vels;
 	points_from_Host_to_Device(vels.cols(), simulation_input_d_.velocities, tp_vel.data(), cell);
+}
+//the init function should have been performed so memory is allocated
+void plb::npfem::Solver_GPU::send_all_points_to_GPU(){
+    points_from_Host_to_Device(mesh_info_.nb_cells*mesh_info_.n_points, simulation_input_d_.points, simulation_input_h_.points);
+}
+void plb::npfem::Solver_GPU::send_all_velocities_to_GPU(){
+    points_from_Host_to_Device(mesh_info_.nb_cells*mesh_info_.n_points, simulation_input_d_.velocities, simulation_input_h_.velocities);
+}
+void plb::npfem::Solver_GPU::send_all_centers_to_GPU(ShapeOpScalar *centers) {
+    points_from_Host_to_Device(mesh_info_.nb_cells, simulation_data_d_.center, centers);
+}
+void plb::npfem::Solver_GPU::read_all_points_from_GPU(){
+    simulation_input_h_.points = Points_rowMajor_.data();
+    points_from_Device_to_Host(mesh_info_.nb_cells*mesh_info_.n_points, simulation_input_d_.points, simulation_input_h_.points, stream);
+}
+void plb::npfem::Solver_GPU::read_all_velocities_from_GPU() {
+    simulation_input_h_.velocities = velocities_.data();
+    points_from_Device_to_Host(mesh_info_.nb_cells*mesh_info_.n_points, simulation_input_d_.velocities, simulation_input_h_.velocities, stream);
+}
+void plb::npfem::Solver_GPU::read_all_centers_from_GPU(ShapeOpScalar *centers) {
+    points_from_Device_to_Host(mesh_info_.nb_cells, simulation_data_d_.center, centers, stream);
 }
 ///////////////////////////////////////////////////////////////////////////////
 }

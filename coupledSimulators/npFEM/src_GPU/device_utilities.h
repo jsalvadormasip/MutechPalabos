@@ -63,7 +63,7 @@ void GPU_Init(Mesh_info        *mesh_info_,
 			  Mesh_data        *mesh_data_d,        Mesh_data *mesh_data_h,
               Simulation_input *simulation_input_d, Simulation_input *simulation_input_h,
               Simulation_data  *simulation_data_d ,
-              Collision_data   *collision_data_d  , Collision_data   *collision_data_h, cuda_scalar **matrices_d);
+              Collision_data   *collision_data_d  , Collision_data *collision_data_h, cuda_scalar **matrices_d);
 
 ///////////////////////////////////////////////////////////////////////////////
 void compute_next_frame_rbc(Mesh_info  *info, Mesh_data *mesh, Simulation_input *input,
@@ -100,6 +100,8 @@ void free_GPU_pointer(void *pointer);
 void external_forces_from_Host_to_Device( int n_points, ShapeOpScalar *Palabos_Forces_h, ShapeOpScalar *Palabos_Forces_d, cudaStream_t stream);
 ///////////////////////////////////////////////////////////////////////////////
 void points_from_Host_to_Device(int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h, int cell);
+///////////////////////////////////////////////////////////////////////////////
+void points_from_Host_to_Device(int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h);
 ///////////////////////////////////////////////////////////////////////////////
 void points_from_Device_to_Host( int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h, cudaStream_t stream);
 ///////////////////////////////////////////////////////////////////////////////

@@ -129,6 +129,15 @@ public:
   void set_initial_velocity(double x, double y, double z);
   void set_gpu_starting_position(const Matrix3X &points, int cell);
   void set_gpu_starting_velocities(const Matrix3X &vels, int cell);
+  //use for checkpoint
+  void send_all_points_to_GPU();
+  void send_all_velocities_to_GPU();
+  void send_all_centers_to_GPU(ShapeOpScalar *centers);
+
+  void read_all_points_from_GPU();
+  void read_all_velocities_from_GPU();
+  void read_all_centers_from_GPU(ShapeOpScalar *centers);
+ 
   ShapeOpScalar *get_centers();
   int get_nb_triangle();
   int get_nb_points();
