@@ -41,7 +41,7 @@
 #ifndef PROJECTIONS_GPU_H
 #define PROJECTIONS_GPU_H
 ///////////////////////////////////////////////////////////////////////////////
-#include <cuda_runtime.h>
+//#include <cuda_runtime.h>
 
 #include "common.h"
 #include "sum_cuda.h"

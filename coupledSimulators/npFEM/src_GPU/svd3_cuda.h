@@ -56,7 +56,7 @@
 #ifndef SVD3_CUDA_H
 #define SVD3_CUDA_H
 
-#include <cuda_runtime.h>
+//#include <cuda_runtime.h>
 #include "math.h" // CUDA math library
 
 #include "common.h"

@@ -60,6 +60,9 @@ double time_elapsed_volume_d = 0;
 double time_elapsed_bending_d = 0;
 double time_elapsed_triangle_d = 0;
 ///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+
 // Handle CUDA error messages
 inline void CUDA_HandleError(cudaError_t err, const char *file, int line)
 {
@@ -68,7 +71,12 @@ inline void CUDA_HandleError(cudaError_t err, const char *file, int line)
     exit(EXIT_FAILURE);
   }
 }
+#define CUDA_HANDLE_ERROR( err ) (CUDA_HandleError( err, __FILE__, __LINE__ ))
 ///////////////////////////////////////////////////////////////////////////////
+struct stream_holder {
+    cudaStream_t stream = 0;
+};
+
 void GPU_Mem_check()
 {
   size_t free_byte;
@@ -227,8 +235,8 @@ void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int
 }
 
 int send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int nb, int start_id, int rank, int iter){
-    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data_in      , data_h->data_in,         3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
-    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->normal_in    , data_h->normal_in,       3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->data_in       , data_h->data_in,         3*data_h->nb*sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_HANDLE_ERROR(cudaMemcpy(data_d->normal_in     , data_h->normal_in,       3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->col_vertics_in, data_h->col_vertics_in, 3*data_h->nb*sizeof(float) , cudaMemcpyHostToDevice));
     CUDA_HANDLE_ERROR(cudaMemcpy(data_d->ids , data_h->ids ,   data_h->nb*sizeof(int)   , cudaMemcpyHostToDevice));
     int maybe_missing = -1;
@@ -278,9 +286,9 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     sim.nearest_normals[point_id +   x_n] = data_fluid.normal_in[3*fluid_id+1];
     sim.nearest_normals[point_id + 2*x_n] = data_fluid.normal_in[3*fluid_id+2];
     
-    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] + input.points[point_id        ] - sim.center[3*which_rbc    ] + threshold*data_fluid.normal_in[3*fluid_id  ];
-    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] + input.points[point_id +   x_n] - sim.center[3*which_rbc + 1] + threshold*data_fluid.normal_in[3*fluid_id+1];
-    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] + input.points[point_id + 2*x_n] - sim.center[3*which_rbc + 2] + threshold*data_fluid.normal_in[3*fluid_id+2];
+    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] + input.points[point_id        ] - sim.center[3*which_rbc    ] - threshold*data_fluid.normal_in[3*fluid_id  ];
+    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] + input.points[point_id +   x_n] - sim.center[3*which_rbc + 1] - threshold*data_fluid.normal_in[3*fluid_id+1];
+    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] + input.points[point_id + 2*x_n] - sim.center[3*which_rbc + 2] - threshold*data_fluid.normal_in[3*fluid_id+2];
     /*
     if (fabs(input.forces_ex[point_id]) >= 3 || fabs(input.forces_ex[point_id + x_n]) >= 3 || fabs(input.forces_ex[point_id + 2*x_n]) >= 3) {
        printf(" EXTREME FORCE [%f %f %f] point [%f %f %f] id(%d) iter(%d)\n", input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n],
@@ -517,9 +525,15 @@ void GPU_Init(Mesh_info        *mesh_info,
 			  Mesh_data        *mesh_data_d,        Mesh_data        *mesh_data_h,
               Simulation_input *simulation_input_d, Simulation_input *simulation_input_h,
               Simulation_data  *simulation_data_d ,
-              Collision_data   *collision_data_d  , Collision_data   *collision_data_h, cuda_scalar **matrices_d)
+              Collision_data   *collision_data_d  , Collision_data   *collision_data_h, cuda_scalar **matrices_d, stream_holder **str)
 {
   GPU_Mem_check();
+  *str = new stream_holder();
+#ifdef STREAM
+  cudaStreamCreate(&((*str)->stream));
+  cudaHostAlloc(&cuda_points, 3*n_points*sizeof(ShapeOpScalar), cudaHostAllocWriteCombined | cudaHostAllocMapped);
+  cudaHostAlloc(&cuda_forces, 3*n_points*sizeof(ShapeOpScalar), cudaHostAllocWriteCombined | cudaHostAllocMapped);
+#endif
 
   int n_points = mesh_info->n_points;
   int nb_cells = mesh_info->nb_cells;
@@ -694,14 +708,14 @@ void points_from_Host_to_Device(int n_points, ShapeOpScalar *points_d, ShapeOpSc
     //CUDA_HANDLE_ERROR(cudaMemcpyAsync(Palabos_Forces_d, Palabos_Forces_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice, stream));
 }
 
-void external_forces_from_Host_to_Device(int n_points, ShapeOpScalar *Palabos_Forces_h, ShapeOpScalar *Palabos_Forces_d, cudaStream_t stream){
+void external_forces_from_Host_to_Device(int n_points, ShapeOpScalar *Palabos_Forces_h, ShapeOpScalar *Palabos_Forces_d, stream_holder *str){
 	 CUDA_HANDLE_ERROR(cudaMemcpy(Palabos_Forces_d, Palabos_Forces_h, 3*n_points*sizeof(ShapeOpScalar), cudaMemcpyHostToDevice));
-	 //CUDA_HANDLE_ERROR(cudaMemcpyAsync(Palabos_Forces_d, Palabos_Forces_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice, stream));
+	 //CUDA_HANDLE_ERROR(cudaMemcpyAsync(Palabos_Forces_d, Palabos_Forces_h, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyHostToDevice, str->stream));
 }
 ///////////////////////////////////////////////////////////////////////////////
-void points_from_Device_to_Host(int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h, cudaStream_t stream){
+void points_from_Device_to_Host(int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h, stream_holder *str){
 	CUDA_HANDLE_ERROR(cudaMemcpy(points_h, points_d, 3*n_points*sizeof(ShapeOpScalar), cudaMemcpyDeviceToHost));
-	//CUDA_HANDLE_ERROR(cudaMemcpyAsync(points_h, points_d, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyDeviceToHost, stream));
+	//CUDA_HANDLE_ERROR(cudaMemcpyAsync(points_h, points_d, 3 * n_points * sizeof(ShapeOpScalar), cudaMemcpyDeviceToHost, str->stream));
 }
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1087,11 +1101,11 @@ void device_make_periodic(ShapeOpScalar * points_d, ShapeOpScalar *center, float
 
 //////////////////////////////////////////////////////////////////////////////////////////
 void compute_next_frame_rbc(Mesh_info  *info, Mesh_data *mesh, Simulation_input *input,
-	                        Simulation_data *sim, Collision_data *coll, ShapeOpScalar h, ShapeOpScalar h_2, int it_max, cudaStream_t stream){
+	                        Simulation_data *sim, Collision_data *coll, ShapeOpScalar h, ShapeOpScalar h_2, int it_max, stream_holder *str){
 
 	//std::cout << "WTF " << info->nb_cells << " "<< info->n_points  << " " << h << " " << h_2  << " it max " << it_max << std::endl;
     if(info->nb_cells)
-	    HANDLE_KERNEL_ERROR(compute_next_frame_rbc_g<<< info->nb_cells, info->n_points, info->n_points*(sizeof(double) + 3*sizeof(cuda_scalar)), stream >>>(*info,*mesh,*input, *sim, *coll, h, h_2, it_max));
+	    HANDLE_KERNEL_ERROR(compute_next_frame_rbc_g<<< info->nb_cells, info->n_points, info->n_points*(sizeof(double) + 3*sizeof(cuda_scalar)), str->stream >>>(*info,*mesh,*input, *sim, *coll, h, h_2, it_max));
 
 }
 

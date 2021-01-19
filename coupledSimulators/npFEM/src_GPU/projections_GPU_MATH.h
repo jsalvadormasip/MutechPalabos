@@ -44,14 +44,18 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <cuda_runtime.h>
+//#include <cuda_runtime.h>
 
 #include "common.h"
 #include "svd3_cuda.h"
 ///////////////////////////////////////////////////////////////////////////////
 // Zero-based indexing for raw pointer arrays, where ld is the number of rows
 // for ColMajor matrices
+
 #define IDX(i,j,ld)                     ( ( (j) * (ld) ) + (i) )
+//to be used with many geometry
+#define IDX_GS(obj_id, item_id, item_per_obj) ((item_per_obj)*(obj_id)  + (item_id))
+#define IDX_G(obj_id, item_id, data_id, item_per_obj, data_per_item) ((item_per_obj*data_per_item)*(obj_id) + (data_id)*(item_per_obj) + (item_id))
 #define SHAPEOP_INNER_ITERATIONS        4
 #define DOT_2(a0, a1,     b0, b1)		    ((a0)*(b0) + (a1)*(b1))
 #define DOT_3(a0, a1, a2, b0, b1, b2)   ((a0)*(b0) + (a1)*(b1) + (a2)*(b2))

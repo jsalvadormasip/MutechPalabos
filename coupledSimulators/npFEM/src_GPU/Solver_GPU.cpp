@@ -55,7 +55,6 @@
 #include "LSSolver.h"
 #include "Constraint.h"
 #include "Force.h"
-#include "device_utilities.h"
 #include "sparse_matrix.h"
 #include "GPU_data.h"
 
@@ -500,12 +499,6 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
 
   simulation_data_h_.center = new double[3 * mesh_info_.nb_cells];
 
-#ifdef STREAM
-  cudaStreamCreate(&stream);
-  cudaHostAlloc(&cuda_points, 3*n_points*sizeof(ShapeOpScalar), cudaHostAllocWriteCombined | cudaHostAllocMapped);
-  cudaHostAlloc(&cuda_forces, 3*n_points*sizeof(ShapeOpScalar), cudaHostAllocWriteCombined | cudaHostAllocMapped);
-#endif
-
   assert(n_points != 0);
   assert(n_constraints != 0);
 
@@ -527,6 +520,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
 
   mesh_info_.idO = idO;
   mesh_info_.volume = compute_volume_cpu(simulation_input_h_.points, mesh_data_h_.triangles, mesh_info_.n_triangles, mesh_info_.n_points);
+  //std::cout <<  " mesh_info_.volume " << mesh_info_.volume << std::endl;
   mesh_info_.n_constraints = n_constraints;
   projections_.setZero(3, idO);
   SparseMatrix A = SparseMatrix(idO, n_points);
@@ -674,7 +668,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
 		   &mesh_data_d_,        &mesh_data_h_,
            &simulation_input_d_, &simulation_input_h_,
            &simulation_data_d_ ,
-           &collision_data_d_  , &collision_data_h_, &matrices_d_);
+           &collision_data_d_  , &collision_data_h_, &matrices_d_, &stream);
 
   //return solver_->info() == Eigen::Success;
   return true;
@@ -760,8 +754,8 @@ SHAPEOP_INLINE void Solver_GPU::rotate_points(const cuda_scalar *matrices) {
 ////////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void Solver_GPU::solve_only(unsigned int max_iterations, Scalar tol, bool Quasi_Newton, Scalar gamma, int max_line_search_loops, int m, Scalar gamma2, Scalar collisions_weight){
 
-            compute_next_frame_rbc(&mesh_info_, &mesh_data_d_, &simulation_input_d_,
-                                   &simulation_data_d_, &collision_data_d_, delta_, solver_step_, max_iterations, stream);
+    compute_next_frame_rbc(&mesh_info_, &mesh_data_d_, &simulation_input_d_,
+                           &simulation_data_d_, &collision_data_d_, delta_, solver_step_, max_iterations, stream);
 
 }
 // solve computes one time step! The algorithms are iterative and so we need some iterations until convergence to the min of the variational problem
@@ -831,7 +825,7 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void Solver_GPU::copy_position_to_CPU() {
     simulation_input_h_.points = Points_rowMajor_.data();
-    cudaStream_t stream;
+  
     points_from_Device_to_Host(mesh_info_.n_points*mesh_info_.nb_cells, simulation_input_d_.points, simulation_input_h_.points, stream);
 }
 ///////////////////////////////////////////////////////////////////////////////

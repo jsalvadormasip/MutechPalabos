@@ -43,13 +43,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <vector>
 #include <memory>
-#include <cuda_runtime.h>
+//#include <cuda_runtime.h>
 
 #include "Types.h"
 #include "Constraint_Flattening.h"
 #include "sparse_matrix.h"
 #include "common.h"
 #include "GPU_data.h"
+#include "device_utilities.h"
 ///////////////////////////////////////////////////////////////////////////////
 /** @file
 This file contains the main ShapeOp solver.*/
@@ -227,7 +228,8 @@ public:
   //CUDA
   Scalar *cuda_points;
   Scalar *cuda_forces;
-  cudaStream_t stream = 0;
+  stream_holder *stream;
+  //cudaStream_t stream = 0;
   Constraint_flat *constraints_h_;
   Mesh_data mesh_data_d_, mesh_data_h_;
   Simulation_input simulation_input_d_, simulation_input_h_;
