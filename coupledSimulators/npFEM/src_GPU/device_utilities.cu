@@ -266,7 +266,7 @@ void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h){
 //////////////////////////////////////////////////////////////////////////////////////////
 //Copy in place data from others solver (fluid solver) from communication buffer to external_forces and from points to buffer
 __launch_bounds__(258, 1)
-__global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, Simulation_data sim, From_fluid_data data_fluid, double threshold, int start_id, int iter) {
+__global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, Simulation_data sim, From_fluid_data data_fluid, ShapeOpScalar *normals, double threshold, int start_id, int iter) {
 
     int x_n = info.n_points;
     int fluid_id = blockIdx.x*blockDim.x + threadIdx.x;
@@ -286,9 +286,9 @@ __global__ void copy_force_from_fluid_g(Mesh_info info, Simulation_input input, 
     sim.nearest_normals[point_id +   x_n] = data_fluid.normal_in[3*fluid_id+1];
     sim.nearest_normals[point_id + 2*x_n] = data_fluid.normal_in[3*fluid_id+2];
     
-    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] + input.points[point_id        ] - sim.center[3*which_rbc    ] - threshold*data_fluid.normal_in[3*fluid_id  ];
-    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] + input.points[point_id +   x_n] - sim.center[3*which_rbc + 1] - threshold*data_fluid.normal_in[3*fluid_id+1];
-    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] + input.points[point_id + 2*x_n] - sim.center[3*which_rbc + 2] - threshold*data_fluid.normal_in[3*fluid_id+2];
+    sim.nearest_points[point_id        ] = data_fluid.col_vertics_in[3*fluid_id  ] + input.points[point_id        ] - sim.center[3*which_rbc    ] - threshold*normals[point_id        ];
+    sim.nearest_points[point_id +   x_n] = data_fluid.col_vertics_in[3*fluid_id+1] + input.points[point_id +   x_n] - sim.center[3*which_rbc + 1] - threshold*normals[point_id +   x_n];
+    sim.nearest_points[point_id + 2*x_n] = data_fluid.col_vertics_in[3*fluid_id+2] + input.points[point_id + 2*x_n] - sim.center[3*which_rbc + 2] - threshold*normals[point_id + 2*x_n];
     /*
     if (fabs(input.forces_ex[point_id]) >= 3 || fabs(input.forces_ex[point_id + x_n]) >= 3 || fabs(input.forces_ex[point_id + 2*x_n]) >= 3) {
        printf(" EXTREME FORCE [%f %f %f] point [%f %f %f] id(%d) iter(%d)\n", input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n],
@@ -351,9 +351,9 @@ __global__ void copy_point_to_fluid_g(Mesh_info info, Simulation_input input, Fr
     //if(data_fluid.ids[fluid_id] == 209)printf("lookup point_id + 2*x_n %d force %f  buffer %f\n", point_id + 2*x_n, input.points[point_id + 2*x_n], data_fluid.data[3*fluid_id+2]  );
     
 }
-void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, Simulation_data *sim, From_fluid_data *data_fluid, double threshold, int start_id, int iter){
+void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, Simulation_data *sim, From_fluid_data *data_fluid, ShapeOpScalar *colid_normals, double threshold, int start_id, int iter){
     if(info->nb_cells)
-        HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *sim, *data_fluid, threshold, start_id, iter));
+        HANDLE_KERNEL_ERROR(copy_force_from_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *sim, *data_fluid, colid_normals, threshold, start_id, iter));
     //printf("start_id %d \n", start_id);
 }
 
