@@ -127,6 +127,7 @@ public:
     MultiBlock3D( MultiBlockManagement3D const& multiBlockManagement_,
                   BlockCommunicator3D* blockCommunicator_,
                   CombinedStatistics* combinedStatistics_ );
+    MultiBlock3D( plint nx, plint ny, plint nz, bool betterDist, plint envelopeWidth);
     MultiBlock3D( plint nx, plint ny, plint nz, plint envelopeWidth );
     MultiBlock3D( MultiBlock3D const& rhs );
     MultiBlock3D( MultiBlock3D const& rhs, Box3D subDomain, bool crop );

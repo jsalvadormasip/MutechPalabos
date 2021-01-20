@@ -82,6 +82,59 @@ SparseBlockStructure3D createRegularDistribution3D (
             numBlocksX, numBlocksY, numBlocksZ);
 }
 
+SparseBlockStructure3D createRegularDistribution3D_better (
+        Box3D const& domain, int numProc)
+{
+    std::vector<plint> repartition = algorithm::evenRepartition(numProc, 3);
+    std::vector<plint> newRepartition(3);
+    std::vector<plint> domain_size(3);
+    domain_size[0] = domain.getNx();
+    domain_size[1] = domain.getNy();
+    domain_size[2] = domain.getNz();
+    int max, min, argmin, argmid, argmax;
+
+    if (domain_size[1] < domain_size[0]) {
+        max = domain_size[0];
+        min = domain_size[1];
+        argmax = 0;
+        argmin = 1;
+    }else {
+        max = domain_size[1];
+        min = domain_size[0];
+        argmax = 1;
+        argmin = 0;
+    }
+
+    if (domain_size[2] < min) {
+        min = domain_size[2];
+        argmid = argmin;
+        argmin = 2;
+    } else if (domain_size[2] > max) {
+        max = domain_size[2];
+        argmid = argmax;
+        argmax = 2;
+    } else {
+        argmid = 2;
+    }
+    newRepartition[0] = repartition[argmax];
+    newRepartition[1] = repartition[argmid];
+    newRepartition[2] = repartition[argmin];
+    //very uncubic domain like a blood vessel
+    
+    if (newRepartition[argmax]*newRepartition[argmid] <= domain_size[argmax]/ domain_size[argmid]) {
+        plint tp = newRepartition[2];
+        newRepartition[argmax] *= newRepartition[argmid];
+        newRepartition[argmid] = newRepartition[argmin];
+        newRepartition[argmin] = 1;
+    }
+    
+    //std::cout << " REPARTITION PALABOS " << newRepartition[0]<< " " << newRepartition[1] << " " << newRepartition[2] << std::endl;
+
+    return createRegularDistribution3D (
+                 domain,
+                 newRepartition[0], newRepartition[1], newRepartition[2] );
+}
+
 SparseBlockStructure3D createRegularDistribution3D (
         Box3D const& domain, int numProc)
 {
@@ -96,7 +149,7 @@ SparseBlockStructure3D createRegularDistribution3D (
             }
             else {                                 // nz>ny
                 newRepartition[1] = repartition[2];
-                newRepartition[2] = repartition[1];
+                newRepartition[2] = repartition[1]; 
             }
         }
         else {                                   // nz>nx
@@ -123,6 +176,8 @@ SparseBlockStructure3D createRegularDistribution3D (
             newRepartition[0] = repartition[2];
         }
     }
+    //std::cout << " REPARTITION PALABOS BOF " << newRepartition[0] << " " << newRepartition[1] << " " << newRepartition[2] << std::endl;
+
     return createRegularDistribution3D (
                  domain,
                  newRepartition[0], newRepartition[1], newRepartition[2] );

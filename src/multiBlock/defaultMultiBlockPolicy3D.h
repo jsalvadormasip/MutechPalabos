@@ -126,6 +126,13 @@ public:
 #endif
     }
 
+    MultiBlockManagement3D getMultiBlockManagementBetterDist(Box3D const& domain, plint envelopeWidth) {
+        return MultiBlockManagement3D(
+            createRegularDistribution3D_better(domain, numProcesses),
+            getThreadAttribution(),
+            envelopeWidth);
+    }
+
     MultiBlockManagement3D getMultiBlockManagement(Box3D const& domain, plint envelopeWidth) {
         return MultiBlockManagement3D (
                 createRegularDistribution3D(domain, numProcesses),

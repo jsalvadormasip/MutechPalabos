@@ -78,6 +78,7 @@ public:
                        CombinedStatistics* combinedStatistics_,
                        MultiScalarAccess3D<T>* multiScalarAccess_, T iniVal=T());
     MultiScalarField3D(plint nx, plint ny, plint nz, T iniVal=T());
+    MultiScalarField3D(plint nx, plint ny, plint nz, bool betterDist, T iniVal =T());
     ~MultiScalarField3D();
     MultiScalarField3D(MultiScalarField3D<T> const& rhs);
     MultiScalarField3D(MultiNTensorField3D<T>& rhs, bool shareMemory);
