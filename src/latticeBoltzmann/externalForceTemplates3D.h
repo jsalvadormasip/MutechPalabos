@@ -179,7 +179,7 @@ static T heForcedBGKCollision (
                (descriptors::ForcedD3Q19Descriptor<T>::c[iPop][1]-uLB[1])*force[1] +
                (descriptors::ForcedD3Q19Descriptor<T>::c[iPop][2]-uLB[2])*force[2];
 		
-		f[iPop] += descriptors::ForcedD3Q19Descriptor<T>::invCs2 * ug * dynamicsTemplatesImpl<T,descriptors::ForcedD3Q19Descriptor<T> >
+		f[iPop] += (1-omega/(T)2)*descriptors::ForcedD3Q19Descriptor<T>::invCs2 * ug * dynamicsTemplatesImpl<T,descriptors::ForcedD3Q19Descriptor<T> >
 			::bgk_ma2_equilibrium( iPop, (T)1, (T)1, uLB, uSqrLB );
     }
     T uSqr = util::sqr(uLB[0] + 0.5*force[0]) +

@@ -195,7 +195,7 @@ static T heForcedBGKCollision (
 		f[iPop] += omega * dynamicsTemplatesImpl<T,Descriptor>::bgk_ma2_equilibrium (
 				iPop, rhoBar, invRho, j, jSqr );
 					
-		f[iPop] += Descriptor::invCs2*ug *
+		f[iPop] += (1-omega/(T)2)*Descriptor::invCs2*ug *
                        dynamicsTemplatesImpl<T,Descriptor>::bgk_ma2_equilibrium (
                                                                 iPop, (T)1, (T)1, uLB, uSqrLB );
     }
