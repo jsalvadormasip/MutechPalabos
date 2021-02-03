@@ -52,7 +52,7 @@
 // Zero-based indexing for raw pointer arrays, where ld is the number of rows
 // for ColMajor matrices
 
-#define IDX(i,j,ld)                     ( ( (j) * (ld) ) + (i) )
+#define IDX(i,j,ld)                     (((j)*(ld)) + (i))
 //to be used with many geometry
 #define IDX_GS(obj_id, item_id, item_per_obj) ((item_per_obj)*(obj_id)  + (item_id))
 #define IDX_G(obj_id, item_id, data_id, item_per_obj, data_per_item) ((item_per_obj*data_per_item)*(obj_id) + (data_id)*(item_per_obj) + (item_id))

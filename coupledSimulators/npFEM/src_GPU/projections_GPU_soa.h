@@ -66,20 +66,15 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
 	const int cell_shift = blockIdx.x*3*n_points;
 	int tp_id;
 
-	//float *buffer = (float*)buffer_double;
-
-	buffer_double[threadIdx.x             ] = 0;
-    //buffer_double[threadIdx.x + blockDim.x] = 0;
+	buffer_double[threadIdx.x] = 0;
 	__syncthreads();
 
 	for(int tid = threadIdx.x; tid < n_tri; tid += blockDim.x){
-		//printf("tid %d \n", tid);
-						  
+
 		short id0 = triangles_d[IDX(tid, 0, n_tri)];
 		short id1 = triangles_d[IDX(tid, 1, n_tri)];
 		short id2 = triangles_d[IDX(tid, 2, n_tri)];
 
-		//printf("ido %d %d %d\n", id0, id1, id2);
 		tp_id = cell_shift + id0;
 
 		cuda_scalar p0x = points_d[tp_id             ];
@@ -110,78 +105,18 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
 		cross(edge0_x, edge0_y, edge0_z, edge1_x, edge1_y, edge1_z, n0, n1, n2);
 		cuda_scalar area = Normalize_3(n0, n1, n2)/2;
 	
-		buffer_double[threadIdx.x]  += area*(n0*(p0x + p1x + p2x) + n1*(p0y + p1y + p2y) + n2*(p0z + p1z + p2z))/9;
+		buffer_double[threadIdx.x]  += area*(n0*(p0x + p1x + p2x) + n1*(p0y + p1y + p2y) + n2*(p0z + p1z + p2z))/9.;
 
-        //buffer_double[threadIdx.x + blockDim.x] += area;
-        
         force_tri[IDX(3*tid, 0, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n0/3.;
         force_tri[IDX(3*tid, 1, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n1/3.;
         force_tri[IDX(3*tid, 2, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n2/3.;
-                        
-		//atomicAdd(normals + blockIdx.x*3*n_points + id0             , n0);
-		//atomicAdd(normals + blockIdx.x*3*n_points + id0 +   n_points, n1);
-		//atomicAdd(normals + blockIdx.x*3*n_points + id0 + 2*n_points, n2);
-
-		//atomicAdd(normals + blockIdx.x*3*n_points + id1             , n0);
-		//atomicAdd(normals + blockIdx.x*3*n_points + id1 +   n_points, n1);
-		//atomicAdd(normals + blockIdx.x*3*n_points + id1 + 2*n_points, n2);
-
-		//atomicAdd(normals + blockIdx.x*3*n_points + id2             , n0);
-		//atomicAdd(normals + blockIdx.x*3*n_points + id2 +   n_points, n1);
-		//atomicAdd(normals + blockIdx.x*3*n_points + id2 + 2*n_points, n2);
-
-		//atomicAdd(grad_c + id0             , (area*n0)/3);
-		//atomicAdd(grad_c + id0 +   n_points, (area*n1)/3);
-		//atomicAdd(grad_c + id0 + 2*n_points, (area*n2)/3);
-
-		//atomicAdd(grad_c + id1             , (area*n0)/3);
-		//atomicAdd(grad_c + id1 +   n_points, (area*n1)/3);
-		//atomicAdd(grad_c + id1 + 2*n_points, (area*n2)/3);
-       
-		//atomicAdd(grad_c + id2             , (area*n0)/3);
-		//atomicAdd(grad_c + id2 +   n_points, (area*n1)/3);
-		//atomicAdd(grad_c + id2 + 2*n_points, (area*n2)/3);
-        
+ 
 	} 
-    /*
-    __syncthreads();
-	//if (threadIdx.x == 224)printf("nb_sum_thread %d \n", nb_sum_thread);
-	//if (threadIdx.x == 0)printf("v0 %f v1 %f \n", volume0, buffer[0]);
-
-	cuda_scalar dx = grad_c[threadIdx.x             ];
-	cuda_scalar dy = grad_c[threadIdx.x +   n_points];
-	cuda_scalar dz = grad_c[threadIdx.x + 2*n_points];
-    __syncthreads();
-	sum(buffer_double, nb_sum_thread, n_points, threadIdx.x);
-	__syncthreads();
-
-	//if (threadIdx.x == 0)printf("norm pourri %d %d\n", nb_sum_thread, blockDim.x);
-	cuda_scalar C = (buffer_double[0] - volume0);
-	__syncthreads();
-	buffer_double[threadIdx.x] = sqrt(dx*dx + dy*dy + dz*dz);
-	sum(buffer_double, nb_sum_thread, n_points, threadIdx.x);
-	__syncthreads();
-
-	dx = (C/buffer_double[0])*dx;
-	dy = (C/buffer_double[0])*dy;
-	dz = (C/buffer_double[0])*dz;
-
-    //if(threadIdx.x == 0)printf("C %f %f \n", C, buffer_double[0]);
-
-	force[id             ] -= volume_weight*dx;
-	force[id +   n_points] -= volume_weight*dy;
-	force[id + 2*n_points] -= volume_weight*dz;
-	
-	E_nonePD[blockIdx.x*n_constraints + threadIdx.x] += 0.5*volume_weight*(dx*dx + dy*dy + dz*dz);
-    Normalize_3(normals[id], normals[id + n_points], normals[id + 2*n_points]);
-    */
-    
     __syncthreads();
     sum(buffer_double, nb_sum_thread, n_points, threadIdx.x);
     __syncthreads();
 
     cuda_scalar C = (buffer_double[0] - volume0);/// buffer_double[blockDim.x];
-    //if (threadIdx.x == 0 && blockIdx.x == 1)printf("C %f %f \n", (buffer_double[0] - volume0), buffer_double[0]);
     
     double n0 = 0;
     double n1 = 0;
@@ -207,8 +142,6 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
     double force_norm = sqrt(force_sqr_norm);
     buffer_double[threadIdx.x] = force_norm;
     sum(buffer_double, nb_sum_thread, n_points, threadIdx.x);
-
-    //if(threadIdx.x == 0)printf(" Normal[%f %f %f] [%f %f %f]\n", normals[id], normals[id + n_points], normals[id + 2*n_points], n0/force_norm, n1/force_norm, n2/force_norm);
 
     normals[id             ] = n0/force_norm;
     normals[id +   n_points] = n1/force_norm;
@@ -241,6 +174,7 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
     
     __syncthreads();
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 __device__
 void project_Bending(int tid, int n_points, int n_constraints, int n_projected_points, int nb_cells,
@@ -250,31 +184,31 @@ void project_Bending(int tid, int n_points, int n_constraints, int n_projected_p
 {
 	cuda_scalar rangeMin_ = rangeMin_d[tid];
 	cuda_scalar rangeMax_ = rangeMax_d[tid];
-	cuda_scalar weight_ = weight_d[tid];
+	cuda_scalar weight_ = weight_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)];
 	int idO_ = idO_d[tid] + blockIdx.x*3*n_projected_points;
 	int cell_shift;
-	cuda_scalar n_ = Scalar1_d[tid];
+	cuda_scalar n_ = Scalar1_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)];
 
 	cuda_scalar w0_, w1_, w2_, w3_;
 	int idI0_, idI1_, idI2_, idI3_;
 
-	w0_ = vectorx_d[IDX(tid, 0, n_constraints)];
-	w1_ = vectorx_d[IDX(tid, 1, n_constraints)];
-	w2_ = vectorx_d[IDX(tid, 2, n_constraints)];
-	w3_ = vectorx_d[IDX(tid, 3, n_constraints)];
+	w0_ = vectorx_d[ID_COL_MULTI(blockIdx.x, tid, 0, n_constraints, 4*n_constraints)];
+	w1_ = vectorx_d[ID_COL_MULTI(blockIdx.x, tid, 1, n_constraints, 4*n_constraints)];
+	w2_ = vectorx_d[ID_COL_MULTI(blockIdx.x, tid, 2, n_constraints, 4*n_constraints)];
+	w3_ = vectorx_d[ID_COL_MULTI(blockIdx.x, tid, 3, n_constraints, 4*n_constraints)];
 
 	cell_shift = blockIdx.x*3*n_points;
 	// Involved points (indices)
-	idI0_ = idI_d[tid                  ] + cell_shift;
-	idI1_ = idI_d[tid +   n_constraints] + cell_shift;
-	idI2_ = idI_d[tid + 2*n_constraints] + cell_shift;
-	idI3_ = idI_d[tid + 3*n_constraints] + cell_shift;
+	idI0_ = idI_d[IDX(tid, 0, n_constraints)] + cell_shift;
+	idI1_ = idI_d[IDX(tid, 1, n_constraints)] + cell_shift;
+	idI2_ = idI_d[IDX(tid, 2, n_constraints)] + cell_shift;
+	idI3_ = idI_d[IDX(tid, 3, n_constraints)] + cell_shift;
 
 	cuda_scalar e0=0, e1=0, e2=0;
 	if (n_ > 1e-6){
-		e0 = w0_*points_d[IDX(idI0_, 0, n_points)] + w1_ * points_d[IDX(idI1_, 0, n_points)] + w2_ * points_d[IDX(idI2_, 0, n_points)] + w3_ * points_d[IDX(idI3_, 0, n_points)];
-		e1 = w0_*points_d[IDX(idI0_, 1, n_points)] + w1_ * points_d[IDX(idI1_, 1, n_points)] + w2_ * points_d[IDX(idI2_, 1, n_points)] + w3_ * points_d[IDX(idI3_, 1, n_points)];
-		e2 = w0_*points_d[IDX(idI0_, 2, n_points)] + w1_ * points_d[IDX(idI1_, 2, n_points)] + w2_ * points_d[IDX(idI2_, 2, n_points)] + w3_ * points_d[IDX(idI3_, 2, n_points)];
+		e0 = w0_*points_d[IDX(idI0_, 0, n_points)] + w1_*points_d[IDX(idI1_, 0, n_points)] + w2_*points_d[IDX(idI2_, 0, n_points)] + w3_*points_d[IDX(idI3_, 0, n_points)];
+		e1 = w0_*points_d[IDX(idI0_, 1, n_points)] + w1_*points_d[IDX(idI1_, 1, n_points)] + w2_*points_d[IDX(idI2_, 1, n_points)] + w3_*points_d[IDX(idI3_, 1, n_points)];
+		e2 = w0_*points_d[IDX(idI0_, 2, n_points)] + w1_*points_d[IDX(idI1_, 2, n_points)] + w2_*points_d[IDX(idI2_, 2, n_points)] + w3_*points_d[IDX(idI3_, 2, n_points)];
 
 		cuda_scalar l = Norm_3(e0, e1, e2);
 
@@ -282,31 +216,19 @@ void project_Bending(int tid, int n_points, int n_constraints, int n_projected_p
 			e0 /= l;
 			e1 /= l;
 			e2 /= l;
-			l = n_ * CLAMP(l / n_, rangeMin_, rangeMax_);
+			l = n_*CLAMP(l/n_, rangeMin_, rangeMax_);
 			e0 *= l;
 			e1 *= l;
 			e2 *= l;
 		}
 	}
 
-	projections_d[IDX(idO_, 0, n_projected_points)] = weight_ * e0;
-	projections_d[IDX(idO_, 1, n_projected_points)] = weight_ * e1;
-	projections_d[IDX(idO_, 2, n_projected_points)] = weight_ * e2;
-	/*
-	if (tid == 107){
-		printf("projection %d %d %d %d \n", idI0_, idI1_, idI2_, idI3_);
-		printf("weight %f %f %f %f n %f\n", w0_, w1_, w2_, w3_, n_);
-		printf("e %f %f %f \n", e0, e1, e2);
-		printf("projection %f %f %f\n", points_d[IDX(idI0_, 0, n_points)], points_d[IDX(idI0_, 1, n_points)], points_d[IDX(idI0_, 2, n_points)]);
-		printf("projection %f %f %f\n", points_d[IDX(idI1_, 0, n_points)], points_d[IDX(idI1_, 1, n_points)], points_d[IDX(idI1_, 2, n_points)]);
-		printf("projection %f %f %f\n", points_d[IDX(idI2_, 0, n_points)], points_d[IDX(idI2_, 1, n_points)], points_d[IDX(idI2_, 2, n_points)]);
-		printf("projection %f %f %f\n", points_d[IDX(idI3_, 0, n_points)], points_d[IDX(idI3_, 1, n_points)], points_d[IDX(idI3_, 2, n_points)]);
-		printf("projection %f %f %f \n", projections_d[IDX(idO_, 0, n_projected_points)], projections_d[IDX(idO_, 1, n_projected_points)], projections_d[IDX(idO_, 2, n_projected_points)]);
-	}
-	*/
+	projections_d[IDX(idO_, 0, n_projected_points)] = weight_*e0;
+	projections_d[IDX(idO_, 1, n_projected_points)] = weight_*e1;
+	projections_d[IDX(idO_, 2, n_projected_points)] = weight_*e2;
 }
-///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
 __device__ 
 void project_Area(int tid, int n_points, int n_constraints, int n_projected_points, int nb_cells,
 	ShapeOpScalar *points_d, ShapeOpScalar *projections_d, cuda_scalar *f_int_nonePD_d,
@@ -315,7 +237,7 @@ void project_Area(int tid, int n_points, int n_constraints, int n_projected_poin
 {
 	cuda_scalar rangeMin_ = rangeMin_d[tid];
 	cuda_scalar rangeMax_ = rangeMax_d[tid];
-	cuda_scalar weight_ = weight_d[tid];
+	cuda_scalar weight_ = weight_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)];
 	int idO_ = idO_d[tid] + blockIdx.x*3*n_projected_points;
 
 	cuda_scalar rest00_, rest01_,
@@ -329,10 +251,10 @@ void project_Area(int tid, int n_points, int n_constraints, int n_projected_poin
 	idI2_ = idI_d[IDX(tid, 2, n_constraints)] + cell_shift;
 	//if (tid == 340)printf("ids %d %d %d tid %d\n", idI0_, idI1_, idI2_, tid);
 
-	rest00_ = matrix22_d[IDX(tid, 0, n_constraints)];
-	rest10_ = matrix22_d[IDX(tid, 1, n_constraints)];
-	rest01_ = matrix22_d[IDX(tid, 2, n_constraints)];
-	rest11_ = matrix22_d[IDX(tid, 3, n_constraints)];
+	rest00_ = matrix22_d[ID_COL_MULTI(blockIdx.x, tid, 0, n_constraints, 4*n_constraints)];
+	rest10_ = matrix22_d[ID_COL_MULTI(blockIdx.x, tid, 1, n_constraints, 4*n_constraints)];
+	rest01_ = matrix22_d[ID_COL_MULTI(blockIdx.x, tid, 2, n_constraints, 4*n_constraints)];
+	rest11_ = matrix22_d[ID_COL_MULTI(blockIdx.x, tid, 3, n_constraints, 4*n_constraints)];
 	//if (tid == 768)printf("matrix2 %f %f %f %f tid %d\n", rest00_, rest10_, rest01_, rest11_, tid);
 
 	cuda_scalar edges00, edges01,
@@ -455,13 +377,6 @@ void project_Area(int tid, int n_points, int n_constraints, int n_projected_poin
 	projections_d[IDX(idO_, 0, n_projected_points)] = weight_*PF00; projections_d[IDX(idO_ + 1, 0, n_projected_points)] = weight_*PF01;
 	projections_d[IDX(idO_, 1, n_projected_points)] = weight_*PF10; projections_d[IDX(idO_ + 1, 1, n_projected_points)] = weight_*PF11;
 	projections_d[IDX(idO_, 2, n_projected_points)] = weight_*PF20; projections_d[IDX(idO_ + 1, 2, n_projected_points)] = weight_*PF21;
-
-	//if(tid == 340)printf("proj %f %f %f | %d %d\n", projections_d[IDX(idO_, 0, n_projected_points)] , projections_d[IDX(idO_, 1, n_projected_points)], projections_d[IDX(idO_, 2, n_projected_points)], idO_, n_projected_points);
-
-	//#ifdef DEBUG
-	//if (threadIdx.x == 109)printf("proj  %f %f %f | %d \n", projections_d[IDX(idO_, 0, n_projected_points)], projections_d[IDX(idO_, 1, n_projected_points)], projections_d[IDX(idO_, 2, n_projected_points)], blockIdx.x);
-	//#endif
-	
 }
 
 ////////////////////////////////////////
@@ -471,18 +386,15 @@ void project_surface_material(int tid, int n_points, int n_constraints, int n_pr
 	int *ConstraintType_d, int *idO_d, ShapeOpScalar *rangeMin_d, ShapeOpScalar *rangeMax_d, ShapeOpScalar *Scalar1_d, ShapeOpScalar *weight_d, ShapeOpScalar *E_nonePD_d,
 	int *idI_d, ShapeOpScalar *vectorx_d, ShapeOpScalar *matrix22_d, ShapeOpScalar *matrix33_d, cuda_scalar *A_d, const float miu, const float lambda, const float kappa)
 {
-	//printf("called material \n");
-
 	cuda_scalar rangeMin_ = rangeMin_d[tid];
 	cuda_scalar rangeMax_ = rangeMax_d[tid];
-	cuda_scalar weight_ = weight_d[tid];
+	cuda_scalar weight_ = weight_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)];
 	int idO_ = idO_d[tid] + blockIdx.x*3*n_projected_points;
 
 	cuda_scalar rest00_, rest01_,
 		rest10_, rest11_;
 	int idI0_, idI1_, idI2_, cell_shift = blockIdx.x*3*n_points;
 
-	// Involved points (indices)
 	idI0_ = idI_d[IDX(tid, 0, n_constraints)] + cell_shift;
 	idI1_ = idI_d[IDX(tid, 1, n_constraints)] + cell_shift;
 	idI2_ = idI_d[IDX(tid, 2, n_constraints)] + cell_shift;
@@ -491,10 +403,10 @@ void project_surface_material(int tid, int n_points, int n_constraints, int n_pr
     //if(tid == 768)printf("tid %d idI0 %d %d %d __________ %d %d \n",tid,  idI0_ , idI1_, idI2_, threadIdx.x, blockIdx.x);
 
 	// ColMajor Order
-	rest00_ = matrix22_d[IDX(tid, 0, n_constraints)];
-	rest10_ = matrix22_d[IDX(tid, 1, n_constraints)];
-	rest01_ = matrix22_d[IDX(tid, 2, n_constraints)];
-	rest11_ = matrix22_d[IDX(tid, 3, n_constraints)];
+	rest00_ = matrix22_d[ID_COL_MULTI(blockIdx.x, tid, 0, n_constraints, 4*n_constraints)];
+	rest10_ = matrix22_d[ID_COL_MULTI(blockIdx.x, tid, 1, n_constraints, 4*n_constraints)];
+	rest01_ = matrix22_d[ID_COL_MULTI(blockIdx.x, tid, 2, n_constraints, 4*n_constraints)];
+	rest11_ = matrix22_d[ID_COL_MULTI(blockIdx.x, tid, 3, n_constraints, 4*n_constraints)];
 
 	cuda_scalar edges00, edges01,
 		edges10, edges11,
@@ -583,9 +495,9 @@ void project_surface_material(int tid, int n_points, int n_constraints, int n_pr
 	}
 	*/
 
-	cuda_scalar A = -0.5*A_d[tid];
+	cuda_scalar A = -0.5*A_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)];
 	//none linear business
-	E_nonePD_d[blockIdx.x*n_constraints + tid] = A_d[tid] * (f_tr(SIG00, miu, lambda, kappa) + f_tr(SIG11, miu, lambda, kappa)) / 2;
+	E_nonePD_d[blockIdx.x*n_constraints + tid] = A_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)]*(f_tr(SIG00, miu, lambda, kappa) + f_tr(SIG11, miu, lambda, kappa))/2.;
 	//printf("e_non_pd %f %f\n", E_nonePD_d[tid], A_d[tid]);
 	/*
 	if (idI0_ == 0 && idI1_ == 1 && idI2_ == 2) {

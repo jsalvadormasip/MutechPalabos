@@ -113,8 +113,8 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 
 	//G = M_star(x-y)
 	for (j = 0; j< M_star.degree; j++) {
-		column_id    = M_star.index[threadIdx.x + x_n*j] + x_adress_shift;
-		matrix_value = M_star.value[threadIdx.x + x_n*j];
+		column_id    = M_star.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, M_star.degree*blockDim.x)] + x_adress_shift;
+        matrix_value = M_star.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, M_star.degree*blockDim.x)];
 		tpx += (x[column_id        ] - y[column_id        ])*matrix_value;
 		tpy += (x[column_id +   x_n] - y[column_id +   x_n])*matrix_value;
 		tpz += (x[column_id + 2*x_n] - y[column_id + 2*x_n])*matrix_value; // /h2/2;
@@ -132,8 +132,8 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 
 	//G += L*x
 	for (j = 0; j< L.degree; j++) {
-		column_id    = L.index[threadIdx.x + x_n*j] + x_adress_shift;
-		matrix_value = L.value[threadIdx.x + x_n*j];
+		column_id    = L.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, L.degree*blockDim.x)] + x_adress_shift;
+		matrix_value = L.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, L.degree*blockDim.x)];
 		tpx += x[column_id          ]*matrix_value;
 		tpy += x[column_id +     x_n]*matrix_value;
 		tpz += x[column_id + 2 * x_n]*matrix_value;	
@@ -151,8 +151,11 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 
     //G -= J*p
 	for (j = 0; j< J.degree; j++) {
-		column_id    = J.index[threadIdx.x + x_n*j] + p_adress_shift;
-		matrix_value = J.value[threadIdx.x + x_n*j];
+		column_id    = J.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)] + p_adress_shift;
+        matrix_value = J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)];
+        //if (J.value[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)] != J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)]) {
+        ///    printf("%d %d %f %f \n", threadIdx.x, j, J.value[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)], J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)]);
+        //}
 		tpx += p[column_id          ]*matrix_value;
 		tpy += p[column_id +     p_n]*matrix_value;
 		tpz += p[column_id + 2 * p_n]*matrix_value;
@@ -233,8 +236,8 @@ __device__ void eval_gradient3(const sparse_matrix_cuda L, const sparse_matrix_c
 	//M_start(x-y)
 	
 	for (j = 0; j < M_star.degree; j++) {
-		column_id    = M_star.index[threadIdx.x + x_n*j];
-		matrix_value = M_star.value[threadIdx.x + x_n*j];
+		column_id    = M_star.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, M_star.degree*blockDim.x)];
+        matrix_value = M_star.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, M_star.degree*blockDim.x)];
 		//printf("%d \n", column_id);
 		gx += matrix_value * (x[x_adress_shift + column_id          ] - y[x_adress_shift + column_id          ]);
 		gy += matrix_value * (x[x_adress_shift + column_id +     x_n] - y[x_adress_shift + column_id +     x_n]);
@@ -244,8 +247,8 @@ __device__ void eval_gradient3(const sparse_matrix_cuda L, const sparse_matrix_c
 	
 	//L*x 
 	for (j = 0; j < L.degree; j++) {
-		column_id    = L.index[threadIdx.x + x_n*j];
-		matrix_value = L.value[threadIdx.x + x_n*j];
+		column_id    = L.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, L.degree*blockDim.x)];
+        matrix_value = L.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, L.degree*blockDim.x)];
 		gx += matrix_value * x[x_adress_shift + column_id          ];
 		gy += matrix_value * x[x_adress_shift + column_id +     x_n];
 		gz += matrix_value * x[x_adress_shift + column_id + 2 * x_n];
@@ -253,8 +256,8 @@ __device__ void eval_gradient3(const sparse_matrix_cuda L, const sparse_matrix_c
 	
 	//-J*p 
 	for (j = 0; j < J.degree; j++) {
-		column_id    = J.index[threadIdx.x + x_n*j];
-		matrix_value = J.value[threadIdx.x + x_n*j];
+		column_id    = J.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)];
+        matrix_value = J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)];
 		gx -= matrix_value * p[p_adress_shift + column_id          ];
 		gy -= matrix_value * p[p_adress_shift + column_id +     p_n];
 		gz -= matrix_value * p[p_adress_shift + column_id + 2 * p_n];
@@ -273,7 +276,6 @@ __device__ void eval_gradient3(const sparse_matrix_cuda L, const sparse_matrix_c
 //L_BFG
 __device__ void comput_s_t_rho_d(const double *point, const double *prev_point, const double *gradient, const double *prev_gradient, 
 								 double *s, double *t, double *rho, const int head, const int n, const int nb_cell, const int nb_sum_thread, double *buffer, int id) {
-
 
 	int s_id = CIRCULAR_ID(head, MEM_SIZE) * 3 * n*nb_cell + id;
 
@@ -344,7 +346,7 @@ __device__ void l_bfg_d(const double *s, const double *t, const double *rho, dou
 		__syncthreads();
 		double local_alpha = 0;
 		if( rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x] != 0){
-			local_alpha = alpha[0] / rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x];
+			local_alpha = alpha[0]/rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x];
 		}
 		alpha_global[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x] = local_alpha;
 		//if(id == 0)printf("alpha %.16g %.16g %.16g\n", alpha[0]/rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x], alpha[0], rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x]);
@@ -369,7 +371,7 @@ __device__ void l_bfg2_d(const double *s, const double *t, const double *rho, co
 	double rz = r[id + 2 * n];
 
 	for (int i = tail; i < head; i++) {
-		int s_id = CIRCULAR_ID(i, MEM_SIZE) * 3 * n*nb_cell + id;
+		int s_id = CIRCULAR_ID(i, MEM_SIZE)*3*n*nb_cell + id;
 
 		//double local_rho = rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x];
 		nu[threadIdx.x] =  (t[s_id        ])*rx;
@@ -384,7 +386,7 @@ __device__ void l_bfg2_d(const double *s, const double *t, const double *rho, co
 		double local_nu = 0;
 	
 		if (rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x] != 0) {
-			local_nu = alpha[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x] - nu[0] / rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x];
+			local_nu = alpha[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x] - nu[0]/rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x];
 		}
 		rx += local_nu*s[s_id        ];
 		ry += local_nu*s[s_id +     n];
@@ -398,17 +400,17 @@ __device__ void l_bfg2_d(const double *s, const double *t, const double *rho, co
 	r[id + 2 * n] = rz;
 }
 
-
 __device__ void  mat_vect_mult3(const double *A, const double *x, double *result, const int n, int id) {
 
 	double Ax_x = 0, Ax_y = 0, Ax_z = 0, A_coef;
 	int tp_index;
+    //a thread is a equation line, 
 	for (int j = 0; j< n; j++) {
-		A_coef = A[ID_COL(threadIdx.x, j, n)];
+		A_coef = A[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, n, n*n)];
 		tp_index = blockIdx.x*3*n + j;
-		Ax_x += x[tp_index      ] * A_coef;
-		Ax_y += x[tp_index +   n] * A_coef;
-		Ax_z += x[tp_index + 2*n] * A_coef;
+		Ax_x += x[tp_index      ]*A_coef;
+		Ax_y += x[tp_index +   n]*A_coef;
+		Ax_z += x[tp_index + 2*n]*A_coef;
 	}
 	result[id      ] = Ax_x;
 	result[id +   n] = Ax_y;
@@ -434,19 +436,18 @@ __device__ void curvature_test_d(const double *gradient, const double *descent_d
 	}
 }
 
-
 __device__ void momentum_points_first_guess3(double *points, const double *velocities, const double *M_tild_inv, const double *force_extern, double *momentum, const  double *M, const double h, const int n, const int id) {
 	
 	//TODO make it multi_cell
 	double Ax_x = 0, Ax_y = 0, Ax_z = 0, A_coef;
     
 	for (int j = 0; j<n; j++) {
-		A_coef = M_tild_inv[ID_COL(threadIdx.x, j, n)];
+		A_coef = M_tild_inv[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, n, n*n)];
 		int local_id = j + 3*n*blockIdx.x;
 		//if (id == 102 && j < 10)printf("j %d __ %d m_tild %.17g h %f force %.17g \n",j, local_id, A_coef, h, force_extern[local_id]);
-		Ax_x += A_coef*(M[j]*h*velocities[local_id      ] + h*h*force_extern[local_id      ]);
-		Ax_y += A_coef*(M[j]*h*velocities[local_id +   n] + h*h*force_extern[local_id +   n]);
-		Ax_z += A_coef*(M[j]*h*velocities[local_id + 2*n] + h*h*force_extern[local_id + 2*n]);
+		Ax_x += A_coef*(M[ID_MULTI_ONE(blockIdx.x, j, n)]*h*velocities[local_id      ] + h*h*force_extern[local_id      ]);
+		Ax_y += A_coef*(M[ID_MULTI_ONE(blockIdx.x, j, n)]*h*velocities[local_id +   n] + h*h*force_extern[local_id +   n]);
+		Ax_z += A_coef*(M[ID_MULTI_ONE(blockIdx.x, j, n)]*h*velocities[local_id + 2*n] + h*h*force_extern[local_id + 2*n]);
 	}
 	
 	momentum[id      ] = points[id      ] + Ax_x;
@@ -457,24 +458,6 @@ __device__ void momentum_points_first_guess3(double *points, const double *veloc
 	points[id +   n] = momentum[id +   n];
 	points[id + 2*n] = momentum[id + 2*n];
 }
-
-
-
-/*
-__device__ void momentum_points_first_guess3(double *points, 
-											 const double *velocities, const double *M_tild_inv, double *force_extern,  double *momentum, const  double *M, const double h, const int n, const int id) {
-
-	momentum[id      ] = points[id      ] + h*(velocities[id      ] + h*force_extern[id      ] / M[id]);
-	momentum[id +   n] = points[id +   n] + h*(velocities[id +   n] + h*force_extern[id +   n] / M[id]);
-	momentum[id + 2*n] = points[id + 2*n] + h*(velocities[id + 2*n] + h*force_extern[id + 2*n] / M[id]);
-
-	//if(id == 109)printf("momentum %f %f %f M %f \n", momentum[id], momentum[id + n], momentum[id + 2 * n], M[id]);
- 
-	points[id      ] = momentum[id      ];
-	points[id +   n] = momentum[id +   n];
-	points[id + 2*n] = momentum[id + 2*n];
-}
-*/
 
 __device__ void copy_gradient_and_points3(const double *points, double *points_prev, const double *gradient, double *gradient_prev, double *q, const int n, const int id) {
 	
@@ -496,7 +479,6 @@ __device__ void velocities_equals_points_minus_points_prev3(const double *points
 	velocities[id      ] = (points[id      ] - points_prev[id      ])*one_over_h;
 	velocities[id   + n] = (points[id +   n] - points_prev[id +   n])*one_over_h;
 	velocities[id + 2*n] = (points[id + 2*n] - points_prev[id + 2*n])*one_over_h;
-	//if (threadIdx.x == 0)printf("velocitiy %f %f %f \n", velocities[id], velocities[id + n], velocities[id + 2 * n]);
 }
 
 __device__ void damping(const double *points, const double *points_prev, double *velocities, 
@@ -505,7 +487,7 @@ __device__ void damping(const double *points, const double *points_prev, double 
 
 	velocities_equals_points_minus_points_prev3(points, points_prev, velocities, one_over_h, n, id);
 	
-	cuda_scalar mi = m[threadIdx.x];
+	cuda_scalar mi = m[ID_MULTI_ONE(blockIdx.x, threadIdx.x, n)];
 	
 	buffer[threadIdx.x      ] = points[id      ]*mi;
 	buffer[threadIdx.x +   n] = points[id +   n]*mi;
@@ -514,8 +496,6 @@ __device__ void damping(const double *points, const double *points_prev, double 
 	__syncthreads();
 	triple_sum(buffer, buffer + n, buffer + 2*n, nb_sum_thread, n, threadIdx.x);
 	__syncthreads();
-
-	//if(threadIdx.x == 0)printf("mi %f mtotal %f \n", mi, mass_total);
 
 	cuda_scalar Xcmx = buffer[  0]/mass_total;
 	cuda_scalar Xcmy = buffer[  n]/mass_total;
@@ -528,7 +508,6 @@ __device__ void damping(const double *points, const double *points_prev, double 
 	}
 	
 	__syncthreads();
-	//if (threadIdx.x == 0)printf("Xcmx %f Xcmy %f Xcmz %f | xi %f %f %f\n", Xcmx, Xcmy, Xcmz, points[id], points[id+n], points[id+2*n]);
 
 	buffer[threadIdx.x      ] = velocities[id      ]*mi;
 	buffer[threadIdx.x +   n] = velocities[id +   n]*mi;
@@ -542,19 +521,13 @@ __device__ void damping(const double *points, const double *points_prev, double 
 	cuda_scalar Vcmy = buffer[  n]/mass_total;
 	cuda_scalar Vcmz = buffer[2*n]/mass_total;
 
-	//if (threadIdx.x == 0)printf("Vcmx %f Vcmy %f Vcmz %f | vi %f %f %f\n", Vcmx, Vcmy, Vcmz, velocities[id], velocities[id + n], velocities[id + 2 * n]);
-
 	cuda_scalar rx = points[id      ] - Xcmx;
 	cuda_scalar ry = points[id +   n] - Xcmy;
 	cuda_scalar rz = points[id + 2*n] - Xcmz;
 	
-	//if (threadIdx.x == 0)printf("rx %f ry %f rz %f | %f %f %f\n", rx, ry, rz, velocities[id] * mi, velocities[id + n] * mi, velocities[id + 2 * n] * mi);
-
 	cross(rx, ry, rz,
 		  (cuda_scalar)velocities[id]*mi, (cuda_scalar)velocities[id + n]*mi, (cuda_scalar)velocities[id + 2*n]*mi,
 		  buffer[threadIdx.x], buffer[threadIdx.x + n], buffer[threadIdx.x + 2*n]);
-
-	//if (threadIdx.x == 0)printf("rx X Vimi %f %f %f \n", buffer[threadIdx.x], buffer[threadIdx.x + n], buffer[threadIdx.x + 2*n]);
 
 	__syncthreads();
 	triple_sum(buffer, buffer + n, buffer + 2*n, nb_sum_thread, n, threadIdx.x);
@@ -583,8 +556,6 @@ __device__ void damping(const double *points, const double *points_prev, double 
 						r[0], r[1], r[2],
 						r[3], r[4], r[5],
 						r[6], r[7], r[8]);
-
-	//if (threadIdx.x == 0)printf("\n I \n %f %f %f\n %f %f %f\n %f %f %f\n", r[0], r[1], r[2],r[3], r[4], r[5],r[6], r[7], r[8]);
 
 	buffer[threadIdx.x      ] = r[0]*mi;
 	buffer[threadIdx.x +   n] = r[1]*mi;
@@ -622,15 +593,14 @@ __device__ void damping(const double *points, const double *points_prev, double 
 		I[8] = buffer[2*n];
 		
 	}
-	//if (threadIdx.x == 0)printf("\n I \n %f %f %f\n %f %f %f\n %f %f %f\n", I[0], I[1], I[2], I[3], I[4], I[5], I[6], I[7], I[8]);
+
 	__syncthreads();
 	Matrix_invers3_3X3(I, I_inv);
 	__syncthreads();
-	//if (threadIdx.x == 0)printf("\n L \n %f %f %f\n", L[0], L[1], L[2]);
-	//if (threadIdx.x == 0)printf("\n Iinv \n %f %f %f\n %f %f %f\n %f %f %f\n", I_inv[0], I_inv[1], I_inv[2], I_inv[3], I_inv[4], I_inv[5], I_inv[6], I_inv[7], I_inv[8]);
+
 	vect_matrix_mult_3X3_par(I_inv, L, omega);
 	__syncthreads();
-	//if (threadIdx.x == 0)printf("\n omeg = I_inv*L\n %f %f %f\n ", omega[0], omega[1], omega[2]);
+
 	cuda_scalar deltaV[3];
 	cross(omega[0], omega[1], omega[2],
 		  rx, ry, rz,
@@ -646,13 +616,11 @@ __device__ void damping(const double *points, const double *points_prev, double 
 	velocities[id + 2*n] += calpha*deltaV[2];
 
 #ifndef NPFEM_SA
-	//if(threadIdx.x == 0)printf("1/h %f  dx_P %f", one_over_h*h2, DX_P);
+
 	ShapeOpScalar vel_lattx = velocities[id      ]/(dx_p*one_over_h*h2);
 	ShapeOpScalar vel_latty = velocities[id +   n]/(dx_p*one_over_h*h2);
 	ShapeOpScalar vel_lattz = velocities[id + 2*n]/(dx_p*one_over_h*h2);
 
-    //if(threadIdx.x == 0)printf("velz %f cp_vel %f\n", vel_lattz, vel_cap_fin);
-    
 	cuda_scalar norm_vel =  Magnitude_3(vel_lattx, vel_latty, vel_lattz);
 	if (norm_vel >= vel_cap) {
 		velocities[id      ] = vel_lattx/norm_vel*vel_cap_fin*(dx_p*one_over_h*h2);
@@ -660,9 +628,7 @@ __device__ void damping(const double *points, const double *points_prev, double 
 		velocities[id + 2*n] = vel_lattz/norm_vel*vel_cap_fin*(dx_p*one_over_h*h2);
 	}   
 #endif
-
 }
-
 
 __device__ void trace_x_time_y3(const double *x, const double *y, double *result, const int n, const int id, const int nb_sum_thread, double *buffer) {
 
