@@ -48,6 +48,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <random>
+#include <cuda_runtime_api.h>
 
 #ifdef MSVC
 #define NOMINMAX // problems with defined macros
@@ -61,7 +62,7 @@
 #include "palabos3D.h"
 #include "palabos3D.hh"
 
-// #define NPFEM_CUDA
+//#define NPFEM_CUDA
 // Load npFEM Lib
 #include "npFEM/rbcShapeOp.h"
 #include "npFEM/rbcGlobal.h"
@@ -497,7 +498,8 @@ void iniShapeOpSolvers(std::string fname_points, std::string fname_constraints,
 			addVertexForce(*solver, forces);
 
             sp.shapeOpBodies[i].init(bodyID, mesh_template, mesh_graph);
-			solver->initialize(Calpha_ShapeOp_, Cbeta_ShapeOp_, sp.dt_p * (T)(sp.timestep_ShapeOp), rho_, false, applyGlobalVolumeConservation_ShapeOp_, globalVolumeConservationWeight_ShapeOp_, sp.dx_p, sp.dt_p);
+        
+			solver->initialize(Calpha_ShapeOp_, Cbeta_ShapeOp_, sp.dt_p* (T)(sp.timestep_ShapeOp), rho_, false, applyGlobalVolumeConservation_ShapeOp_, globalVolumeConservationWeight_ShapeOp_, sp.dx_p, sp.dt_p);
 
 			if (!sp.continuePLB)
 			{
@@ -1434,6 +1436,7 @@ int main(int argc, char* argv[])
 	pcout << "     dt_p (micro-s)  : " << sp.dt_p << std::endl;
 	pcout << "             tau_lb  : " << sp.tau_lb << std::endl;
 	pcout << "               u_lb  : " << sp.u_lb << std::endl;
+    pcout << "               u_p   : " << sp.u_p << std::endl;
     pcout << "***********************" << "\n";
     pcout << "    Mach number, Ma  : " << sp.Ma << std::endl;
     pcout << "Reynolds number, Re  : " << sp.Re << std::endl;
@@ -1702,6 +1705,8 @@ int main(int argc, char* argv[])
 #ifdef NPFEM_CUDA
 	// GPU init
 	auto init_gpu = [&](Solver_GPU &sGPU, Solver &s_template, std::vector<Solver*> &solvers, plb::Array<double, 3>*iniPositions, vector<int> *mesh_graph, Mesh_info params) {
+        //std::cout << "      sp.dt_p " << " (T)(sp.timestep_ShapeOp) " << (T)(sp.timestep_ShapeOp) << std::endl;
+
 		sGPU = Solver_GPU(s_template.getPoints(),
 		s_template.getConnectivityList(),
 		s_template.get_onSurfaceParticle(),
@@ -1716,8 +1721,8 @@ int main(int argc, char* argv[])
 		sGPU.compute_first_centroid();
 	};
 
-	if (sp.loc_rank < sp.number_devices)
-    {
+	if (sp.loc_rank < sp.number_devices){
+
 		cudaError_t err = cudaSetDevice(sp.loc_rank);
 
 		if (sp.shapeOpRBCs.size() > 0)
@@ -1972,9 +1977,11 @@ int main(int argc, char* argv[])
     plint piNeqID_act2b = actions2b.addBlock(group.get("piNeq"));
     plint particleID_act2b = actions2b.addBlock(group.get("vertexParticles"));
 	// From lattice to physical units
-	T Cf = sp.rho_p * (sp.dx_p * sp.dx_p * sp.dx_p * sp.dx_p) / (sp.dt_p * sp.dt_p); // force
-	T Cp = sp.rho_p * (sp.dx_p * sp.dx_p) / (sp.dt_p * sp.dt_p); // pressure
-	T Ca = sp.dx_p * sp.dx_p; // area
+
+	T Cf = sp.rho_p*(sp.dx_p*sp.dx_p*sp.dx_p*sp.dx_p)/(sp.dt_p*sp.dt_p); // force
+    //std::cout << " CF " << Cf << std::endl;
+	T Cp = sp.rho_p*(sp.dx_p*sp.dx_p)/(sp.dt_p*sp.dt_p); // pressure
+	T Ca = sp.dx_p*sp.dx_p; // area
     T densityOffset = 1.0;
 	actions2b.addProcessor(new CollisionsForcesCombo<T, DESCRIPTOR>(sp.dx_p, omega, densityOffset, Cf, Cp, Ca, sp.collisions_threshold_rep, sp.collisions_threshold_nonRep, sp.wallVertexNormals, sp.bodyToType, sp.CellPacking),
 		particleID_act2b, rhoBarID_act2b, piNeqID_act2b, group.getBoundingBox());
@@ -2165,14 +2172,14 @@ int main(int argc, char* argv[])
 			timer("shapeop").start();
 #ifdef NPFEM_CUDA
 			if (sp.shapeOpRBCs.size()) {
-                /*
+                
                 std::cout << "sp.max_iterations_ShapeOp" << sp.max_iterations_ShapeOp << std::endl;
                 std::cout << "sp.tol_ShapeOp" << sp.tol_ShapeOp << std::endl;
                 std::cout << "sp.gamma_ShapeOp" << sp.gamma_ShapeOp << std::endl;
                 std::cout << "sp.max_line_search_loops_ShapeOp "<< sp.max_line_search_loops_ShapeOp << std::endl;
                 std::cout << "sp.m_ShapeOp" << sp.m_ShapeOp << std::endl;
                 std::cout << "sp.gamma2_ShapeOp " << sp.gamma2_ShapeOp << std::endl;
-                */
+                
 
 				copy_data_to_gpu(sp.sGPU, sp.shapeOpRBCs);
                 sp.sGPU.Palabos_iT_ = sp.iT;
@@ -2198,7 +2205,7 @@ int main(int argc, char* argv[])
 
 				copy_data_to_gpu(sp.sGPU_plt, sp.shapeOpPLTs);
                 sp.sGPU_plt.Palabos_iT_ = sp.iT;
-                sp.sGPU_plt.solve(sp.max_iterations_ShapeOp, sp.tol_ShapeOp, true, sp.gamma_ShapeOp, sp.max_line_search_loops_ShapeOp, sp.m_ShapeOp, sp.gamma2_ShapeOp);
+                //sp.sGPU_plt.solve(sp.max_iterations_ShapeOp, sp.tol_ShapeOp, true, sp.gamma_ShapeOp, sp.max_line_search_loops_ShapeOp, sp.m_ShapeOp, sp.gamma2_ShapeOp);
 				// GPU counterpart of imposePlbPeriodicityToSO
                 sp.sGPU_plt.make_periodic(group.getLattice<T, DESCRIPTOR>("lattice").getNx() - 1,
 					group.getLattice<T, DESCRIPTOR>("lattice").getNy() - 1,

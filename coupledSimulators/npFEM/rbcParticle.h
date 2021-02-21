@@ -629,6 +629,12 @@ void CollisionsForcesCombo<T, Descriptor>::processGenericBlocks(
             
             // Shear Force
             shearForce = area*(Descriptor<T>::invRho(singleValRhoBar)*(omega / (T)2. - (T)1.)*singleValPi_n);
+
+            SymmetricTensorImpl<T, 3>::matVectMult(singleValPiNeq, normal, singleValPi_n);
+            
+            //std::cout << " singleValPi_n " << singleValPi_n[0] << " " << singleValPi_n[1] << " " << singleValPi_n[2]  <<"  SymmetricTensorImpl<T, 3>::n  " << SymmetricTensorImpl<T, 3>::n << std::endl;
+            //std::cout << " shearForce " << shearForce[0] << " " << shearForce[1] << " " << shearForce[2] <<" area " << area << "(Descriptor<T>::invRho(singleValRhoBar)  " << Descriptor<T>::invRho(singleValRhoBar)  << " omega " << (omega/(T)2. - (T)1.) << std::endl ;
+            
         }
         else
         {

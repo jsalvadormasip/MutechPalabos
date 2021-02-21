@@ -112,6 +112,7 @@ Solver_GPU::Solver_GPU(const MatrixXX &points,
             set_onSurfaceParticle(onSurfaceParticle);
             make_gpu_graph(graph, points.cols());
             Cbeta_ = cbeta;
+            p_dt = phys_timestep;
             initialize(phys_timestep*shapeOp_time_step);
         }
     }
@@ -925,12 +926,13 @@ int Solver_GPU::send_fluid_data(int nb, int rank, int iter){
 void Solver_GPU::read_fluid_data(){
     read_fluid_data_(&from_fluid_data_d, &from_fluid_data_h);
 }
-void Solver_GPU::copy_force_from_fluid(){
-    plb::npfem::copy_force_from_fluid(&mesh_info_, &simulation_input_d_, &simulation_data_d_, &from_fluid_data_d, collision_data_d_.colid_normals, mesh_info_.threshold_rep, starting_ids, 0);
+void Solver_GPU::copy_force_from_fluid(double dx){
+    double cf = 1000*(dx*dx*dx*dx)/(p_dt*p_dt);
+    plb::npfem::copy_force_from_fluid(&mesh_info_, &simulation_input_d_, &simulation_data_d_, &from_fluid_data_d, collision_data_d_.colid_normals, cf, dx, mesh_info_.threshold_rep, starting_ids, 0);
 }
 
-void Solver_GPU::copy_point_to_fluid(int iter){
-    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, collision_data_d_.colid_normals, starting_ids, iter);
+void Solver_GPU::copy_point_to_fluid(double dx, int iter){
+    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, collision_data_d_.colid_normals, p_dt/dx, starting_ids, iter);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -938,7 +940,6 @@ SHAPEOP_INLINE const std::vector<bool>& Solver_GPU::get_onSurfaceParticle() cons
 	return onSurfaceParticle_;
 }
 ///////////////////////////////////////////////////////////////////////////////
-//TODO tester ca
 void Solver_GPU::set_gpu_starting_position(const Matrix3X &points, int cell){
 	MatrixXXCuda tp_point = points;
 	points_from_Host_to_Device(points.cols(), simulation_input_d_.points, tp_point.data(), cell);

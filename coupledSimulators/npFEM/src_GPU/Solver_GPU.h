@@ -165,8 +165,8 @@ public:
 
   int send_fluid_data(int nb, int rank, int iter);
   void read_fluid_data();
-  void copy_force_from_fluid();
-  void copy_point_to_fluid(int iter);
+  void copy_force_from_fluid(double dx);
+  void copy_point_to_fluid(double dx, int iter);
   const std::vector<bool>& get_onSurfaceParticle() const;
   const MatrixXXCuda& getVelocities() const;
   const Matrix3X& get_Palabos_Forces() const;
@@ -189,7 +189,7 @@ public:
 
  //private:
   //Palabos interface
-  Scalar Cbeta_;
+  Scalar Cbeta_, p_dt = 1.;
   Scalar delta_, solver_step_;
   //Object Connectivity (triangle soup)
   std::vector< std::vector<int> > connectivity_list_;

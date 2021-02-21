@@ -47,6 +47,8 @@ API.*/
 #define CIRCULAR_ID(id, n) (id)%(n)
 #define ID_COL(i,j,N) ((N*(j)) + (i))
 
+#define SINGLECELL 1
+
 #ifdef SINGLECELL
 #define ID_COL_MULTI(body, i, j, N, M) ((N*(j)) + (i))
 #define ID_MULTI_ONE(body, i, M) (i)

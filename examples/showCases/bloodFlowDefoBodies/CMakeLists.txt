@@ -53,7 +53,7 @@ project(bloodFlowDefoBodies)
 
 enable_language(CXX)
 
-option(ENABLE_CUDA "Enabling CUDA" OFF)
+option(ENABLE_CUDA "Enabling CUDA" ON)
 if(ENABLE_CUDA)
   find_package(CUDA)
   enable_language(CUDA)
