@@ -112,13 +112,14 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 	double x_yz = xz - y[id + 2*x_n];
 
 	//G = M_star(x-y)
-	for (j = 0; j< M_star.degree; j++) {
-		column_id    = M_star.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, M_star.degree*blockDim.x)] + x_adress_shift;
+	for (j = 0; j< M_star.degree; j++) {  
+		column_id = M_star.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, M_star.degree*blockDim.x)] + x_adress_shift;
         matrix_value = M_star.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, M_star.degree*blockDim.x)];
 		tpx += (x[column_id        ] - y[column_id        ])*matrix_value;
 		tpy += (x[column_id +   x_n] - y[column_id +   x_n])*matrix_value;
 		tpz += (x[column_id + 2*x_n] - y[column_id + 2*x_n])*matrix_value; // /h2/2;
 	}	
+    
 	//E = (x-y)M_star(x-y)/2
 	buffer[threadIdx.x] = (tpx*x_yx + tpy*x_yy + tpz*x_yz)/ 2;
 

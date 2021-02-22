@@ -85,6 +85,7 @@ struct Mesh_info {
 	ShapeOpScalar mass_total = 0;
 	int nb_cells = 1;
 	int n_points = 0;
+    int surface_id0 = 0;
 	int idO = 0;
 	int n_constraints = 0;
 	int n_triangles = 0;
@@ -160,6 +161,7 @@ struct Simulation_data
 	ShapeOpScalar *momentum;
 	cuda_scalar   *force_npd;
     cuda_scalar *tri_normal;
+    cuda_scalar *normals;
 
 	ShapeOpScalar *gradient;
 	ShapeOpScalar *gradient_prev;

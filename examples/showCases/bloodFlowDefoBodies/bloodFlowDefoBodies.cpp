@@ -2172,14 +2172,14 @@ int main(int argc, char* argv[])
 			timer("shapeop").start();
 #ifdef NPFEM_CUDA
 			if (sp.shapeOpRBCs.size()) {
-                
+                /*
                 std::cout << "sp.max_iterations_ShapeOp" << sp.max_iterations_ShapeOp << std::endl;
                 std::cout << "sp.tol_ShapeOp" << sp.tol_ShapeOp << std::endl;
                 std::cout << "sp.gamma_ShapeOp" << sp.gamma_ShapeOp << std::endl;
                 std::cout << "sp.max_line_search_loops_ShapeOp "<< sp.max_line_search_loops_ShapeOp << std::endl;
                 std::cout << "sp.m_ShapeOp" << sp.m_ShapeOp << std::endl;
                 std::cout << "sp.gamma2_ShapeOp " << sp.gamma2_ShapeOp << std::endl;
-                
+                */
 
 				copy_data_to_gpu(sp.sGPU, sp.shapeOpRBCs);
                 sp.sGPU.Palabos_iT_ = sp.iT;
@@ -2205,7 +2205,7 @@ int main(int argc, char* argv[])
 
 				copy_data_to_gpu(sp.sGPU_plt, sp.shapeOpPLTs);
                 sp.sGPU_plt.Palabos_iT_ = sp.iT;
-                //sp.sGPU_plt.solve(sp.max_iterations_ShapeOp, sp.tol_ShapeOp, true, sp.gamma_ShapeOp, sp.max_line_search_loops_ShapeOp, sp.m_ShapeOp, sp.gamma2_ShapeOp);
+                sp.sGPU_plt.solve(sp.max_iterations_ShapeOp, sp.tol_ShapeOp, true, sp.gamma_ShapeOp, sp.max_line_search_loops_ShapeOp, sp.m_ShapeOp, sp.gamma2_ShapeOp);
 				// GPU counterpart of imposePlbPeriodicityToSO
                 sp.sGPU_plt.make_periodic(group.getLattice<T, DESCRIPTOR>("lattice").getNx() - 1,
 					group.getLattice<T, DESCRIPTOR>("lattice").getNy() - 1,

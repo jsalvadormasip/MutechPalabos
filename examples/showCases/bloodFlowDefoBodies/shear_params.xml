@@ -61,8 +61,8 @@
   <CP_OutputDir> ./CPs/ </CP_OutputDir>
   <checkpoint_timestep> 500 </checkpoint_timestep>
   
-  <numRBC> 1 </numRBC>
-  <numPLT> 1 </numPLT>
+  <numRBC> 204 </numRBC>
+  <numPLT> 40 </numPLT>
 </CheckPointing>
 
 <ShapeOp_General>

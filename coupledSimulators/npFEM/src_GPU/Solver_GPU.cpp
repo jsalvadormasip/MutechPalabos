@@ -535,13 +535,15 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
   std::cout << "GPU VERSION >> Number of Points & Constraints: " << n_points << " - " << n_constraints << std::endl;
   std::cout << "***********************************************************" << std::endl;
 #endif // NPFEM_SA
-    
+    mesh_info_.surface_id0 = 0;
     std::vector<Triplet> triplets;
     int idO = 0;
     for (int i = 0; i < n_constraints; ++i) {
       // NONE_PD Energies (may add more : TODO)
-        if (constraints_[i]->get_ConstraintType().compare("SurfaceMaterial") == 0)
+        if (constraints_[i]->get_ConstraintType().compare("SurfaceMaterial") == 0){
+            if(!mesh_info_.surface_id0)mesh_info_.surface_id0 = i;
             continue;
+        }
       // PD Energies
         constraints_[i]->addConstraint(triplets, idO);
     }
@@ -716,7 +718,7 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
     
     flatten_constraints();
     // After converting all the needed data to raw pointers, we can work without problems on the gpu!
-    
+    printf(" befor pointer pointer  %p \n",  &collision_data_d_);
     GPU_Init(&mesh_info_,
              &mesh_data_d_,        &mesh_data_h_,
              &simulation_input_d_, &simulation_input_h_,
@@ -833,7 +835,7 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
 	if (graph_h.nb_edges > 0) {
 		median_filter(graph_d, simulation_input_d_.forces_ex, mesh_info_.nb_cells, mesh_info_.n_points);
 	}
-	
+
 	compute_next_frame_rbc(&mesh_info_, &mesh_data_d_, &simulation_input_d_,
 		&simulation_data_d_, &collision_data_d_, delta_, solver_step_, max_iterations, stream);
 	
@@ -932,7 +934,7 @@ void Solver_GPU::copy_force_from_fluid(double dx){
 }
 
 void Solver_GPU::copy_point_to_fluid(double dx, int iter){
-    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, collision_data_d_.colid_normals, p_dt/dx, starting_ids, iter);
+    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, simulation_data_d_.normals, p_dt/dx, starting_ids, iter);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -58,7 +58,7 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
 	grad_c[threadIdx.x             ] = 0;
 	grad_c[threadIdx.x +   n_points] = 0;
 	grad_c[threadIdx.x + 2*n_points] = 0;
-
+    
 	normals[id             ] = 0;
 	normals[id +   n_points] = 0;
 	normals[id + 2*n_points] = 0;
@@ -70,11 +70,11 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
 	__syncthreads();
 
 	for(int tid = threadIdx.x; tid < n_tri; tid += blockDim.x){
-
+        
 		short id0 = triangles_d[IDX(tid, 0, n_tri)];
 		short id1 = triangles_d[IDX(tid, 1, n_tri)];
 		short id2 = triangles_d[IDX(tid, 2, n_tri)];
-
+        
 		tp_id = cell_shift + id0;
 
 		cuda_scalar p0x = points_d[tp_id             ];
@@ -109,8 +109,7 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
 
         force_tri[IDX(3*tid, 0, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n0/3.;
         force_tri[IDX(3*tid, 1, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n1/3.;
-        force_tri[IDX(3*tid, 2, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n2/3.;
- 
+        force_tri[IDX(3*tid, 2, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n2/3.;     
 	} 
     __syncthreads();
     sum(buffer_double, nb_sum_thread, n_points, threadIdx.x);
@@ -171,13 +170,12 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
         force_tri[IDX(3*tid+2, 1, 3*n_tri) + 9*blockIdx.x*n_tri] = -volume_weight*C*n1;
         force_tri[IDX(3*tid+2, 2, 3*n_tri) + 9*blockIdx.x*n_tri] = -volume_weight*C*n2;
     }  
-    
     __syncthreads();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 __device__
-void project_Bending(int tid, int n_points, int n_constraints, int n_projected_points, int nb_cells,
+void project_Bending(int tid, int n_points, int n_constraints, int n_projected_points,
 	ShapeOpScalar *points_d, ShapeOpScalar *projections_d, cuda_scalar *f_int_nonePD_d,
 	int *ConstraintType_d, int *idO_d, ShapeOpScalar *rangeMin_d, ShapeOpScalar *rangeMax_d, ShapeOpScalar *Scalar1_d, ShapeOpScalar *weight_d, ShapeOpScalar *E_nonePD_d,
 	int *idI_d, ShapeOpScalar *vectorx_d, ShapeOpScalar *matrix22_d, ShapeOpScalar *matrix33_d)
@@ -230,7 +228,7 @@ void project_Bending(int tid, int n_points, int n_constraints, int n_projected_p
 
 ///////////////////////////////////////////////////////////////////////////////
 __device__ 
-void project_Area(int tid, int n_points, int n_constraints, int n_projected_points, int nb_cells,
+void project_Area(int tid, int n_points, int n_constraints, int n_projected_points,
 	ShapeOpScalar *points_d, ShapeOpScalar *projections_d, cuda_scalar *f_int_nonePD_d,
 	int *ConstraintType_d, int *idO_d, ShapeOpScalar *rangeMin_d, ShapeOpScalar *rangeMax_d, ShapeOpScalar *Scalar1_d, ShapeOpScalar *weight_d, ShapeOpScalar *E_nonePD_d,
 	int *idI_d, ShapeOpScalar *vectorx_d, ShapeOpScalar *matrix22_d, ShapeOpScalar *matrix33_d)
@@ -381,7 +379,7 @@ void project_Area(int tid, int n_points, int n_constraints, int n_projected_poin
 
 ////////////////////////////////////////
 __device__
-void project_surface_material(int tid, int n_points, int n_constraints, int n_projected_points, int nb_tri, int nb_cells,
+void project_surface_material(int tid, int tri_id, int n_points, int n_constraints, int n_projected_points, int nb_tri,
 	ShapeOpScalar *points_d, ShapeOpScalar *projections_d, ShapeOpScalar *force_intern_cont, cuda_scalar *f_int_nonePD_d,
 	int *ConstraintType_d, int *idO_d, ShapeOpScalar *rangeMin_d, ShapeOpScalar *rangeMax_d, ShapeOpScalar *Scalar1_d, ShapeOpScalar *weight_d, ShapeOpScalar *E_nonePD_d,
 	int *idI_d, ShapeOpScalar *vectorx_d, ShapeOpScalar *matrix22_d, ShapeOpScalar *matrix33_d, cuda_scalar *A_d, const float miu, const float lambda, const float kappa)
@@ -399,7 +397,6 @@ void project_surface_material(int tid, int n_points, int n_constraints, int n_pr
 	idI1_ = idI_d[IDX(tid, 1, n_constraints)] + cell_shift;
 	idI2_ = idI_d[IDX(tid, 2, n_constraints)] + cell_shift;
 
-    int tri_id = tid - 768;
     //if(tid == 768)printf("tid %d idI0 %d %d %d __________ %d %d \n",tid,  idI0_ , idI1_, idI2_, threadIdx.x, blockIdx.x);
 
 	// ColMajor Order
@@ -554,7 +551,6 @@ void project_surface_material(int tid, int n_points, int n_constraints, int n_pr
 	printf("P*Piola*rest %f %f \nP*Piola*rest %f %f\n P*Piola*rest %f %f\n", A*F00, A*F01, A*F10, A*F11, A*F20, A*F21);
 	}
 	*/
-
     //if(blockIdx.x == 0)printf("tid %d tri_id %d  ____ threadIdx.x %d \n", tid, tri_id, threadIdx.x);
     
     force_intern_cont[IDX(3*tri_id, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F00 - F01);
@@ -661,7 +657,7 @@ __device__ void nearest_neighbor_linear_d(double *points, double *colid_points, 
 }
 //////////////////////////////////////////////////////////////////////////////
 __device__
-void project_collision_d(int n_points, int nb_cells, double *points, double *nearest_points, 
+void project_collision_d(int n_points, double *points, double *nearest_points, 
 						double *nearest_normals, cuda_scalar *f_int_nonePD_d, double *E_nonePD, const int id, const int n_constraints,
                         const float weight_col_rep, const float threshold_rep, const float weight_col_nonRep, const float threshold_nonRep, const float beta_morse){
 

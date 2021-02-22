@@ -366,9 +366,9 @@ void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, Simulation_
     //printf("start_id %d \n", start_id);
 }
 
-void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, ShapeOpScalar *colid_normals, double cu, int start_id, int iter){
+void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, ShapeOpScalar *normals, double cu, int start_id, int iter){
     if (info->nb_cells)
-        HANDLE_KERNEL_ERROR(copy_point_to_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, colid_normals, cu, start_id, iter));
+        HANDLE_KERNEL_ERROR(copy_point_to_fluid_g<<< info->nb_cells, info->n_points >>>(*info, *input, *data_fluid, normals, cu, start_id, iter));
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 __global__ void clone_cells_points_mat_mult(Mesh_info info, Simulation_input input, Simulation_data sim, cuda_scalar *mat) {
@@ -586,11 +586,13 @@ void GPU_Init(Mesh_info        *mesh_info,
     CUDA_HANDLE_ERROR(cudaMalloc(&simulation_data_d->alpha,                 MEM_SIZE*nb_cells*sizeof(ShapeOpScalar)));
     CUDA_HANDLE_ERROR(cudaMalloc(&simulation_data_d->center,						  3*nb_cells*sizeof(ShapeOpScalar)));
     //CUDA_HANDLE_ERROR(cudaMalloc(&simulation_data_d->tri_normal, 3*n_triangles*nb_cells*sizeof(cuda_scalar)));
+
     CUDA_HANDLE_ERROR(cudaMalloc(&simulation_data_d->force_intern_cont, 9*n_triangles*nb_cells*sizeof(ShapeOpScalar)));
     CUDA_HANDLE_ERROR(cudaMemset(simulation_data_d->force_intern_cont, 0, 9*n_triangles*nb_cells*sizeof(ShapeOpScalar)));
     //collision data
     CUDA_HANDLE_ERROR(cudaMalloc(&collision_data_d->nb_neighbours,  (nb_cells + 1)*sizeof(int)));
-    CUDA_HANDLE_ERROR(cudaMalloc(&collision_data_d->colid_normals, 3*n_points*nb_cells*sizeof(ShapeOpScalar)));
+    
+    CUDA_HANDLE_ERROR(cudaMalloc(&simulation_data_d->normals, 3*n_points*nb_cells*sizeof(cuda_scalar)));
     // Matrices
     //MULTISHAPES
     CUDA_HANDLE_ERROR(cudaMalloc(&mesh_data_d->N_inv_dense, n_points*n_points*manyShape*sizeof(ShapeOpScalar)));
@@ -677,7 +679,7 @@ void GPU_Init(Mesh_info        *mesh_info,
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-__device__ void project_d(int n_points, int n_constraints, int n_projected_points, int nb_tri, int nb_cells,
+__device__ void project_d(int n_points, int n_constraints, int n_projected_points, int nb_tri, int surface_id0,
 		ShapeOpScalar *points_d, ShapeOpScalar *projections_d, ShapeOpScalar *force_intern_cont, cuda_scalar *f_int_nonePD_d,
 		int *ConstraintType_d, int *idO_d, ShapeOpScalar *rangeMin_d, ShapeOpScalar *rangeMax_d, ShapeOpScalar *Scalar1_d, ShapeOpScalar *weight_d, ShapeOpScalar *E_nonePD_d,
 		int *idI_d, ShapeOpScalar *vectorx_d, ShapeOpScalar *matrix22_d, ShapeOpScalar *matrix33_d, cuda_scalar *A_d, const float miu, const float lambda, const float kappa){
@@ -690,26 +692,27 @@ __device__ void project_d(int n_points, int n_constraints, int n_projected_point
 #endif
 	while (tid < n_constraints) {
 		//if(threadIdx.x == n_points - 1)printf("tid %d \n", ConstraintType_d[tid]);
-
+        
 		if (ConstraintType_d[tid] == 1) {
-			project_Area(tid, n_points, n_constraints, n_projected_points, nb_cells,
+			project_Area(tid, n_points, n_constraints, n_projected_points,
 						 points_d, projections_d, f_int_nonePD_d,
 						 ConstraintType_d, idO_d, rangeMin_d, rangeMax_d, Scalar1_d, weight_d, E_nonePD_d,
 						 idI_d, vectorx_d, matrix22_d, matrix33_d);
 
 		} else if (ConstraintType_d[tid] == 3) {
-			project_Bending(tid, n_points, n_constraints, n_projected_points, nb_cells,
+			project_Bending(tid, n_points, n_constraints, n_projected_points,
 							points_d, projections_d, f_int_nonePD_d,
 							ConstraintType_d, idO_d, rangeMin_d, rangeMax_d, Scalar1_d, weight_d, E_nonePD_d,
 							idI_d, vectorx_d, matrix22_d, matrix33_d);
 
 		} else if (ConstraintType_d[tid] == 5) {
-			project_surface_material(tid, n_points, n_constraints, n_projected_points, nb_tri, nb_cells,
+			project_surface_material(tid, tid - surface_id0, n_points, n_constraints, n_projected_points, nb_tri,
 									 points_d, projections_d, force_intern_cont, f_int_nonePD_d,
 									 ConstraintType_d, idO_d, rangeMin_d, rangeMax_d, Scalar1_d, weight_d, E_nonePD_d,
 									 idI_d, vectorx_d, matrix22_d, matrix33_d, A_d, miu, lambda, kappa);
-		}																						
-																								 
+		}
+        																						
+        																				 
 #ifdef SEQ
 		tid++;
 #else
@@ -745,7 +748,6 @@ void points_from_Device_to_Host(int n_points, ShapeOpScalar *points_d, ShapeOpSc
 
 void send_GPU_collinding_points(ShapeOpScalar *points, ShapeOpScalar **colid_points_d, ShapeOpScalar *normals, ShapeOpScalar **colid_normals_d, int *n_per_cell, int *n_per_cell_d, int nb, int nb_cell)
 {
-	//printf("nb_cell %d\n", nb_cell);
 	CUDA_HANDLE_ERROR(cudaMemcpy(n_per_cell_d, n_per_cell, (nb_cell + 1)*sizeof(int), cudaMemcpyHostToDevice));
 
 	CUDA_HANDLE_ERROR(cudaMalloc(colid_points_d, 3*nb*sizeof(ShapeOpScalar)));
@@ -760,8 +762,9 @@ void free_GPU_pointer(void *pointer){
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
 __launch_bounds__(258, 1)
-__global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulation_input input, Simulation_data sim, Collision_data coll, ShapeOpScalar h, ShapeOpScalar h2, int it_max) {
-	
+__global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulation_input input, Simulation_data sim, 
+                                         Collision_data coll, ShapeOpScalar h, ShapeOpScalar h2, int it_max) {
+		
 	int line_search_it = 0, it = 0, tail = 0, head = 0, total_conv = 1, head_o = 0, x_n = info.n_points;
 
 	int point_id = blockIdx.x*x_n*3 + threadIdx.x;
@@ -819,7 +822,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	//compute momentum, set point = momentum
 	//printf("%f %f %f |%d\n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], point_id);
 	momentum_points_first_guess3(input.points, input.velocities, mesh.M_tild_inv, input.forces_ex, sim.momentum, mesh.mass, h, x_n, point_id);
-
+    
 	#ifdef DEBUG
 		if (threadIdx.x == 102 && blockIdx.x == BL)printf("momentum %.17g %.17g %.17g \n", sim.momentum[threadIdx.x], sim.momentum[threadIdx.x + x_n], sim.momentum[threadIdx.x + 2*x_n]);
 	#endif
@@ -830,29 +833,32 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	sim.force_npd[point_id + 2*x_n] = 0;
 	sim.E_nonePD[threadIdx.x + blockIdx.x*info.n_constraints] = 0;
 
-    project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, mesh.vertex_to_tri, sim.force_intern_cont, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, volume_der, sim.tri_normal, coll.colid_normals, point_id, info.volume_weight);
-	
-	project_d(x_n, info.n_constraints, info.idO, info.n_triangles, 1, input.points, sim.projections, sim.force_intern_cont, sim.force_npd,
+    project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, mesh.vertex_to_tri, 
+                    sim.force_intern_cont, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, 
+                    volume_der, sim.tri_normal, sim.normals, point_id, info.volume_weight);
+
+	project_d(x_n, info.n_constraints, info.idO, info.n_triangles, info.surface_id0, 
+              input.points, sim.projections, sim.force_intern_cont, sim.force_npd,
 			  mesh.ConstraintType, mesh.idO, mesh.rangeMin, mesh.rangeMax, mesh.Scalar1, mesh.weight, sim.E_nonePD,
 			  mesh.idI, mesh.vectorx, mesh.matrix22, mesh.matrix33, mesh.A, info.miu, info.lambda, info.kappa);
+
     __syncthreads();
-	project_collision_d(x_n, info.nb_cells, input.points, sim.nearest_points, sim.nearest_normals, sim.force_npd, sim.E_nonePD, point_id, info.n_constraints, info.weight_col_rep, info.threshold_rep, info.weight_col_nonRep, info.threshold_nonRep, info.beta_morse);
+	project_collision_d(x_n, input.points, sim.nearest_points, sim.nearest_normals, 
+                        sim.force_npd, sim.E_nonePD, point_id, info.n_constraints, info.weight_col_rep, 
+                        info.threshold_rep, info.weight_col_nonRep, info.threshold_nonRep, info.beta_morse);
 
 	__syncthreads();
     //if(blockIdx.x == 0 && threadIdx.x == 223)printf(" sim.force_intern_cont %f thread %d block %d \n", sim.force_intern_cont[229], threadIdx.x, blockIdx.x);
 	objectif[head_o] = eval_objectif_and_grandient3(mesh.L, mesh.J, mesh.M_star, 
                                                     mesh.vertex_to_tri, mesh.vertex_pos, info.n_triangles,
                                                     mesh.mass, input.points, sim.momentum, sim.projections, sim.E_nonePD, sim.force_intern_cont, sim.force_npd,
-													h*h, x_n, info.idO, info.n_constraints, info.sum_points, sim.gradient, buffer, volume_der, point_id);
-
-    
+													h*h, x_n, info.idO, info.n_constraints, info.sum_points, sim.gradient, buffer, volume_der, point_id);  
     /*
     if (threadIdx.x == 102 && blockIdx.x == BL) {
         printf("sim.force_npd %.17g %.17g %.17g  G %.17g %.17g %.17g | %d h %f it %d\n", sim.force_npd[point_id], sim.force_npd[point_id + x_n], sim.force_npd[point_id + 2*x_n], 
                             sim.gradient[point_id], sim.gradient[point_id + x_n], sim.gradient[point_id + 2*x_n], blockIdx.x, h, it);
     }
     */
-
 	gradient_norm = volume_der[0];
 	//todo test gradient norm
 	objectif_sqr[head_o] = objectif[head_o]*objectif[head_o];
@@ -943,14 +949,17 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 
 			__syncthreads();  
 
-            project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, mesh.vertex_to_tri, sim.force_intern_cont, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, volume_der, sim.tri_normal, coll.colid_normals, point_id, info.volume_weight);
+            project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, mesh.vertex_to_tri, sim.force_intern_cont, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, volume_der, sim.tri_normal, sim.normals, point_id, info.volume_weight);
  
-			project_d(x_n, info.n_constraints, info.idO, info.n_triangles, 1,
+			project_d(x_n, info.n_constraints, info.idO, info.n_triangles, info.surface_id0,
 				input.points, sim.projections, sim.force_intern_cont, sim.force_npd,
 				mesh.ConstraintType, mesh.idO, mesh.rangeMin, mesh.rangeMax, mesh.Scalar1, mesh.weight, sim.E_nonePD,
 				mesh.idI, mesh.vectorx, mesh.matrix22, mesh.matrix33, mesh.A, info.miu, info.lambda, info.kappa);
+
             __syncthreads();
-			project_collision_d(x_n, info.nb_cells, input.points, sim.nearest_points, sim.nearest_normals, sim.force_npd, sim.E_nonePD, point_id, info.n_constraints, info.weight_col_rep, info.threshold_rep, info.weight_col_nonRep, info.threshold_nonRep, info.beta_morse);
+			project_collision_d(x_n, input.points, sim.nearest_points, sim.nearest_normals, 
+                                sim.force_npd, sim.E_nonePD, point_id, info.n_constraints,
+                                info.weight_col_rep, info.threshold_rep, info.weight_col_nonRep, info.threshold_nonRep, info.beta_morse);
 			
             __syncthreads();
 			//gradient = gradient(xk + 1);
@@ -1126,7 +1135,6 @@ void device_make_periodic(ShapeOpScalar * points_d, ShapeOpScalar *center, float
 //////////////////////////////////////////////////////////////////////////////////////////
 void compute_next_frame_rbc(Mesh_info  *info, Mesh_data *mesh, Simulation_input *input,
 	                        Simulation_data *sim, Collision_data *coll, ShapeOpScalar h, ShapeOpScalar h_2, int it_max, stream_holder *str){
-
 	//std::cout << "WTF " << info->nb_cells << " "<< info->n_points  << " " << h << " " << h_2  << " it max " << it_max << std::endl;
     if(info->nb_cells)
 	    HANDLE_KERNEL_ERROR(compute_next_frame_rbc_g<<< info->nb_cells, info->n_points, info->n_points*(sizeof(double) + 3*sizeof(cuda_scalar)), str->stream >>>(*info,*mesh,*input, *sim, *coll, h, h_2, it_max));
