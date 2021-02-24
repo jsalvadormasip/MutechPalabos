@@ -1723,7 +1723,7 @@ int main(int argc, char* argv[])
 
 	if (sp.loc_rank < sp.number_devices){
 
-		cudaError_t err = cudaSetDevice(sp.loc_rank);
+		int err = cudaSetDevice_warpper(sp.loc_rank);
 
 		if (sp.shapeOpRBCs.size() > 0)
 			init_gpu(sp.sGPU, sp.RBC_shapeOpSolverTemplate, sp.shapeOpRBCs, sp.iniPositions.data(), sp.shapeOpBodies[getSolverID(sp.shapeOpRBCs[0]->bodyID_, sp.shapeOpBodies)].mesh_graph, params_rbc);

@@ -1155,6 +1155,11 @@ void debug_matrix_from_gpu(double *mat_d, int n) {
 	
 }
 
+//Wrapper: only object build with nvcc knows cuda functions, so we need wrapper to use them outside.
+int cudaSetDevice_warpper(int index){
+    cudaError_t err = cudaSetDevice(index);
+    return (int)err;
+}
 }
 }
 ///////////////////////////////////////////////////////////////////////////////

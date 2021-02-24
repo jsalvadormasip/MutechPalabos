@@ -107,6 +107,8 @@ void points_from_Device_to_Host( int n_points, ShapeOpScalar *points_d, ShapeOpS
 ///////////////////////////////////////////////////////////////////////////////
 void debug_matrix_from_gpu(double *mat_d, int n);
 ///////////////////////////////////////////////////////////////////////////////
+int cudaSetDevice_warpper(int index);
+///////////////////////////////////////////////////////////////////////////////
 void points_time_mat_3X3(cuda_scalar *mat_d, const cuda_scalar *mat_h, double *points, double *center, const int nb_cells, const int n);
 ///////////////////////////////////////////////////////////////////////////////
 void device_make_periodic(ShapeOpScalar *points_d, ShapeOpScalar *center, float nx, float ny, float nz, int ncells, int npoints,int it);
