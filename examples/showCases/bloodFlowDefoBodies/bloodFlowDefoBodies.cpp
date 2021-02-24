@@ -48,7 +48,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <random>
-#include <cuda_runtime_api.h>
+//#include <cuda_runtime_api.h>
 
 #ifdef MSVC
 #define NOMINMAX // problems with defined macros
