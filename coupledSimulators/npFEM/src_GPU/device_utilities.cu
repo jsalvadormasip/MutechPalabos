@@ -41,7 +41,7 @@
 #ifndef DEVICE_UTILITIES_CU
 #define DEVICE_UTILITIES_CU
 
-#define SINGLECELL 1
+
 ///////////////////////////////////////////////////////////////////////////////
 #include <chrono>
 
