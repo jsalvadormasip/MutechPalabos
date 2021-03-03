@@ -334,6 +334,15 @@ SHAPEOP_INLINE void Solver_GPU::flatten_constraints()
     mesh_data_h_.vectorx       = vectorx_eigen_.data();
     mesh_data_h_.matrix22      = matrix22_eigen_.data();
     mesh_data_h_.matrix33      = matrix33_eigen_.data();
+
+    for (int i = 769; i < 769+10; ++i) {
+        if (i >= 769 && i < 779) {
+            printf("mesh_data_h_.matrix22 %f  %f \n", mesh_data_h_.matrix22[ID_COL_MULTI(body, i, 0, nConst, m4)], mesh_data_h_.matrix22[ID_COL_MULTI(body, i, 1, nConst, m4)]);
+            printf("mesh_data_h_.matrix22 %f  %f \n", mesh_data_h_.matrix22[ID_COL_MULTI(body, i, 2, nConst, m4)], mesh_data_h_.matrix22[ID_COL_MULTI(body, i, 3, nConst, m4)]);
+            printf("\n");
+        }
+    }
+
 #endif
     //delete[] constraints_h_;
     //multi shape:
@@ -341,32 +350,27 @@ SHAPEOP_INLINE void Solver_GPU::flatten_constraints()
 }
 
 ////////////////////////////////////////////////////////////
-void Solver_GPU::add_collinding_points(ShapeOpScalar  *points, ShapeOpScalar *obstacle_normal, int *nb_per_cell, int nb)
-{
+void Solver_GPU::add_collinding_points(ShapeOpScalar  *points, ShapeOpScalar *obstacle_normal, int *nb_per_cell, int nb){
 	//carfull this fonction allocate memory on GPU that has to be free later
 	collision_data_d_.total_neighbours = nb;
 	send_GPU_collinding_points(points, &collision_data_d_.colid_points, obstacle_normal, &collision_data_d_.colid_normals, nb_per_cell, collision_data_d_.nb_neighbours, nb, mesh_info_.nb_cells);
 }
 //////////////////////////////////////////////////////////////
-void Solver_GPU::free_collinding_points()
-{
+void Solver_GPU::free_collinding_points(){
 	free_GPU_pointer(collision_data_d_.colid_points);
 	free_GPU_pointer(collision_data_d_.colid_normals);
 }
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE int Solver_GPU::addForces(const std::shared_ptr<Force> &f)
-{
+SHAPEOP_INLINE int Solver_GPU::addForces(const std::shared_ptr<Force> &f){
   forces_.push_back(f);
   return static_cast<int>(forces_.size() - 1);
 }
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE std::shared_ptr<Force> &Solver_GPU::getForce(int id)
-{
+SHAPEOP_INLINE std::shared_ptr<Force> &Solver_GPU::getForce(int id){
   return forces_[id];
 }
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE void Solver_GPU::setPoints(const Matrix3X &p, const int nb_cells)
-{
+SHAPEOP_INLINE void Solver_GPU::setPoints(const Matrix3X &p, const int nb_cells){
   //Vector3 offset;
 	
   const int npoints = p.cols();
@@ -389,13 +393,11 @@ SHAPEOP_INLINE void Solver_GPU::setPoints(const Matrix3X &p, const int nb_cells)
   while(mesh_info_.sum_points <= mesh_info_.n_points/2) mesh_info_.sum_points *= 2;
 }
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE const MatrixXXCuda& Solver_GPU::getVelocities() const
-{
+SHAPEOP_INLINE const MatrixXXCuda& Solver_GPU::getVelocities() const {
 	return velocities_;
 }
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE const Matrix3X& Solver_GPU::get_Palabos_Forces() const
-{
+SHAPEOP_INLINE const Matrix3X& Solver_GPU::get_Palabos_Forces() const {
 	return Palabos_Forces_;
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -409,8 +411,7 @@ SHAPEOP_INLINE void Solver_GPU::setDamping(Scalar damping) {
   damping_ = damping;
 }
 ///////////////////////////////////////////////////////////////////////////////
-MatrixXXCuda *plb::npfem::Solver_GPU::get_transformedPoints()
-{
+MatrixXXCuda *plb::npfem::Solver_GPU::get_transformedPoints() {
 	return &Points_rowMajor_;
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -554,6 +555,9 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
     mesh_info_.n_constraints = n_constraints;
     projections_.setZero(3, idO);
     SparseMatrix A = SparseMatrix(idO, n_points);
+    std::cout << " triplet " << triplets[0].col() << " " << triplets[0].row() << " " << triplets[0].value() << std::endl;
+    std::cout << " triplet " << triplets[1].col() << " " << triplets[1].row() << " " << triplets[1].value() << std::endl;
+
     A.setFromTriplets(triplets.begin(), triplets.end());
     At_ = A.transpose();
     
@@ -614,6 +618,11 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
     
     L_ = At_*A;
     J_ = At_;
+    std::cout << " A " << A.coeff(1, 1) << std::endl;
+    std::cout << " At_ " << At_.coeff(0, 1) << std::endl;
+    std::cout << " Laplacian " << Laplacian.coeff(0, 1) << std::endl;
+    std::cout << " N_  " << N_.coeff(0, 0) << std::endl;
+    
     std::cout << "mesh_info_.nb_cells &&" << mesh_info_.nb_cells  << " "  << n_points << std::endl;
     
     //f_int_nonePD_ = Matrix3X::Zero(3*mesh_info_.nb_cells, n_points);
@@ -647,6 +656,9 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
     MatrixDyn L_dense_  = MatrixDyn(L_);
     MatrixDyn J_dense_  = MatrixDyn(J_);
     MatrixDyn M_star_dense_ = MatrixDyn(M_star_);
+    std::cout << "L_dense_ " << L_dense_(0, 1) << std::endl;
+    std::cout << "M_star_dense_ " << M_star_dense_(0, 1) << std::endl;
+    std::cout << "M_tilde_" << M_tilde_.coeff(0, 1) << std::endl;
     
     //back to sparse but with our own structure usable on GPU
     mesh_data_h_.L = make_sparse_from_full( L_dense_.data(), L_dense_.rows(), L_dense_.cols(), mesh_info_.nb_cells);

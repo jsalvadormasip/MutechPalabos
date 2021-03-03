@@ -135,6 +135,7 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 	for (j = 0; j< L.degree; j++) {
 		column_id    = L.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, L.degree*blockDim.x)] + x_adress_shift;
 		matrix_value = L.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, L.degree*blockDim.x)];
+        if (threadIdx.x == 0 && blockIdx.x == 0)printf(" L %d %f %f \n", column_id, matrix_value, x[column_id]*matrix_value);
 		tpx += x[column_id          ]*matrix_value;
 		tpy += x[column_id +     x_n]*matrix_value;
 		tpz += x[column_id + 2 * x_n]*matrix_value;	
@@ -154,6 +155,7 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 	for (j = 0; j< J.degree; j++) {
 		column_id    = J.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)] + p_adress_shift;
         matrix_value = J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)];
+        if (threadIdx.x == 0 && blockIdx.x == 0)printf(" J %d %f %f \n", column_id, matrix_value, p[column_id]*matrix_value);
         //if (J.value[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)] != J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)]) {
         ///    printf("%d %d %f %f \n", threadIdx.x, j, J.value[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)], J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)]);
         //}
@@ -188,6 +190,10 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
         tpz += force_intern_cont[IDX(3*tri_id + pos, 2, 3*nb_tri) + 9*blockIdx.x*nb_tri];
 	}
 
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        printf("gradient %f  %f %f %f \n", gradientx - tpx - f_nonePD[id], gradientx, tpx, f_nonePD[id]);
+
+    }
 	gradient[id        ] = gradientx - tpx - f_nonePD[id        ];
 	gradient[id +   x_n] = gradienty - tpy - f_nonePD[id +   x_n];
 	gradient[id + 2*x_n] = gradientz - tpz - f_nonePD[id + 2*x_n];

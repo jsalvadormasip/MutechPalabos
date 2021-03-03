@@ -41,7 +41,6 @@
 #ifndef DEVICE_UTILITIES_CU
 #define DEVICE_UTILITIES_CU
 
-
 ///////////////////////////////////////////////////////////////////////////////
 #include <chrono>
 
@@ -792,11 +791,11 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 
     __syncthreads();
 
-	#ifdef DEBUG
+	//#ifdef DEBUG
 	if (threadIdx.x == 102 && blockIdx.x == BL) {
 		printf("points %.17g %.17g %.17g | %d h %f\n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], blockIdx.x, h);
 	}
-	#endif
+	//#endif
 	//center_d(input.points, x_n, volume_der, center, point_id);
 	input.points[point_id        ] -= sim.center[3*blockIdx.x    ];
 	input.points[point_id +   x_n] -= sim.center[3*blockIdx.x + 1];

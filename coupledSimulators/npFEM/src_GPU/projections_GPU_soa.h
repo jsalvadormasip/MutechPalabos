@@ -459,7 +459,6 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
 		F00, F01,
 		F10, F11);
 
-
 	// [U SIG V] = SVD(F)
 	// SVD
 	cuda_scalar U00, U01,
@@ -493,6 +492,10 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
 	*/
 
 	cuda_scalar A = -0.5*A_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)];
+
+    if (tri_id == 0 && blockIdx.x == 0)printf("edge [%f %f %f] [%f %f %f] rest [%f %f | %f %f] A %f id %d %d %d\n",
+        edges00, edges10, edges20, edges01, edges11, edges21,
+        rest00_, rest01_, rest10_, rest11_, A, idI0_, idI1_, idI2_);
 	//none linear business
 	E_nonePD_d[blockIdx.x*n_constraints + tid] = A_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)]*(f_tr(SIG00, miu, lambda, kappa) + f_tr(SIG11, miu, lambda, kappa))/2.;
 	//printf("e_non_pd %f %f\n", E_nonePD_d[tid], A_d[tid]);
@@ -523,7 +526,7 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
 	if (idI0_ == 0 && idI1_ == 1 && idI2_ == 2) {
 	printf("Piola %f %f \nPiola %f %f A %f \n", F00, F01, F10, F11, A_d[tid]);
 	}
-	*/
+	*/  
 	// tmp =  Piola*rest_T
 	Matrix_Product_22_22(F00, F01,
 		F10, F11,
@@ -551,8 +554,11 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
 	printf("P*Piola*rest %f %f \nP*Piola*rest %f %f\n P*Piola*rest %f %f\n", A*F00, A*F01, A*F10, A*F11, A*F20, A*F21);
 	}
 	*/
-    //if(blockIdx.x == 0)printf("tid %d tri_id %d  ____ threadIdx.x %d \n", tid, tri_id, threadIdx.x);
-    
+    /*
+    if (tri_id == 0)printf("force intern [%f %f %f] [%f %f %f] [%f %f %f]\n",
+                            A*(-F00 - F01), A*(-F10 - F11), A*(-F20 - F21),
+                            A*F00, A*F10, A*F20, A*F01, A*F11, A*F21);
+    */
     force_intern_cont[IDX(3*tri_id, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F00 - F01);
     force_intern_cont[IDX(3*tri_id, 1, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F10 - F11);
     force_intern_cont[IDX(3*tri_id, 2, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F20 - F21);
