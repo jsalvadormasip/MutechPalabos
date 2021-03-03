@@ -297,33 +297,6 @@ void writeGifs(BlockLatticeT& lattice,
     imageWriter.writeScaledGif(createFileName("uNorm", iter, 6),
         *computeVelocityNorm(lattice, slice),
         imSize, imSize);
-    
-    //imageWriter.writeScaledGif(createFileName("uz", iter, 6),
-    //    *computeVelocityComponent(lattice, slice, zComponent),
-    //    imSize, imSize);
-    
-    //imageWriter.writeScaledGif(createFileName("omega", iter, 6),
-    //    *computeNorm(*computeVorticity(
-    //        *computeVelocity(lattice)), slice),
-    //    imSize, imSize);
-}
-
-template<class BlockLatticeT>
-void writeVTK(BlockLatticeT& lattice,
-              IncomprFlowParam<T> const& parameters, plint iter)
-{
-    T dx = parameters.getDeltaX();
-    T dt = parameters.getDeltaT();
-
-#ifdef MSVC
-	VtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), dx);
-#else
-	ParallelVtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), 3, dx);
-#endif
-
-    vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx/dt);
-    //vtkOut.writeData<3,float>(*computeVelocity(lattice), "velocity", dx/dt);
-    //vtkOut.writeData<3,float>(*computeVorticity(*computeVelocity(lattice)), "vorticity", 1./dt);
 }
 
 int main(int argc, char* argv[])
@@ -387,7 +360,6 @@ int main(int argc, char* argv[])
             pcout << "step " << iT << "; t=" << iT*parameters.getDeltaT() << std::endl;
             
             writeGifs(lattice, parameters, iT);
-            //writeVTK (lattice, parameters, iT);
         }
 
         // Execute a time iteration.
