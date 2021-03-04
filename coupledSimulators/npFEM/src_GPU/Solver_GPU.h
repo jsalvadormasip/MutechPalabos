@@ -62,27 +62,30 @@ namespace npfem {
 class LSSolver;
 class Constraint;
 class Force;
-typedef std::vector<std::shared_ptr<Constraint> > Constraints;
+typedef std::vector<std::shared_ptr<Constraint>> Constraints;
 typedef std::vector<std::shared_ptr<Force> > Forces;
 typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> MatrixDyn;
 ///////////////////////////////////////////////////////////////////////////////
 /** \brief ShapeOp Solver. This class implements the main ShapeOp solver based on \cite Bouaziz2012 and \cite Bouaziz2014.*/
 class SHAPEOP_API Solver_GPU {
 private:
-    void construct(const MatrixXX &points,
+    void construct(const MatrixXX &points, const std::vector<Matrix3X>& points_diff,
                    const std::vector< std::vector<int> > &triangles,
                    const std::vector<bool> &onSurfaceParticle,
-                   std::vector<std::shared_ptr<Constraint>>& constraints, Mesh_info params, float cbeta,
-                   const int nb_cells = 1, Scalar phys_timestep = 1, Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
+                   std::vector<std::vector<std::shared_ptr<Constraint>>> &constraints, Mesh_info params, float cbeta,
+                   const int nb_cells = 1, Scalar phys_timestep = 1,
+                   Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
+
     int starting_ids = 0;
 
 public:
     Solver_GPU(){};
-    Solver_GPU(const MatrixXX &points,
+    Solver_GPU(const MatrixXX &points, const std::vector<Matrix3X>& points_diff,
                const std::vector< std::vector<int> > &triangles,
                const std::vector<bool> &onSurfaceParticle,
-               std::vector<std::shared_ptr<Constraint>>& constraints, Mesh_info params, float cbeta,
-               const int nb_cells = 1, Scalar phys_timestep = 1, Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
+               std::vector<std::vector<std::shared_ptr<Constraint>>> &constraints, Mesh_info params, float cbeta,
+               const int nb_cells = 1, Scalar phys_timestep = 1, 
+               Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
 
     Solver_GPU(const MatrixXX &points,
                const std::vector< std::vector<int>> &triangles,
@@ -105,6 +108,7 @@ public:
   std::shared_ptr<Force> &getForce(int id);
   /** \brief Set the points.*/
   void setPoints(const Matrix3X &p, const int nb_cells = 1);
+  void setPoints(const Matrix3X &p, const std::vector<Matrix3X>& points_diff, const int nb_cells);
   /** \brief Set the timestep for the dynamics.*/
   void setTimeStep(Scalar timestep);
   /** \brief Set the velocity damping for the dynamics.*/
@@ -119,7 +123,7 @@ public:
   /** \brief Initialize the ShapeOp linear system and the different parameters.
   \return true if successfull */
 
-  bool initialize(Scalar timestep = 1.0);
+  bool initialize(int nb_shapes, Scalar timestep = 1.0);
   /** \brief Solve the constraint problem by projecting and merging.
     \return true if successfull */
   void compute_first_centroid();
@@ -160,6 +164,7 @@ public:
   void set_Palabos_Forces(const Matrix3X &force_matrix, const int cell_id);
   void shiftPoints(Vector3 vec);
   void flatten_constraints();
+  void flatten_constraints(int nb_shapes);
   void rotatePoints(const std::string& axis, const Scalar& theta);
   void set_onSurfaceParticle(const std::vector<bool>& onSurfaceParticle);
 
@@ -198,7 +203,7 @@ public:
   //Static
   Matrix3X points_;
   Matrix3X projections_;
-  Constraints constraints_;
+  std::vector<std::vector<std::shared_ptr<Constraint>>> constraints_;
   std::shared_ptr<LSSolver> solver_;
   SparseMatrix At_;
   SparseMatrix N_;

@@ -209,7 +209,8 @@ void project_Bending(int tid, int n_points, int n_constraints, int n_projected_p
 		e2 = w0_*points_d[IDX(idI0_, 2, n_points)] + w1_*points_d[IDX(idI1_, 2, n_points)] + w2_*points_d[IDX(idI2_, 2, n_points)] + w3_*points_d[IDX(idI3_, 2, n_points)];
 
 		cuda_scalar l = Norm_3(e0, e1, e2);
-
+        
+        
 		if (l > 1e-6){
 			e0 /= l;
 			e1 /= l;
@@ -220,7 +221,7 @@ void project_Bending(int tid, int n_points, int n_constraints, int n_projected_p
 			e2 *= l;
 		}
 	}
-
+  
 	projections_d[IDX(idO_, 0, n_projected_points)] = weight_*e0;
 	projections_d[IDX(idO_, 1, n_projected_points)] = weight_*e1;
 	projections_d[IDX(idO_, 2, n_projected_points)] = weight_*e2;
@@ -375,6 +376,11 @@ void project_Area(int tid, int n_points, int n_constraints, int n_projected_poin
 	projections_d[IDX(idO_, 0, n_projected_points)] = weight_*PF00; projections_d[IDX(idO_ + 1, 0, n_projected_points)] = weight_*PF01;
 	projections_d[IDX(idO_, 1, n_projected_points)] = weight_*PF10; projections_d[IDX(idO_ + 1, 1, n_projected_points)] = weight_*PF11;
 	projections_d[IDX(idO_, 2, n_projected_points)] = weight_*PF20; projections_d[IDX(idO_ + 1, 2, n_projected_points)] = weight_*PF21;
+
+    //if (idI0_ == 0 && blockIdx.x == 0) {
+       // printf(" projections_d[IDX(idO_, 0, n_projected_points)] %f %d ", projections_d[IDX(idO_, 0, n_projected_points)], idI0_);
+   // }
+
 }
 
 ////////////////////////////////////////
@@ -459,6 +465,7 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
 		F00, F01,
 		F10, F11);
 
+
 	// [U SIG V] = SVD(F)
 	// SVD
 	cuda_scalar U00, U01,
@@ -490,12 +497,12 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
 	printf("singular %f %f \n", SIG00, SIG11);
 	}
 	*/
-
 	cuda_scalar A = -0.5*A_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)];
-
+    /*
     if (tri_id == 0 && blockIdx.x == 0)printf("edge [%f %f %f] [%f %f %f] rest [%f %f | %f %f] A %f id %d %d %d\n",
         edges00, edges10, edges20, edges01, edges11, edges21,
         rest00_, rest01_, rest10_, rest11_, A, idI0_, idI1_, idI2_);
+    */
 	//none linear business
 	E_nonePD_d[blockIdx.x*n_constraints + tid] = A_d[ID_MULTI_ONE(blockIdx.x, tid, n_constraints)]*(f_tr(SIG00, miu, lambda, kappa) + f_tr(SIG11, miu, lambda, kappa))/2.;
 	//printf("e_non_pd %f %f\n", E_nonePD_d[tid], A_d[tid]);
@@ -526,7 +533,7 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
 	if (idI0_ == 0 && idI1_ == 1 && idI2_ == 2) {
 	printf("Piola %f %f \nPiola %f %f A %f \n", F00, F01, F10, F11, A_d[tid]);
 	}
-	*/  
+	*/
 	// tmp =  Piola*rest_T
 	Matrix_Product_22_22(F00, F01,
 		F10, F11,
@@ -551,21 +558,22 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
 		F20, F21);
 	/*
 	if (idI0_ == 0 && idI1_ == 1 && idI2_ == 2) {
-	printf("P*Piola*rest %f %f \nP*Piola*rest %f %f\n P*Piola*rest %f %f\n", A*F00, A*F01, A*F10, A*F11, A*F20, A*F21);
+	    printf("P*Piola*rest %f %f \nP*Piola*rest %f %f\n P*Piola*rest %f %f\n", A*F00, A*F01, A*F10, A*F11, A*F20, A*F21);
 	}
 	*/
     /*
-    if (tri_id == 0)printf("force intern [%f %f %f] [%f %f %f] [%f %f %f]\n",
+    if(tri_id == 0 && blockIdx.x == 0)printf("force intern [%f %f %f] [%f %f %f] [%f %f %f] \n",
                             A*(-F00 - F01), A*(-F10 - F11), A*(-F20 - F21),
                             A*F00, A*F10, A*F20, A*F01, A*F11, A*F21);
     */
     force_intern_cont[IDX(3*tri_id, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F00 - F01);
     force_intern_cont[IDX(3*tri_id, 1, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F10 - F11);
     force_intern_cont[IDX(3*tri_id, 2, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F20 - F21);
-    
+    //
     force_intern_cont[IDX(3*tri_id + 1, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*F00;
     force_intern_cont[IDX(3*tri_id + 1, 1, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*F10;
     force_intern_cont[IDX(3*tri_id + 1, 2, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*F20;
+    //if(blockIdx.x == 1 && IDX(3*tri_id + 1, 2, 3*nb_tri) + 9*blockIdx.x*nb_tri >  2*9*nb_tri)printf(" PAFF  %d  %.17g  id %d  nb %d\n", IDX(3 * tri_id + 1, 2, 3 * nb_tri) + 9 * blockIdx.x*nb_tri, A*F20, tri_id, nb_tri);
     
     force_intern_cont[IDX(3*tri_id + 2, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*F01;
     force_intern_cont[IDX(3*tri_id + 2, 1, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*F11;

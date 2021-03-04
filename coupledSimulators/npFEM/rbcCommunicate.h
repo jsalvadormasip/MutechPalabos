@@ -239,7 +239,7 @@ template <typename T>
 void receiveBodiesVelocities(std::map<pluint, pluint>& bodyToProc, std::vector<ShapeOpBody<T>>& shapeOpBodies, T dx, T dt, T rho)
 {
     // From physical to lattice units (From ShapeOp to Palabos)
-    T Cu = dt/dx;
+    T Cu = dt / dx;
 
     typename std::map<pluint, LocalMesh<T>*>::iterator it = LocalMeshes<T>().begin();
     for (; it != LocalMeshes<T>().end(); ++it)

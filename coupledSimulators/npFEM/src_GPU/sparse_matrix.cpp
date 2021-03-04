@@ -95,7 +95,7 @@ sparse_matrix_cuda make_sparse_from_full(double *mat, int rows, int cols, int nb
 				out.value[i + k*rows] = mat[id];
 				out.index[i + k*rows] = j;
 
-				if(i==0)printf("mat %f | %d %d |  %d \n", out.value[i + k*rows], i, out.index[i + k*rows], i + k*rows);
+				//if(i==0)printf("mat %f | %d %d |  %d \n", out.value[i + k*rows], i, out.index[i + k*rows], i + k*rows);
 				k++;
 				if (k >= degree) {
 					break;

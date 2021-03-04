@@ -693,22 +693,26 @@ __device__ void project_d(int n_points, int n_constraints, int n_projected_point
 		//if(threadIdx.x == n_points - 1)printf("tid %d \n", ConstraintType_d[tid]);
         
 		if (ConstraintType_d[tid] == 1) {
+                      
 			project_Area(tid, n_points, n_constraints, n_projected_points,
 						 points_d, projections_d, f_int_nonePD_d,
 						 ConstraintType_d, idO_d, rangeMin_d, rangeMax_d, Scalar1_d, weight_d, E_nonePD_d,
 						 idI_d, vectorx_d, matrix22_d, matrix33_d);
-
+            
 		} else if (ConstraintType_d[tid] == 3) {
+            
 			project_Bending(tid, n_points, n_constraints, n_projected_points,
 							points_d, projections_d, f_int_nonePD_d,
 							ConstraintType_d, idO_d, rangeMin_d, rangeMax_d, Scalar1_d, weight_d, E_nonePD_d,
 							idI_d, vectorx_d, matrix22_d, matrix33_d);
-
+            
 		} else if (ConstraintType_d[tid] == 5) {
+
 			project_surface_material(tid, tid - surface_id0, n_points, n_constraints, n_projected_points, nb_tri,
 									 points_d, projections_d, force_intern_cont, f_int_nonePD_d,
 									 ConstraintType_d, idO_d, rangeMin_d, rangeMax_d, Scalar1_d, weight_d, E_nonePD_d,
 									 idI_d, vectorx_d, matrix22_d, matrix33_d, A_d, miu, lambda, kappa);
+            
 		}
         																						
         																				 
@@ -785,46 +789,48 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
                input.velocities[point_id], input.velocities[point_id + x_n], input.velocities[point_id + 2*x_n], h);
 	}
 	*/
+ 
 	sim.points_last_iter[point_id        ] = input.points[point_id        ];
 	sim.points_last_iter[point_id +   x_n] = input.points[point_id +   x_n];
 	sim.points_last_iter[point_id + 2*x_n] = input.points[point_id + 2*x_n];
 
     __syncthreads();
 
-	//#ifdef DEBUG
-	if (threadIdx.x == 102 && blockIdx.x == BL) {
+    #ifdef DEBUG
+	if (threadIdx.x == 5 && blockIdx.x == 0) {
 		printf("points %.17g %.17g %.17g | %d h %f\n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], blockIdx.x, h);
 	}
-	//#endif
+    #endif
 	//center_d(input.points, x_n, volume_der, center, point_id);
 	input.points[point_id        ] -= sim.center[3*blockIdx.x    ];
 	input.points[point_id +   x_n] -= sim.center[3*blockIdx.x + 1];
 	input.points[point_id + 2*x_n] -= sim.center[3*blockIdx.x + 2];
 
 	#ifdef DEBUG
-		if (threadIdx.x == 102 && blockIdx.x == BL) {
-			printf("forces %f %f %f | %d \n", input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2 * x_n], blockIdx.x);
-			printf("velocity %f %f %f | %d \n", input.velocities[point_id], input.velocities[point_id + x_n], input.velocities[point_id + 2 * x_n], blockIdx.x);
-			printf("points %f %f %f | %d \n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], blockIdx.x);
-		}
+    if (threadIdx.x == 5 && blockIdx.x == 0) {
+    	printf("forces %f %f %f | %d \n", input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n], blockIdx.x);
+    	printf("velocity %f %f %f | %d \n", input.velocities[point_id], input.velocities[point_id + x_n], input.velocities[point_id + 2*x_n], blockIdx.x);
+    	printf("points %.17g %.17g %.17g | %d \n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], blockIdx.x);
+    }
 	#endif
 
 	//printf("coll.total_neighbours %f \n", coll.total_neighbours);
 	//if(threadIdx.x == 0)printf("nb voisin %d \n", coll.nb_neighbours[blockIdx.x + 1] - coll.nb_neighbours[blockIdx.x]);
-
+ 
 	if(coll.nb_neighbours[blockIdx.x + 1] - coll.nb_neighbours[blockIdx.x]  > 0){
 		nearest_neighbor_linear_d(input.points, coll.colid_points, coll.colid_normals, sim.nearest_points, sim.nearest_normals, sim.center + 3*blockIdx.x, 
 								  coll.nb_neighbours[blockIdx.x], coll.nb_neighbours[blockIdx.x + 1], x_n, point_id, info.threshold_rep, info.threshold_nonRep);
 	}
 
 	__syncthreads();
+
 	//compute momentum, set point = momentum
 	//printf("%f %f %f |%d\n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], point_id);
 	momentum_points_first_guess3(input.points, input.velocities, mesh.M_tild_inv, input.forces_ex, sim.momentum, mesh.mass, h, x_n, point_id);
-    
-	#ifdef DEBUG
-		if (threadIdx.x == 102 && blockIdx.x == BL)printf("momentum %.17g %.17g %.17g \n", sim.momentum[threadIdx.x], sim.momentum[threadIdx.x + x_n], sim.momentum[threadIdx.x + 2*x_n]);
-	#endif
+
+#ifdef DEBUG
+    if (threadIdx.x == 5 && blockIdx.x == 0)printf("momentum %.17g %.17g %.17g  %d \n", input.points[threadIdx.x], input.points[threadIdx.x + x_n], input.points[threadIdx.x + 2*x_n], threadIdx.x + 2*x_n);
+#endif
 	__syncthreads();
 	
 	sim.force_npd[point_id        ] = 0;
@@ -842,6 +848,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 			  mesh.idI, mesh.vectorx, mesh.matrix22, mesh.matrix33, mesh.A, info.miu, info.lambda, info.kappa);
 
     __syncthreads();
+
 	project_collision_d(x_n, input.points, sim.nearest_points, sim.nearest_normals, 
                         sim.force_npd, sim.E_nonePD, point_id, info.n_constraints, info.weight_col_rep, 
                         info.threshold_rep, info.weight_col_nonRep, info.threshold_nonRep, info.beta_morse);
@@ -852,6 +859,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
                                                     mesh.vertex_to_tri, mesh.vertex_pos, info.n_triangles,
                                                     mesh.mass, input.points, sim.momentum, sim.projections, sim.E_nonePD, sim.force_intern_cont, sim.force_npd,
 													h*h, x_n, info.idO, info.n_constraints, info.sum_points, sim.gradient, buffer, volume_der, point_id);  
+    
     /*
     if (threadIdx.x == 102 && blockIdx.x == BL) {
         printf("sim.force_npd %.17g %.17g %.17g  G %.17g %.17g %.17g | %d h %f it %d\n", sim.force_npd[point_id], sim.force_npd[point_id + x_n], sim.force_npd[point_id + 2*x_n], 
@@ -919,12 +927,16 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 		//comput q according to s, t and rho
 		__syncthreads();
 		l_bfg_d(sim.s, sim.t, sim.rho, sim.alpha, sim.q, tail, head, x_n, info.nb_cells, info.sum_points, buffer, point_id);
+
 		//descent_direction = inv(H)*q
 		__syncthreads();
 		mat_vect_mult3(mesh.N_inv_dense, sim.q, sim.descent_direction, x_n, point_id);
+
 		//correct descent_direction accordind to s, t rho and alpha
 		__syncthreads();
+
 		l_bfg2_d(sim.s, sim.t, sim.rho, sim.alpha, sim.descent_direction, tail, head, x_n, info.nb_cells, info.sum_points, buffer, point_id);
+
 		//armijo condition gradient = gradient(xk)
 		__syncthreads();
 		trace_x_time_y3(sim.gradient, sim.descent_direction, &directional_derivative_prev, x_n, point_id, info.sum_points, buffer);
@@ -933,7 +945,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 		line_search_it = 0;
 
 		while (line_search_it < MAX_LINE_SEARCH) {
-			//if(threadIdx.x==0)printf("line %d \n", line_search_it);
+
 			__syncthreads();
 			a /= 2.;
 	#ifdef DEBUG
@@ -1040,7 +1052,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	//input.points[point_id +2*x_n] += center[2];
 	
 	#ifdef DEBUG
-	if (threadIdx.x == 102)printf("point GPU %f %f %f \n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n]);
+	if (threadIdx.x == 52 && (blockIdx.x == 0 || blockIdx.x == 1))printf("point GPU %f %f %f  |%d %d\n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2*x_n], blockIdx.x, gridDim.x);
 	#endif
 
 	input.points[point_id       ] += sim.center[3*blockIdx.x    ];
@@ -1137,7 +1149,6 @@ void compute_next_frame_rbc(Mesh_info  *info, Mesh_data *mesh, Simulation_input 
 	//std::cout << "WTF " << info->nb_cells << " "<< info->n_points  << " " << h << " " << h_2  << " it max " << it_max << std::endl;
     if(info->nb_cells)
 	    HANDLE_KERNEL_ERROR(compute_next_frame_rbc_g<<< info->nb_cells, info->n_points, info->n_points*(sizeof(double) + 3*sizeof(cuda_scalar)), str->stream >>>(*info,*mesh,*input, *sim, *coll, h, h_2, it_max));
-
 }
 
 void debug_matrix_from_gpu(double *mat_d, int n) {

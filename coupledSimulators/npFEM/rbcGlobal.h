@@ -48,6 +48,50 @@ namespace plb {
 namespace npfem {
 
 template <typename T>
+RawConnectedTriangleMesh<T> generateRBC(const T& dx_p = 1.0, const T& R = 3.91, const T& c0 = 0.1035805, const T& c1 = 1.001279, const T& c2 = -0.561381, const T& numTriangles = 258)
+{
+    typedef typename TriangleSet<T>::Triangle Triangle;
+
+    T epsilon = R * 1.e-4;
+    T RSqr = R*R;
+
+    TriangleSet<T> rbc = constructSphere(Array<T, 3>::zero(), R, numTriangles);
+
+    std::vector<Triangle> triangles = rbc.getTriangles();
+    for (pluint i = 0; i<triangles.size(); ++i)
+    {
+        Triangle& triangle = triangles[i];
+        for (pluint j = 0; j<3; ++j)
+        {
+            Array<T, 3>& vertex = triangle[j];
+            T& x = vertex[0];
+            T& y = vertex[1];
+            T& z = vertex[2];
+            T rSqr = x*x + z*z;
+            T ratio = rSqr / RSqr;
+            if (ratio < 1. - epsilon)
+            {
+                T yFormula = R*sqrt(1 - ratio)*(c0 + c1*ratio + c2*ratio*ratio);
+
+                // To achieve a more discoid shape use the following
+                //T yFormula = R*sqrt(1 - ratio*ratio)*(c0 + c1*ratio + c2*ratio*ratio);
+
+                if (y>epsilon)
+                    y = yFormula;
+                else if (y<epsilon)
+                    y = -yFormula;
+            }
+
+            vertex /= dx_p; // convert to lattice units
+        }
+    }
+    TriangleSet<T> rbc_(triangles);
+    rbc_.rotate(0, std::acos(-1) / 2, 0);
+
+    return triangleSetToConnectedTriangleMesh<T>(rbc_);
+}
+
+template <typename T>
 struct LocalMesh
 {
 

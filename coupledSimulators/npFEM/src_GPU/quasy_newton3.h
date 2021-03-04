@@ -115,11 +115,11 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 	for (j = 0; j< M_star.degree; j++) {  
 		column_id = M_star.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, M_star.degree*blockDim.x)] + x_adress_shift;
         matrix_value = M_star.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, M_star.degree*blockDim.x)];
+
 		tpx += (x[column_id        ] - y[column_id        ])*matrix_value;
 		tpy += (x[column_id +   x_n] - y[column_id +   x_n])*matrix_value;
 		tpz += (x[column_id + 2*x_n] - y[column_id + 2*x_n])*matrix_value; // /h2/2;
 	}	
-    
 	//E = (x-y)M_star(x-y)/2
 	buffer[threadIdx.x] = (tpx*x_yx + tpy*x_yy + tpz*x_yz)/ 2;
 
@@ -134,8 +134,8 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 	//G += L*x
 	for (j = 0; j< L.degree; j++) {
 		column_id    = L.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, L.degree*blockDim.x)] + x_adress_shift;
-		matrix_value = L.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, L.degree*blockDim.x)];
-        if (threadIdx.x == 0 && blockIdx.x == 0)printf(" L %d %f %f \n", column_id, matrix_value, x[column_id]*matrix_value);
+		matrix_value = L.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, L.degree*blockDim.x)];      
+        
 		tpx += x[column_id          ]*matrix_value;
 		tpy += x[column_id +     x_n]*matrix_value;
 		tpz += x[column_id + 2 * x_n]*matrix_value;	
@@ -155,10 +155,7 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 	for (j = 0; j< J.degree; j++) {
 		column_id    = J.index[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)] + p_adress_shift;
         matrix_value = J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)];
-        if (threadIdx.x == 0 && blockIdx.x == 0)printf(" J %d %f %f \n", column_id, matrix_value, p[column_id]*matrix_value);
-        //if (J.value[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)] != J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)]) {
-        ///    printf("%d %d %f %f \n", threadIdx.x, j, J.value[ID_COL_MULTI(0, threadIdx.x, j, x_n, J.degree*blockDim.x)], J.value[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, x_n, J.degree*blockDim.x)]);
-        //}
+
 		tpx += p[column_id          ]*matrix_value;
 		tpy += p[column_id +     p_n]*matrix_value;
 		tpz += p[column_id + 2 * p_n]*matrix_value;
@@ -169,8 +166,6 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
 	__syncthreads();
 	//E-= x'*J*p
 	buffer[threadIdx.x] -= (tpx*xx + tpy*xy + tpz*xz);
-
-    //if(id == 102)printf(" -Jp tpx %.17g \n", tpx);
 
     gradientx -= tpx;
     gradienty -= tpy;
@@ -189,11 +184,7 @@ __device__ double eval_objectif_and_grandient3(const sparse_matrix_cuda L, const
         tpy += force_intern_cont[IDX(3*tri_id + pos, 1, 3*nb_tri) + 9*blockIdx.x*nb_tri];
         tpz += force_intern_cont[IDX(3*tri_id + pos, 2, 3*nb_tri) + 9*blockIdx.x*nb_tri];
 	}
-
-    if (threadIdx.x == 0 && blockIdx.x == 0) {
-        printf("gradient %f  %f %f %f \n", gradientx - tpx - f_nonePD[id], gradientx, tpx, f_nonePD[id]);
-
-    }
+  
 	gradient[id        ] = gradientx - tpx - f_nonePD[id        ];
 	gradient[id +   x_n] = gradienty - tpy - f_nonePD[id +   x_n];
 	gradient[id + 2*x_n] = gradientz - tpz - f_nonePD[id + 2*x_n];
@@ -316,12 +307,10 @@ __device__ void comput_s_t_rho_d(const double *point, const double *prev_point, 
 
 	if (threadIdx.x == 0) {
 		rho[CIRCULAR_ID(head, MEM_SIZE)*nb_cell + blockIdx.x] = buffer[0];
-		//printf("rho %f \n", rho[CIRCULAR_ID(head, MEM_SIZE)*nb_cell + blockIdx.x]);
 	}
 }
 
 __device__ void x__plus_equal_alpha_time_y3(const double *y, double *x, const double alpha, const int n, const int id) {
-	//if (threadIdx.x == 0)printf("x %f %f %f y %f %f %f alpha %f\n", x[id], x[id + n], x[id + 2 * n], y[id], y[id + n], y[id + 2 * n], alpha);
 
 	x[id      ] += alpha*y[id      ];
 	x[id +   n] += alpha*y[id +   n];
@@ -335,12 +324,8 @@ __device__ void l_bfg_d(const double *s, const double *t, const double *rho, dou
 	double qy = q[id +     n];
 	double qz = q[id + 2 * n];
 
-	//if(threadIdx.x == 0)printf("q %f %f %f \n", qx, qy, qz);
-
 	for (int i = head - 1; i >= tail; i--) {
 		int s_id = CIRCULAR_ID(i, MEM_SIZE)*3*n*nb_cell + id;
-
-		//double local_rho = rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x];
 
 		alpha[threadIdx.x] =  (s[s_id        ])*qx;
 		alpha[threadIdx.x] += (s[s_id +     n])*qy;
@@ -356,8 +341,6 @@ __device__ void l_bfg_d(const double *s, const double *t, const double *rho, dou
 			local_alpha = alpha[0]/rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x];
 		}
 		alpha_global[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x] = local_alpha;
-		//if(id == 0)printf("alpha %.16g %.16g %.16g\n", alpha[0]/rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x], alpha[0], rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x]);
-		//if(id == 0)printf("alpha %.16g  rho %f\n", local_alpha, rho[CIRCULAR_ID(i, MEM_SIZE)*nb_cell + blockIdx.x] );
 
 		qx -= local_alpha*t[s_id        ];
 		qy -= local_alpha*t[s_id +     n];
@@ -414,6 +397,7 @@ __device__ void  mat_vect_mult3(const double *A, const double *x, double *result
     //a thread is a equation line, 
 	for (int j = 0; j< n; j++) {
 		A_coef = A[ID_COL_MULTI(blockIdx.x, threadIdx.x, j, n, n*n)];
+    
 		tp_index = blockIdx.x*3*n + j;
 		Ax_x += x[tp_index      ]*A_coef;
 		Ax_y += x[tp_index +   n]*A_coef;

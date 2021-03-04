@@ -147,7 +147,6 @@ SHAPEOP_INLINE std::shared_ptr<Constraint> Constraint::shapeConstraintFactory(
 
     return c;
 }
-
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE Constraint::Constraint(const std::vector<int>& idI, Scalar weight)
     : idI_(idI)

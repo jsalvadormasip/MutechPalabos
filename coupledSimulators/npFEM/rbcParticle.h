@@ -169,26 +169,32 @@ class ConstructLocalMeshesFromParticles : public BoxProcessingFunctional3D
 {
 public:
     ConstructLocalMeshesFromParticles(RawConnectedTriangleMesh<T>* rbcTemplate_, RawConnectedTriangleMesh<T>* pltTemplate_,
-            std::map<pluint, pluint> bodyToType_,
-            plint particleEnvelopeWidth_);
+            std::map<pluint, pluint>& bodyToType_, std::map<pluint, Array<T, 4> >& bodyToShapeParams_, std::map<pluint, RawConnectedTriangleMesh<T> >& bodyToShapeParams_RawConnectedTriangleMesh_,
+            plint particleEnvelopeWidth_, T dx_p_);
     virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> blocks);
     virtual ConstructLocalMeshesFromParticles<T, Descriptor>* clone() const;
     virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
 private:
     RawConnectedTriangleMesh<T> *rbcTemplate, *pltTemplate;
     std::map<pluint, pluint> bodyToType;
+    std::map<pluint, Array<T, 4> > bodyToShapeParams;
+    std::map<pluint, RawConnectedTriangleMesh<T> > bodyToShapeParams_RawConnectedTriangleMesh;
     plint particleEnvelopeWidth;
+    T dx_p;
 };
 
 template <typename T, template <typename U> class Descriptor>
 ConstructLocalMeshesFromParticles<T, Descriptor>::
     ConstructLocalMeshesFromParticles(RawConnectedTriangleMesh<T>* rbcTemplate_, RawConnectedTriangleMesh<T>* pltTemplate_,
-            std::map<pluint, pluint> bodyToType_,
-            plint particleEnvelopeWidth_)
+            std::map<pluint, pluint>& bodyToType_, std::map<pluint, Array<T, 4> >& bodyToShapeParams_, std::map<pluint, RawConnectedTriangleMesh<T> >& bodyToShapeParams_RawConnectedTriangleMesh_,
+            plint particleEnvelopeWidth_, T dx_p_)
     : rbcTemplate(rbcTemplate_)
     , pltTemplate(pltTemplate_)
     , bodyToType(bodyToType_)
+    , bodyToShapeParams(bodyToShapeParams_)
+    , bodyToShapeParams_RawConnectedTriangleMesh(bodyToShapeParams_RawConnectedTriangleMesh_)
     , particleEnvelopeWidth(particleEnvelopeWidth_)
+    , dx_p(dx_p_)
 {
 }
 
@@ -221,10 +227,14 @@ void ConstructLocalMeshesFromParticles<T, Descriptor>::processGenericBlocks(
         {
             // if RBC
             if (bodyToType[bodyID] == 0)
-                LocalMeshes<T>()[bodyID] = new LocalMesh<T>(*rbcTemplate, bodyID);
+            {
+                LocalMeshes<T>()[bodyID] = new LocalMesh<T>(bodyToShapeParams_RawConnectedTriangleMesh[bodyID], bodyID);
+            }
             // if PLT
             if (bodyToType[bodyID] == 1)
+            {
                 LocalMeshes<T>()[bodyID] = new LocalMesh<T>(*pltTemplate, bodyID);
+            }
 
             it = LocalMeshes<T>().find(bodyID);
         }
@@ -629,12 +639,6 @@ void CollisionsForcesCombo<T, Descriptor>::processGenericBlocks(
             
             // Shear Force
             shearForce = area*(Descriptor<T>::invRho(singleValRhoBar)*(omega / (T)2. - (T)1.)*singleValPi_n);
-
-            SymmetricTensorImpl<T, 3>::matVectMult(singleValPiNeq, normal, singleValPi_n);
-            
-            //std::cout << " singleValPi_n " << singleValPi_n[0] << " " << singleValPi_n[1] << " " << singleValPi_n[2]  <<"  SymmetricTensorImpl<T, 3>::n  " << SymmetricTensorImpl<T, 3>::n << std::endl;
-            //std::cout << " shearForce " << shearForce[0] << " " << shearForce[1] << " " << shearForce[2] <<" area " << area << "(Descriptor<T>::invRho(singleValRhoBar)  " << Descriptor<T>::invRho(singleValRhoBar)  << " omega " << (omega/(T)2. - (T)1.) << std::endl ;
-            
         }
         else
         {
