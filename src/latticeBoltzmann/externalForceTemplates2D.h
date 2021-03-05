@@ -115,7 +115,7 @@ static T heForcedBGKCollision (
     
     Array<T,descriptors::ForcedD2Q9Descriptor<T>::d> uLB(j[0]*invRho, j[1]*invRho);
     const T uSqrLB = VectorTemplateImpl<T,descriptors::ForcedD2Q9Descriptor<T>::d>::normSqr(uLB);
-    
+
     dynamicsTemplatesImpl<T,descriptors::D2Q9DescriptorBase<T> >::bgk_ma2_collision(f, rhoBar, j, omega);
     
     for (plint iPop=0; iPop < descriptors::ForcedD2Q9Descriptor<T>::q; ++iPop) {
@@ -125,8 +125,8 @@ static T heForcedBGKCollision (
         f[iPop] += (1-omega/(T)2)*descriptors::ForcedD2Q9Descriptor<T>::invCs2 * ug * dynamicsTemplatesImpl<T,descriptors::ForcedD2Q9Descriptor<T> >
             ::bgk_ma2_equilibrium( iPop, (T)1, (T)1, uLB, uSqrLB );
     }
-    T uSqr = util::sqr(uLB[0] + 0.5*force[0]) +
-             util::sqr(uLB[1] + 0.5*force[1]);
+    T uSqr = util::sqr(uLB[0]) +
+             util::sqr(uLB[1]);
     return uSqr;
 }
 

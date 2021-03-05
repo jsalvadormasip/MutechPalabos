@@ -202,7 +202,7 @@ static T heForcedBGKCollision (
 	
 	T uSqr = T();
 	for (int iD=0; iD<Descriptor::d; ++iD) {
-		uSqr += util::sqr(uLB[iD] + 0.5*force[iD]);
+		uSqr += util::sqr(uLB[iD]);
 	}
     
     return uSqr;
