@@ -10,6 +10,27 @@ project(palabos)
 
 enable_language(CXX)
 
+###############################################################################
+# Palabos Library
+###############################################################################
+
+file(GLOB_RECURSE PALABOS_SRC "src/*.cpp")
+file(GLOB_RECURSE EXT_SRC "externalLibraries/tinyxml/*.cpp")
+
+add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
+# PUBLIC directories are propagated to projects that links to palabos library
+target_include_directories(palabos
+    PUBLIC 
+        "src"
+        "externalLibraries"
+        "externalLibraries/Eigen3"
+)
+
+# Add character 'd' to target compiled with DEBUG configuration
+set_target_properties(palabos PROPERTIES DEBUG_POSTFIX "d")
+
+###############################################################################
+
 # This compiles Palabos library and all the examples
 # It is used mainly for Continuous Integration (CI)
 option(CI "Compile Everything (Continuous Integration)" ON)
@@ -25,18 +46,24 @@ message(${CMAKE_BUILD_TYPE})
 # Append flags: set(CMAKE_XXX_FLAGS "${CMAKE_XXX_FLAGS} ...")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     message("GCC.")
-    set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
+    target_compile_options(palabos PRIVATE 
+                    -std=c++11 -Wall -Wnon-virtual-dtor
+                    $<$<CONFIG:Release>:-O3 -DNDEBUG>
+                    $<$<CONFIG:Debug>:-g -DPLB_DEBUG -O0>
+    )
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     message("Clang.")
-    set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
+    target_compile_options(palabos PRIVATE 
+                    -std=c++11 -Wall -Wnon-virtual-dtor
+                    $<$<CONFIG:Release>:-O3 -DNDEBUG>
+                    $<$<CONFIG:Debug>:-g -DPLB_DEBUG -O0>
+    )
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
     message("MSVC.")
-    set(CMAKE_CXX_FLAGS_RELEASE "/Ox /Ot /GS- /GL /DNDEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG "/DPLB_DEBUG")
+    target_compile_options(palabos PRIVATE 
+                    $<$<CONFIG:Release>:/Ox /Ot /GS- /GL /DNDEBUG>
+                    $<$<CONFIG:Debug>:/DPLB_DEBUG>
+    )
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/LTCG /INCREMENTAL:NO /OPT:REF")
 else()
     message( FATAL_ERROR "CXX compiler not recognized. CMake will quit." )
@@ -48,9 +75,12 @@ if(ENABLE_MPI)
     find_package(MPI REQUIRED)
     if(MPI_CXX_FOUND)
         #set(CMAKE_CXX_COMPILER "${MPI_CXX_COMPILER}")
-        include_directories(${MPI_CXX_INCLUDE_PATH})
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
-        add_definitions(-DPLB_MPI_PARALLEL)
+        target_include_directories(palabos PUBLIC ${MPI_CXX_INCLUDE_PATH})
+        # This function append to previous options
+        target_compile_options(palabos PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${MPI_CXX_COMPILE_FLAGS}>)
+        target_compile_definitions(palabos PUBLIC -DPLB_MPI_PARALLEL)
+        # palabos does not need to link MPI to compile, however any code that consumes it must link MPI libraries
+        target_link_libraries(palabos INTERFACE ${MPI_CXX_LIBRARIES})
     endif()
 endif()
 
@@ -62,29 +92,17 @@ endif()
 
 if(ENABLE_POSIX)
     message("Enabling POSIX")
-    add_definitions(-DPLB_USE_POSIX)
+    target_compile_definitions(palabos PRIVATE -DPLB_USE_POSIX)
 endif()
 
 if(APPLE)
-    add_definitions(-DPLB_MAC_OS_X)
+    target_compile_definitions(palabos PRIVATE -DPLB_MAC_OS_X)
 endif()
 
 if(WIN32 OR CYGWIN)
-    add_definitions(-DPLB_WINDOWS)
+    target_compile_definitions(-DPLB_WINDOWS)
 endif()
-
 ###############################################################################
-# Palabos Library
-###############################################################################
-
-include_directories("src")
-include_directories("externalLibraries")
-include_directories("externalLibraries/Eigen3")
-
-file(GLOB_RECURSE PALABOS_SRC "src/*.cpp")
-file(GLOB_RECURSE EXT_SRC "externalLibraries/tinyxml/*.cpp")
-
-add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 
 ###############################################################################
 
