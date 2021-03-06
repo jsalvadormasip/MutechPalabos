@@ -33,7 +33,7 @@ set_target_properties(palabos PROPERTIES DEBUG_POSTFIX "d")
 
 # This compiles Palabos library and all the examples
 # It is used mainly for Continuous Integration (CI)
-option(CI "Compile Everything (Continuous Integration)" ON)
+option(CI "Compile Everything (Continuous Integration)" OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")

@@ -44,8 +44,8 @@ cmake:
     script: 
         - pwd
         - cd build
-        - cmake ..
-        - make -j4
+        - cmake .. -DCI=ON
+        - make -j4 VERBOSE=1
 
 pages:
     stage: deploy
