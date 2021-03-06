@@ -19,14 +19,18 @@ endif()
 # npFEM Library (Compile npFEM separately)
 ###############################################################################
 
-include_directories("../../../coupledSimulators")
-include_directories("../../../coupledSimulators/npFEM")
 
 file(GLOB NPFEM_H "../../../coupledSimulators/npFEM/*.h")
 file(GLOB NPFEM_CPP "../../../coupledSimulators/npFEM/*.cpp")
 
 add_library(npFEM STATIC ${NPFEM_CPP} ${NPFEM_H})
 
+target_include_directories(npFEM PUBLIC "../../../coupledSimulators")
+target_include_directories(npFEM PRIVATE "../../../coupledSimulators/npFEM")
+
+# Every client code will automatically link palabos in this case
+# Also, PUBLIC and INTERFACE definitions from palabos target will be propagated to client code in ${EXECUTABLE_NAME}
+target_link_libraries(npFEM PUBLIC palabos)
 ###############################################################################
 
 file(GLOB DEPS_H "./*.h")
@@ -34,10 +38,7 @@ file(GLOB PARAMS_1 "./*.xml")
 file(GLOB PARAMS_2 "./*.pos")
 
 add_executable(${EXECUTABLE_NAME} "./${EXECUTABLE_NAME}.cpp" ${DEPS_H} ${PARAMS_1} ${PARAMS_2})
-target_link_libraries(${EXECUTABLE_NAME} palabos npFEM)
-if(ENABLE_MPI)
-	target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
-endif()
+target_link_libraries(${EXECUTABLE_NAME} npFEM)
 
 ###############################################################################
 
