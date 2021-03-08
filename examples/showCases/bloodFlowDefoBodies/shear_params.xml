@@ -33,7 +33,7 @@
     <output_timestep> 4000 </output_timestep> <!--> Every how many Palabos timesteps to print results <-->
     <max_time> 0.6 </max_time> <!--> Simulation stops when Simulated Time is over X seconds <-->
 
-    <printVTKs> false </printVTKs>
+    <printVTKs> true </printVTKs>
     <!--> ratio: [0..1], applies in VTKs & COMs (Center of Mass) <-->
     <dump_RBCs_ratio_VTKs> 1.0 </dump_RBCs_ratio_VTKs>
     <dump_PLTs_ratio_VTKs> 1.0 </dump_PLTs_ratio_VTKs>
@@ -59,7 +59,7 @@
 <CheckPointing>
   <restartFromCP> true </restartFromCP>
   <CP_OutputDir> ./CPs/ </CP_OutputDir>
-  <checkpoint_timestep> 4000 </checkpoint_timestep>
+  <checkpoint_timestep> 200 </checkpoint_timestep>
   
   <numRBC> 476 </numRBC>
   <numPLT> 95 </numPLT>
