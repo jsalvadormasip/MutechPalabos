@@ -53,12 +53,9 @@ namespace npfem {
 __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, double *points_d, short *triangles_d, const int *vector_to_tri, 
                                  ShapeOpScalar *force_tri, cuda_scalar *force,
 								 double *E_nonePD, cuda_scalar volume0, const int nb_sum_thread, double *buffer_double, 
-                                 cuda_scalar *grad_c, cuda_scalar *normals_tri, ShapeOpScalar *normals, const int id, const float volume_weight) {
+                                 cuda_scalar *normals_tri, ShapeOpScalar *normals, const int id, const float volume_weight) {
 
-	grad_c[threadIdx.x             ] = 0;
-	grad_c[threadIdx.x +   n_points] = 0;
-	grad_c[threadIdx.x + 2*n_points] = 0;
-    
+  
 	normals[id             ] = 0;
 	normals[id +   n_points] = 0;
 	normals[id + 2*n_points] = 0;
@@ -66,15 +63,17 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
 	const int cell_shift = blockIdx.x*3*n_points;
 	int tp_id;
 
+	__syncthreads();
 	buffer_double[threadIdx.x] = 0;
 	__syncthreads();
+	double sum_area = 0;
 
 	for(int tid = threadIdx.x; tid < n_tri; tid += blockDim.x){
         
 		short id0 = triangles_d[IDX(tid, 0, n_tri)];
 		short id1 = triangles_d[IDX(tid, 1, n_tri)];
 		short id2 = triangles_d[IDX(tid, 2, n_tri)];
-        
+		     
 		tp_id = cell_shift + id0;
 
 		cuda_scalar p0x = points_d[tp_id             ];
@@ -105,17 +104,20 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
 		cross(edge0_x, edge0_y, edge0_z, edge1_x, edge1_y, edge1_z, n0, n1, n2);
 		cuda_scalar area = Normalize_3(n0, n1, n2)/2;
 	
-		buffer_double[threadIdx.x]  += area*(n0*(p0x + p1x + p2x) + n1*(p0y + p1y + p2y) + n2*(p0z + p1z + p2z))/9.;
+		sum_area += area*(n0*(p0x + p1x + p2x) + n1*(p0y + p1y + p2y) + n2*(p0z + p1z + p2z))/9.;
 
         force_tri[IDX(3*tid, 0, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n0/3.;
         force_tri[IDX(3*tid, 1, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n1/3.;
         force_tri[IDX(3*tid, 2, 3*n_tri) + 9*blockIdx.x*n_tri] = area*n2/3.;     
-	} 
+	}
+	buffer_double[threadIdx.x] = sum_area;
+
     __syncthreads();
     sum(buffer_double, nb_sum_thread, n_points, threadIdx.x);
+ 	//if(threadIdx.x == 0)printf(" nb_sum_thread %d n_points %d \n", nb_sum_thread, n_points);
     __syncthreads();
-
     cuda_scalar C = (buffer_double[0] - volume0);/// buffer_double[blockDim.x];
+    __syncthreads();
     
     double n0 = 0;
     double n1 = 0;
@@ -140,20 +142,21 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
     double force_sqr_norm = n0*n0 + n1*n1 + n2*n2;
     double force_norm = sqrt(force_sqr_norm);
     buffer_double[threadIdx.x] = force_norm;
+    __syncthreads();
     sum(buffer_double, nb_sum_thread, n_points, threadIdx.x);
-
+   
     normals[id             ] = n0/force_norm;
     normals[id +   n_points] = n1/force_norm;
     normals[id + 2*n_points] = n2/force_norm;
 
     __syncthreads();
-
+	//if(threadIdx.x == 0 && blockIdx.x == 0)printf("buffer_double[0] %f \n", buffer_double[0]);
     C /= buffer_double[0];
 
     E_nonePD[blockIdx.x*n_constraints + threadIdx.x] += 0.5*volume_weight*C*C*force_sqr_norm;
     
     for (int tid = threadIdx.x; tid < n_tri; tid += blockDim.x) {
-        
+    
         n0 = force_tri[IDX(3*tid, 0, 3*n_tri) + 9*blockIdx.x*n_tri];
         n1 = force_tri[IDX(3*tid, 1, 3*n_tri) + 9*blockIdx.x*n_tri];
         n2 = force_tri[IDX(3*tid, 2, 3*n_tri) + 9*blockIdx.x*n_tri];
@@ -165,12 +168,15 @@ __device__ void project_volume_d(int n_points, int n_tri, int n_constraints, dou
         force_tri[IDX(3*tid+1, 0, 3*n_tri) + 9*blockIdx.x*n_tri] = -volume_weight*C*n0;
         force_tri[IDX(3*tid+1, 1, 3*n_tri) + 9*blockIdx.x*n_tri] = -volume_weight*C*n1;
         force_tri[IDX(3*tid+1, 2, 3*n_tri) + 9*blockIdx.x*n_tri] = -volume_weight*C*n2;
-        
+     
         force_tri[IDX(3*tid+2, 0, 3*n_tri) + 9*blockIdx.x*n_tri] = -volume_weight*C*n0;
         force_tri[IDX(3*tid+2, 1, 3*n_tri) + 9*blockIdx.x*n_tri] = -volume_weight*C*n1;
         force_tri[IDX(3*tid+2, 2, 3*n_tri) + 9*blockIdx.x*n_tri] = -volume_weight*C*n2;
-    }  
+        
+    } 
+
     __syncthreads();
+    //if (threadIdx.x == 0 && blockIdx.x == 0)printf("C %.17g  volume0 %.17g  \n", C, volume0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -566,6 +572,7 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
                             A*(-F00 - F01), A*(-F10 - F11), A*(-F20 - F21),
                             A*F00, A*F10, A*F20, A*F01, A*F11, A*F21);
     */
+  
     force_intern_cont[IDX(3*tri_id, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F00 - F01);
     force_intern_cont[IDX(3*tri_id, 1, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F10 - F11);
     force_intern_cont[IDX(3*tri_id, 2, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*(-F20 - F21);
@@ -578,33 +585,6 @@ void project_surface_material(int tid, int tri_id, int n_points, int n_constrain
     force_intern_cont[IDX(3*tri_id + 2, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*F01;
     force_intern_cont[IDX(3*tri_id + 2, 1, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*F11;
     force_intern_cont[IDX(3*tri_id + 2, 2, 3*nb_tri) + 9*blockIdx.x*nb_tri] += A*F21;
-    
-    /*
-    if (idI0_ == 202 )printf("Force write tri_id(%d) idx(%d) %f \n", tri_id, IDX(3*tri_id  , 0, 3*nb_tri) + 9*blockIdx.x*nb_tri, force_intern_cont[IDX(3*tri_id  , 0, 3*nb_tri) + 9*blockIdx.x*nb_tri]);
-    if (idI1_ == 202 )printf("Force write tri_id(%d) idx(%d) %f \n", tri_id, IDX(3*tri_id+1, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri, force_intern_cont[IDX(3*tri_id+1, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri]);
-    if (idI2_ == 202 )printf("Force write tri_id(%d) idx(%d) %f \n", tri_id, IDX(3*tri_id+2, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri, force_intern_cont[IDX(3*tri_id+2, 0, 3*nb_tri) + 9*blockIdx.x*nb_tri]);
-    
-	atomicAdd(f_int_nonePD_d + IDX(idI0_, 0, n_points), A*(-F00 - F01));
-	atomicAdd(f_int_nonePD_d + IDX(idI0_, 1, n_points), A*(-F10 - F11));
-	atomicAdd(f_int_nonePD_d + IDX(idI0_, 2, n_points), A*(-F20 - F21));
-    
-	atomicAdd(f_int_nonePD_d + IDX(idI1_, 0, n_points), A*F00);
-	atomicAdd(f_int_nonePD_d + IDX(idI1_, 1, n_points), A*F10);
-	atomicAdd(f_int_nonePD_d + IDX(idI1_, 2, n_points), A*F20);
-    
-	atomicAdd(f_int_nonePD_d + IDX(idI2_, 0, n_points), A*F01);
-	atomicAdd(f_int_nonePD_d + IDX(idI2_, 1, n_points), A*F11);
-	atomicAdd(f_int_nonePD_d + IDX(idI2_, 2, n_points), A*F21);
-    */
-
-	/*
-	if (idI0_ == 0 && idI1_ == 1 && idI2_ == 2) {
-	printf("force \n%f %f %f\n%f %f %f\n%f %f %f\n\________________  end frame _________________\n\n\n",
-	f_int_nonePD_d[IDX(idI0_, 0, n_points)], f_int_nonePD_d[IDX(idI0_, 1, n_points)], f_int_nonePD_d[IDX(idI0_, 2, n_points)],
-	f_int_nonePD_d[IDX(idI1_, 0, n_points)], f_int_nonePD_d[IDX(idI1_, 1, n_points)], f_int_nonePD_d[IDX(idI1_, 2, n_points)],
-	f_int_nonePD_d[IDX(idI2_, 0, n_points)], f_int_nonePD_d[IDX(idI2_, 1, n_points)], f_int_nonePD_d[IDX(idI2_, 2, n_points)]);
-	}
-	*/
 
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

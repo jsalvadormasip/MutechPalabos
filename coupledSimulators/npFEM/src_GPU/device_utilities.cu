@@ -682,6 +682,7 @@ __device__ void project_d(int n_points, int n_constraints, int n_projected_point
 		ShapeOpScalar *points_d, ShapeOpScalar *projections_d, ShapeOpScalar *force_intern_cont, cuda_scalar *f_int_nonePD_d,
 		int *ConstraintType_d, int *idO_d, ShapeOpScalar *rangeMin_d, ShapeOpScalar *rangeMax_d, ShapeOpScalar *Scalar1_d, ShapeOpScalar *weight_d, ShapeOpScalar *E_nonePD_d,
 		int *idI_d, ShapeOpScalar *vectorx_d, ShapeOpScalar *matrix22_d, ShapeOpScalar *matrix33_d, cuda_scalar *A_d, const float miu, const float lambda, const float kappa){
+		
 #ifdef SEQ
 
 	int tid = 0;
@@ -706,8 +707,7 @@ __device__ void project_d(int n_points, int n_constraints, int n_projected_point
 							ConstraintType_d, idO_d, rangeMin_d, rangeMax_d, Scalar1_d, weight_d, E_nonePD_d,
 							idI_d, vectorx_d, matrix22_d, matrix33_d);
             
-		} else if (ConstraintType_d[tid] == 5) {
-
+		} else if (ConstraintType_d[tid] == 5 ) {
 			project_surface_material(tid, tid - surface_id0, n_points, n_constraints, n_projected_points, nb_tri,
 									 points_d, projections_d, force_intern_cont, f_int_nonePD_d,
 									 ConstraintType_d, idO_d, rangeMin_d, rangeMax_d, Scalar1_d, weight_d, E_nonePD_d,
@@ -725,6 +725,7 @@ __device__ void project_d(int n_points, int n_constraints, int n_projected_point
 #ifdef SEQ
 	}
 #endif
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -772,7 +773,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 
 	int point_id = blockIdx.x*x_n*3 + threadIdx.x;
 
-	__shared__ extern ShapeOpScalar buffer[];
+	__shared__ extern double buffer[];
 	__shared__ ShapeOpScalar objectif[CONV_WINDOWS];
 	__shared__ ShapeOpScalar objectif_sqr[CONV_WINDOWS];
 	__shared__ ShapeOpScalar directional_derivative_prev, directional_derivative;
@@ -781,15 +782,14 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	ShapeOpScalar newE = 0;
 	cuda_scalar gradient_norm = 100;
 	cuda_scalar *volume_der = (cuda_scalar*)(buffer + x_n);
-    /*
-	if(threadIdx.x == 169 && blockIdx.x == 9){
-	    printf("Solid solver before id %d input.points %.17g %.17g %.17g input.force %f %f %f vel %f %f %f  h %f\n",point_id + 2*x_n,
+    #ifdef DEBUG
+	if(threadIdx.x == 102 && blockIdx.x == BL){
+	    printf("Solid solver before id %d input.points %.17g %.17g %.17g input.force %.17g %.17g %.17g vel %f %f %f  h %f\n",point_id + 2*x_n,
                input.points[point_id], input.points[point_id +  x_n], input.points[point_id + 2*x_n],
                input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n],
                input.velocities[point_id], input.velocities[point_id + x_n], input.velocities[point_id + 2*x_n], h);
 	}
-	*/
- 
+ 	#endif
 	sim.points_last_iter[point_id        ] = input.points[point_id        ];
 	sim.points_last_iter[point_id +   x_n] = input.points[point_id +   x_n];
 	sim.points_last_iter[point_id + 2*x_n] = input.points[point_id + 2*x_n];
@@ -807,7 +807,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	input.points[point_id + 2*x_n] -= sim.center[3*blockIdx.x + 2];
 
 	#ifdef DEBUG
-    if (threadIdx.x == 5 && blockIdx.x == 0) {
+    if (threadIdx.x == 102 && blockIdx.x == BL) {
     	printf("forces %f %f %f | %d \n", input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n], blockIdx.x);
     	printf("velocity %f %f %f | %d \n", input.velocities[point_id], input.velocities[point_id + x_n], input.velocities[point_id + 2*x_n], blockIdx.x);
     	printf("points %.17g %.17g %.17g | %d \n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], blockIdx.x);
@@ -829,7 +829,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	momentum_points_first_guess3(input.points, input.velocities, mesh.M_tild_inv, input.forces_ex, sim.momentum, mesh.mass, h, x_n, point_id);
 
 #ifdef DEBUG
-    if (threadIdx.x == 5 && blockIdx.x == 0)printf("momentum %.17g %.17g %.17g  %d \n", input.points[threadIdx.x], input.points[threadIdx.x + x_n], input.points[threadIdx.x + 2*x_n], threadIdx.x + 2*x_n);
+    if (threadIdx.x == 102 && blockIdx.x == BL)printf("momentum %.17g %.17g %.17g  %d \n", input.points[threadIdx.x], input.points[threadIdx.x + x_n], input.points[threadIdx.x + 2*x_n], threadIdx.x + 2*x_n);
 #endif
 	__syncthreads();
 	
@@ -837,18 +837,18 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	sim.force_npd[point_id +   x_n] = 0;
 	sim.force_npd[point_id + 2*x_n] = 0;
 	sim.E_nonePD[threadIdx.x + blockIdx.x*info.n_constraints] = 0;
-
+	
     project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, mesh.vertex_to_tri, 
                     sim.force_intern_cont, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, 
-                    volume_der, sim.tri_normal, sim.normals, point_id, info.volume_weight);
-
+                    sim.tri_normal, sim.normals, point_id, info.volume_weight);
+	
+	__syncthreads();
 	project_d(x_n, info.n_constraints, info.idO, info.n_triangles, info.surface_id0, 
               input.points, sim.projections, sim.force_intern_cont, sim.force_npd,
 			  mesh.ConstraintType, mesh.idO, mesh.rangeMin, mesh.rangeMax, mesh.Scalar1, mesh.weight, sim.E_nonePD,
 			  mesh.idI, mesh.vectorx, mesh.matrix22, mesh.matrix33, mesh.A, info.miu, info.lambda, info.kappa);
-
+	
     __syncthreads();
-
 	project_collision_d(x_n, input.points, sim.nearest_points, sim.nearest_normals, 
                         sim.force_npd, sim.E_nonePD, point_id, info.n_constraints, info.weight_col_rep, 
                         info.threshold_rep, info.weight_col_nonRep, info.threshold_nonRep, info.beta_morse);
@@ -866,6 +866,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
                             sim.gradient[point_id], sim.gradient[point_id + x_n], sim.gradient[point_id + 2*x_n], blockIdx.x, h, it);
     }
     */
+    __syncthreads();
 	gradient_norm = volume_der[0];
 	//todo test gradient norm
 	objectif_sqr[head_o] = objectif[head_o]*objectif[head_o];
@@ -959,15 +960,17 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 			sim.E_nonePD[threadIdx.x + blockIdx.x*info.n_constraints] = 0;
 
 			__syncthreads();  
-
-            project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, mesh.vertex_to_tri, sim.force_intern_cont, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, volume_der, sim.tri_normal, sim.normals, point_id, info.volume_weight);
- 
+			
+            project_volume_d(x_n, info.n_triangles, info.n_constraints, input.points, mesh.triangles, mesh.vertex_to_tri, sim.force_intern_cont, sim.force_npd, sim.E_nonePD, info.volume, info.sum_points, buffer, sim.tri_normal, sim.normals, point_id, info.volume_weight);
+ 			
+ 			__syncthreads();
 			project_d(x_n, info.n_constraints, info.idO, info.n_triangles, info.surface_id0,
 				input.points, sim.projections, sim.force_intern_cont, sim.force_npd,
 				mesh.ConstraintType, mesh.idO, mesh.rangeMin, mesh.rangeMax, mesh.Scalar1, mesh.weight, sim.E_nonePD,
 				mesh.idI, mesh.vectorx, mesh.matrix22, mesh.matrix33, mesh.A, info.miu, info.lambda, info.kappa);
-
+			
             __syncthreads();
+            
 			project_collision_d(x_n, input.points, sim.nearest_points, sim.nearest_normals, 
                                 sim.force_npd, sim.E_nonePD, point_id, info.n_constraints,
                                 info.weight_col_rep, info.threshold_rep, info.weight_col_nonRep, info.threshold_nonRep, info.beta_morse);
@@ -1067,8 +1070,9 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	//coll.colid_normals[point_id +  x_n] = 0;
 	//coll.colid_normals[point_id +2*x_n] = 0;
 
-	//velocities_equals_points_minus_points_prev3(input.points, sim.points_last_iter, input.velocities, 1 / h, x_n, point_id);
-	damping( input.points, sim.points_last_iter, input.velocities, 1/h, h2, mesh.mass, 
+	//velocities_equals_points_minus_points_prev3(input.points, sim.points_last_iter, input.velocities, 1. / h, x_n, point_id);
+	__syncthreads();
+	damping( input.points, sim.points_last_iter, input.velocities, 1./h, h2, mesh.mass, 
 			info.mass_total, x_n, info.sum_points, point_id, volume_der, sim.center + 3*blockIdx.x, info.calpha, info.vel_cap, info.vel_cap_fin, info.dx_p);
 
 	input.points[point_id        ] = sim.points_last_iter[point_id        ] + input.velocities[point_id        ]*h;
@@ -1079,14 +1083,7 @@ __global__ void compute_next_frame_rbc_g(Mesh_info info, Mesh_data mesh, Simulat
 	if (threadIdx.x == 102 && blockIdx.x == BL) {
 		printf("points %.17g %.17g %.17g | %d h %f it %d\n", input.points[point_id], input.points[point_id + x_n], input.points[point_id + 2 * x_n], blockIdx.x, h, it);
 	}
-    */
-    /*
-    if(threadIdx.x == 169 && blockIdx.x == 9){
-        printf("Solid solver after id %d input.points %.17g %.17g %.17g input.force %f %f %f\n",point_id + 2*x_n,
-               input.points[point_id], input.points[point_id +  x_n], input.points[point_id + 2*x_n],
-               input.forces_ex[point_id], input.forces_ex[point_id + x_n], input.forces_ex[point_id + 2*x_n] );
-    }
-    */
+	*/
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

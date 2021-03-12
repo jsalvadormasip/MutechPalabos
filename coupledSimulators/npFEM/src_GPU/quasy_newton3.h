@@ -476,10 +476,14 @@ __device__ void damping(const double *points, const double *points_prev, double 
 						const double one_over_h, const double h2, const double *m, const double mass_total, const int n, 
 						const int nb_sum_thread, const int id, cuda_scalar *buffer, double center[3], const float calpha, const float vel_cap, const float vel_cap_fin, const float dx_p) {
 
+	cuda_scalar L[3];
+
 	velocities_equals_points_minus_points_prev3(points, points_prev, velocities, one_over_h, n, id);
 	
 	cuda_scalar mi = m[ID_MULTI_ONE(blockIdx.x, threadIdx.x, n)];
 	
+	//printf("mi %f \n", mi);
+	__syncthreads();
 	buffer[threadIdx.x      ] = points[id      ]*mi;
 	buffer[threadIdx.x +   n] = points[id +   n]*mi;
 	buffer[threadIdx.x + 2*n] = points[id + 2*n]*mi;
@@ -499,42 +503,50 @@ __device__ void damping(const double *points, const double *points_prev, double 
 	}
 	
 	__syncthreads();
-
 	buffer[threadIdx.x      ] = velocities[id      ]*mi;
 	buffer[threadIdx.x +   n] = velocities[id +   n]*mi;
 	buffer[threadIdx.x + 2*n] = velocities[id + 2*n]*mi;
-
 	__syncthreads();
 	triple_sum(buffer, buffer + n, buffer + 2*n, nb_sum_thread, n, threadIdx.x);
 	__syncthreads();
+	cuda_scalar sumCoord_x = buffer[  0];
+	cuda_scalar sumCoord_y = buffer[  n];
+	cuda_scalar sumCoord_z = buffer[2*n];
+	__syncthreads();
 
-	cuda_scalar Vcmx = buffer[  0]/mass_total;
-	cuda_scalar Vcmy = buffer[  n]/mass_total;
-	cuda_scalar Vcmz = buffer[2*n]/mass_total;
+	cuda_scalar Vcmx = sumCoord_x/mass_total;
+	cuda_scalar Vcmy = sumCoord_y/mass_total;
+	cuda_scalar Vcmz = sumCoord_z/mass_total;
 
 	cuda_scalar rx = points[id      ] - Xcmx;
 	cuda_scalar ry = points[id +   n] - Xcmy;
 	cuda_scalar rz = points[id + 2*n] - Xcmz;
 	
+	cuda_scalar rx_cross_vel;
+	cuda_scalar ry_cross_vel;
+	cuda_scalar rz_cross_vel;
+	
 	cross(rx, ry, rz,
 		  (cuda_scalar)velocities[id]*mi, (cuda_scalar)velocities[id + n]*mi, (cuda_scalar)velocities[id + 2*n]*mi,
-		  buffer[threadIdx.x], buffer[threadIdx.x + n], buffer[threadIdx.x + 2*n]);
+		  rx_cross_vel, ry_cross_vel, rz_cross_vel);
 
+	__syncthreads();
+	buffer[threadIdx.x      ] = rx_cross_vel;
+	buffer[threadIdx.x +   n] = ry_cross_vel;
+	buffer[threadIdx.x + 2*n] = rz_cross_vel;	
 	__syncthreads();
 	triple_sum(buffer, buffer + n, buffer + 2*n, nb_sum_thread, n, threadIdx.x);
 	__syncthreads();
-
-	__shared__ cuda_scalar L[3];
-
-	if(threadIdx.x == 0){
-		L[0] = buffer[  0];
-		L[1] = buffer[  n];
-		L[2] = buffer[2*n];
-	}
+	L[0] = buffer[  0];
+	L[1] = buffer[  n];
+	L[2] = buffer[2*n];	
+	__syncthreads();
+	//if(blockIdx.x == 0 && threadIdx.x == 102)printf("L %f %f %f \n", L[0], L[1], L[2]  );
+	
 	cuda_scalar r[9];
-	__shared__ cuda_scalar I[9];
-	__shared__ cuda_scalar I_inv[9];
-	__shared__ cuda_scalar omega[3];
+	cuda_scalar I[9];
+	cuda_scalar I_inv[9];
+	cuda_scalar omega[3];
 
 	Matrix_Product_33_33((cuda_scalar)0., -rz,  ry,
 						 rz, (cuda_scalar)0. , -rx,
@@ -547,50 +559,44 @@ __device__ void damping(const double *points, const double *points_prev, double 
 						r[0], r[1], r[2],
 						r[3], r[4], r[5],
 						r[6], r[7], r[8]);
-
+						
+	__syncthreads();
 	buffer[threadIdx.x      ] = r[0]*mi;
 	buffer[threadIdx.x +   n] = r[1]*mi;
 	buffer[threadIdx.x + 2*n] = r[2]*mi;
 	__syncthreads();
 	triple_sum(buffer, buffer + n, buffer + 2 * n, nb_sum_thread, n, threadIdx.x);
 	__syncthreads();
-	if (threadIdx.x == 0) {
-		I[0] = buffer[  0];
-		I[1] = buffer[  n];
-		I[2] = buffer[2*n];
-	}
+	I[0] = buffer[  0];
+	I[1] = buffer[  n];
+	I[2] = buffer[2*n];
 	__syncthreads();
+	
 	buffer[threadIdx.x      ] = r[3]*mi;
 	buffer[threadIdx.x +   n] = r[4]*mi;
 	buffer[threadIdx.x + 2*n] = r[5]*mi;
 	__syncthreads();
-	triple_sum(buffer, buffer + n, buffer + 2 * n, nb_sum_thread, n, threadIdx.x);
+	triple_sum(buffer, buffer + n, buffer + 2*n, nb_sum_thread, n, threadIdx.x);
 	__syncthreads();
-	if (threadIdx.x == 0) {
-		I[3] = buffer[  0];
-		I[4] = buffer[  n];
-		I[5] = buffer[2*n];
-	}
+	I[3] = buffer[  0];
+	I[4] = buffer[  n];
+	I[5] = buffer[2*n];
 	__syncthreads();
+	
 	buffer[threadIdx.x      ] = r[6]*mi;
 	buffer[threadIdx.x +   n] = r[7]*mi;
 	buffer[threadIdx.x + 2*n] = r[8]*mi;
 	__syncthreads();
 	triple_sum(buffer, buffer + n, buffer + 2 * n, nb_sum_thread, n, threadIdx.x);
 	__syncthreads();
-	if (threadIdx.x == 0) {
-		I[6] = buffer[  0];
-		I[7] = buffer[  n];
-		I[8] = buffer[2*n];
-		
-	}
-
+	I[6] = buffer[  0];
+	I[7] = buffer[  n];
+	I[8] = buffer[2*n];	
 	__syncthreads();
+	
 	Matrix_invers3_3X3(I, I_inv);
-	__syncthreads();
 
-	vect_matrix_mult_3X3_par(I_inv, L, omega);
-	__syncthreads();
+	vect_matrix_mult_3X3(I_inv, L, omega);
 
 	cuda_scalar deltaV[3];
 	cross(omega[0], omega[1], omega[2],
@@ -601,11 +607,13 @@ __device__ void damping(const double *points, const double *points_prev, double 
 	deltaV[1] = Vcmy + deltaV[1] - velocities[id +   n];
 	deltaV[2] = Vcmz + deltaV[2] - velocities[id + 2*n];
 
-
+	
 	velocities[id      ] += calpha*deltaV[0];
 	velocities[id +   n] += calpha*deltaV[1];
 	velocities[id + 2*n] += calpha*deltaV[2];
+	
 
+/*
 #ifndef NPFEM_SA
 
 	ShapeOpScalar vel_lattx = velocities[id      ]/(dx_p*one_over_h*h2);
@@ -619,6 +627,7 @@ __device__ void damping(const double *points, const double *points_prev, double 
 		velocities[id + 2*n] = vel_lattz/norm_vel*vel_cap_fin*(dx_p*one_over_h*h2);
 	}   
 #endif
+*/
 }
 
 __device__ void trace_x_time_y3(const double *x, const double *y, double *result, const int n, const int id, const int nb_sum_thread, double *buffer) {
