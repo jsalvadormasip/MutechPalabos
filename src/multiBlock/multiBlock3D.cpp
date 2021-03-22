@@ -266,22 +266,6 @@ MultiBlock3D::MultiBlock3D( MultiBlockManagement3D const& multiBlockManagement_,
     id = multiBlockRegistration3D().announce(*this);
 }
 
-MultiBlock3D::MultiBlock3D(plint nx, plint ny, plint nz, bool betterDist, plint envelopeWidth)
-    : multiBlockManagement(defaultMultiBlockPolicy3D().getMultiBlockManagementBetterDist(
-        Box3D(0, nx - 1, 0, ny - 1, 0, nz - 1), envelopeWidth)),
-    maxProcessorLevel(-1),
-    blockCommunicator(defaultMultiBlockPolicy3D().getBlockCommunicator()),
-    internalStatistics(),
-    combinedStatistics(defaultMultiBlockPolicy3D().getCombinedStatistics()),
-    statSubscriber(*this),
-    statisticsOn(true),
-    periodicitySwitch(*this),
-    internalModifT(modif::staticVariables)
-{
-    id = multiBlockRegistration3D().announce(*this);
-}
-
-
 MultiBlock3D::MultiBlock3D(plint nx, plint ny, plint nz, plint envelopeWidth)
     : multiBlockManagement(defaultMultiBlockPolicy3D().getMultiBlockManagement (
                                Box3D(0,nx-1,0,ny-1,0,nz-1), envelopeWidth) ),

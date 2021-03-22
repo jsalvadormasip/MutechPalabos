@@ -88,16 +88,6 @@ MultiScalarField3D<T>::MultiScalarField3D(plint nx, plint ny, plint nz, T iniVal
 }
 
 template<typename T>
-MultiScalarField3D<T>::MultiScalarField3D(plint nx, plint ny, plint nz, bool betterDist, T iniVal)
-// Envelope-width defaults to 1.
-    : MultiBlock3D(nx, ny, nz, betterDist, 1),
-    multiScalarAccess(defaultMultiBlockPolicy3D().getMultiScalarAccess<T>()),
-    nTensorViewBlock(0)
-{
-    allocateFields(iniVal);
-}
-
-template<typename T>
 MultiScalarField3D<T>::~MultiScalarField3D() {
     if (nTensorViewBlock) {
         delete nTensorViewBlock;
@@ -967,4 +957,3 @@ MultiNTensorField3D<T>& findMultiNTensorField3D(id_t id) {
 }  // namespace plb
 
 #endif   // MULTI_DATA_FIELD_3D_HH
-
