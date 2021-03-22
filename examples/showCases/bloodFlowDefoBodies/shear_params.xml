@@ -30,7 +30,7 @@
     <dt_p> -1 </dt_p> <!--> Fluid solver time step: Physical Length (us) <-->
     <u_lb> -1 </u_lb>
     
-    <output_timestep> 4000 </output_timestep> <!--> Every how many Palabos timesteps to print results <-->
+    <output_timestep> 200 </output_timestep> <!--> Every how many Palabos timesteps to print results <-->
     <max_time> 0.6 </max_time> <!--> Simulation stops when Simulated Time is over X seconds <-->
 
     <printVTKs> true </printVTKs>
