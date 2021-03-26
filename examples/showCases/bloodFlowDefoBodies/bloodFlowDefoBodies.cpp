@@ -73,7 +73,6 @@ using namespace std;
 using namespace plb::global;
 using namespace plb::npfem;
 
-
 // If FORCED, uncomment the 2 following lines
 //#define FORCED
 //#define DESCRIPTOR descriptors::ForcedD3Q19Descriptor
