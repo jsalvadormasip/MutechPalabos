@@ -240,7 +240,9 @@ By alphabetic order
 * @parmigiani
 * @rconradin
 * @swang251 
+* @vmapelli
 * @YannThorimbert
 * @ysagon
+* @Yulan-Fang
 
 
