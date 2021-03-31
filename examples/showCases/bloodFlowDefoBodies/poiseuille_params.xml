@@ -7,7 +7,7 @@
 
 <!--> Length scales are dx_p, dt_p, rho_p, which result in dx_lb = dt_lb = rho_lb = 1 <-->
 <System_Setup>
-    <OutputDir> ./tmp/ </OutputDir>
+    <OutputDir> ./tmp_0/ </OutputDir>
     <pos_filename> initialPlacing.pos </pos_filename>
     <wallStlFileName> ./wallStlFiles/cylinderD50L50.stl </wallStlFileName>
     <withBodies> true </withBodies>

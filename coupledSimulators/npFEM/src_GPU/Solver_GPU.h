@@ -43,13 +43,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <vector>
 #include <memory>
-#include <cuda_runtime.h>
+//#include <cuda_runtime.h>
 
 #include "Types.h"
 #include "Constraint_Flattening.h"
 #include "sparse_matrix.h"
 #include "common.h"
 #include "GPU_data.h"
+#include "device_utilities.h"
 ///////////////////////////////////////////////////////////////////////////////
 /** @file
 This file contains the main ShapeOp solver.*/
@@ -61,19 +62,36 @@ namespace npfem {
 class LSSolver;
 class Constraint;
 class Force;
-typedef std::vector<std::shared_ptr<Constraint> > Constraints;
+typedef std::vector<std::shared_ptr<Constraint>> Constraints;
 typedef std::vector<std::shared_ptr<Force> > Forces;
 typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> MatrixDyn;
 ///////////////////////////////////////////////////////////////////////////////
 /** \brief ShapeOp Solver. This class implements the main ShapeOp solver based on \cite Bouaziz2012 and \cite Bouaziz2014.*/
 class SHAPEOP_API Solver_GPU {
- public:
-  Solver_GPU(){};
-  Solver_GPU(const MatrixXX &points, 
-			 const std::vector< std::vector<int> > &triangles, 
-			 const std::vector<bool> &onSurfaceParticle, 
-			 std::vector<std::shared_ptr<Constraint>>& constraints, Mesh_info params, float cbeta,
-			 const int nb_cells = 1, Scalar phys_timestep = 1, Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
+private:
+    void construct(const MatrixXX &points, const std::vector<Matrix3X>& points_diff,
+                   const std::vector< std::vector<int> > &triangles,
+                   const std::vector<bool> &onSurfaceParticle,
+                   std::vector<std::vector<std::shared_ptr<Constraint>>> &constraints, Mesh_info params, float cbeta,
+                   const int nb_cells = 1, Scalar phys_timestep = 1,
+                   Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
+
+    int starting_ids = 0;
+
+public:
+    Solver_GPU(){};
+    Solver_GPU(const MatrixXX &points, const std::vector<Matrix3X>& points_diff,
+               const std::vector< std::vector<int> > &triangles,
+               const std::vector<bool> &onSurfaceParticle,
+               std::vector<std::vector<std::shared_ptr<Constraint>>> &constraints, Mesh_info params, float cbeta,
+               const int nb_cells = 1, Scalar phys_timestep = 1, 
+               Scalar shapeOp_time_step = 1, int bodyID = 0 , std::vector<int> *graph = NULL);
+
+    Solver_GPU(const MatrixXX &points,
+               const std::vector< std::vector<int>> &triangles,
+               const std::vector<bool> &onSurfaceParticle,
+               std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
+               const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyID, int start_id);
 
   void make_gpu_graph(std::vector<int> *graph, int nb);
 
@@ -90,6 +108,7 @@ class SHAPEOP_API Solver_GPU {
   std::shared_ptr<Force> &getForce(int id);
   /** \brief Set the points.*/
   void setPoints(const Matrix3X &p, const int nb_cells = 1);
+  void setPoints(const Matrix3X &p, const std::vector<Matrix3X>& points_diff, const int nb_cells);
   /** \brief Set the timestep for the dynamics.*/
   void setTimeStep(Scalar timestep);
   /** \brief Set the velocity damping for the dynamics.*/
@@ -104,15 +123,26 @@ class SHAPEOP_API Solver_GPU {
   /** \brief Initialize the ShapeOp linear system and the different parameters.
   \return true if successfull */
 
-  bool initialize(Scalar timestep = 1.0);
+  bool initialize(int nb_shapes, Scalar timestep = 1.0);
   /** \brief Solve the constraint problem by projecting and merging.
     \return true if successfull */
   void compute_first_centroid();
   void set_initial_positions(const double *centers);
+  void set_initial_positions(const double *centers, cuda_scalar *local_mat, double mat[16]);
   void reset_position(const double *centers);
+  void set_initial_velocities(double *vel);
   void set_initial_velocity(double x, double y, double z);
   void set_gpu_starting_position(const Matrix3X &points, int cell);
   void set_gpu_starting_velocities(const Matrix3X &vels, int cell);
+  //use for checkpoint
+  void send_all_points_to_GPU();
+  void send_all_velocities_to_GPU();
+  void send_all_centers_to_GPU(ShapeOpScalar *centers);
+
+  void read_all_points_from_GPU();
+  void read_all_velocities_from_GPU();
+  void read_all_centers_from_GPU(ShapeOpScalar *centers);
+ 
   ShapeOpScalar *get_centers();
   int get_nb_triangle();
   int get_nb_points();
@@ -122,16 +152,26 @@ class SHAPEOP_API Solver_GPU {
   void get_data_from_GPU();
 
   void rotate_points(const cuda_scalar *matrices);
+  void solve_only( unsigned int max_iterations = ((int)(1e3)), Scalar tol = 1e-6, bool Quasi_Newton = true, Scalar gamma = 0.3,
+                  int max_line_search_loops = ((int)(1e3)), int m = 7, Scalar gamma2 = 0.9, Scalar collisions_weight = 500.);
 
   double solve( unsigned int max_iterations = ((int)(1e3)), Scalar tol = 1e-6, bool Quasi_Newton = true, Scalar gamma = 0.3, 
               int max_line_search_loops = ((int)(1e3)), int m = 7, Scalar gamma2 = 0.9, Scalar collisions_weight = 500.);
+
+  void copy_position_to_CPU();
 
   void make_periodic(float nx,float ny, float nz, float dx, int it);
   void set_Palabos_Forces(const Matrix3X &force_matrix, const int cell_id);
   void shiftPoints(Vector3 vec);
   void flatten_constraints();
+  void flatten_constraints(int nb_shapes);
   void rotatePoints(const std::string& axis, const Scalar& theta);
   void set_onSurfaceParticle(const std::vector<bool>& onSurfaceParticle);
+
+  int send_fluid_data(int nb, int rank, int iter);
+  void read_fluid_data();
+  void copy_force_from_fluid(double dx);
+  void copy_point_to_fluid(double dx, int iter);
   const std::vector<bool>& get_onSurfaceParticle() const;
   const MatrixXXCuda& getVelocities() const;
   const Matrix3X& get_Palabos_Forces() const;
@@ -149,9 +189,12 @@ class SHAPEOP_API Solver_GPU {
   int  nb_tri_ = 0;
   Mesh_info mesh_info_;
 
- private:
+  From_fluid_data from_fluid_data_h;
+  From_fluid_data from_fluid_data_d;
+
+ //private:
   //Palabos interface
-  Scalar Cbeta_;
+  Scalar Cbeta_, p_dt = 1.;
   Scalar delta_, solver_step_;
   //Object Connectivity (triangle soup)
   std::vector< std::vector<int> > connectivity_list_;
@@ -160,7 +203,7 @@ class SHAPEOP_API Solver_GPU {
   //Static
   Matrix3X points_;
   Matrix3X projections_;
-  Constraints constraints_;
+  std::vector<std::vector<std::shared_ptr<Constraint>>> constraints_;
   std::shared_ptr<LSSolver> solver_;
   SparseMatrix At_;
   SparseMatrix N_;
@@ -190,7 +233,8 @@ class SHAPEOP_API Solver_GPU {
   //CUDA
   Scalar *cuda_points;
   Scalar *cuda_forces;
-  cudaStream_t stream = 0;
+  stream_holder *stream;
+  //cudaStream_t stream = 0;
   Constraint_flat *constraints_h_;
   Mesh_data mesh_data_d_, mesh_data_h_;
   Simulation_input simulation_input_d_, simulation_input_h_;

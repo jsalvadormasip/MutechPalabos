@@ -45,14 +45,16 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "common.h"
+#include "../common.h"
 #include "sum_cuda.h"
 #include "sparse_matrix.h"
 
-
+/*
 #define CIRCULAR_ID(id, n) (id)%(n)
 #define ID_COL(i,j,N) ((N*(j)) + (i))
+#define ID_COL_MULTI(body, i,j, N, M) ((M)*(body) + (N*(j)) + (i))
 #define ID_ROW(i,j,N) ((N*(i)) + (j))
+*/
 
 namespace plb {
 namespace npfem {
@@ -285,7 +287,7 @@ __global__ void l_bfg(double *s, double *t, double *rho, double *alpha_global, d
 
 	int id = threadIdx.x;
 
-	int point_id = (blockIdx.x) * 3 * n + id;
+	int point_id = (blockIdx.x)*3*n + id;
 
 	extern __shared__ double alpha[];
 

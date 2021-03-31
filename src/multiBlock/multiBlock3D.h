@@ -262,4 +262,3 @@ MultiBlockRegistration3D& multiBlockRegistration3D();
 } // namespace plb
 
 #endif  // MULTI_BLOCK_3D_H
-

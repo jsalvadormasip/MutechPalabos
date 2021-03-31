@@ -40,6 +40,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <stdio.h>
 
+
 #include "sparse_matrix.h"
 
 namespace plb {
@@ -55,7 +56,7 @@ void print_mat_sparse(sparse_matrix_cuda mat, int l, int n, int size) {
 	}
 }
 
-sparse_matrix_cuda make_sparse_from_full(double *mat, int rows, int cols) {
+sparse_matrix_cuda make_sparse_from_full(double *mat, int rows, int cols, int nb_objects) {
 
 	sparse_matrix_cuda out;
 
@@ -80,7 +81,7 @@ sparse_matrix_cuda make_sparse_from_full(double *mat, int rows, int cols) {
 
 	out.degree = degree;
 	//printf("degree %d rows %d\n", out.degree, rows);
-	out.value = new double[rows*degree]();
+	out.value = new double[rows*degree*nb_objects]();
 	out.index = new int[rows*degree]();
 
 	for (int i = 0; i < rows; i++) {
@@ -89,11 +90,12 @@ sparse_matrix_cuda make_sparse_from_full(double *mat, int rows, int cols) {
 			int id = j*rows + i;
 			//printf("j %d  \n", j);
 
-			if (mat[id] * mat[id] > tol) {
+			if (mat[id]*mat[id] > tol) {
 
 				out.value[i + k*rows] = mat[id];
 				out.index[i + k*rows] = j;
-				//if(i==0)printf("mat %f | %d %d |  %d \n", out.value[i + k*n], i, out.index[i + k*n], i + k*n);
+
+				//if(i==0)printf("mat %f | %d %d |  %d \n", out.value[i + k*rows], i, out.index[i + k*rows], i + k*rows);
 				k++;
 				if (k >= degree) {
 					break;
@@ -102,6 +104,18 @@ sparse_matrix_cuda make_sparse_from_full(double *mat, int rows, int cols) {
 		}
 	}
 	return out;
+}
+
+//assuming different shape of object but same topology
+void add_values_to_sparse(sparse_matrix_cuda *out, double *mat, int rows, int cols, int bodyId) {
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < out->degree; j++) {
+			int col = out->index[ID_COL_MULTI(0, i, j, rows, out->degree*rows)];
+
+            if(col == 0 && j > 0)break;
+			out->value[ID_COL_MULTI(bodyId, i, j, rows, out->degree*rows)] = mat[col*rows + i];
+		}
+	}
 }
 
 }

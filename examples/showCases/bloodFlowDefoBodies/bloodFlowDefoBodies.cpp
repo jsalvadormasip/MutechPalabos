@@ -73,7 +73,6 @@ using namespace std;
 using namespace plb::global;
 using namespace plb::npfem;
 
-
 // If FORCED, uncomment the 2 following lines
 //#define FORCED
 //#define DESCRIPTOR descriptors::ForcedD3Q19Descriptor
@@ -94,7 +93,12 @@ struct SimulationParameters {
 
     // Tag to distinguish the type of body. The key is the unique ID of the body.
     std::map<pluint, pluint> bodyToType;
-
+    std::map<pluint, Array<T,4> > bodyToShapeParams;
+    std::map<pluint, RawConnectedTriangleMesh<T> > bodyToShapeParams_RawConnectedTriangleMesh;
+    // GPU RBCs points initialization
+    std::vector<plb::npfem::Matrix3X> GPU_RBCs, GPU_PLTs;
+    std::vector<std::vector<std::shared_ptr<Constraint>>> GPU_RBC_contraints;
+    std::vector<std::vector<std::shared_ptr<Constraint>>> GPU_PLT_contraints;
     // To be used by PIK
     T collisions_threshold_rep;
     T collisions_threshold_nonRep;
@@ -313,6 +317,28 @@ void writeVTK(BlockLatticeT& lattice, T dx, T dt, pluint iter)
 	//vtkOut.writeData<float>(*computeDensity(lattice), "Density (lb units)", 1.0);
 }
 
+// ShapeOp solver should have the same connectivity as the RawConnectedTriangleMesh
+// I make sure of this by using the same template mesh as a starting point
+void setPointsFromRawConnectedTriangleMesh(ShapeOp_Solver& s, const RawConnectedTriangleMesh<T>& setter, bool firstTime = false)
+{
+    int n_points = setter.getNumVertices();
+    plb::npfem::Matrix3X q(3, n_points);
+
+    std::vector<Array<T, 3> > const& setter_vertices = setter.getVertices();
+    for (int i = 0; i < q.cols(); ++i)
+    {
+        q.col(i) = plb::npfem::Vector3(setter_vertices[i][0],
+            setter_vertices[i][1],
+            setter_vertices[i][2]);
+    }
+
+    s.setPoints(q);
+
+    if (firstTime) {
+        sp.GPU_RBCs.push_back(q);
+    }
+}
+
 // Assign the ShapeOp bodies to their respective processors, and construct them.
 // ShapeOp objects always in physical units, while palabos always in lattice
 // units.
@@ -453,19 +479,28 @@ void iniShapeOpSolvers(std::string fname_points, std::string fname_constraints,
 	std::vector<int> *rbc_graph = sp.RBC_shapeOpSolverTemplate.get_mesh_graph();
 	std::vector<int> *plt_graph = sp.PLT_shapeOpSolverTemplate.get_mesh_graph();
 
-	auto initBody = [&](std::vector<ShapeOp_Solver*> &shapeOpP, std::string &case_name, plb::RawConnectedTriangleMesh<T> *mesh_template,
+	auto initBody = [&](std::vector<ShapeOp_Solver*> &shapeOpP, std::vector<std::vector<std::shared_ptr<Constraint>>> &GPU_contraints, std::string &case_name, plb::RawConnectedTriangleMesh<T> *mesh_template,
 		T Calpha_ShapeOp_, T  Cbeta_ShapeOp_, T rho_, T applyGlobalVolumeConservation_ShapeOp_, T globalVolumeConservationWeight_ShapeOp_,
-		std::vector<int> *mesh_graph, int  bodyID, int i, int body_type)
-	{
+		std::vector<int> *mesh_graph, int  bodyID, int i, int body_type) {
+
+        // The mesh graph remains the same for RBCs with different shape params,
+        // because they have the same connectivity
+
 		ShapeOp_Solver *solver = &(sp.shapeOpBodies[i].getSolver());
 
 		solver->bodyID_ = bodyID;
 		solver->bodyType_ = body_type;
 
-		setPointsFromCSV(*solver, "./Case_Studies/" + case_name + "/" + fname_points);
+        if (body_type == 0) {
+            // RBCs with different shape params
+            setPointsFromRawConnectedTriangleMesh(*solver, *mesh_template, true);
 
-		if (!sp.restartFromCP)
-		{
+        } else {
+            setPointsFromCSV(*solver, "./Case_Studies/" + case_name + "/" + fname_points);
+        }
+
+		if (!sp.restartFromCP){
+
 			Array<T, 3> position = sp.iniPositions[bodyID];
 			Array<T, 3> rotation = sp.iniRotations[bodyID];
 
@@ -485,9 +520,7 @@ void iniShapeOpSolvers(std::string fname_points, std::string fname_constraints,
 
             sp.shapeOpBodies[i].init(bodyID, mesh_template, mesh_graph);
 			solver->initialize(Calpha_ShapeOp_, Cbeta_ShapeOp_, sp.dt_p * (T)(sp.timestep_ShapeOp), rho_, false, applyGlobalVolumeConservation_ShapeOp_, globalVolumeConservationWeight_ShapeOp_, sp.dx_p, sp.dt_p);
-		}
-		else
-		{
+		} else {
 			setConstraintsFromCSV(*solver, "./Case_Studies/" + case_name + "/" + fname_constraints);
 			setConnectivityListFromCSV(*solver, "./Case_Studies/" + case_name + "/" + fname_connectivity);
 			setOnSurfaceParticle(*solver, "./Case_Studies/" + case_name + "/" + fname_onsurface);
@@ -511,6 +544,7 @@ void iniShapeOpSolvers(std::string fname_points, std::string fname_constraints,
 				setVelsFromCSV(*solver, createFileName(sp.CP_OutputDir + "vels_body_ID_" + util::val2str(bodyID) + "_iT_", sp.iT, sp.fileNamePadding) + ".csv");
 			}
 		}
+        GPU_contraints.push_back(solver->getConstraints());
 		shapeOpP.push_back(solver);
 	};
 
@@ -519,15 +553,26 @@ void iniShapeOpSolvers(std::string fname_points, std::string fname_constraints,
 	if (sp.shapeOpBodies.size())
     {
         sp.local_body_id = 0;
-		for (plint bodyID = sp.myRangeRBC.first; bodyID <= sp.myRangeRBC.second; ++bodyID)
-        {
-			initBody(sp.shapeOpRBCs, sp.Case_Study_RBC, sp.rbcTemplate, sp.Calpha_ShapeOp_RBC, sp.Cbeta_ShapeOp_RBC, sp.rho_ShapeOp_RBC, sp.applyGlobalVolumeConservation_ShapeOp_RBC, sp.globalVolumeConservationWeight_ShapeOp_RBC, rbc_graph, bodyID, sp.local_body_id, 0);
-            sp.local_body_id++;
+		for (plint bodyID = sp.myRangeRBC.first; bodyID <= sp.myRangeRBC.second; ++bodyID){
+
+            plb::RawConnectedTriangleMesh<T> tmp_ = generateRBC<T>(1.0, sp.bodyToShapeParams[bodyID][0], sp.bodyToShapeParams[bodyID][1], 
+                                                                        sp.bodyToShapeParams[bodyID][2], sp.bodyToShapeParams[bodyID][3]);
+
+            //TODO saved the constraint for GPUs
+			initBody(sp.shapeOpRBCs, sp.GPU_RBC_contraints, sp.Case_Study_RBC, &tmp_,
+                sp.Calpha_ShapeOp_RBC, sp.Cbeta_ShapeOp_RBC, sp.rho_ShapeOp_RBC, 
+                sp.applyGlobalVolumeConservation_ShapeOp_RBC, sp.globalVolumeConservationWeight_ShapeOp_RBC, 
+                rbc_graph, bodyID, sp.local_body_id, 0);
+
+                sp.local_body_id++;
 		}
 
-		for (plint bodyID = sp.myRangePLT.first; bodyID <= sp.myRangePLT.second; ++bodyID)
-        {
-			initBody(sp.shapeOpPLTs, sp.Case_Study_PLT, sp.pltTemplate, sp.Calpha_ShapeOp_PLT, sp.Cbeta_ShapeOp_PLT, sp.rho_ShapeOp_PLT, sp.applyGlobalVolumeConservation_ShapeOp_PLT, sp.globalVolumeConservationWeight_ShapeOp_PLT, plt_graph, bodyID, sp.local_body_id, 1);
+		for (plint bodyID = sp.myRangePLT.first; bodyID <= sp.myRangePLT.second; ++bodyID){
+
+			initBody(sp.shapeOpPLTs, sp.GPU_PLT_contraints, sp.Case_Study_PLT, sp.pltTemplate,
+                sp.Calpha_ShapeOp_PLT, sp.Cbeta_ShapeOp_PLT, sp.rho_ShapeOp_PLT, sp.applyGlobalVolumeConservation_ShapeOp_PLT,
+                sp.globalVolumeConservationWeight_ShapeOp_PLT, plt_graph, bodyID, sp.local_body_id, 1);
+
             sp.local_body_id++;
 		}
 	}
@@ -548,12 +593,16 @@ void iniPalabosParticles(Group3D& group, T vel)
 
     plb::global::logfile("progress.log").flushEntry("Injecting Particles: RBCs");
     const std::vector<bool>& RBC_onSurfaceParticle = sp.RBC_shapeOpSolverTemplate.get_onSurfaceParticle();
-    for (plint bodyID = sp.myRangeRBC.first; bodyID <= sp.myRangeRBC.second; ++bodyID)
-    {
+    for (plint bodyID = sp.myRangeRBC.first; bodyID <= sp.myRangeRBC.second; ++bodyID) {
+
         ShapeOp_Solver shapeOpSolverTemplate_tmp = sp.RBC_shapeOpSolverTemplate;
 
-        if (!sp.restartFromCP)
-        {
+        // RBCs with different shape params
+        setPointsFromRawConnectedTriangleMesh(shapeOpSolverTemplate_tmp,
+            generateRBC<T>(1.0, sp.bodyToShapeParams[bodyID][0], sp.bodyToShapeParams[bodyID][1], 
+            sp.bodyToShapeParams[bodyID][2], sp.bodyToShapeParams[bodyID][3]));
+
+        if (!sp.restartFromCP) {
             Array<T, 3> position = sp.iniPositions[bodyID];
             Array<T, 3> rotation = sp.iniRotations[bodyID];
 
@@ -562,17 +611,13 @@ void iniPalabosParticles(Group3D& group, T vel)
             shapeOpSolverTemplate_tmp.rotatePoints("z", rotation[2] * std::acos((T)-1) / 180);
 
             shapeOpSolverTemplate_tmp.shiftPoints(Vector3(position[0], position[1], position[2]));
-        }
-        else
-        {
+        } else {
             if (!sp.continuePLB)
             {
                 //setPointsFromCSV(shapeOpSolverTemplate_tmp, CP_OutputDir + "body_ID_" + util::val2str(bodyID) + ".csv");
                 // This is to avoid setting the initial conditions with deformed bodies such that we avoid energy bursts
                 setPointsFromCSV(shapeOpSolverTemplate_tmp, sp.CP_OutputDir + "body_ID_" + util::val2str(bodyID) + ".csv", true);
-            }
-            else
-            {
+            }else{
                 setPointsFromCSV(shapeOpSolverTemplate_tmp, createFileName(sp.CP_OutputDir + "body_ID_" + util::val2str(bodyID) + "_iT_", sp.iT, sp.fileNamePadding) + ".csv");
                 setVelsFromCSV(shapeOpSolverTemplate_tmp, createFileName(sp.CP_OutputDir + "vels_body_ID_" + util::val2str(bodyID) + "_iT_", sp.iT, sp.fileNamePadding) + ".csv");
             }
@@ -581,8 +626,7 @@ void iniPalabosParticles(Group3D& group, T vel)
         const Matrix3X& tmp_points = shapeOpSolverTemplate_tmp.getPoints();
         const Matrix3X& tmp_vels = shapeOpSolverTemplate_tmp.getVelocities();
 
-        for (pluint vertexID = 0; vertexID < (pluint)tmp_points.cols(); ++vertexID)
-        {
+        for (pluint vertexID = 0; vertexID < (pluint)tmp_points.cols(); ++vertexID) {
             // Palabos cares only for particles that are on the RBC surface.
             // The interiors are for the ShapeOp only (if any).
             if (!RBC_onSurfaceParticle[vertexID])
@@ -609,13 +653,10 @@ void iniPalabosParticles(Group3D& group, T vel)
                 group.getLattice<T, DESCRIPTOR>("lattice").getNz() - 1,
                 x, y, z);
 
-            if (global::mpi().getRank() == 0)
-            {
+            if (global::mpi().getRank() == 0) {
                 // particle position in lattice units
                 particles.push_back(new bodyVertexParticle<T, Descriptor>(vertexID, position, bodyID, velocity));
-            }
-            else
-            {
+            } else {
                 verIDs.push_back(vertexID);
                 ps.push_back(position);
                 bdIDs.push_back(bodyID);
@@ -1129,6 +1170,65 @@ bool file_exist(const std::string& name)
 	return f.good();
 }
 
+// Degugging Purposes
+void _generateRBC_(const T& R = 3.91, const T& c0 = 0.1035805, const T& c1 = 1.001279, const T& c2 = -0.561381, const T& numTriangles = 258)
+{
+    typedef TriangleSet<T>::Triangle Triangle;
+
+    T epsilon = R * 1.e-4;
+    T RSqr = R*R;
+
+    TriangleSet<T> rbc = constructSphere(Array<T, 3>::zero(), R, numTriangles);
+
+    std::vector<Triangle> triangles = rbc.getTriangles();
+    for (pluint i = 0; i<triangles.size(); ++i)
+    {
+        Triangle& triangle = triangles[i];
+        for (pluint j = 0; j<3; ++j)
+        {
+            Array<T, 3>& vertex = triangle[j];
+            T& x = vertex[0];
+            T& y = vertex[1];
+            T& z = vertex[2];
+            T rSqr = x*x + z*z;
+            T ratio = rSqr / RSqr;
+            if (ratio < 1. - epsilon)
+            {
+                T yFormula = R*sqrt(1 - ratio)*(c0 + c1*ratio + c2*ratio*ratio);
+
+                // To achieve a more discoid shape use the following
+                //T yFormula = R*sqrt(1 - ratio*ratio)*(c0 + c1*ratio + c2*ratio*ratio);
+
+                if (y>epsilon)
+                    y = yFormula;
+                else if (y<epsilon)
+                    y = -yFormula;
+            }
+
+            vertex /= sp.dx_p; // convert to lattice units
+        }
+    }
+    TriangleSet<T> rbc_(triangles);
+    rbc_.rotate(0, std::acos(-1) / 2, 0);
+    
+    RawConnectedTriangleMesh<T> RBC = triangleSetToConnectedTriangleMesh<T>(rbc_);
+
+    // For Debugging
+    /*
+    rbc_.writeBinarySTL(sp.OutputDir + "rbcPlbTemplate.stl"); // to build ShapeOp-GH template files
+
+    multiProcWriteVTK(RawConnectedTriangleMesh<T>(*sp.rbcTemplate),
+        sp.OutputDir + "rbcTemplate.vtk",
+        100,100,100,
+        1.0, 0.125, 1000.);
+    
+    multiProcWriteVTK(RBC,
+        sp.OutputDir + "RBC.vtk",
+        100, 100, 100,
+        1.0, 0.125, 1000.);
+    //*/
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -1163,6 +1263,19 @@ int main(int argc, char* argv[])
 	}
 
 	///////////////////////////////////////////////////////////////////////////
+
+    if (global::mpi().getRank() == 0)
+    {
+        std::cout << "\n WARNING: \n"
+            << " Quick & Dirty solution for now:  \n"
+            << " 1. Built a rbc template stl from generateRBC function. \n"
+            << " 2. Update the RBC_Surface_mesh_258SurfVer.3dm in the npFEM_StandAlone_RhinoGH. \n"
+            << " 3. From within GH application generate the constraints/points/surface_connectivity.csv. \n"
+            << " 4. Update the CSVs in the Case_Studies folder. \n"
+            << " With this approach, I make sure that whenever I generate on-the-fly a RBC with different shape, \n"
+            << " it will always have the same connectivity list, since it was generated from the same function! \n"
+            << std::endl;
+    }
 
 	// Open the XMl file.
 	XMLreader xmlFile(xml_name);
@@ -1483,41 +1596,41 @@ int main(int argc, char* argv[])
 					if (i >= sp.numRBC && i < (sp.numRBC + sp.numPLT))
                         sp.bodyToType[i] = 1;
 				}
+
+                char c; // to eat the commas
+                T R_, c0_, c1_, c2_;
+
+                pluint i = 0;
+                std::ifstream shapeParams_file(sp.CP_OutputDir + "bodyToShapeParams.log");
+                while (shapeParams_file >> R_ >> c >> c0_ >> c >> c1_ >> c >> c2_)
+                {
+                    sp.bodyToShapeParams[i] = Array<T,4>(R_, c0_, c1_, c2_);
+                    if (i < sp.numRBC)
+                        sp.bodyToShapeParams_RawConnectedTriangleMesh[i] = generateRBC<T>(sp.dx_p, R_, c0_, c1_, c2_);
+                    ++i;
+                }
 			}
 			else {
 				xmlFile["System_Setup"]["pos_filename"].read(sp.pos_filename);
 
-				pluint iBody = 0;
-				std::ifstream pos(sp.pos_filename.c_str());
-				std::string line;
-				while (std::getline(pos, line)) {
-					Array<T, 3> position;
-					Array<T, 3> rotation;
+                char c; // to eat the commas
+                pluint type_;
+                T x_, y_, z_;
+                T Rx_, Ry_, Rz_;
+                T R_, c0_, c1_, c2_;
 
-					std::istringstream ss(line);
-					std::string token;
-					int field = 0;
-					while (std::getline(ss, token, ',')) {
-						if (field == 0) {
-							pluint type_ = (pluint)std::stoi(token);
-                            sp.bodyToType[iBody] = type_;
-							if (type_ == 0) ++sp.numRBC;
-							if (type_ == 1) ++sp.numPLT;
-
-						}
-						else if (field > 0 && field <= 3) {
-							position[field - 1] = std::stof(token);
-						}
-						else {
-							rotation[field - 4] = std::stof(token);
-						}
-						++field;
-					}
-                    sp.iniPositions.push_back(position);
-                    sp.iniRotations.push_back(rotation);
-
-					++iBody;
-				}
+                pluint i = 0;
+                std::ifstream initialPlacing(sp.pos_filename.c_str());
+                while (initialPlacing >> type_ >> c >> x_ >> c >> y_ >> c >> z_ >> c >> Rx_ >> c >> Ry_ >> c >> Rz_ >> c >> R_ >> c >> c0_ >> c >> c1_ >> c >> c2_)
+                {
+                    sp.bodyToType[i] = type_;
+                    sp.iniPositions.push_back(Array<T, 3>(x_, y_, z_));
+                    sp.iniRotations.push_back(Array<T, 3>(Rx_, Ry_, Rz_));
+                    sp.bodyToShapeParams[i] = Array<T, 4>(R_, c0_, c1_, c2_);
+                    if (type_ == 0)
+                        sp.bodyToShapeParams_RawConnectedTriangleMesh[i] = generateRBC<T>(sp.dx_p, R_, c0_, c1_, c2_);
+                    ++i;
+                }
 			}
 		}
 		else // CellPacking
@@ -1563,6 +1676,11 @@ int main(int argc, char* argv[])
             {
                 sp.iniPositions.resize(sp.numRBC + sp.numPLT, Array<T, 3>(0., 0., 0.));
                 sp.iniRotations.resize(sp.numRBC + sp.numPLT, Array<T, 3>(0., 0., 0.));
+                // Shape Params
+                std::vector<T> vec_R (sp.numRBC + sp.numPLT, 0.);
+                std::vector<T> vec_c0(sp.numRBC + sp.numPLT, 0.);
+                std::vector<T> vec_c1(sp.numRBC + sp.numPLT, 0.);
+                std::vector<T> vec_c2(sp.numRBC + sp.numPLT, 0.);
 
 				for (pluint i = 0; i < (sp.numRBC + sp.numPLT); ++i) {
 					if (i < sp.numRBC) {
@@ -1585,6 +1703,36 @@ int main(int argc, char* argv[])
 					std::uniform_real_distribution<T> dist_pos_y(0. + offset, sp.ly_p - offset);
 					std::uniform_real_distribution<T> dist_pos_z(0. + offset, sp.lz_p - offset);
 					std::uniform_real_distribution<T> dist_rot(0., 360.0);
+                    
+                    ///////////////////////////////////////////////////////////
+                    // Shape Params
+                    std::ifstream shapeParams_file("RBC_shapeParams.csv");
+                    int num_of_lines = 0;
+                    char c; // to eat the commas
+                    T R_, c0_, c1_, c2_;
+                    std::vector<Array<T, 4> > shapeParams;
+                    while (shapeParams_file >> R_ >> c >> c0_ >> c >> c1_ >> c >> c2_)
+                    {
+                        shapeParams.push_back(Array<T, 4>(R_, c0_, c1_, c2_));
+                        ++num_of_lines;
+                    }
+
+                    std::uniform_int_distribution<int> shapeParams_inds(0, num_of_lines-1);
+
+                    int ind_;
+                    for (pluint i = 0; i < (sp.numRBC + sp.numPLT); ++i) {
+                        if (i < sp.numRBC) {
+                            ind_ = shapeParams_inds(mt);
+                            vec_R [i] = shapeParams[ind_][0];
+                            vec_c0[i] = shapeParams[ind_][1];
+                            vec_c1[i] = shapeParams[ind_][2];
+                            vec_c2[i] = shapeParams[ind_][3];
+                        }
+                        if (i >= sp.numRBC && i < (sp.numRBC + sp.numPLT)) {
+                            continue;
+                        }
+                    }
+                    ///////////////////////////////////////////////////////////
 
                     T radial_pos;
                     T radial_bound = sp.pipeRadius_LB*sp.dx_p - offset;
@@ -1628,7 +1776,39 @@ int main(int argc, char* argv[])
 
 				MPI_Bcast(&sp.iniPositions[0][0], (int)((sp.numRBC + sp.numPLT) * 3), MPI_DOUBLE, 0, MPI_COMM_WORLD);
 				MPI_Bcast(&sp.iniRotations[0][0], (int)((sp.numRBC + sp.numPLT) * 3), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-			}
+                // Shape Params
+                MPI_Bcast(&vec_R [0]            , (int)((sp.numRBC + sp.numPLT) * 1), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+                MPI_Bcast(&vec_c0[0]            , (int)((sp.numRBC + sp.numPLT) * 1), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+                MPI_Bcast(&vec_c1[0]            , (int)((sp.numRBC + sp.numPLT) * 1), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+                MPI_Bcast(&vec_c2[0]            , (int)((sp.numRBC + sp.numPLT) * 1), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+                for (pluint i = 0; i < (sp.numRBC + sp.numPLT); ++i)
+                {
+                    if (i < sp.numRBC) 
+                    {
+                        sp.bodyToShapeParams[i] = Array<T, 4>(vec_R[i], vec_c0[i], vec_c1[i], vec_c2[i]);
+                        sp.bodyToShapeParams_RawConnectedTriangleMesh[i] = generateRBC<T>(sp.dx_p, vec_R[i], vec_c0[i], vec_c1[i], vec_c2[i]);
+                    }
+                    if (i >= sp.numRBC && i < (sp.numRBC + sp.numPLT)) 
+                    {
+                        sp.bodyToShapeParams[i] = Array<T, 4>::zero();
+                    }
+                }
+
+                if (global::mpi().getRank() == 0)
+                {
+                    std::ofstream ofile;
+                    ofile.open(sp.CP_OutputDir + "bodyToShapeParams.log", std::ofstream::out);
+                    for (pluint i = 0; i < (sp.numRBC + sp.numPLT); ++i)
+                    {
+                        ofile << plb::util::val2str(sp.bodyToShapeParams[i][0]) + "," +
+                                 plb::util::val2str(sp.bodyToShapeParams[i][1]) + "," +
+                                 plb::util::val2str(sp.bodyToShapeParams[i][2]) + "," +
+                                 plb::util::val2str(sp.bodyToShapeParams[i][3])
+                              << std::endl;
+                    }
+                }
+            }
             else
             {
                 pcout << "There is no option to restart from CP in the CellPacking ... ABORT!" << std::endl;
@@ -1661,8 +1841,8 @@ int main(int argc, char* argv[])
 
     sp.iT = 0;
 
-	if (sp.continuePLB)
-    {
+	if (sp.continuePLB) {
+
 		// Check the latest iT
 		std::string continueFile = "continue.xml";
 		XMLreader cont(continueFile);
@@ -1684,18 +1864,27 @@ int main(int argc, char* argv[])
     plb::global::logfile("progress.log").flushEntry("initialize ShapeOp Solvers");
 	iniShapeOpSolvers("points.csv", "constraints.csv", "surface_connectivity.csv", "onSurfaceParticle.csv");
 
-	///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
+//TODO make it multi shape
 #ifdef NPFEM_CUDA
 	// GPU init
-	auto init_gpu = [&](Solver_GPU &sGPU, Solver &s_template, std::vector<Solver*> &solvers, plb::Array<double, 3>*iniPositions, vector<int> *mesh_graph, Mesh_info params) {
-		sGPU = Solver_GPU(s_template.getPoints(),
-		s_template.getConnectivityList(),
-		s_template.get_onSurfaceParticle(),
-		s_template.getConstraints(), params, s_template.Cbeta_,
-		solvers.size(), sp.dt_p, (T)(sp.timestep_ShapeOp), solvers[0]->bodyID_, mesh_graph);
+	auto init_gpu = [&](Solver_GPU &sGPU, Solver &s_template, std::vector<std::vector<std::shared_ptr<Constraint>>> contraints,
+                        std::vector<Solver*> &solvers, plb::Array<double, 3>*iniPositions, 
+                        vector<int> *mesh_graph, Mesh_info params, const std::vector<plb::npfem::Matrix3X>& points_diff){	
 
-
+        sGPU = Solver_GPU(s_template.getPoints(), points_diff,
+            s_template.getConnectivityList(),
+            s_template.get_onSurfaceParticle(),
+            contraints, params, s_template.Cbeta_,
+            solvers.size(), sp.dt_p, (T)(sp.timestep_ShapeOp), solvers[0]->bodyID_, mesh_graph);
+        /*
+        sGPU = Solver_GPU(s_template.getPoints(),
+            s_template.getConnectivityList(),
+            s_template.get_onSurfaceParticle(),
+            s_template.getConstraints(), params, s_template.Cbeta_,
+            solvers.size(), sp.dt_p, (T)(sp.timestep_ShapeOp), solvers[0]->bodyID_, mesh_graph);
+        */
 		for (int i = 0; i< solvers.size(); i++) {
 			sGPU.set_gpu_starting_position(solvers[i]->getPoints(), i);
 			sGPU.set_gpu_starting_velocities(solvers[i]->getVelocities(), i);
@@ -1705,13 +1894,15 @@ int main(int argc, char* argv[])
 
 	if (sp.loc_rank < sp.number_devices)
     {
-		cudaError_t err = cudaSetDevice(sp.loc_rank);
+        int err = cudaSetDevice_warpper(sp.loc_rank);
 
 		if (sp.shapeOpRBCs.size() > 0)
-			init_gpu(sp.sGPU, sp.RBC_shapeOpSolverTemplate, sp.shapeOpRBCs, sp.iniPositions.data(), sp.shapeOpBodies[getSolverID(sp.shapeOpRBCs[0]->bodyID_, sp.shapeOpBodies)].mesh_graph, params_rbc);
+			init_gpu(sp.sGPU, sp.RBC_shapeOpSolverTemplate, sp.GPU_RBC_contraints, sp.shapeOpRBCs, sp.iniPositions.data(),
+                     sp.shapeOpBodies[getSolverID(sp.shapeOpRBCs[0]->bodyID_, sp.shapeOpBodies)].mesh_graph, params_rbc, sp.GPU_RBCs);
 		
 		if (sp.shapeOpPLTs.size() > 0)
-			init_gpu(sp.sGPU_plt, sp.PLT_shapeOpSolverTemplate, sp.shapeOpPLTs, sp.iniPositions.data(), sp.shapeOpBodies[getSolverID(sp.shapeOpPLTs[0]->bodyID_, sp.shapeOpBodies)].mesh_graph, params_plt);
+			init_gpu(sp.sGPU_plt, sp.PLT_shapeOpSolverTemplate, sp.GPU_PLT_contraints, sp.shapeOpPLTs, sp.iniPositions.data(),
+                     sp.shapeOpBodies[getSolverID(sp.shapeOpPLTs[0]->bodyID_, sp.shapeOpBodies)].mesh_graph, params_plt, sp.GPU_PLTs);
 	}
 #endif
 
@@ -1951,7 +2142,7 @@ int main(int argc, char* argv[])
 	Actions3D actions2a;
 	plint particleID_act2a = actions2a.addBlock(group.get("vertexParticles"));
 	actions2a.addProcessor(
-		new ConstructLocalMeshesFromParticles<T, DESCRIPTOR>(sp.rbcTemplate, sp.pltTemplate, sp.bodyToType, sp.particleEnvelopeWidth),
+		new ConstructLocalMeshesFromParticles<T, DESCRIPTOR>(sp.rbcTemplate, sp.pltTemplate, sp.bodyToType, sp.bodyToShapeParams, sp.bodyToShapeParams_RawConnectedTriangleMesh, sp.particleEnvelopeWidth, sp.dx_p),
 		particleID_act2a, group.getBoundingBox());
 
     Actions3D actions2b;

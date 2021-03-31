@@ -428,7 +428,7 @@ SHAPEOP_INLINE bool Solver::initialize(Scalar Calpha
     //mass_lumping(); // Go with uniform ditribution
     M_.setIdentity();
 #ifdef THREED
-    M_ *= (Volume0_ * rho_) / n_points; // mass = Volume * density
+    M_ *= (Volume0_ * rho_)/n_points; // mass = Volume * density
 #else
     M_ *= 1.;
 #endif
@@ -462,8 +462,8 @@ SHAPEOP_INLINE bool Solver::initialize(Scalar Calpha
     }
 
     // Damping based on Rayleigh with the "stiffness" part (Laplacian in my case)
-    M_tilde_ = M_ + delta_ * (Cbeta_ * Laplacian);
-    M_star_ = M_tilde_ / (delta_ * delta_);
+    M_tilde_ = M_ + delta_*(Cbeta_*Laplacian);
+    M_star_ = M_tilde_/(delta_*delta_);
 
     // Inverse of M_tilde
     M_tilde_inv_ = (MatrixXX(M_tilde_)).inverse();

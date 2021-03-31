@@ -44,14 +44,18 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <cuda_runtime.h>
+//#include <cuda_runtime.h>
 
 #include "common.h"
 #include "svd3_cuda.h"
 ///////////////////////////////////////////////////////////////////////////////
 // Zero-based indexing for raw pointer arrays, where ld is the number of rows
 // for ColMajor matrices
-#define IDX(i,j,ld)                     ( ( (j) * (ld) ) + (i) )
+
+#define IDX(i,j,ld)                     (((j)*(ld)) + (i))
+//to be used with many geometry
+#define IDX_GS(obj_id, item_id, item_per_obj) ((item_per_obj)*(obj_id)  + (item_id))
+#define IDX_G(obj_id, item_id, data_id, item_per_obj, data_per_item) ((item_per_obj*data_per_item)*(obj_id) + (data_id)*(item_per_obj) + (item_id))
 #define SHAPEOP_INNER_ITERATIONS        4
 #define DOT_2(a0, a1,     b0, b1)		    ((a0)*(b0) + (a1)*(b1))
 #define DOT_3(a0, a1, a2, b0, b1, b2)   ((a0)*(b0) + (a1)*(b1) + (a2)*(b2))
@@ -152,7 +156,7 @@ ShapeOpScalar Determinant_3(T &a,T &b,T &c,
 }
 template <typename T>
 __device__ 
-void Matrix_invers3_3X3(const T m[9], T m_inv[9]) {
+void Matrix_invers3_3X3_par(const T m[9], T m_inv[9]) {
 	T det = m[0] * m[4] * m[8] + m[1] * m[5] * m[6] + m[2] * m[3] * m[7] - m[6] * m[4] * m[2] - m[7] * m[5] * m[0] - m[8] * m[3] * m[1];
 	__syncthreads();
 	if (threadIdx.x == 0)m_inv[0] =  (m[4] * m[8] - m[5] * m[7]) / det;
@@ -168,6 +172,24 @@ void Matrix_invers3_3X3(const T m[9], T m_inv[9]) {
 	if (threadIdx.x == 8)m_inv[8] =  (m[0] * m[4] - m[1] * m[3]) / det;
 }
 template <typename T>
+__device__ 
+void Matrix_invers3_3X3(const T m[9], T m_inv[9]) {
+	T det = m[0] * m[4] * m[8] + m[1] * m[5] * m[6] + m[2] * m[3] * m[7] - m[6] * m[4] * m[2] - m[7] * m[5] * m[0] - m[8] * m[3] * m[1];
+
+	m_inv[0] =  (m[4] * m[8] - m[5] * m[7]) / det;
+	m_inv[1] = -(m[1] * m[8] - m[2] * m[7]) / det;
+	m_inv[2] =  (m[1] * m[5] - m[2] * m[4]) / det;
+
+	m_inv[3] = -(m[3] * m[8] - m[5] * m[6]) / det;
+	m_inv[4] =  (m[0] * m[8] - m[2] * m[6]) / det;
+	m_inv[5] = -(m[0] * m[5] - m[2] * m[3]) / det;
+
+	m_inv[6] =  (m[3] * m[7] - m[4] * m[6]) / det;
+	m_inv[7] = -(m[0] * m[7] - m[1] * m[6]) / det;
+	m_inv[8] =  (m[0] * m[4] - m[1] * m[3]) / det;
+}
+
+template <typename T>
 __device__ void vect_matrix_mult_3X3_par(const T A[9], const T x[3],T b[3]) {
 	__shared__ T prod[9];
 
@@ -179,6 +201,15 @@ __device__ void vect_matrix_mult_3X3_par(const T A[9], const T x[3],T b[3]) {
 		b[threadIdx.x] = prod[3*threadIdx.x] +  prod[3*threadIdx.x + 1] + prod[3*threadIdx.x + 2];
 	}
 }
+///////////////////////////////////////////////////////////////////////////////
+template <typename T>
+__device__ void vect_matrix_mult_3X3(const T A[9], const T x[3],T b[3]) {
+
+	b[0] = x[0]*A[0] + x[1]*A[1] + x[2]*A[2];
+	b[1] = x[0]*A[3] + x[1]*A[4] + x[2]*A[5];
+	b[2] = x[0]*A[6] + x[1]*A[7] + x[2]*A[8];	
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // A:nx*ny  || B:ny*nz  || R:nx*nz

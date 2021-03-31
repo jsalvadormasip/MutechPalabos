@@ -957,4 +957,3 @@ MultiNTensorField3D<T>& findMultiNTensorField3D(id_t id) {
 }  // namespace plb
 
 #endif   // MULTI_DATA_FIELD_3D_HH
-

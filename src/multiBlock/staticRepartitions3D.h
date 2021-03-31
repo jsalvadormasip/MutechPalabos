@@ -63,9 +63,12 @@ SparseBlockStructure3D
     createRegularDistribution3D(plint nx, plint ny, plint nz,
                                 int numProc = global::mpi().getSize());
 
+
 /// Create a data distribution with regular blocks, as evenly distributed as possible
 SparseBlockStructure3D createRegularDistribution3D(Box3D const& domain,
                                                    int numProc = global::mpi().getSize());
+
+SparseBlockStructure3D createRegularDistribution3D_better(Box3D const& domain, int numProc = global::mpi().getSize());
 
 /// Create a data distribution with regular blocks only at the y and z directions, as evenly distributed as possible
 SparseBlockStructure3D createRegularDistributionYZ3D (

@@ -41,6 +41,8 @@
 #ifndef SPARSE_MATRIX_H
 #define SPARSE_MATRIX_H
 
+#include "common.h"
+
 namespace plb {
 namespace npfem {
 
@@ -52,8 +54,8 @@ struct sparse_matrix_cuda{
 
 
 void print_mat_sparse(sparse_matrix_cuda mat, int l, int n, int size);
-sparse_matrix_cuda make_sparse_from_full(double *mat, int rows, int cols);
-
+sparse_matrix_cuda make_sparse_from_full(double *mat, int rows, int cols, int nb_objects);
+void add_values_to_sparse(sparse_matrix_cuda *out, double *mat, int rows, int cols, int bodyId);
 }
 }
 

@@ -55,11 +55,10 @@
 #include "LSSolver.h"
 #include "Constraint.h"
 #include "Force.h"
-#include "device_utilities.h"
 #include "sparse_matrix.h"
 #include "GPU_data.h"
 
-#include "palabos3D.h"
+//#include "palabos3D.h"
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef SHAPEOP_OPENMP
 #ifdef SHAPEOP_MSVC
@@ -77,8 +76,9 @@
 namespace plb {
 namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
+/*
 Solver_GPU::Solver_GPU(const MatrixXX &points,
-		const std::vector< std::vector<int> > &triangles,
+		const std::vector< std::vector<int>> &triangles,
 		const std::vector<bool> &onSurfaceParticle,
 		std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
 		const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyId, std::vector<int> *graph): mesh_info_(params)
@@ -87,12 +87,74 @@ Solver_GPU::Solver_GPU(const MatrixXX &points,
 	bodyID_ = bodyId;
 	setPoints(points, nb_cells);
 	constraints_ = constraints;
-	setConnectivityList(triangles);
-	set_onSurfaceParticle(onSurfaceParticle);
-	make_gpu_graph(graph, points.cols());
-	Cbeta_ = cbeta;
-	initialize(phys_timestep*shapeOp_time_step);
+    setConnectivityList(triangles);
+    set_onSurfaceParticle(onSurfaceParticle);
+    make_gpu_graph(graph, points.cols());
+    Cbeta_ = cbeta;
+    initialize(phys_timestep*shapeOp_time_step);
+
 }
+*/
+    void Solver_GPU::construct(const MatrixXX &points, const std::vector<Matrix3X>& points_diff,
+                               const std::vector< std::vector<int>> &triangles,
+                               const std::vector<bool> &onSurfaceParticle,
+                               std::vector<std::vector<std::shared_ptr<Constraint>>>  &constraints, Mesh_info params, float cbeta,
+                               const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyId, std::vector<int> *graph){
+
+        //test_prefix();
+        //exit(0);
+        solver_step_ = shapeOp_time_step;
+        bodyID_ = bodyId;
+        //setPoints(points, nb_cells);
+        setPoints(points, points_diff, nb_cells);
+        /*
+        #ifdef SINGLECELL
+        constraints.resize(1);
+        #endif
+        */
+        int nb_shapes = 1;
+ 
+        if(points_diff.size())nb_shapes = points_diff.size();
+        //TODO make it multi cell
+        if(nb_cells){
+            constraints_ = constraints;
+            setConnectivityList(triangles);
+            set_onSurfaceParticle(onSurfaceParticle);
+            make_gpu_graph(graph, points.cols());
+            Cbeta_ = cbeta;
+            p_dt = phys_timestep;
+            initialize(nb_shapes, phys_timestep*shapeOp_time_step);
+        }
+    }
+
+    Solver_GPU::Solver_GPU(const MatrixXX &points, const std::vector<Matrix3X>& points_diff,
+                           const std::vector< std::vector<int>> &triangles,
+                           const std::vector<bool> &onSurfaceParticle,
+                           std::vector<std::vector<std::shared_ptr<Constraint>>>  &constraints, Mesh_info params, float cbeta,
+                           const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, 
+                           int bodyId, std::vector<int> *graph): mesh_info_(params) {
+        //test_prefix();
+        //exit(0);
+        this->construct(points, points_diff, triangles, onSurfaceParticle, constraints, 
+                        params, cbeta, nb_cells, phys_timestep, shapeOp_time_step, bodyId, graph);
+    }
+
+    Solver_GPU::Solver_GPU(const MatrixXX &points,
+                           const std::vector< std::vector<int>> &triangles,
+                           const std::vector<bool> &onSurfaceParticle,
+                           std::vector<std::shared_ptr<Constraint>> &constraints, Mesh_info params, float cbeta,
+                           const int nb_cells, Scalar phys_timestep, Scalar shapeOp_time_step, int bodyID, int start_id):mesh_info_(params){
+
+        this->starting_ids = start_id*points.cols();
+        from_fluid_data_alloc(&from_fluid_data_d, &from_fluid_data_h, points.cols()*nb_cells);
+        const std::vector<Matrix3X> diff;
+        std::vector<std::vector<std::shared_ptr<Constraint>>> constraints_vec(1);
+        constraints_vec[0] = constraints;
+        this->construct(points, diff, triangles, onSurfaceParticle, constraints_vec,
+                        params, cbeta, nb_cells, phys_timestep, shapeOp_time_step, bodyID, NULL);
+    }
+
+
 /////////////////////////////////////////////////////////////////////////////
 void Solver_GPU::make_gpu_graph(std::vector<int> *graph, int nb)
 {
@@ -141,157 +203,386 @@ Solver_GPU::~Solver_GPU()
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE int Solver_GPU::addConstraint(const std::shared_ptr<Constraint> &c) 
 {
-  constraints_.push_back(c);
-  return static_cast<int>(constraints_.size() - 1);
+  constraints_[0].push_back(c);
+  return static_cast<int>(constraints_[0].size() - 1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE std::shared_ptr<Constraint> &Solver_GPU::getConstraint(int id) 
 {
-	return constraints_[id];
+	return constraints_[0][id];
 }
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE void Solver_GPU::flatten_constraints() 
+SHAPEOP_INLINE void Solver_GPU::flatten_constraints()
 {
+    std::vector<std::shared_ptr<Constraint>> constraints_l = constraints_[0];
+    constraints_h_ = new Constraint_flat[mesh_info_.n_constraints];
+
+    ConstraintType_eigen_ = Eigen::Matrix<int, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    idO_eigen_ = Eigen::Matrix<int, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    rangeMin_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    rangeMax_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    Scalar1_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    weight_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    E_nonePD_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    A_ = Eigen::Matrix<cuda_scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    idI_eigen_ = Eigen::Matrix<int, 4, Eigen::Dynamic>::Zero(4, mesh_info_.n_constraints);
+    vectorx_eigen_ = Eigen::Matrix<Scalar, 4, Eigen::Dynamic>::Zero(4, mesh_info_.n_constraints);
+    matrix22_eigen_ = Eigen::Matrix<Scalar, 4, Eigen::Dynamic>::Zero(4, mesh_info_.n_constraints);
+    matrix33_eigen_ = Eigen::Matrix<Scalar, 9, Eigen::Dynamic>::Zero(9, mesh_info_.n_constraints);
+
+    SHAPEOP_OMP_PARALLEL
+    {
+        SHAPEOP_OMP_FOR for (int i = 0; i < mesh_info_.n_constraints; ++i)
+    {
+        // Common to every constraint
+        constraints_h_[i].idO_ = constraints_l[i]->get_idO();
+        for (int j = 0; j < static_cast<int>(constraints_l[i]->get_idI().size()); ++j) constraints_h_[i].idI_[j] = constraints_l[i]->get_idI()[j];
+        constraints_h_[i].weight_ = constraints_l[i]->get_weight();
+
+        if (constraints_l[i]->ConstraintType_.compare("Area") == 0) {
+            constraints_h_[i].ConstraintType_ = 1;
+            constraints_h_[i].rangeMin_ = constraints_l[i]->getMinRange();
+            constraints_h_[i].rangeMax_ = constraints_l[i]->getMaxRange();
+            Scalar *tmp = constraints_l[i]->getMatrix22().data();
+            for (int j = 0; j < 4; ++j) constraints_h_[i].matrix22_[j] = tmp[j];
+
+        } else if (constraints_l[i]->ConstraintType_.compare("Volume") == 0) {
+            constraints_h_[i].ConstraintType_ = 2;
+            constraints_h_[i].rangeMin_ = constraints_l[i]->getMinRange();
+            constraints_h_[i].rangeMax_ = constraints_l[i]->getMaxRange();
+            Scalar *tmp = constraints_l[i]->getMatrix33().data();
+            for (int j = 0; j < 9; ++j) constraints_h_[i].matrix33_[j] = tmp[j];
+
+        }
+        else if (constraints_l[i]->ConstraintType_.compare("Bending") == 0) {
+            constraints_h_[i].ConstraintType_ = 3;
+            constraints_h_[i].rangeMin_ = constraints_l[i]->getMinRange();
+            constraints_h_[i].rangeMax_ = constraints_l[i]->getMaxRange();
+            constraints_h_[i].Scalar1_ = constraints_l[i]->getScalar1();
+            constraints_h_[i].vectorx_ = constraints_l[i]->getVectorX();
+            Scalar *tmp = constraints_l[i]->getVectorX();
+            for (int j = 0; j < 4; ++j) constraints_h_[i].vectorx_[j] = tmp[j];
+
+        } else if (constraints_l[i]->ConstraintType_.compare("TriangleStrainLimiting") == 0) {
+
+            constraints_h_[i].ConstraintType_ = 4;
+            constraints_h_[i].rangeMin_ = constraints_l[i]->getMinRange();
+            constraints_h_[i].rangeMax_ = constraints_l[i]->getMaxRange();
+            Scalar *tmp = constraints_l[i]->getMatrix22().data();
+            for (int j = 0; j < 4; ++j) constraints_h_[i].matrix22_[j] = tmp[j];
+
+        } else if (constraints_l[i]->ConstraintType_.compare("SurfaceMaterial") == 0) {
+
+            SurfaceMaterialConstraint *tp = (SurfaceMaterialConstraint*)constraints_l[i].get();
+            constraints_h_[i].ConstraintType_ = 5;
+            constraints_h_[i].rangeMin_ = constraints_l[i]->getMinRange();
+            constraints_h_[i].rangeMax_ = constraints_l[i]->getMaxRange();
+            Scalar *tmp = constraints_l[i]->getMatrix22().data();
+            for (int j = 0; j < 4; ++j) constraints_h_[i].matrix22_[j] = tmp[j];
+
+            A_[i] = tp->A_;
+        }
+    }
+    }
+
+        SHAPEOP_OMP_PARALLEL
+    {
+        SHAPEOP_OMP_FOR for (int i = 0; i < mesh_info_.n_constraints; ++i)
+    {
+        ConstraintType_eigen_[i] = constraints_h_[i].ConstraintType_;
+        idO_eigen_[i] = constraints_h_[i].idO_;
+        rangeMin_eigen_[i] = constraints_h_[i].rangeMin_;
+        rangeMax_eigen_[i] = constraints_h_[i].rangeMax_;
+        Scalar1_eigen_[i] = constraints_h_[i].Scalar1_;
+        weight_eigen_[i] = constraints_h_[i].weight_;
+        E_nonePD_eigen_[i] = constraints_h_[i].E_nonePD_;
+
+        idI_eigen_.col(i) = Eigen::Map<Eigen::Matrix<int   , 4, 1>>(constraints_h_[i].idI_);
+        vectorx_eigen_.col(i) = Eigen::Map<Eigen::Matrix<Scalar, 4, 1>>(constraints_h_[i].vectorx_);
+        matrix22_eigen_.col(i) = Eigen::Map<Eigen::Matrix<Scalar, 4, 1>>(constraints_h_[i].matrix22_);
+        matrix33_eigen_.col(i) = Eigen::Map<Eigen::Matrix<Scalar, 9, 1>>(constraints_h_[i].matrix33_);
+    }
+    }
+
+        //printf("passed here 0.5\n?");
+        //multi shape:
+    mesh_data_h_.idO = idO_eigen_.data();
+    mesh_data_h_.idI = idI_eigen_.data();
+    mesh_data_h_.ConstraintType = ConstraintType_eigen_.data();
+    mesh_data_h_.rangeMin = rangeMin_eigen_.data();
+    mesh_data_h_.rangeMax = rangeMax_eigen_.data();
+
+    int nConst = mesh_info_.n_constraints;
+    int baseNB = nConst*mesh_info_.nb_cells;
+#ifndef SINGLECELL
+    mesh_data_h_.A = (ShapeOpScalar*)malloc(baseNB * sizeof(ShapeOpScalar));
+    mesh_data_h_.Scalar1 = (ShapeOpScalar*)malloc(baseNB * sizeof(ShapeOpScalar));
+    mesh_data_h_.weight = (ShapeOpScalar*)malloc(baseNB * sizeof(ShapeOpScalar));
+
+    mesh_data_h_.vectorx = (ShapeOpScalar*)malloc(baseNB * 4 * sizeof(ShapeOpScalar));
+    mesh_data_h_.matrix22 = (ShapeOpScalar*)malloc(baseNB * 4 * sizeof(ShapeOpScalar));
+    mesh_data_h_.matrix33 = (ShapeOpScalar*)malloc(baseNB * 9 * sizeof(ShapeOpScalar));
+
+    int m4 = 4 * nConst;
+    int m9 = 9 * nConst;
+
+    for (int body = 0; body <mesh_info_.nb_cells; ++body) {
+        for (int i = 0; i < mesh_info_.n_constraints; ++i) {
+            mesh_data_h_.A[body*mesh_info_.n_constraints + i] = A_(i);
+            mesh_data_h_.Scalar1[body*mesh_info_.n_constraints + i] = Scalar1_eigen_[i];
+            mesh_data_h_.weight[body*mesh_info_.n_constraints + i] = weight_eigen_[i];
+            for (int j = 0; j < 4; ++j) {
+                mesh_data_h_.vectorx[ID_COL_MULTI(body, i, j, nConst, m4)] = vectorx_eigen_(j, i);
+                mesh_data_h_.matrix22[ID_COL_MULTI(body, i, j, nConst, m4)] = matrix22_eigen_(j, i);
+            }
+            for (int j = 0; j < 9; ++j) {
+                mesh_data_h_.matrix33[ID_COL_MULTI(body, i, j, nConst, m9)] = matrix33_eigen_(j, i);
+            }
+        }
+    }
+#else 
+    mesh_data_h_.A = A_.data();
+    mesh_data_h_.Scalar1 = Scalar1_eigen_.data();
+    mesh_data_h_.weight = weight_eigen_.data();
+
+    mesh_data_h_.vectorx = vectorx_eigen_.data();
+    mesh_data_h_.matrix22 = matrix22_eigen_.data();
+    mesh_data_h_.matrix33 = matrix33_eigen_.data();
+#endif
+    //delete[] constraints_h_;
+    //multi shape:
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+SHAPEOP_INLINE void Solver_GPU::flatten_constraints(int nb_shapes) {
+    //if nb_shapes == 1{
+
+    //}
+    //std::cout << " mesh_info_.n_constraints " << mesh_info_.n_constraints << std::endl;
+
 	constraints_h_ = new Constraint_flat[mesh_info_.n_constraints];
 
-	ConstraintType_eigen_ = Eigen::Matrix<int, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
-	idO_eigen_ = Eigen::Matrix<int, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
-	rangeMin_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
-	rangeMax_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
-	Scalar1_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
-	weight_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
-	E_nonePD_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
-	A_ = Eigen::Matrix<cuda_scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
-	idI_eigen_ = Eigen::Matrix<int, 4, Eigen::Dynamic>::Zero(4, mesh_info_.n_constraints);
-	vectorx_eigen_ = Eigen::Matrix<Scalar, 4, Eigen::Dynamic>::Zero(4, mesh_info_.n_constraints);
-	matrix22_eigen_ = Eigen::Matrix<Scalar, 4, Eigen::Dynamic>::Zero(4, mesh_info_.n_constraints);
-	matrix33_eigen_ = Eigen::Matrix<Scalar, 9, Eigen::Dynamic>::Zero(9, mesh_info_.n_constraints);
+    int nConst = mesh_info_.n_constraints;
+    int baseNB = nConst*nb_shapes;
+    int m4 = 4*nConst;
+    int m9 = 9*nConst;
 
-	SHAPEOP_OMP_PARALLEL
-	{
-		SHAPEOP_OMP_FOR for (int i = 0; i < mesh_info_.n_constraints; ++i)
-		{
-			// Common to every constraint
-			constraints_h_[i].idO_ = constraints_[i]->get_idO();
-			for (int j = 0; j < static_cast<int>(constraints_[i]->get_idI().size()); ++j) constraints_h_[i].idI_[j] = constraints_[i]->get_idI()[j];
-			constraints_h_[i].weight_ = constraints_[i]->get_weight();
+    mesh_data_h_.A = (ShapeOpScalar*)malloc(baseNB*sizeof(ShapeOpScalar));
+    mesh_data_h_.Scalar1 = (ShapeOpScalar*)malloc(baseNB*sizeof(ShapeOpScalar));
+    mesh_data_h_.weight = (ShapeOpScalar*)malloc(baseNB*sizeof(ShapeOpScalar));
 
-			if (constraints_[i]->ConstraintType_.compare("Area") == 0)
-			{
-				constraints_h_[i].ConstraintType_ = 1;
-				constraints_h_[i].rangeMin_ = constraints_[i]->getMinRange();
-				constraints_h_[i].rangeMax_ = constraints_[i]->getMaxRange();
-				Scalar *tmp = constraints_[i]->getMatrix22().data();
-				for (int j = 0; j < 4; ++j) constraints_h_[i].matrix22_[j] = tmp[j];
-			}
-			else if (constraints_[i]->ConstraintType_.compare("Volume") == 0)
-			{
-				constraints_h_[i].ConstraintType_ = 2;
-				constraints_h_[i].rangeMin_ = constraints_[i]->getMinRange();
-				constraints_h_[i].rangeMax_ = constraints_[i]->getMaxRange();
-				Scalar *tmp = constraints_[i]->getMatrix33().data();
-				for (int j = 0; j < 9; ++j) constraints_h_[i].matrix33_[j] = tmp[j];
-			}
-			else if (constraints_[i]->ConstraintType_.compare("Bending") == 0)
-			{
-				constraints_h_[i].ConstraintType_ = 3;
-				constraints_h_[i].rangeMin_ = constraints_[i]->getMinRange();
-				constraints_h_[i].rangeMax_ = constraints_[i]->getMaxRange();
-				constraints_h_[i].Scalar1_ = constraints_[i]->getScalar1();
-				constraints_h_[i].vectorx_ = constraints_[i]->getVectorX();
-				Scalar *tmp = constraints_[i]->getVectorX();
-				for (int j = 0; j < 4; ++j) constraints_h_[i].vectorx_[j] = tmp[j];
-			}
-			else if (constraints_[i]->ConstraintType_.compare("TriangleStrainLimiting") == 0)
-			{
-				constraints_h_[i].ConstraintType_ = 4;
-				constraints_h_[i].rangeMin_ = constraints_[i]->getMinRange();
-				constraints_h_[i].rangeMax_ = constraints_[i]->getMaxRange();
-				Scalar *tmp = constraints_[i]->getMatrix22().data();
-				for (int j = 0; j < 4; ++j) constraints_h_[i].matrix22_[j] = tmp[j];
-			}
-			else if (constraints_[i]->ConstraintType_.compare("SurfaceMaterial") == 0)
-			{
-				SurfaceMaterialConstraint *tp = (SurfaceMaterialConstraint*)constraints_[i].get();
-				constraints_h_[i].ConstraintType_ = 5;
-				constraints_h_[i].rangeMin_ = constraints_[i]->getMinRange();
-				constraints_h_[i].rangeMax_ = constraints_[i]->getMaxRange();
-				Scalar *tmp = constraints_[i]->getMatrix22().data();
-				for (int j = 0; j < 4; ++j) constraints_h_[i].matrix22_[j] = tmp[j];
+    mesh_data_h_.vectorx = (ShapeOpScalar*)malloc(baseNB*4*sizeof(ShapeOpScalar));
+    mesh_data_h_.matrix22 = (ShapeOpScalar*)malloc(baseNB*4*sizeof(ShapeOpScalar));
+    mesh_data_h_.matrix33 = (ShapeOpScalar*)malloc(baseNB*9*sizeof(ShapeOpScalar));
 
-				A_[i] = tp->A_;
-			}
-		}
-	}
+    //Topology dependant data
+    E_nonePD_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    ConstraintType_eigen_ = Eigen::Matrix<int, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    idO_eigen_ = Eigen::Matrix<int, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    rangeMin_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    rangeMax_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);
+    idI_eigen_ = Eigen::Matrix<int, 4, Eigen::Dynamic>::Zero(4, mesh_info_.n_constraints);
 
-	SHAPEOP_OMP_PARALLEL
-	{
-		SHAPEOP_OMP_FOR for (int i = 0; i < mesh_info_.n_constraints; ++i)
-		{
-			ConstraintType_eigen_[i] = constraints_h_[i].ConstraintType_;
-			idO_eigen_[i] = constraints_h_[i].idO_;
-			rangeMin_eigen_[i] = constraints_h_[i].rangeMin_;
-			rangeMax_eigen_[i] = constraints_h_[i].rangeMax_;
-			Scalar1_eigen_[i] = constraints_h_[i].Scalar1_;
-			weight_eigen_[i] = constraints_h_[i].weight_;
-			E_nonePD_eigen_[i] = constraints_h_[i].E_nonePD_;
+    SHAPEOP_OMP_PARALLEL {
+        SHAPEOP_OMP_FOR for (int i = 0; i < mesh_info_.n_constraints; ++i) {
+            // Common to every constraint
+            constraints_h_[i].idO_ = constraints_[0][i]->get_idO();
+            for (int j = 0; j < static_cast<int>(constraints_[0][i]->get_idI().size()); ++j){
+                constraints_h_[i].idI_[j] = constraints_[0][i]->get_idI()[j];
+            }
 
-			idI_eigen_.col(i)      = Eigen::Map<Eigen::Matrix<int   , 4, 1>>(constraints_h_[i].idI_);
-			vectorx_eigen_.col(i)  = Eigen::Map<Eigen::Matrix<Scalar, 4, 1>>(constraints_h_[i].vectorx_);
-			matrix22_eigen_.col(i) = Eigen::Map<Eigen::Matrix<Scalar, 4, 1>>(constraints_h_[i].matrix22_);
-			matrix33_eigen_.col(i) = Eigen::Map<Eigen::Matrix<Scalar, 9, 1>>(constraints_h_[i].matrix33_);
-		}
-	}
+            if (constraints_[0][i]->ConstraintType_.compare("Area") == 0) {
+                constraints_h_[i].ConstraintType_ = 1;
+                constraints_h_[i].rangeMin_ = constraints_[0][i]->getMinRange();
+                constraints_h_[i].rangeMax_ = constraints_[0][i]->getMaxRange();
 
-  //printf("passed here 0.5\n?");
+            } else if (constraints_[0][i]->ConstraintType_.compare("Volume") == 0) {
 
-  mesh_data_h_.A = A_.data();
-  mesh_data_h_.ConstraintType = ConstraintType_eigen_.data();
-  mesh_data_h_.idO            = idO_eigen_.data();
-  mesh_data_h_.rangeMin       = rangeMin_eigen_.data();
-  mesh_data_h_.rangeMax       = rangeMax_eigen_.data();
-  mesh_data_h_.Scalar1        = Scalar1_eigen_.data();
-  mesh_data_h_.weight         = weight_eigen_.data();
-  //E_nonePD_h_       = E_nonePD_eigen_.data();
+                constraints_h_[i].ConstraintType_ = 2;
+                constraints_h_[i].rangeMin_ = constraints_[0][i]->getMinRange();
+                constraints_h_[i].rangeMax_ = constraints_[0][i]->getMaxRange();
 
-  mesh_data_h_.idI           = idI_eigen_.data();
-  mesh_data_h_.vectorx       = vectorx_eigen_.data();
-  mesh_data_h_.matrix22      = matrix22_eigen_.data();
-  mesh_data_h_.matrix33      = matrix33_eigen_.data();
+            }else if (constraints_[0][i]->ConstraintType_.compare("Bending") == 0) {
 
-  //delete[] constraints_h_;
+                constraints_h_[i].ConstraintType_ = 3;
+                constraints_h_[i].rangeMin_ = constraints_[0][i]->getMinRange();
+                constraints_h_[i].rangeMax_ = constraints_[0][i]->getMaxRange();
+
+            } else if (constraints_[0][i]->ConstraintType_.compare("TriangleStrainLimiting") == 0) {
+
+                constraints_h_[i].ConstraintType_ = 4;
+                constraints_h_[i].rangeMin_ = constraints_[0][i]->getMinRange();
+                constraints_h_[i].rangeMax_ = constraints_[0][i]->getMaxRange();
+
+            } else if (constraints_[0][i]->ConstraintType_.compare("SurfaceMaterial") == 0) {
+
+                constraints_h_[i].ConstraintType_ = 5;
+                constraints_h_[i].rangeMin_ = constraints_[0][i]->getMinRange();
+                constraints_h_[i].rangeMax_ = constraints_[0][i]->getMaxRange();
+            }
+        }
+    }
+
+    SHAPEOP_OMP_PARALLEL{
+        SHAPEOP_OMP_FOR for (int i = 0; i < mesh_info_.n_constraints; ++i) {
+            ConstraintType_eigen_[i] = constraints_h_[i].ConstraintType_;
+            idO_eigen_[i] = constraints_h_[i].idO_;
+            rangeMin_eigen_[i] = constraints_h_[i].rangeMin_;
+            rangeMax_eigen_[i] = constraints_h_[i].rangeMax_;
+            //TODO remove, might be useless
+            E_nonePD_eigen_[i] = constraints_h_[i].E_nonePD_;
+
+            idI_eigen_.col(i) = Eigen::Map<Eigen::Matrix<int   , 4, 1>>(constraints_h_[i].idI_);
+        }
+    }
+
+    mesh_data_h_.idO = idO_eigen_.data();
+    mesh_data_h_.idI = idI_eigen_.data();
+    mesh_data_h_.ConstraintType = ConstraintType_eigen_.data();
+    mesh_data_h_.rangeMin = rangeMin_eigen_.data();
+    mesh_data_h_.rangeMax = rangeMax_eigen_.data();
+
+    for (int body = 0; body < nb_shapes; ++body) {
+        //Shape dependant data
+	    Scalar1_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);//
+	    weight_eigen_ = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);//
+	    A_ = Eigen::Matrix<cuda_scalar, Eigen::Dynamic, 1>::Zero(mesh_info_.n_constraints, 1);//
+	    vectorx_eigen_ = Eigen::Matrix<Scalar, 4, Eigen::Dynamic>::Zero(4, mesh_info_.n_constraints);//
+	    matrix22_eigen_ = Eigen::Matrix<Scalar, 4, Eigen::Dynamic>::Zero(4, mesh_info_.n_constraints);//
+	    matrix33_eigen_ = Eigen::Matrix<Scalar, 9, Eigen::Dynamic>::Zero(9, mesh_info_.n_constraints);//
+
+	    SHAPEOP_OMP_PARALLEL {
+		    SHAPEOP_OMP_FOR for (int i = 0; i < mesh_info_.n_constraints; ++i) {
+			    // Common to every constraint
+			    constraints_h_[i].weight_ = constraints_[body][i]->get_weight();
+
+			    if (constraints_[body][i]->ConstraintType_.compare("Area") == 0){
+
+				    Scalar *tmp = constraints_[body][i]->getMatrix22().data();
+				    for (int j = 0; j < 4; ++j) constraints_h_[i].matrix22_[j] = tmp[j];
+
+			    }else if (constraints_[body][i]->ConstraintType_.compare("Volume") == 0){
+
+				    Scalar *tmp = constraints_[body][i]->getMatrix33().data();
+				    for (int j = 0; j < 9; ++j) constraints_h_[i].matrix33_[j] = tmp[j];
+
+			    }else if (constraints_[body][i]->ConstraintType_.compare("Bending") == 0){
+
+				    constraints_h_[i].Scalar1_ = constraints_[body][i]->getScalar1();
+				    //constraints_h_[i].vectorx_ = constraints_[body][i]->getVectorX();
+				    Scalar *tmp = constraints_[body][i]->getVectorX();
+				    for (int j = 0; j < 4; ++j) constraints_h_[i].vectorx_[j] = tmp[j];
+
+			    } else if (constraints_[body][i]->ConstraintType_.compare("TriangleStrainLimiting") == 0){
+
+				    Scalar *tmp = constraints_[body][i]->getMatrix22().data();
+				    for (int j = 0; j < 4; ++j) constraints_h_[i].matrix22_[j] = tmp[j];
+
+			    } else if (constraints_[body][i]->ConstraintType_.compare("SurfaceMaterial") == 0){
+
+				    Scalar *tmp = constraints_[body][i]->getMatrix22().data();
+				    for (int j = 0; j < 4; ++j) constraints_h_[i].matrix22_[j] = tmp[j];
+                    SurfaceMaterialConstraint *tp = (SurfaceMaterialConstraint*)constraints_[body][i].get();
+				    A_[i] = tp->A_;
+			    }
+		    }
+	    }
+
+	    SHAPEOP_OMP_PARALLEL{
+		    SHAPEOP_OMP_FOR for (int i = 0; i < mesh_info_.n_constraints; ++i){
+
+			    Scalar1_eigen_[i] = constraints_h_[i].Scalar1_;
+			    weight_eigen_[i] = constraints_h_[i].weight_;
+
+			    vectorx_eigen_.col(i)  = Eigen::Map<Eigen::Matrix<Scalar, 4, 1>>(constraints_h_[i].vectorx_);
+			    matrix22_eigen_.col(i) = Eigen::Map<Eigen::Matrix<Scalar, 4, 1>>(constraints_h_[i].matrix22_);
+			    matrix33_eigen_.col(i) = Eigen::Map<Eigen::Matrix<Scalar, 9, 1>>(constraints_h_[i].matrix33_);
+		    }
+	    }
+        for (int i = 0; i < mesh_info_.n_constraints; ++i) {
+            mesh_data_h_.A[body*mesh_info_.n_constraints + i] = A_(i);
+            mesh_data_h_.Scalar1[body*mesh_info_.n_constraints + i] = Scalar1_eigen_[i];
+            mesh_data_h_.weight[body*mesh_info_.n_constraints + i] = weight_eigen_[i];
+
+            //std::cout << " mesh_data_h_.weight " << mesh_data_h_.weight[body*mesh_info_.n_constraints + i] << std::endl;
+
+            for (int j = 0; j < 4; ++j) {
+                mesh_data_h_.vectorx[ID_COL_MULTI(body, i, j, nConst, m4)] = vectorx_eigen_(j, i);
+                mesh_data_h_.matrix22[ID_COL_MULTI(body, i, j, nConst, m4)] = matrix22_eigen_(j, i);
+            }
+            /*
+            std::cout << "  mesh_data_h_.vectorx" << mesh_data_h_.vectorx[ID_COL_MULTI(body, i, 0, nConst, m4)] << " "
+                      << mesh_data_h_.vectorx[ID_COL_MULTI(body, i, 1, nConst, m4)] << " " 
+                      << mesh_data_h_.vectorx[ID_COL_MULTI(body, i, 2, nConst, m4)] << " " 
+                      << mesh_data_h_.vectorx[ID_COL_MULTI(body, i, 3, nConst, m4)] << std::endl;
+            
+            if (i >= 769 && i < 779) {
+                printf("mesh_data_h_.matrix22 %f  %f \n", mesh_data_h_.matrix22[ID_COL_MULTI(body, i, 0, nConst, m4)], mesh_data_h_.matrix22[ID_COL_MULTI(body, i, 1, nConst, m4)]);
+                printf("mesh_data_h_.matrix22 %f  %f \n", mesh_data_h_.matrix22[ID_COL_MULTI(body, i, 2, nConst, m4)], mesh_data_h_.matrix22[ID_COL_MULTI(body, i, 3, nConst, m4)]);
+                printf("\n");
+            }
+            */
+            for (int j = 0; j < 9; ++j) {
+                mesh_data_h_.matrix33[ID_COL_MULTI(body, i, j, nConst, m9)] = matrix33_eigen_(j, i);
+            }
+        }
+        //printf("passed here 0.5\n?");
+        //multi shape:
+    }
+    
+    //Case less shapes than cells (they should be duplicated
+    /*
+    for(int body = nb_shapes; body < mesh_info_.nb_cells; ++body){
+
+        for (int i = 0; i < mesh_info_.n_constraints; ++i) {
+
+            mesh_data_h_.A[body*mesh_info_.n_constraints + i] = mesh_data_h_.A[i];
+            mesh_data_h_.Scalar1[body*mesh_info_.n_constraints + i] = mesh_data_h_.Scalar1[i];
+            mesh_data_h_.weight[body*mesh_info_.n_constraints + i] = mesh_data_h_.weight[i];
+
+            for (int j = 0; j < 4; ++j) {
+                mesh_data_h_.vectorx[ID_COL_MULTI(body, i, j, nConst, m4)] = mesh_data_h_.vectorx[ID_COL_MULTI(0, i, j, nConst, m4)];
+                mesh_data_h_.matrix22[ID_COL_MULTI(body, i, j, nConst, m4)] = mesh_data_h_.matrix22[ID_COL_MULTI(0, i, j, nConst, m4)];
+            }
+            for (int j = 0; j < 9; ++j) {
+                mesh_data_h_.matrix33[ID_COL_MULTI(body, i, j, nConst, m9)] = mesh_data_h_.matrix33[ID_COL_MULTI(body, i, j, nConst, m9)];
+            }
+        }
+    }
+    */
+    //delete[] constraints_h_;
+    //multi shape:
 }
 
 ////////////////////////////////////////////////////////////
-void Solver_GPU::add_collinding_points(ShapeOpScalar  *points, ShapeOpScalar *obstacle_normal, int *nb_per_cell, int nb)
-{
+void Solver_GPU::add_collinding_points(ShapeOpScalar  *points, ShapeOpScalar *obstacle_normal, int *nb_per_cell, int nb){
 	//carfull this fonction allocate memory on GPU that has to be free later
 	collision_data_d_.total_neighbours = nb;
 	send_GPU_collinding_points(points, &collision_data_d_.colid_points, obstacle_normal, &collision_data_d_.colid_normals, nb_per_cell, collision_data_d_.nb_neighbours, nb, mesh_info_.nb_cells);
 }
+
 //////////////////////////////////////////////////////////////
-void Solver_GPU::free_collinding_points()
-{
+void Solver_GPU::free_collinding_points(){
 	free_GPU_pointer(collision_data_d_.colid_points);
 	free_GPU_pointer(collision_data_d_.colid_normals);
 }
+
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE int Solver_GPU::addForces(const std::shared_ptr<Force> &f)
-{
+SHAPEOP_INLINE int Solver_GPU::addForces(const std::shared_ptr<Force> &f){
   forces_.push_back(f);
   return static_cast<int>(forces_.size() - 1);
 }
+
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE std::shared_ptr<Force> &Solver_GPU::getForce(int id)
-{
+SHAPEOP_INLINE std::shared_ptr<Force> &Solver_GPU::getForce(int id){
   return forces_[id];
 }
+
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE void Solver_GPU::setPoints(const Matrix3X &p, const int nb_cells)
-{
+SHAPEOP_INLINE void Solver_GPU::setPoints(const Matrix3X &p, const int nb_cells){
   //Vector3 offset;
-	
   const int npoints = p.cols();
   points_ = p;
   mesh_info_.nb_cells = nb_cells;
@@ -311,6 +602,37 @@ SHAPEOP_INLINE void Solver_GPU::setPoints(const Matrix3X &p, const int nb_cells)
   mesh_info_.sum_points = 32;
   while(mesh_info_.sum_points <= mesh_info_.n_points/2) mesh_info_.sum_points *= 2;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+SHAPEOP_INLINE void Solver_GPU::setPoints(const Matrix3X &p, const std::vector<Matrix3X>& points_diff, const int nb_cells){
+
+    //Vector3 offset;
+    const int npoints = p.cols();
+    points_ = p;
+    mesh_info_.nb_cells = nb_cells;
+    mesh_info_.n_points = npoints;
+    Points_rowMajor_ = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Zero(3*nb_cells, npoints);
+    
+    //printf("points pointer %lu %lu \n", Points_rowMajor_.data(), Points_rowMajor_.data() + 3*nb_cells*npoints);
+    
+    int cnt_ = 0;
+    for (int i = 0; i < 3*nb_cells; i += 3 ){
+        //offset << i, 0, 0;
+        if (points_diff.size() != 0){
+                Points_rowMajor_.block(i, 0, 3, p.cols()) = points_diff[cnt_];//+ offset*MatrixXX::Ones(1, mesh_info_.n_points);
+            }else{
+                Points_rowMajor_.block(i, 0, 3, p.cols()) = points_;
+        }
+        ++cnt_;
+    }
+    //std::cout << Points_rowMajor_.transpose() << std::endl;
+    
+    //Points_rowMajor_ = points_;
+    simulation_input_h_.points = Points_rowMajor_.data();
+    mesh_info_.sum_points = 32;
+    while(mesh_info_.sum_points <= mesh_info_.n_points/2) mesh_info_.sum_points *= 2;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE const MatrixXXCuda& Solver_GPU::getVelocities() const
 {
@@ -345,13 +667,16 @@ SHAPEOP_INLINE void Solver_GPU::setConnectivityList(const std::vector<std::vecto
 
     connectivity_list_ = connectivity_list;
 	nb_tri_ = connectivity_list_.size();
-	mesh_data_h_.triangles = new short[nb_tri_ * 3];
+	mesh_data_h_.triangles = new short[nb_tri_*3];
 	mesh_info_.n_triangles = nb_tri_;
 
 	for (int i = 0; i < nb_tri_; i++) {
+
 		mesh_data_h_.triangles[i            ] = connectivity_list_[i][0];
 		mesh_data_h_.triangles[i +   nb_tri_] = connectivity_list_[i][1];
 		mesh_data_h_.triangles[i + 2*nb_tri_] = connectivity_list_[i][2];
+
+        //std::cout << " triangle i "<< i << " " << mesh_data_h_.triangles[i] << " " << mesh_data_h_.triangles[i + nb_tri_] << " " << mesh_data_h_.triangles[i + 2 * nb_tri_] << std::endl;
 	}
 	mesh_info_.sum_triangles = 64;
 	while (mesh_info_.sum_triangles <= nb_tri_/2) mesh_info_.sum_triangles *= 2;
@@ -367,12 +692,11 @@ void plb::npfem::Solver_GPU::make_periodic(float nx, float ny, float nz, float d
 ///////////////////////////////////////////////////////////////////////////////
 void Solver_GPU::set_Palabos_Forces(const Matrix3X &force_matrix, const int cell_id){
 
-  if (Palabos_Forces_.cols()>0){
-	Palabos_Forces_.block(cell_id*3, 0, 3, force_matrix.cols()) = force_matrix;
-  }
-  else {
-	  Palabos_Forces_ = force_matrix;
-  }
+    if (Palabos_Forces_.cols()>0){
+        Palabos_Forces_.block(cell_id*3, 0, 3, force_matrix.cols()) = force_matrix;
+    } else {
+        Palabos_Forces_ = force_matrix;
+    }
 }
 ///////////////////////////////////////////////////////////////////////////////
 void Solver_GPU::shiftPoints(Vector3 vec) {
@@ -397,8 +721,8 @@ double compute_volume_cpu(double *points, short *triangle, int n_tri, int n_p) {
 
 	}
 
-	for (int i = 0; i < n_tri; i++) {
-		short p0 = triangle[i            ];
+    for (int i = 0; i < n_tri; i++) {
+        short p0 = triangle[i            ];
 		short p1 = triangle[i +     n_tri];
 		short p2 = triangle[i + 2 * n_tri];
 
@@ -419,11 +743,10 @@ double compute_volume_cpu(double *points, short *triangle, int n_tri, int n_p) {
 
 		volume += ((a + b + c).dot(n)*area) * 1 / 9;
 
-		grad[p0] += (area*n) / 3;
-		grad[p1] += (area*n) / 3;
-		grad[p2] += (area*n) / 3;
-		//double n[3] = 
-
+		grad[p0] += (area*n)/3;
+		grad[p1] += (area*n)/3;
+		grad[p2] += (area*n)/3;
+		//double n[3] =
 	}
 	//std::cout << grad[0] <<"\n";
 
@@ -435,7 +758,7 @@ double compute_volume_cpu(double *points, short *triangle, int n_tri, int n_p) {
 
 ///////////////////////////////////////////////////////////////////////////////TODO
 
-SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
+SHAPEOP_INLINE bool Solver_GPU::initialize(int nb_shapes, Scalar timestep){
 #ifdef NPFEM_SA
 #ifdef SHAPEOP_MSVC
     //Console output for dll
@@ -443,162 +766,214 @@ SHAPEOP_INLINE bool Solver_GPU::initialize(Scalar timestep){
     freopen("CONOUT$", "w", stdout);
 #endif
 #endif
+    
+    const int n_points = mesh_info_.n_points;
+    int n_constraints = static_cast<int>(constraints_[0].size());
+    
+    simulation_data_h_.center = new double[3*mesh_info_.nb_cells];
+    
+    delta_ = timestep;
 
-  const int n_points	= mesh_info_.n_points;
-  int n_constraints = static_cast<int>(constraints_.size());
-
-  simulation_data_h_.center = new double[3 * mesh_info_.nb_cells];
-
-#ifdef STREAM
-  cudaStreamCreate(&stream);
-  cudaHostAlloc(&cuda_points, 3*n_points*sizeof(ShapeOpScalar), cudaHostAllocWriteCombined | cudaHostAllocMapped);
-  cudaHostAlloc(&cuda_forces, 3*n_points*sizeof(ShapeOpScalar), cudaHostAllocWriteCombined | cudaHostAllocMapped);
-#endif
-
-  assert(n_points != 0);
-  assert(n_constraints != 0);
+    assert(n_points != 0);
+    assert(n_constraints != 0);
 
 #ifdef NPFEM_SA
-  std::cout << "***********************************************************" << std::endl;
-  std::cout << "GPU VERSION >> Number of Points & Constraints: " << n_points << " - " << n_constraints << std::endl;
-  std::cout << "***********************************************************" << std::endl;
+    std::cout << "***********************************************************" << std::endl;
+    std::cout << "GPU VERSION >> Number of Points & Constraints: " << n_points << " - " << n_constraints << std::endl;
+    std::cout << "***********************************************************" << std::endl;
 #endif // NPFEM_SA
+    //Matrices depending of rest positions
 
-  std::vector<Triplet> triplets;
-  int idO = 0;
-  for (int i = 0; i < n_constraints; ++i) {
-	  // NONE_PD Energies (may add more : TODO)
-	  if (constraints_[i]->get_ConstraintType().compare("SurfaceMaterial") == 0)
-		  continue;
-	  // PD Energies
-	  constraints_[i]->addConstraint(triplets, idO);
-  }
-  mesh_info_.idO = idO;
-  mesh_info_.volume = compute_volume_cpu(simulation_input_h_.points, mesh_data_h_.triangles, mesh_info_.n_triangles, mesh_info_.n_points);
-  mesh_info_.n_constraints = n_constraints;
-  projections_.setZero(3, idO);
-  SparseMatrix A = SparseMatrix(idO, n_points);
-  A.setFromTriplets(triplets.begin(), triplets.end());
-  At_ = A.transpose();
+    mesh_info_.surface_id0 = 0;
 
-  // Build LAPLACIAN considering the contribution of nonePD energies as well
-  triplets.clear();
-  idO = 0;
-  for (int i = 0; i < n_constraints; ++i)
-	  constraints_[i]->addConstraint(triplets, idO);
+    for (int body = 0; body < constraints_.size(); ++body){
+        
+        std::vector<Triplet> triplets;
+        int idO = 0;
+        for (int i = 0; i < n_constraints; ++i) {
+            // NONE_PD Energies (may add more : TODO)
+            if (constraints_[body][i]->get_ConstraintType().compare("SurfaceMaterial") == 0){ 
+           
+                if((!mesh_info_.surface_id0) && body== 0)mesh_info_.surface_id0 = i;
+                continue;
+            }
+            // PD Energies
+            constraints_[body][i]->addConstraint(triplets, idO);
+        }
+        SparseMatrix A = SparseMatrix(idO, n_points);
+        A.setFromTriplets(triplets.begin(), triplets.end());
+        At_ = A.transpose();
 
+        // Build LAPLACIAN considering the contribution of nonePD energies as well
+        triplets.clear();
+        idO = 0;
+        for (int i = 0; i < n_constraints; ++i) {
+            constraints_[body][i]->addConstraint(triplets, idO);
+        }
 
-  SparseMatrix B = SparseMatrix(idO, n_points);
-  SparseMatrix Bt = SparseMatrix(n_points, idO);
-  B.setFromTriplets(triplets.begin(), triplets.end());
-  Bt = B.transpose();
-  // See Liu_2017 & Thesis for more
-  SparseMatrix Laplacian = Bt * B;
-  //printf("Laplacian GPU %f %f %f %f %f \n", Laplacian.coeff(223, 221), Laplacian.coeff(223, 222), Laplacian.coeff(223, 223), Laplacian.coeff(223, 224), Laplacian.coeff(223, 225));
+        SparseMatrix B = SparseMatrix(idO, n_points);
+        SparseMatrix Bt = SparseMatrix(n_points, idO);
+        B.setFromTriplets(triplets.begin(), triplets.end());
+        Bt = B.transpose();
+        // See Liu_2017 & Thesis for more
+        SparseMatrix Laplacian = Bt*B;
 
-  //Dynamic
-  if (velocities_.cols() == 0) {
-	  velocities_ = MatrixXXCuda::Zero(3*mesh_info_.nb_cells, n_points);
-  }
-  delta_ = timestep;
-  momentum_ = Matrix3X::Zero(3, n_points);
+        if(body == 0){
+            mesh_info_.idO = idO;
+            mesh_info_.volume = compute_volume_cpu(simulation_input_h_.points, mesh_data_h_.triangles, mesh_info_.n_triangles, mesh_info_.n_points);
+            //std::cout <<  " mesh_info_.volume " << mesh_info_.volume << std::endl;
+            mesh_info_.n_constraints = n_constraints;
+            projections_.setZero(3, idO);
+        }
+        // Mass and Damping Matrices
+        M_ = SparseMatrix(n_points, n_points);
+        M_tilde_ = SparseMatrix(n_points, n_points);
+        M_tilde_inv_ = MatrixXX(n_points, n_points);
+        M_star_ = SparseMatrix(n_points, n_points);
 
-#ifdef NPFEM_SA
-  std::cout << " Calpha" << mesh_info_.calpha << "  Cbeta " << Cbeta_ << "  " << timestep << " rho " << mesh_info_.rho << " delta " << delta_ << std::endl;
-#endif
+        //mass_lumping(); // Go with uniform ditribution
+        M_.setIdentity();
+        mesh_info_.mass_total = mesh_info_.volume*mesh_info_.rho;
+        M_ *= (mesh_info_.mass_total) / n_points; // mass = Volume * density
 
-  // Mass and Damping Matrices
-  M_ = SparseMatrix(n_points, n_points);
-  M_tilde_ = SparseMatrix(n_points, n_points);
-  M_tilde_inv_ = MatrixXX(n_points, n_points);
-  M_star_ = SparseMatrix(n_points, n_points);
+        M_tilde_ = M_ + delta_*(Cbeta_*Laplacian);
+        M_star_ = M_tilde_ / (delta_*delta_);
+        M_tilde_inv_ = (MatrixXX(M_tilde_)).inverse();
 
-  //mass_lumping(); // Go with uniform ditribution
-  M_.setIdentity();
-  mesh_info_.mass_total = mesh_info_.volume * mesh_info_.rho;
-  M_ *= (mesh_info_.mass_total)/ n_points; // mass = Volume * density
+        N_ = M_star_ + Laplacian;
 
-  M_tilde_ = M_ + delta_ * (Cbeta_ * Laplacian);
-  M_star_ = M_tilde_ / (delta_ * delta_);
-  M_tilde_inv_ = (MatrixXX(M_tilde_)).inverse();
+        //Quasi-Newton
+        L_ = SparseMatrix(n_points, n_points);
+        J_ = SparseMatrix(At_.rows(), At_.cols());
 
-#ifdef NPFEM_SA
-  printf("GPU Volume0_ %.17f  rho_ %f n_points %d  number of cells %d\n", mesh_info_.volume, mesh_info_.rho, n_points, mesh_info_.nb_cells);
-#endif
-  //printf("GPU M_tilde_inv %f %f %f %f %f \n", M_tilde_inv_(223, 221), M_tilde_inv_(223, 222), M_tilde_inv_(223, 223), M_tilde_inv_(223, 224), M_tilde_inv_(223, 225));
-  // M_ /= delta_ * delta_;
-  N_ = M_star_ + Laplacian;
+        L_ = At_*A;
+        J_ = At_;
 
-  //printf("Mtild inv %f %f %f\n", M_tilde_inv_(0,0), M_tilde_inv_(0,1), M_tilde_inv_(0,2));
+        MatrixDyn N_dense = MatrixDyn(N_);
+        MatrixDyn M_dense_ = MatrixDyn(M_);
+        MatrixDyn L_dense_ = MatrixDyn(L_);
+        MatrixDyn J_dense_ = MatrixDyn(J_);
+        MatrixDyn M_star_dense_ = MatrixDyn(M_star_);
 
-  //Quasi-Newton
-  L_ = SparseMatrix(n_points, n_points);
-  J_ = SparseMatrix(At_.rows(), At_.cols());
-  L_ = At_ * A;
-  J_ = At_;
- 
-  f_int_nonePD_ = Matrix3X::Zero(3*mesh_info_.nb_cells, n_points);
+        VectorX diag = M_dense_.diagonal();
+        N_dense_inv_ = N_dense.inverse();
 
-  //Palabos interface
-  Palabos_Forces_ = MatrixXXCuda::Zero(3*mesh_info_.nb_cells,n_points);
+        //back to sparse but with our own structure usable on GPU
+        if (body == 0) {
+            mesh_data_h_.L = make_sparse_from_full(L_dense_.data(), L_dense_.rows(), L_dense_.cols(), constraints_.size());
+            mesh_data_h_.J = make_sparse_from_full(J_dense_.data(), J_dense_.rows(), J_dense_.cols(), constraints_.size());
+            mesh_data_h_.M_star = make_sparse_from_full(M_star_dense_.data(), M_star_dense_.rows(), M_star_dense_.cols(), constraints_.size());
+        } else {
+           add_values_to_sparse(&mesh_data_h_.L, L_dense_.data(), L_dense_.rows(), L_dense_.cols(), body);
+           add_values_to_sparse(&mesh_data_h_.J, J_dense_.data(), J_dense_.rows(), J_dense_.cols(), body);
+           add_values_to_sparse(&mesh_data_h_.M_star, M_star_dense_.data(), M_star_dense_.rows(), M_star_dense_.cols(), body);
 
-  //Collisions
-  f_collisions_ = Matrix3X::Zero(3, n_points);
-  E_collisions_ = 0.;
-  std::vector<bool>().swap(collision_state_);
-  for (int i = 0; i < n_points; ++i) collision_state_.push_back(false);
-  
-  solver_ = std::make_shared<plb::npfem::SimplicialLDLTSolver>();
+        }
+        //MULTISHAPE:
+        if(body == 0){
+            mesh_data_h_.N_inv_dense = (ShapeOpScalar*)malloc(N_dense_inv_.size()*mesh_info_.nb_cells * sizeof(ShapeOpScalar));
+            mesh_data_h_.M_tild_inv = (ShapeOpScalar*)malloc(N_dense_inv_.size()*mesh_info_.nb_cells * sizeof(ShapeOpScalar));
+            mesh_data_h_.mass = (ShapeOpScalar*)malloc(n_points*mesh_info_.nb_cells * sizeof(ShapeOpScalar));
+        }
+       
+        for (int i = 0; i < N_dense_inv_.rows(); ++i) {
+            mesh_data_h_.mass[ID_MULTI_ONE(body, i, n_points)] = diag(i);
+            //std::cout <<"  mesh_data_h_.mass[ID_MULTI_ONE(body, i, n_points)] " << mesh_data_h_.mass[ID_MULTI_ONE(body, i, n_points)] << " " << ID_MULTI_ONE(body, i, n_points) << std::endl;
 
-  //Prefactorize matrix
-  solver_->initialize(N_);
+            for (int j = 0; j < N_dense_inv_.cols(); ++j) {
+                mesh_data_h_.M_tild_inv[ID_COL_MULTI(body, i, j, N_dense_inv_.rows(), N_dense_inv_.size())] = M_tilde_inv_(i, j);
+                mesh_data_h_.N_inv_dense[ID_COL_MULTI(body, i, j, N_dense_inv_.rows(), N_dense_inv_.size())] = N_dense_inv_(i, j);
+                //std::cout <<"  mesh_data_h_.M_tild_inv " << mesh_data_h_.M_tild_inv[ID_COL_MULTI(body, i, j, N_dense_inv_.rows(), N_dense_inv_.size())] << " " <<  ID_COL_MULTI(body, i, j, N_dense_inv_.rows(), N_dense_inv_.size()) << std::endl;
+            }
+        }           
+    }
+    //Dynamic
+    if (velocities_.cols() == 0) {
+        velocities_ = MatrixXXCuda::Zero(3*mesh_info_.nb_cells, n_points);
+    }
+    
+    momentum_ = Matrix3X::Zero(3, n_points);
 
-  // GPU Initialization
-  // Convert Eigen data structures to raw pointer in host memory
-  simulation_input_h_.forces_ex = Palabos_Forces_.data();
+    #ifdef NPFEM_SA
+        std::cout << " Calpha" << mesh_info_.calpha << "  Cbeta " << Cbeta_ << "  " << timestep << " rho " << mesh_info_.rho << " delta " << delta_ << std::endl;
+    #endif
+         
+    #ifdef NPFEM_SA
+        std::cout << "GPU Volume0_ "<< mesh_info_.volume <<"  rho_ "<<   mesh_info_.rho << " n_points " << n_points <<" number of cells " << mesh_info_.nb_cells <<std::endl;
+    #endif
 
-  //copy past from CPU version by Joel, I dont know what it's needed for
-  //bodyID_ = 0;
-  Palabos_iT_ = 0;
+    //std::cout << "mesh_info_.nb_cells &&" << mesh_info_.nb_cells  << " "  << n_points << std::endl;
+    
+    //Palabos interface
+    Palabos_Forces_ = MatrixXXCuda::Zero(3*mesh_info_.nb_cells, n_points);
+    
+    //Collisions
+   
+    f_collisions_ = Matrix3X::Zero(3, n_points);
+    E_collisions_ = 0.;
+    std::vector<bool>().swap(collision_state_);
+    for (int i = 0; i < n_points; ++i) collision_state_.push_back(false);
+   
+    solver_ = std::make_shared<plb::npfem::SimplicialLDLTSolver>();
+    //Prefactorize matrix
+    solver_->initialize(N_);
+   
+    // GPU Initialization
+    // Convert Eigen data structures to raw pointer in host memory
+    simulation_input_h_.forces_ex = Palabos_Forces_.data();
+    
+    //copy past from CPU version by Joel, I dont know what it's needed for
+    //bodyID_ = 0;
+    Palabos_iT_ = 0;
+    
+    simulation_input_h_.velocities = velocities_.data();
 
-  simulation_input_h_.velocities    = velocities_.data();
-
-  MatrixDyn N_dense   = MatrixDyn(N_);
-  MatrixDyn M_dense_  = MatrixDyn(M_);
-  MatrixDyn L_dense_  = MatrixDyn(L_);
-  MatrixDyn J_dense_  = MatrixDyn(J_);
-  MatrixDyn M_star_dense_ = MatrixDyn(M_star_);
-  
- //back to sparse but with our own structure usable on GPU
-  mesh_data_h_.L = make_sparse_from_full( L_dense_.data(), L_dense_.rows(), L_dense_.cols());
-  mesh_data_h_.J = make_sparse_from_full( J_dense_.data(), J_dense_.rows(), J_dense_.cols());
-  mesh_data_h_.M_star = make_sparse_from_full(M_star_dense_.data(), M_star_dense_.rows(), M_star_dense_.cols());
-
-  mesh_data_d_.L = mesh_data_h_.L;
-  mesh_data_d_.J = mesh_data_h_.J;
-  mesh_data_d_.M_star = mesh_data_h_.M_star;
-
-  mesh_data_h_.M_tild_inv = M_tilde_inv_.data();
-  //printf("init pointer l %p %p \n", &mesh_data_d_.L.value, mesh_data_h_.L.value);
-  
-  VectorX diag = M_dense_.diagonal();
-  mesh_data_h_.mass = diag.data();
-
-  N_dense_inv_   = N_dense.inverse();
-  mesh_data_h_.N_inv_dense = N_dense_inv_.data();
-  //Flatten constraints, quite similar to the .data() of the Eigen Matrices!
-
-  flatten_constraints();
-  // After converting all the needed data to raw pointers, we can work without problems on the gpu!
-  
-  GPU_Init(&mesh_info_,
-		   &mesh_data_d_,        &mesh_data_h_,
-           &simulation_input_d_, &simulation_input_h_,
-           &simulation_data_d_ ,
-           &collision_data_d_  , &collision_data_h_, &matrices_d_);
-
-  //return solver_->info() == Eigen::Success;
-  return true;
+    mesh_data_d_.L = mesh_data_h_.L;
+    mesh_data_d_.J = mesh_data_h_.J;
+    mesh_data_d_.M_star = mesh_data_h_.M_star;
+    /*
+    std::cout <<  "  mesh_data_d_.L " << mesh_data_d_.L.degree << " " << std::endl;
+    for(int i = 0; i < 258 ; ++i){
+        for (int j = 0; j < mesh_data_h_.L.degree; j++) {
+            std::cout << "("<< mesh_data_h_.L.index[mesh_data_h_.L.degree*i + j]  << ", " << mesh_data_h_.L.value[mesh_data_h_.L.degree* i + j] <<")";
+        }
+        std::cout << std::endl;
+    }
+    */
+    mesh_data_h_.vertex_to_tri = new int[15*n_points];
+    mesh_data_h_.vertex_pos = new char[15*n_points];
+    memset(mesh_data_h_.vertex_to_tri, -1, 15*n_points*sizeof(int));
+    
+    for (int i = 0; i < 3*nb_tri_; i++) {
+        int vid = mesh_data_h_.triangles[i];
+        int tri_id = i%nb_tri_;
+        //if(vid == 125)std::cout << " tri "<< tri_id << std::endl;
+        bool succ = false;
+        for(int j = vid; j < 15*n_points; j += n_points){
+           //std::cout << " j " << j << "mesh_data_h_.vertex_to_tri[j]  " << mesh_data_h_.vertex_to_tri[j] << std::endl;
+           if (mesh_data_h_.vertex_to_tri[j] == -1) {
+                succ = true;
+                //std::cout << "  i/nb_tri_ " << i/nb_tri_<< std::endl;
+                mesh_data_h_.vertex_pos[j] = i/nb_tri_;
+                mesh_data_h_.vertex_to_tri[j] = tri_id;
+                break;
+           }
+        }
+       if(!succ)std::cout << " PROBLEME more than 15 tri connectect to a vertex " << std::endl;
+    }
+   
+    //Flatten constraints, quite similar to the .data() of the Eigen Matrices!
+    flatten_constraints(constraints_.size());
+   
+    // After converting all the needed data to raw pointers, we can work without problems on the gpu!
+    GPU_Init(&mesh_info_,
+             &mesh_data_d_,        &mesh_data_h_,
+             &simulation_input_d_, &simulation_input_h_,
+             &simulation_data_d_ ,
+             &collision_data_d_  , &collision_data_h_, &matrices_d_, &stream);
+    
+    //return solver_->info() == Eigen::Success;
+    return true;
 }
 //////////////////////////////////////////////////////////////////////////////
 void plb::npfem::Solver_GPU::compute_first_centroid() {
@@ -609,24 +984,43 @@ void plb::npfem::Solver_GPU::set_initial_positions(const double *centers){
 	set_cells_initial_position(centers, simulation_data_d_.center, mesh_info_.nb_cells, mesh_info_, mesh_data_d_, simulation_input_d_ , simulation_data_d_);
 		
 }
+void plb::npfem::Solver_GPU::set_initial_positions(const double *centers, cuda_scalar *local_mat, double mat[16]) {
+    set_cells_initial_position(centers, simulation_data_d_.center, matrices_d_, local_mat, mat, mesh_info_.nb_cells, mesh_info_, mesh_data_d_, simulation_input_d_, simulation_data_d_);
+
+}
+
 void plb::npfem::Solver_GPU::reset_position(const double *centers) {
 	//reset_position(const double *center_h, double *center_d, Simulation_input *input_h, Mesh_info info, Mesh_data mesh, Simulation_input *input_d, Simulation_data sim)
 	reset_position_d(centers, simulation_data_d_.center, points_.data(), mesh_info_, mesh_data_d_, simulation_input_d_, simulation_data_d_);
 }
 ///////////////////////////////////////////////////////////////////////////////
-//TODO make it multible cell
+void Solver_GPU::set_initial_velocities(double *vel) {
+
+    Vector3 speed;
+
+    for (int i = 0; i< mesh_info_.nb_cells * 3; i += 3) {
+        speed << vel[i], vel[i + 1], vel[i + 2];
+        velocities_.block(i, 0, 3, mesh_info_.n_points) = speed*MatrixXX::Ones(1, mesh_info_.n_points);
+        //std::cout << velocities_.block(i, 0, 3, 5) << std::endl << std::endl;
+    }
+    simulation_input_h_.velocities = velocities_.data();
+    external_forces_from_Host_to_Device(mesh_info_.n_points*mesh_info_.nb_cells, simulation_input_h_.velocities, simulation_input_d_.velocities,0);
+    //velocities_.row(1) = Matrix3X::Ones(1, n_points_)*y;
+    //velocities_.row(2) = Matrix3X::Ones(1, n_points_)*z;
+}
+
 void Solver_GPU::set_initial_velocity(double x, double y, double z){
 	Vector3 speed;
 	speed << x, y, z;
 	printf("init vell nb %d \n", mesh_info_.n_points);
 	velocities_ = speed*MatrixXX::Ones(1, mesh_info_.n_points);
-	std::cout << velocities_.col(0) << std::endl;
-	std::cout << "couille"<< std::endl;
+	//std::cout << velocities_.col(0) << std::endl;
 	simulation_input_h_.velocities  = velocities_.data();
 	external_forces_from_Host_to_Device(mesh_info_.n_points, simulation_input_h_.velocities, simulation_input_d_.velocities, 0);
 	//velocities_.row(1) = Matrix3X::Ones(1, n_points_)*y;
 	//velocities_.row(2) = Matrix3X::Ones(1, n_points_)*z;
 }
+
 ShapeOpScalar *plb::npfem::Solver_GPU::get_centers(){
 	return simulation_data_h_.center;
 }
@@ -657,10 +1051,15 @@ void Solver_GPU::get_data_from_GPU() {
 //////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void Solver_GPU::rotate_points(const cuda_scalar *matrices) {
 
-	points_time_mat_3X3(matrices_d_,  matrices, simulation_input_d_.points, mesh_info_.nb_cells, mesh_info_.n_points);
+    points_time_mat_3X3(matrices_d_, matrices, simulation_input_d_.points, simulation_data_d_.center, mesh_info_.nb_cells, mesh_info_.n_points);
 }
+////////////////////////////////////////////////////////////////////////////////
+SHAPEOP_INLINE void Solver_GPU::solve_only(unsigned int max_iterations, Scalar tol, bool Quasi_Newton, Scalar gamma, int max_line_search_loops, int m, Scalar gamma2, Scalar collisions_weight){
 
-///////////////////////////////////////////////////////////////////////////////
+    compute_next_frame_rbc(&mesh_info_, &mesh_data_d_, &simulation_input_d_,
+                           &simulation_data_d_, &collision_data_d_, delta_, solver_step_, max_iterations, stream);
+
+}
 // solve computes one time step! The algorithms are iterative and so we need some iterations until convergence to the min of the variational problem
 SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol, bool Quasi_Newton, Scalar gamma, int max_line_search_loops, int m, Scalar gamma2, Scalar collisions_weight) 
 {
@@ -672,15 +1071,6 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
 	#endif
 
 	simulation_input_h_.forces_ex = Palabos_Forces_.data();
-	//printf("palabos force %f %f %f  delta_ %f\n", Palabos_Forces_(0, 223), Palabos_Forces_(1, 223), Palabos_Forces_(2, 223), delta_ );
-	/*
-	std::cout << Palabos_Forces_.col(56) << "\n";
-
-	for (int i = 56; i < 60; i++) {
-		printf("%f %f %f \n", Palabos_Forces_h_[i], Palabos_Forces_h_[i + Palabos_Forces_.cols()], Palabos_Forces_h_[i + 2*Palabos_Forces_.cols()]);
-	}
-	*/
-	//compute_volume_cpu(simulation_input_h_.points, mesh_data_h_.triangles, mesh_info_.n_triangles, mesh_info_.n_points);
 
 	#ifdef STREAM
 		memcpy(cuda_forces, simulation_input_h_.forces_ex, 3 * mesh_info_.n_points * sizeof(ShapeOpScalar));
@@ -692,7 +1082,7 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
 	if (graph_h.nb_edges > 0) {
 		median_filter(graph_d, simulation_input_d_.forces_ex, mesh_info_.nb_cells, mesh_info_.n_points);
 	}
-	
+
 	compute_next_frame_rbc(&mesh_info_, &mesh_data_d_, &simulation_input_d_,
 		&simulation_data_d_, &collision_data_d_, delta_, solver_step_, max_iterations, stream);
 	
@@ -710,40 +1100,13 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
         points_from_Device_to_Host(mesh_info_.nb_cells, simulation_data_d_.center, simulation_data_h_.center, stream);
 
 		//printf("%f %f %f | %d \n\n", simulation_data_h_.center[0], simulation_data_h_.center[1], simulation_data_h_.center[2], bodyID_ );
-		
-		for(int i = 0; i < 3*mesh_info_.nb_cells; i+=3){
-			/*
-			std::ofstream ofile;
-			ofile.open("./tmp/body_" + plb::util::val2str(bodyID_ + i/3) + "_ComPos.log", std::ofstream::out | std::ofstream::app);
-	
-			ofile << plb::util::val2str(Palabos_iT_) + "," +
-					 plb::util::val2str(simulation_data_h_.center[i]) + "," +
-					 plb::util::val2str(simulation_data_h_.center[i + 1]) + "," +
-					 plb::util::val2str(simulation_data_h_.center[i + 2]) << std::endl;
 
-			ofile.close();
-			*/
-			/*
-			plb::global::logfile_nonparallel("body_" + plb::util::val2str(bodyID_ + i/3) + "_ComPos.log").flushEntry(plb::util::val2str(Palabos_iT_) + "," +
-					plb::util::val2str(simulation_data_h_.center[i    ]) + "," +
-					plb::util::val2str(simulation_data_h_.center[i + 1]) + "," +
-					plb::util::val2str(simulation_data_h_.center[i + 2]));
-			*/
-		//points_ += velocities_;
-		}
-		
 		#ifdef DEBUG
 			std::cout << "velo GPU: \n" << velocities_.col(102) << std::endl;
 		#endif
 		//points_.block(0, 0, 3, Points_rowMajor_.cols()) = Points_rowMajor_;
 	#endif
 
-	/*
-	for (int i = 56; i < 57; i++) {
-		std::cout << points_.col(i) << "\n";
-		//printf("%f %f %f \n", points_[i], points_[i + Palabos_Forces_.cols()], points_[i + 2 * Palabos_Forces_.cols()]);
-	}
-	*/
 	clock_t end = clock();
 	//std::cout << "temps one iter" << (double)(end - start) / CLOCKS_PER_SEC << "\n";
 	// DEBUGGING!
@@ -762,7 +1125,13 @@ SHAPEOP_INLINE double Solver_GPU::solve(unsigned int max_iterations, Scalar tol,
 	return (double)(end - start);
 }
 ///////////////////////////////////////////////////////////////////////////////
-//Rotat point can be done on GPU
+SHAPEOP_INLINE void Solver_GPU::copy_position_to_CPU() {
+    simulation_input_h_.points = Points_rowMajor_.data();
+  
+    points_from_Device_to_Host(mesh_info_.n_points*mesh_info_.nb_cells, simulation_input_d_.points, simulation_input_h_.points, stream);
+}
+///////////////////////////////////////////////////////////////////////////////
+//Rotate point can be done on GPU
 ///////////////////////////////////////////////////////////////////////////////
 SHAPEOP_INLINE void Solver_GPU::rotatePoints(const std::string& axis, const Scalar& theta)
 {
@@ -770,16 +1139,16 @@ SHAPEOP_INLINE void Solver_GPU::rotatePoints(const std::string& axis, const Scal
 
 	if (axis.compare("x") == 0) {
 		R.col(0) = Vector3(1., 0., 0.);
-		R.col(1) = Vector3(0., std::cos(theta), std::sin(theta));
+		R.col(1) = Vector3(0., std::cos(theta) , std::sin(theta));
 		R.col(2) = Vector3(0., -std::sin(theta), std::cos(theta));
-	}
-	else if (axis.compare("y") == 0) {
+
+	}else if (axis.compare("y") == 0) {
 		R.col(0) = Vector3(std::cos(theta), 0., -std::sin(theta));
 		R.col(1) = Vector3(0., 1., 0.);
 		R.col(2) = Vector3(std::sin(theta), 0., std::cos(theta));
-	}
-	else {
-		R.col(0) = Vector3(std::cos(theta), std::sin(theta), 0.);
+
+	}else {
+		R.col(0) = Vector3( std::cos(theta), std::sin(theta), 0.);
 		R.col(1) = Vector3(-std::sin(theta), std::cos(theta), 0.);
 		R.col(2) = Vector3(0., 0., 1.);
 	}
@@ -795,18 +1164,31 @@ SHAPEOP_INLINE void Solver_GPU::rotatePoints(const std::string& axis, const Scal
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE void Solver_GPU::set_onSurfaceParticle(
-	const std::vector<bool>& onSurfaceParticle)
-{
+SHAPEOP_INLINE void Solver_GPU::set_onSurfaceParticle(const std::vector<bool>& onSurfaceParticle){
 	onSurfaceParticle_ = onSurfaceParticle;
 }
+/////////////////////////////////////////////////////////////////////////////////
+int Solver_GPU::send_fluid_data(int nb, int rank, int iter){
+    return send_fluid_data_(&from_fluid_data_d, &from_fluid_data_h, nb,  starting_ids, rank, iter);
+}
+
+void Solver_GPU::read_fluid_data(){
+    read_fluid_data_(&from_fluid_data_d, &from_fluid_data_h);
+}
+void Solver_GPU::copy_force_from_fluid(double dx){
+    double cf = 1000*(dx*dx*dx*dx)/(p_dt*p_dt);
+    plb::npfem::copy_force_from_fluid(&mesh_info_, &simulation_input_d_, &simulation_data_d_, &from_fluid_data_d, collision_data_d_.colid_normals, cf, dx, mesh_info_.threshold_rep, starting_ids, 0);
+}
+
+void Solver_GPU::copy_point_to_fluid(double dx, int iter){
+    plb::npfem::copy_point_to_fluid(&mesh_info_, &simulation_input_d_, &from_fluid_data_d, simulation_data_d_.normals, p_dt/dx, starting_ids, iter);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE const std::vector<bool>& Solver_GPU::get_onSurfaceParticle() const
-{
+SHAPEOP_INLINE const std::vector<bool>& Solver_GPU::get_onSurfaceParticle() const {
 	return onSurfaceParticle_;
 }
 ///////////////////////////////////////////////////////////////////////////////
-//TODO tester ca
 void Solver_GPU::set_gpu_starting_position(const Matrix3X &points, int cell){
 	MatrixXXCuda tp_point = points;
 	points_from_Host_to_Device(points.cols(), simulation_input_d_.points, tp_point.data(), cell);
@@ -815,6 +1197,27 @@ void Solver_GPU::set_gpu_starting_position(const Matrix3X &points, int cell){
 void plb::npfem::Solver_GPU::set_gpu_starting_velocities(const Matrix3X & vels, int cell){
 	MatrixXXCuda tp_vel = vels;
 	points_from_Host_to_Device(vels.cols(), simulation_input_d_.velocities, tp_vel.data(), cell);
+}
+//the init function should have been performed so memory is allocated
+void plb::npfem::Solver_GPU::send_all_points_to_GPU(){
+    points_from_Host_to_Device(mesh_info_.nb_cells*mesh_info_.n_points, simulation_input_d_.points, simulation_input_h_.points);
+}
+void plb::npfem::Solver_GPU::send_all_velocities_to_GPU(){
+    points_from_Host_to_Device(mesh_info_.nb_cells*mesh_info_.n_points, simulation_input_d_.velocities, simulation_input_h_.velocities);
+}
+void plb::npfem::Solver_GPU::send_all_centers_to_GPU(ShapeOpScalar *centers) {
+    points_from_Host_to_Device(mesh_info_.nb_cells, simulation_data_d_.center, centers);
+}
+void plb::npfem::Solver_GPU::read_all_points_from_GPU(){
+    simulation_input_h_.points = Points_rowMajor_.data();
+    points_from_Device_to_Host(mesh_info_.nb_cells*mesh_info_.n_points, simulation_input_d_.points, simulation_input_h_.points, stream);
+}
+void plb::npfem::Solver_GPU::read_all_velocities_from_GPU() {
+    simulation_input_h_.velocities = velocities_.data();
+    points_from_Device_to_Host(mesh_info_.nb_cells*mesh_info_.n_points, simulation_input_d_.velocities, simulation_input_h_.velocities, stream);
+}
+void plb::npfem::Solver_GPU::read_all_centers_from_GPU(ShapeOpScalar *centers) {
+    points_from_Device_to_Host(mesh_info_.nb_cells, simulation_data_d_.center, centers, stream);
 }
 ///////////////////////////////////////////////////////////////////////////////
 }

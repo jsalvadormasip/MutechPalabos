@@ -69,6 +69,7 @@ RawConnectedTriangleMesh<T> generateConnectedTriangleMesh(RawTriangleMesh<T>& ra
 template<typename T>
 class ManualConnectedTriangleMesh : public ConnectedTriangleMesh<T> {
 public:
+    ManualConnectedTriangleMesh() {};
     /// In this constructor, it is assumed that there is only one part in
     /// the geometry, and that the tagging is therefore trivial.
     ManualConnectedTriangleMesh(plint numTriangles_, plint numVertices_);
@@ -270,6 +271,7 @@ public:
     };
 public:
     /// Constructor for single part, with raw triangles.
+    RawConnectedTriangleMesh() {};
     RawConnectedTriangleMesh (
             std::vector<Array<T,3> > const& vertices_, std::vector<Array<plint,3> > const& triangles_ );
     RawConnectedTriangleMesh (

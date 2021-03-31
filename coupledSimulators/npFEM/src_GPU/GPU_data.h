@@ -50,7 +50,21 @@ namespace npfem {
 struct matrix3{
 	float data[9];
 };
+//heuristic how many fluid nodes we may communicate may vary
+#define MAXFLUIDNODE 256
 
+struct From_fluid_data {
+    int nb_fluid_nodes = 0;
+    int nb;
+    double *data_in;
+    double *data_out;
+    float *normal_out;
+    float *normal_in;
+    float *col_vertics_in;
+    int *ids;
+    int *shift;
+    int *fluid_nodes_rank;
+};
 //MESH
 struct Mesh_info {
 	float rho = 1125.0;
@@ -71,6 +85,7 @@ struct Mesh_info {
 	ShapeOpScalar mass_total = 0;
 	int nb_cells = 1;
 	int n_points = 0;
+    int surface_id0 = 0;
 	int idO = 0;
 	int n_constraints = 0;
 	int n_triangles = 0;
@@ -94,6 +109,8 @@ struct Mesh_data
 	//nconstraint
 	int *ConstraintType;
 	int *idO;
+    int *vertex_to_tri;
+    char *vertex_pos;
 	ShapeOpScalar *rangeMin;
 	ShapeOpScalar *rangeMax;
 	ShapeOpScalar *Scalar1;
@@ -140,8 +157,11 @@ struct Simulation_data
 	ShapeOpScalar *oldPoints;
 	ShapeOpScalar *points_last_iter;
 	ShapeOpScalar *projections;
+    ShapeOpScalar *force_intern_cont;
 	ShapeOpScalar *momentum;
 	cuda_scalar   *force_npd;
+    cuda_scalar *tri_normal;
+    cuda_scalar *normals;
 
 	ShapeOpScalar *gradient;
 	ShapeOpScalar *gradient_prev;

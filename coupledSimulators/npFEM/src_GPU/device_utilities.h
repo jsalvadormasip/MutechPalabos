@@ -54,30 +54,40 @@
 namespace plb {
 namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
-inline void CUDA_HandleError( cudaError_t err, const char *file, int line );
-#define CUDA_HANDLE_ERROR( err ) (CUDA_HandleError( err, __FILE__, __LINE__ ))
-///////////////////////////////////////////////////////////////////////////////
 void GPU_Mem_check();
+//inline void CUDA_HandleError(cudaError_t err, const char *file, int line);
+///////////////////////////////////////////////////////////////////////////////
+struct stream_holder;
 ///////////////////////////////////////////////////////////////////////////////
 void GPU_Init(Mesh_info        *mesh_info_,
 			  Mesh_data        *mesh_data_d,        Mesh_data *mesh_data_h,
               Simulation_input *simulation_input_d, Simulation_input *simulation_input_h,
               Simulation_data  *simulation_data_d ,
-              Collision_data   *collision_data_d  , Collision_data   *collision_data_h, cuda_scalar **matrices_d);
+              Collision_data   *collision_data_d  , Collision_data *collision_data_h, cuda_scalar **matrices_d, stream_holder **str);
 
 ///////////////////////////////////////////////////////////////////////////////
 void compute_next_frame_rbc(Mesh_info  *info, Mesh_data *mesh, Simulation_input *input,
-	Simulation_data *sim, Collision_data *coll, ShapeOpScalar h, ShapeOpScalar h2, int it_max, cudaStream_t stream);
+	Simulation_data *sim, Collision_data *coll, ShapeOpScalar h, ShapeOpScalar h2, int it_max, stream_holder *str);
 ///////////////////////////////////////////////////////////////////////////////
 struct gradient_functor;
 ///////////////////////////////////////////////////////////////////////////////
 void median_filter(graph_data graph, ShapeOpScalar *force, int nb_cells, int nb);
 ///////////////////////////////////////////////////////////////////////////////
+void from_fluid_data_alloc(From_fluid_data *data_d, From_fluid_data *data_h, int nb);
+///////////////////////////////////////////////////////////////////////////////
+int send_fluid_data_(From_fluid_data *data_d, From_fluid_data *data_h, int nb, int start_id, int rank, int iter);
+void read_fluid_data_(From_fluid_data * data_d, From_fluid_data * data_h);
+void copy_force_from_fluid(Mesh_info *info, Simulation_input *input, Simulation_data *sim, From_fluid_data *data_fluid,  ShapeOpScalar *colid_normals, double cf, double dx, double threshold, int start_id, int iter);
+void copy_point_to_fluid(Mesh_info *info, Simulation_input *input, From_fluid_data *data_fluid, ShapeOpScalar *colid_normals, double cu, int start_id, int iter);
+////////////////////////////////////////////////////////////////////////
 void send_graph(graph_data *graph_h, graph_data *graph_d, int n);
 ///////////////////////////////////////////////////////////////////////////////
 void first_center(Mesh_info info, Simulation_input input, Simulation_data sim, double *center_d);
 ///////////////////////////////////////////////////////////////////////////////
 void set_cells_initial_position(const double *center_h, double *center_d, const int nb_cells, Mesh_info info, Mesh_data mesh, Simulation_input input, Simulation_data sim);
+///////////////////////////////////////////////////////////////////////////////
+void set_cells_initial_position(const double *center_h, double *center_d, cuda_scalar *mat_local_d, cuda_scalar *mat_local_h, 
+                                double mat[16], const int nb_cells, Mesh_info info, Mesh_data mesh, Simulation_input input, Simulation_data sim);
 ///////////////////////////////////////////////////////////////////////////////
 void reset_position_d(const double *center_h, double *center_d, ShapeOpScalar *points, Mesh_info info, Mesh_data mesh, Simulation_input input_d, Simulation_data sim);
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,15 +97,19 @@ void send_GPU_collinding_points(ShapeOpScalar *points, ShapeOpScalar **colid_poi
 ///////////////////////////////////////////////////////////////////////////////
 void free_GPU_pointer(void *pointer);
 ///////////////////////////////////////////////////////////////////////////////
-void external_forces_from_Host_to_Device( int n_points, ShapeOpScalar *Palabos_Forces_h, ShapeOpScalar *Palabos_Forces_d, cudaStream_t stream);
+void external_forces_from_Host_to_Device( int n_points, ShapeOpScalar *Palabos_Forces_h, ShapeOpScalar *Palabos_Forces_d, stream_holder *str);
 ///////////////////////////////////////////////////////////////////////////////
 void points_from_Host_to_Device(int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h, int cell);
 ///////////////////////////////////////////////////////////////////////////////
-void points_from_Device_to_Host( int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h, cudaStream_t stream);
+void points_from_Host_to_Device(int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h);
+///////////////////////////////////////////////////////////////////////////////
+void points_from_Device_to_Host( int n_points, ShapeOpScalar *points_d, ShapeOpScalar *points_h, stream_holder *str);
 ///////////////////////////////////////////////////////////////////////////////
 void debug_matrix_from_gpu(double *mat_d, int n);
 ///////////////////////////////////////////////////////////////////////////////
-void points_time_mat_3X3(cuda_scalar *mat_d, const cuda_scalar *mat_h, double *points, const int n_cells, const int n);
+int cudaSetDevice_warpper(int index);
+///////////////////////////////////////////////////////////////////////////////
+void points_time_mat_3X3(cuda_scalar *mat_d, const cuda_scalar *mat_h, double *points, double *center, const int nb_cells, const int n);
 ///////////////////////////////////////////////////////////////////////////////
 void device_make_periodic(ShapeOpScalar *points_d, ShapeOpScalar *center, float nx, float ny, float nz, int ncells, int npoints,int it);
 ///////////////////////////////////////////////////////////////////////////////

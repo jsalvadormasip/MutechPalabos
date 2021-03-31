@@ -3,18 +3,18 @@
 <Simulation_Type> Shear_Flow </Simulation_Type>
 
 <Case_Study_RBC> RBC_Surface_mesh_258SurfVer </Case_Study_RBC>
-<Case_Study_PLT> PLT_Larger_Surface_mesh_66SurfVer </Case_Study_PLT>
+<Case_Study_PLT> PLT_AP_Larger_Surface_mesh_66SurfVer </Case_Study_PLT>
 
 <!--> Length scales are dx_p, dt_p, rho_p, which result in dx_lb = dt_lb = rho_lb = 1 <-->
 <System_Setup>
-    <OutputDir> ./tmp/ </OutputDir>
+    <OutputDir> ./tmp_0/ </OutputDir>
     <pos_filename> initialPlacing.pos </pos_filename>
     <wallStlFileName> ./wallStlFiles/box50x50x50.stl </wallStlFileName>
     <withBodies> true </withBodies>
     
     <particleEnvelopeWidth> 6 </particleEnvelopeWidth>
 
-    <ht> 15 </ht> <!--> Hematocrit (%) <-->
+    <ht> 35 </ht> <!--> Hematocrit (%) <-->
     <RBCsToPLT> 5 </RBCsToPLT> <!--> How many RBCs correspond to 1 PLT <-->
 
     <lx_p> 50 </lx_p> <!--> Physical Length (um) <-->
@@ -27,13 +27,13 @@
     <u_p> 0 </u_p> <!--> Physical Velocity (um/us) || Poiseuille Flow: Velocity at the center of the tube (desired) <-->
     <shear_rate> 0 </shear_rate> <!--> in sec^-1 <-->
   
-    <dt_p> 5 </dt_p> <!--> Fluid solver time step: Physical Length (us) <-->
+    <dt_p> 1 </dt_p> <!--> Fluid solver time step: Physical Length (us) <-->
     <u_lb> -1 </u_lb>
     
-    <output_timestep> 100 </output_timestep> <!--> Every how many Palabos timesteps to print results <-->
-    <max_time> 0.1 </max_time> <!--> Simulation stops when Simulated Time is over X seconds <-->
+    <output_timestep> 1000 </output_timestep> <!--> Every how many Palabos timesteps to print results <-->
+    <max_time> 0.05 </max_time> <!--> Simulation stops when Simulated Time is over X seconds <-->
 
-    <printVTKs> true </printVTKs>
+    <printVTKs> false </printVTKs>
     <!--> ratio: [0..1], applies in VTKs & COMs (Center of Mass) <-->
     <dump_RBCs_ratio_VTKs> 1.0 </dump_RBCs_ratio_VTKs>
     <dump_PLTs_ratio_VTKs> 1.0 </dump_PLTs_ratio_VTKs>
@@ -48,7 +48,7 @@
 
 <CellPacking>
     <Run> true </Run>
-    <offset> 5.0 </offset>
+    <offset> 7.0 </offset>
 </CellPacking>
 
 <Physical_Properties>
@@ -93,7 +93,7 @@
 <ShapeOp_RBC>
   <rho> 1125.0 </rho> <!--> Density of RBC in physical units (femtoGr/um^3) <-->
   <Calpha> 0.9 </Calpha>
-  <Cbeta> 1.0 </Cbeta>
+  <Cbeta> 1.5 </Cbeta>
 
   <applyGlobalVolumeConservation> true </applyGlobalVolumeConservation>
   <globalVolumeConservationWeight> 250. </globalVolumeConservationWeight>
@@ -102,7 +102,7 @@
 <ShapeOp_PLT>
   <rho> 1125.0 </rho> <!--> Density of PLT in physical units (femtoGr/um^3) <-->
   <Calpha> 0.9 </Calpha>
-  <Cbeta> 1.0 </Cbeta>
+  <Cbeta> 1.5 </Cbeta>
 
   <applyGlobalVolumeConservation> true </applyGlobalVolumeConservation>
   <globalVolumeConservationWeight> 250. </globalVolumeConservationWeight>
