@@ -351,6 +351,7 @@ void InjectRandomParticlesFunctional3D<T,Descriptor>::processGenericBlocks (
                                     particleField.getLocation().y + iY + randY,
                                     particleField.getLocation().z + iZ + randZ );
 
+                    pcout << newparticle->getPosition()[0] << " "  << newparticle->getPosition()[1] << " "  << newparticle->getPosition()[2] << std::endl;
                     particleField.addParticle(domain, newparticle);
                 }
             }
