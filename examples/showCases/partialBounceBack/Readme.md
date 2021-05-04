@@ -19,7 +19,9 @@ f_i^{out}(x,t) = (1-\gamma)f_i^c(x,t) + \gamma f_{\hat{i}}^{in}(x,t)
 \end{equation}
 with $f_i^{out}(x,t)$ the outgoing populations after the PBB step, in lattice direction $i$, at position $x$ and time $t$, $f_i^c(x,t)$ the populations immediately after the fluid collision step, and $f_{\hat{i}}^{in}(x,t)$ the incoming fluid packet before the collision step, in direction $-i$. $\gamma$ is the model solid fraction, which varies from **0** (completely **fluid** node) to **1** (completely **solid** node). 
 <center>
-![PBB voxel](../examples/showCases/partialBounceBack/img/PBBVoxel.png  "PBB voxel")
+<br/>
+<img alt="PBB voxel" src="./img/PBBVoxel.png" title="PBB voxel"/>
+<br/>
 </center>
 
 Walsh et al. show that, with this method, $\gamma$ is related to the permeability $k$ of the PBB voxel as follows:
@@ -69,7 +71,9 @@ Based on measurements by Wufsus et al. ([https://doi.org/10.1016/j.bpj.2013.02.0
 The figure below shows the comparison of the other models' implementation with their analytical expression, and with Wufsus' measurements for fibrin clots (the fiber radius taken here is 70 nm).
 
 <center>
-![Permeability models](./img/PermeModels.png  "Permeability models implemented")
+<br/>
+<img alt="Permeability models" src="./img/PermeModels.png" title="Permeability models implemented"/>
+<br/>
 </center>
 
 Change the permeability model by changing the *permeModel* variable in **simParams.h**, with *Clague* or *JJ*. Assess how the fibrinolysis is affected.
