@@ -14,9 +14,32 @@
 This exercise guides you through an example of implementation of the *Partially Saturated Method* or *Partial Bounce-Back* (PBB). In brief, this method consists of simulating voxels that block part of the incoming *populations*. This blocking fraction is commonly called the *solid fraction*.
 The method implemented is the one given by Walsh et al. ([https://doi.org/10.1016/j.cageo.2008.05.004](https://doi.org/10.1016/j.cageo.2008.05.004)), and which can be summarized in the following way: 
 
-\begin{equation}
-f_i^{out}(x,t) = (1-\gamma)f_i^c(x,t) + \gamma f_{\hat{i}}^{in}(x,t)
-\end{equation}
+<p>
+   \begin{equation}
+   <br/>
+   f_i^{out}(x,t) = (1-\gamma)f_i^c(x,t) + \gamma f_{\hat{i}}^{in}(x,t)
+   <br/>
+   \end{equation}
+   <br/>
+   with $f_i^{out}(x,t)$ the outgoing populations after the PBB step, in lattice direction $i$, at position $x$ and time $t$, $f_i^c(x,t)$ the populations immediately after the fluid collision step, and $f_{\hat{i}}^{in}(x,t)$ the incoming fluid packet before the collision step, in direction $-i$. $\gamma$ is the model solid fraction, which varies from
+   <strong>
+    0
+   </strong>
+   (completely
+   <strong>
+    fluid
+   </strong>
+   node) to
+   <strong>
+    1
+   </strong>
+   (completely
+   <strong>
+    solid
+   </strong>
+   node).
+   <br/>
+  </p>
 with $f_i^{out}(x,t)$ the outgoing populations after the PBB step, in lattice direction $i$, at position $x$ and time $t$, $f_i^c(x,t)$ the populations immediately after the fluid collision step, and $f_{\hat{i}}^{in}(x,t)$ the incoming fluid packet before the collision step, in direction $-i$. $\gamma$ is the model solid fraction, which varies from **0** (completely **fluid** node) to **1** (completely **solid** node). 
 <center>
 <br/>
