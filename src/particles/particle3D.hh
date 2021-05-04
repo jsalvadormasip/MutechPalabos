@@ -380,7 +380,7 @@ void PointParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor>
 
 template<typename T, template<typename U> class Descriptor>
 void PointParticle3D<T,Descriptor>::advance() {
-    //PLB_ASSERT( norm(velocity)<1. );
+    PLB_ASSERT( norm(velocity)<1. );
     this->getPosition() += velocity;
 }
 
