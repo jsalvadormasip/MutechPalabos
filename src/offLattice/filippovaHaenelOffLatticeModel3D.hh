@@ -45,32 +45,61 @@
 
 namespace plb {
 
+/**
+ * This class implements the Filippova-Haenel (FH,1998) boundary condition on a BoundaryShape.
+ * The BoundaryShape determines whether the points of the discrete lattice are "inside"
+ * or "outside" some geometry.
+ *
+ * It can handle moving boundaries using the momentum correction of ladd (LADD, 1994).
+ * The wall velocity is recovered from SurfaceData stored in BoundaryShape3D<T,SurfaceData>*
+ *
+ * IMPORTANT NOTE: in Palabos versions before June 2020 the FilippovaHaenelLocalModel3D boundary condition
+ * refers to the MeiLuoShyy (MLS,1999) variant than now has a independent implementation in
+ * offLattice/meiLuoShyyOffLatticeModel3D.h. The name of the class has been changed to have a BREAKING CHANGE
+ * in order to encourage the user to choose and check the implementation they need in their application.
+ *
+ * (FH,1998) O. Filippova and D. Hänel, “Grid Refinement for Lattice-BGK Models,”
+ *     Journal of Computational Physics, vol. 147, no. 1, pp. 219–228, Nov. 1998, doi: 10.1006/jcph.1998.6089.
+ *
+ * (MLS,1999) R. Mei, L.-S. Luo, and W. Shyy, “An Accurate Curved Boundary Treatment in the Lattice Boltzmann Method,”
+ *     Journal of Computational Physics, vol. 155, no. 2, pp. 307–330, Nov. 1999, doi: 10.1006/jcph.1999.6334.
+ *
+ * (LADD, 1994) A. J. C. Ladd, “Numerical simulations of particulate suspensions via a discretized Boltzmann equation. Part 1. Theoretical foundation,”
+ *              Journal of Fluid Mechanics, vol. 271, pp. 285–309, Jul. 1994, doi: 10.1017/S0022112094001771.
+ *
+ * @tparam T
+ * @tparam Descriptor
+ */
 template<typename T, template<typename U> class Descriptor>
-FilippovaHaenelModel3D<T,Descriptor>::FilippovaHaenelModel3D (
-        BoundaryShape3D<T,Array<T,3> >* shape_, int flowType_, bool useAllDirections_ )
-    : OffLatticeModel3D<T,Array<T,3> >(shape_, flowType_),
-      computeStat(true)
+FilippovaHaenelLocalModel3D<T,Descriptor>::FilippovaHaenelLocalModel3D (
+        BoundaryShape3D<T,Array<T,3> >* shape_, int flowType_)
+    : OffLatticeModel3D<T,Array<T,3> >(shape_, flowType_)
 { }
 
 template<typename T, template<typename U> class Descriptor>
-FilippovaHaenelModel3D<T,Descriptor>* FilippovaHaenelModel3D<T,Descriptor>::clone() const {
-    return new FilippovaHaenelModel3D(*this);
+FilippovaHaenelLocalModel3D<T,Descriptor>* FilippovaHaenelLocalModel3D<T,Descriptor>::clone() const {
+    return new FilippovaHaenelLocalModel3D(*this);
 }
 
 template<typename T, template<typename U> class Descriptor>
-plint FilippovaHaenelModel3D<T,Descriptor>::getNumNeighbors() const {
+plint FilippovaHaenelLocalModel3D<T,Descriptor>::getNumNeighbors() const {
     return 1;
 }
 
+/**
+ *  Filippova-Haenel is a completion scheme for a layer of cells on the
+ *  "solid" side of the boundary, like Guo.
+ * @tparam T
+ * @tparam Descriptor
+ * @return true
+ */
 template<typename T, template<typename U> class Descriptor>
-bool FilippovaHaenelModel3D<T,Descriptor>::isExtrapolated() const {
-    // Filippova-Haenel is a completion scheme for a layer of cells on the
-    // "solid" side of the boundary, like Guo.
+bool FilippovaHaenelLocalModel3D<T,Descriptor>::isExtrapolated() const {
     return true;
 }
 
 template<typename T, template<typename U> class Descriptor>
-void FilippovaHaenelModel3D<T,Descriptor>::prepareCell (
+void FilippovaHaenelLocalModel3D<T,Descriptor>::prepareCell (
         Dot3D const& cellLocation,
         AtomicContainerBlock3D& container )
 {
@@ -124,13 +153,13 @@ void FilippovaHaenelModel3D<T,Descriptor>::prepareCell (
 
 template<typename T, template<typename U> class Descriptor>
 ContainerBlockData*
-    FilippovaHaenelModel3D<T,Descriptor>::generateOffLatticeInfo() const
+    FilippovaHaenelLocalModel3D<T,Descriptor>::generateOffLatticeInfo() const
 {
     return new OffLatticeInfo3D;
 }
 
 template<typename T, template<typename U> class Descriptor>
-Array<T,3> FilippovaHaenelModel3D<T,Descriptor>::getLocalForce (
+Array<T,3> FilippovaHaenelLocalModel3D<T,Descriptor>::getLocalForce (
                 AtomicContainerBlock3D& container ) const
 {
     OffLatticeInfo3D* info =
@@ -140,7 +169,7 @@ Array<T,3> FilippovaHaenelModel3D<T,Descriptor>::getLocalForce (
 }
 
 template<typename T, template<typename U> class Descriptor>
-void FilippovaHaenelModel3D<T,Descriptor>::boundaryCompletion (
+void FilippovaHaenelLocalModel3D<T,Descriptor>::boundaryCompletion (
         AtomicBlock3D& nonTypeLattice,
         AtomicContainerBlock3D& container,
         std::vector<AtomicBlock3D *> const& args )
@@ -170,7 +199,7 @@ void FilippovaHaenelModel3D<T,Descriptor>::boundaryCompletion (
 }
 
 template<typename T, template<typename U> class Descriptor>
-void FilippovaHaenelModel3D<T,Descriptor>::cellCompletion (
+void FilippovaHaenelLocalModel3D<T,Descriptor>::cellCompletion (
         BlockLattice3D<T,Descriptor>& lattice, Dot3D const& guoNode,
         std::vector<int> const& dryNodeFluidDirections,
         std::vector<plint> const& dryNodeIds, Dot3D const& absoluteOffset,
@@ -332,7 +361,11 @@ void FilippovaHaenelModel3D<T,Descriptor>::cellCompletion (
         Array<T,3> wf_j; wf_j.resetToZero();
         T omega = f_cell.getDynamics().getOmega();
 
+        if (delta < 0.5) {
+                wf_j = f_j;
+                kappa = (omega * (2.0 * delta - 1.0)) / (1.0 - omega);
 
+<<<<<<< HEAD
         if (delta<0.5) {
             // This is the Filippova-Hänel algorithm, which we don't use
             // because it is not very stable. We use insteand the non-local
@@ -357,6 +390,11 @@ void FilippovaHaenelModel3D<T,Descriptor>::cellCompletion (
             // Eq. 9b
             wf_j = (1.0-3.0/(2.0*delta))*f_j + 3.0/(2.0*delta)*w_j;
             kappa = (2.0*omega*(2.0*delta-1.0))/(2.0+omega);
+=======
+        } else {
+                wf_j = f_j * ((delta - 1.0) / delta) + w_j / delta;
+                kappa = omega * (2.0 * delta - 1.0);
+>>>>>>> upstream/master
         }
 
         T c_i_wf_j_f_j = D::c[iPop][0]*(wf_j[0]-f_j[0]) +

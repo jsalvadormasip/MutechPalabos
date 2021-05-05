@@ -1,54 +1,55 @@
-# This file is a template, and might need editing before it works on your project.
-# use the official gcc image, based on debian
-# can use verions as well, like gcc:5.2
-    
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_BASE_IMG: $CI_REGISTRY_IMAGE/plb-base-img:latest
+
 cache:
-    untracked: false
+    untracked: true
     key: "$CI_PROJECT_ID"
-    
+    paths:
+        - ${PWD}/ccache/
+
 stages:
-    - build_examples
-    - build_utility
+    - prepare_docker
+    - build_cmake
     - deploy
 
-#test_pypal:
-#    stage: build
-#    
-#    script: 
-#        - apt-get update
-#        - apt-get install -y swig python-dev
-#        - export PALABOS_ROOT=`pwd`
-#        - git clone git@gitlab.com:flowkit/pypal-web.git
-#        - cd pypal-web/scripted-palabos/src
-#        - export PYPAL_ROOT=`pwd`
-#        - make
-        
-# Test compilation in the examples directory
-examples:
-    stage: build_examples
+# Build and test stages are using a docker image containing package
+# needed to build and run a Palabos application.
+build_base_docker_img:
+  stage: prepare_docker
+  image: docker:latest
+  services:
+     - docker:dind
+  only:
+    changes:
+      - docker/*
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - cd docker
+    - docker build --tag $DOCKER_BASE_IMG .
+    - docker push $DOCKER_BASE_IMG
 
-    only:
-        - master
+## Test compilation with CMake, everything in examples & utility directory
+cmake:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ccache
+        - export CCACHE_BASEDIR=${PWD}
+        - export CCACHE_DIR=${PWD}/ccache
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=500M
     
     script: 
         - pwd
-        - cd examples
-        - make optimize="false"
-
-# Test compilation in the utility directory
-utility:
-    stage: build_utility
-
-    only:
-        - master
-    
-    script: 
-        - pwd
-        - cd utility
-        - make optimize="false"
+        - cd build
+        - cmake ..
+        - make -j4
 
 pages:
     stage: deploy
+    image: $DOCKER_BASE_IMG
     script:
         - pwd
         - mkdir -p public/docs
@@ -58,10 +59,5 @@ pages:
         - public
     only:
         - master
-        - tags
 
-# run tests using the binary built before
-#test:
-#  stage: test
-#  script:
-#    - ./runmytests.sh
+
