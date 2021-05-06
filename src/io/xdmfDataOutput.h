@@ -46,6 +46,7 @@
 #include "core/array.h"
 #include "core/globalDefs.h"
 #include "core/serializer.h"
+#include "io/hdfWrapper.h"
 #include "io/multiBlockWriter3D.h"
 #include "multiBlock/multiDataField2D.h"
 #include "multiBlock/multiDataField3D.h"
