@@ -11,6 +11,7 @@ cache:
 
 stages:
     - prepare_docker
+    - check_format
     - build_cmake
     - deploy
 
@@ -29,6 +30,16 @@ build_base_docker_img:
     - cd docker
     - docker build --tag $DOCKER_BASE_IMG .
     - docker push $DOCKER_BASE_IMG
+
+## Test compilation with CMake, everything in examples & utility directory
+format:
+    stage: check_format
+    image: $DOCKER_BASE_IMG
+    
+    script: 
+        - pwd
+        - clang-format -version
+        - ./run-clang-format.sh -n
 
 ## Test compilation with CMake, everything in examples & utility directory
 cmake:
