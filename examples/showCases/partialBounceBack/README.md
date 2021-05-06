@@ -28,7 +28,7 @@ Walsh et al. show that, with this method, $`\gamma`$ is related to the permeabil
 ```math
 k = \frac{(1-\gamma)\nu\,dt}{2\gamma}
 ```
-where $`\nu`$ is the viscosity of the fluid and $dt$ the time interval of the LB simulation. $`k`$ and $`\nu`$ are here in physical units.
+where $`\nu`$ is the viscosity of the fluid and $`dt`$ the time interval of the LB simulation. $`k`$ and $`\nu`$ are here in physical units.
 By inverting this relationship, we have an explicit expression for the model solid fraction to impose, in terms of the desired permeability for our porous medium:
 ```math
 \gamma = \frac{1}{1+\frac{2k}{\nu\,dt}}.
@@ -66,7 +66,7 @@ Try first to compile and run the code as is. Several output files will be genera
 	- **voldataSF\*.vti**: clot solid fraction data. It is basically the same data as voldataClot, up to a conversion factor. Equals 1-porosity at voxel level.
 
 ### Change the permeability model
-As seen in the lecture, a permeability model represents the dependency of the permeability $k$ on the solid fraction  $n_s^\*$ of the porous medium. This relation depends on the nature of the porous medium. 
+As seen in the lecture, a permeability model represents the dependency of the permeability $`k`$ on the solid fraction  $`n_s^\*`$ of the porous medium. This relation depends on the nature of the porous medium. 
 Based on measurements by Wufsus et al. ([https://doi.org/10.1016/j.bpj.2013.02.055](https://doi.org/10.1016/j.bpj.2013.02.055)), Davies model seems to represent quite well the permeability law of *in-vitro* fibrin clots. However, other permeability models for porous media can be used, for media that are not fibrin clots.
 The figure below shows the comparison of the other models' implementation with their analytical expression, and with Wufsus' measurements for fibrin clots (the fiber radius taken here is 70 nm).
 
