@@ -35,6 +35,8 @@
 #define MULTI_GRID_DATA_ANALYSIS_WRAPPER_2D_H
 
 #include "dataProcessors/dataAnalysisWrapper2D.h"
+#include "multiGrid/multiGridDataField2D.h"
+#include "multiGrid/multiGridLattice2D.h"
 
 namespace plb {
 

@@ -37,6 +37,8 @@
 #include "atomicBlock/dataProcessingFunctional3D.h"
 #include "core/dynamics.h"
 #include "core/globalDefs.h"
+#include "multiBlock/multiBlockLattice3D.h"
+#include "multiBlock/multiDataField3D.h"
 
 namespace plb {
 

@@ -37,7 +37,9 @@
 #ifndef SMAGORINSKY_DYNAMICS_3D_H
 #define SMAGORINSKY_DYNAMICS_3D_H
 
+#include "atomicBlock/blockLattice3D.h"
 #include "complexDynamics/smagorinskyDynamics.h"
+#include "multiBlock/multiBlockLattice3D.h"
 
 namespace plb {
 

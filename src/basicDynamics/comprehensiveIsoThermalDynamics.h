@@ -41,6 +41,7 @@
 #ifndef COMPREHENSIVE_ISO_THERMAL_DYNAMICS_H
 #define COMPREHENSIVE_ISO_THERMAL_DYNAMICS_H
 
+#include "basicDynamics/isoThermalDynamics.h"
 #include "core/dynamics.h"
 #include "core/globalDefs.h"
 

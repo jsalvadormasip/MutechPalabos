@@ -38,6 +38,9 @@
 #define PLB_TIMER_H
 
 #include <ctime>
+#include <string>
+
+#include "core/globalDefs.h"
 
 #ifdef PLB_USE_POSIX
 #include <unistd.h>

@@ -38,6 +38,8 @@
 #define DYNAMICS_GENERATORS_H
 
 #include "basicDynamics/isoThermalDynamics.h"
+#include "core/globalDefs.h"
+#include "multiGrid/multiGridParameterManager.h"
 
 namespace plb {
 

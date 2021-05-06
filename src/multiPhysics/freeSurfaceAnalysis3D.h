@@ -34,7 +34,10 @@
 #ifndef FREE_SURFACE_ANALYSIS_3D_H
 #define FREE_SURFACE_ANALYSIS_3D_H
 
+#include <memory>
+
 #include "multiBlock/multiBlockLattice3D.h"
+#include "multiBlock/multiDataField3D.h"
 
 namespace plb {
 
