@@ -214,61 +214,6 @@ void FilippovaHaenelLocalModel3D<T,Descriptor>::cellCompletion (
 #endif
     PLB_ASSERT( s_cell.getDynamics().getId() == noDynId 
         && "Filippova-Haenel BC needs the dynamics to be set to NoDynamics.");
-    // Check if at least one direction want a densityNeumann condition. If so,
-    // densityNeumann is implemented in all directions, with the average density
-    // value.
-    T averageRhoBar = 0.;
-    int numDensityConditions = 0;
-    for (plint iDirection=0; iDirection<(plint)dryNodeFluidDirections.size(); ++iDirection) {
-        int iOpp = dryNodeFluidDirections[iDirection];
-        Dot3D fluidDirection(D::c[iOpp][0],D::c[iOpp][1],D::c[iOpp][2]);
-        Array<T,3> wallNode, wall_vel;
-        T wallDistance;
-        Array<T,3> wallNormal;
-        OffBoundary::Type bdType;
-        plint dryNodeId = dryNodeIds[iDirection];
-#ifdef PLB_DEBUG
-        bool ok =
-#endif
-        this->pointOnSurface( guoNode+absoluteOffset, fluidDirection,
-                              wallNode, wallDistance, wallNormal,
-                              wall_vel, bdType, dryNodeId );
-        PLB_ASSERT( ok );
-        if (bdType == OffBoundary::densityNeumann) {
-            ++numDensityConditions;
-            averageRhoBar = averageRhoBar + Descriptor<T>::rhoBar(wall_vel[0]);
-        }
-    }
-    bool isDensityNeuman = numDensityConditions > 0;
-    if (isDensityNeuman) {
-        T wallRhoBar = averageRhoBar / numDensityConditions;
-        for (plint iDirection=0; iDirection<(plint)dryNodeFluidDirections.size(); ++iDirection) {
-            int iOpp = dryNodeFluidDirections[iDirection];
-            Dot3D fluidDirection(D::c[iOpp][0],D::c[iOpp][1],D::c[iOpp][2]);
-            Cell<T,Descriptor> const& f_cell =
-                lattice.get( guoNode.x+fluidDirection.x,
-                             guoNode.y+fluidDirection.y,
-                             guoNode.z+fluidDirection.z );
-                s_cell[iOpp] = f_cell[iOpp];
-        }
-        T rhoBar;
-        Array<T,3> j;
-        // The cell has NoDynamics, and cannot be used to compute moments.
-        momentTemplates<T,Descriptor>::get_rhoBar_j(s_cell, rhoBar, j);
-        T jSqr = normSqr(j);
-        Array<T,Descriptor<T>::q> oldFeq, newFeq;
-        dynamicsTemplates<T,Descriptor>::complete_bgk_ma2_equilibria( rhoBar, Descriptor<T>::invRho(rhoBar), j, jSqr, oldFeq );
-        // Debugging
-        s_cell.getDynamics().computeEquilibria(newFeq, wallRhoBar, j, jSqr);
-        dynamicsTemplates<T,Descriptor>::complete_bgk_ma2_equilibria( wallRhoBar, Descriptor<T>::invRho(wallRhoBar), j, jSqr, newFeq );
-        for (plint iPop=0; iPop<Descriptor<T>::q; ++iPop) {
-            s_cell[iPop] += newFeq[iPop]-oldFeq[iPop];
-
-        }
-        return;
-    }
-
-    // Here, there is an implicit else, because the above "if" ends with a return.
     for (plint iDirection=0; iDirection<(plint)dryNodeFluidDirections.size(); ++iDirection)
     {
         int iOpp = dryNodeFluidDirections[iDirection];
@@ -349,7 +294,6 @@ void FilippovaHaenelLocalModel3D<T,Descriptor>::cellCompletion (
         this->pointOnSurface( guoNode+absoluteOffset, fluidDirection,
                               wallNode, wallDistance, wallNormal,
                               wall_vel, bdType, dryNodeId );
-        //this->rhoBarVect[iDirection]=Descriptor<T>::rhoBar(wall_vel[0]);
         PLB_ASSERT( ok );
 
         Array<T,3> w_j = wall_vel*f_rho;
@@ -365,36 +309,9 @@ void FilippovaHaenelLocalModel3D<T,Descriptor>::cellCompletion (
                 wf_j = f_j;
                 kappa = (omega * (2.0 * delta - 1.0)) / (1.0 - omega);
 
-<<<<<<< HEAD
-        if (delta<0.5) {
-            // This is the Filippova-Hänel algorithm, which we don't use
-            // because it is not very stable. We use insteand the non-local
-            // Mei algorithm below.
-            //wf_j = f_j;
-            //kappa = (omega*(2.0*delta-1.0))/(1.0-omega);
-
-            // Mei et al: PRE 041203 (2002)
-            // https://doi.org/10.1103/PhysRevE.65.041203
-            // Eq. 9a
-            wf_j = ff_j;
-            kappa = (omega*(2*delta-1.0))/(1.0-2.0*omega);
-        }
-        else {
-            // This is the Filippova-Hänel algorithm, which we don't use
-            // because it is not very stable. We use insteand the non-local
-            // Mei algorithm below.
-            //wf_j = f_j * ((delta-1.0)/delta) + w_j / delta;
-            //kappa = omega*(2.0*delta-1.0)
-
-            // Mei et al: PRE 041203 (2002)
-            // Eq. 9b
-            wf_j = (1.0-3.0/(2.0*delta))*f_j + 3.0/(2.0*delta)*w_j;
-            kappa = (2.0*omega*(2.0*delta-1.0))/(2.0+omega);
-=======
         } else {
                 wf_j = f_j * ((delta - 1.0) / delta) + w_j / delta;
                 kappa = omega * (2.0 * delta - 1.0);
->>>>>>> upstream/master
         }
 
         T c_i_wf_j_f_j = D::c[iPop][0]*(wf_j[0]-f_j[0]) +
@@ -406,8 +323,7 @@ void FilippovaHaenelLocalModel3D<T,Descriptor>::cellCompletion (
 
         T f_ieq = f_cell.getDynamics().computeEquilibrium(iPop, f_rhoBar, f_j, f_jSqr) +
                       D::t[iPop]*D::invCs2*c_i_wf_j_f_j;
-        // From Eq. 10 (the term ubf-uf is taken to be zero).
-        s_cell[iOpp] = (1.0-kappa)*collidedCell[iPop] + kappa*f_ieq - 2.0*D::t[iPop]*D::invCs2*c_i_w_j;
+        s_cell[iOpp] = (1.0-kappa)*collidedCell[iPop]+kappa*f_ieq+2.0*D::t[iPop]*D::invCs2*c_i_w_j;
 
         localForce[0] += D::c[iPop][0]*(s_cell[iPop]+s_cell[iOpp]);
         localForce[1] += D::c[iPop][1]*(s_cell[iPop]+s_cell[iOpp]);
