@@ -14,23 +14,25 @@
 This exercise guides you through an example of implementation of the *Partially Saturated Method* or *Partial Bounce-Back* (PBB). In brief, this method consists of simulating voxels that block part of the incoming *populations*. This blocking fraction is commonly called the *solid fraction*.
 The method implemented is the one given by Walsh et al. ([https://doi.org/10.1016/j.cageo.2008.05.004](https://doi.org/10.1016/j.cageo.2008.05.004)), and which can be summarized in the following way: 
 
-\begin{equation}
+```math
 f_i^{out}(x,t) = (1-\gamma)f_i^c(x,t) + \gamma f_{\hat{i}}^{in}(x,t)
-\end{equation}
-with $f_i^{out}(x,t)$ the outgoing populations after the PBB step, in lattice direction $i$, at position $x$ and time $t$, $f_i^c(x,t)$ the populations immediately after the fluid collision step, and $f_{\hat{i}}^{in}(x,t)$ the incoming fluid packet before the collision step, in direction $-i$. $\gamma$ is the model solid fraction, which varies from **0** (completely **fluid** node) to **1** (completely **solid** node). 
+```
+with $`f_i^{out}(x,t)`$ the outgoing populations after the PBB step, in lattice direction $`i`$, at position $`x`$ and time $`t`$, $`f_i^c(x,t)`$ the populations immediately after the fluid collision step, and $`f_{\hat{i}}^{in}(x,t)`$ the incoming fluid packet before the collision step, in direction $`-i`$. $`\gamma`$ is the model solid fraction, which varies from **0** (completely **fluid** node) to **1** (completely **solid** node). 
 <center>
-![PBB voxel](img/PBBVoxel.png  "PBB voxel")
+<br/>
+<img alt="PBB voxel" src="./img/PBBVoxel.png" title="PBB voxel"/>
+<br/>
 </center>
 
-Walsh et al. show that, with this method, $\gamma$ is related to the permeability $k$ of the PBB voxel as follows:
-\begin{equation} \label{eq-k_ns}
+Walsh et al. show that, with this method, $`\gamma`$ is related to the permeability $`k`$ of the PBB voxel as follows:
+```math
 k = \frac{(1-\gamma)\nu\,dt}{2\gamma}
-\end{equation}
-where $\nu$ is the viscosity of the fluid and $dt$ the time interval of the LB simulation. $k$ and $\nu$ are here in physical units.
+```
+where $`\nu`$ is the viscosity of the fluid and $`dt`$ the time interval of the LB simulation. $`k`$ and $`\nu`$ are here in physical units.
 By inverting this relationship, we have an explicit expression for the model solid fraction to impose, in terms of the desired permeability for our porous medium:
-\begin{equation}
+```math
 \gamma = \frac{1}{1+\frac{2k}{\nu\,dt}}.
-\end{equation}
+```
 
 ## Compilation and execution
 
@@ -64,12 +66,14 @@ Try first to compile and run the code as is. Several output files will be genera
 	- **voldataSF\*.vti**: clot solid fraction data. It is basically the same data as voldataClot, up to a conversion factor. Equals 1-porosity at voxel level.
 
 ### Change the permeability model
-As seen in the lecture, a permeability model represents the dependency of the permeability $k$ on the solid fraction  $n_s^\*$ of the porous medium. This relation depends on the nature of the porous medium. 
+As seen in the lecture, a permeability model represents the dependency of the permeability $`k`$ on the solid fraction  $`n_s^\*`$ of the porous medium. This relation depends on the nature of the porous medium. 
 Based on measurements by Wufsus et al. ([https://doi.org/10.1016/j.bpj.2013.02.055](https://doi.org/10.1016/j.bpj.2013.02.055)), Davies model seems to represent quite well the permeability law of *in-vitro* fibrin clots. However, other permeability models for porous media can be used, for media that are not fibrin clots.
 The figure below shows the comparison of the other models' implementation with their analytical expression, and with Wufsus' measurements for fibrin clots (the fiber radius taken here is 70 nm).
 
 <center>
-![Permeability models](./img/PermeModels.png  "Permeability models implemented")
+<br/>
+<img alt="Permeability models" src="./img/PermeModels.png" title="Permeability models implemented"/>
+<br/>
 </center>
 
 Change the permeability model by changing the *permeModel* variable in **simParams.h**, with *Clague* or *JJ*. Assess how the fibrinolysis is affected.
