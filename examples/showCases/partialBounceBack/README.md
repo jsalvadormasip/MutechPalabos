@@ -17,6 +17,10 @@ The method implemented is the one given by Walsh et al. ([https://doi.org/10.101
 \begin{equation}
 f_i^{out}(x,t) = (1-\gamma)f_i^c(x,t) + \gamma f_{\hat{i}}^{in}(x,t)
 \end{equation}
+
+```math
+f_i^{out}(x,t) = (1-\gamma)f_i^c(x,t) + \gamma f_{\hat{i}}^{in}(x,t)
+```
 with $f_i^{out}(x,t)$ the outgoing populations after the PBB step, in lattice direction $i$, at position $x$ and time $t$, $f_i^c(x,t)$ the populations immediately after the fluid collision step, and $f_{\hat{i}}^{in}(x,t)$ the incoming fluid packet before the collision step, in direction $-i$. $\gamma$ is the model solid fraction, which varies from **0** (completely **fluid** node) to **1** (completely **solid** node). 
 <center>
 <br/>
