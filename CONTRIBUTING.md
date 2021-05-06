@@ -42,6 +42,14 @@ When you think your contributions are ready to be added to Palabos, you should c
 a `merge request` (see [here](https://docs.gitlab.com/ee/gitlab-basics/add-merge-request.html) for how to 
 create one). In your `merge request` briefly summarize what your additions are and highlight the particularly important ones.
 
+## Code formatting
+
+In order to have an uniform code formatting we are using a custom 
+`clang-format` configuration file that can be found at the root of the project 
+and which is named `.clang-format`. A `bash` script named `run-clang-format.sh` 
+can help you format your code in place. Note that the continuous integration 
+will fail if you have not formatted your code before making your merge request.
+
 ## Feature requests
 
 Feature requests can be created as issues. Keep in mind that we are an open source community
