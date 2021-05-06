@@ -34,6 +34,7 @@ build_base_docker_img:
 ## Test compilation with CMake, everything in examples & utility directory
 format:
     stage: check_format
+    image: $DOCKER_BASE_IMG
     
     script: 
         - pwd
