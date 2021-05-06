@@ -88,7 +88,7 @@ T fluidCompliance = 6.e-5;  // The fluid->particle force is equal to the velocit
 Array<T, 3> gravity(-3.0e-7, 0., 0.);  // A body force acting on each particle.
 T forceAmplitude = 1.e-4;              // Amplitude for the pairwise particle interaction force.
 T cutOffLength   = 3.5;  // Cutoff length for particle interaction in lattice units (make sure the
-                       // interaction force is negligible at this distance).
+                         // interaction force is negligible at this distance).
 plint commEnvelope =
     (plint)cutOffLength + 1;  // Width of communication envelope needed to cope with neighborhoods
                               // within the cutoff length. Must be bigger than blockSize/2.

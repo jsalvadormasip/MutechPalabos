@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     imageWriter.writeScaledGif("300*field1+field3", *add(*multiply((T)300., field1), field3));
 
     const T pi = (T)4. * std::atan((T)1.);
-    T (*Tsin)
+    T(*Tsin)
     (T) = std::sin;  // Explicit reference to the overloaded "sin" is required for automatic
                      // template instantiation.
     imageWriter.writeScaledGif("sine", *evaluate(Tsin, *multiply((T)2. * pi / (T)N, field3)));

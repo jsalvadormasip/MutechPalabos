@@ -106,11 +106,11 @@ struct SimulationParameters {
     bool refineSurfaceMeshes;    // Immersed surfaces are represented as triangle surface meshes.
                                  // Because of the immersed boundary method used, the size of
                                  // the triangles must approximately be the same as the lattice cell
-                               // size. The value of this parameter provides the option to refine
-                               // the triangular representation of the immersed surfaces.
-    T targetMaxEdgeLength;  // If surface mesh refinement has been selected, this parameter
-                            // defines the target value of the maximum edge length of the new
-                            // refined surface mesh.
+                                 // size. The value of this parameter provides the option to refine
+                                 // the triangular representation of the immersed surfaces.
+    T targetMaxEdgeLength;       // If surface mesh refinement has been selected, this parameter
+                                 // defines the target value of the maximum edge length of the new
+                                 // refined surface mesh.
     plint maxNumSurfaceRefinements;  // This is the maximum number of surface refinements to be
                                      // performed, whether or not the target maximum triangle edge
                                      // length has been achieved.

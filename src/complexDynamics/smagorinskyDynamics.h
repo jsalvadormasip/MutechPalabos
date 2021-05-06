@@ -76,7 +76,7 @@ private:
     T omega0;     //< "Laminar" relaxation parameter, used when the strain-rate is zero.
     T cSmago;     //< Smagorinsky constant.
     T preFactor;  //< A factor depending on the Smagorinky constant, used to compute the effective
-                  //viscosity.
+                  // viscosity.
     static int id;
 };
 
@@ -115,7 +115,7 @@ private:
     T omega0;     //< "Laminar" relaxation parameter, used when the strain-rate is zero.
     T cSmago;     //< Smagorinsky constant.
     T preFactor;  //< A factor depending on the Smagorinky constant, used to compute the effective
-                  //viscosity.
+                  // viscosity.
     static int id;
 };
 
@@ -379,7 +379,7 @@ private:
     T omega0;     //< "Laminar" relaxation parameter, used when the strain-rate is zero.
     T cSmago;     //< Smagorinsky constant.
     T preFactor;  //< A factor depending on the Smagorinky constant, used to compute the effective
-                  //viscosity.
+                  // viscosity.
     static int id;
 };
 
@@ -433,7 +433,7 @@ private:
     T omega0;     //< "Laminar" relaxation parameter, used when the strain-rate is zero.
     T cSmago;     //< Smagorinsky constant.
     T preFactor;  //< A factor depending on the Smagorinky constant, used to compute the effective
-                  //viscosity.
+                  // viscosity.
     static int id;
 };
 
@@ -470,7 +470,7 @@ private:
     T omega0;     //< "Laminar" relaxation parameter, used when the strain-rate is zero.
     T cSmago;     //< Smagorinsky constant.
     T preFactor;  //< A factor depending on the Smagorinky constant, used to compute the effective
-                  //viscosity.
+                  // viscosity.
     static int id;
 };
 
@@ -510,7 +510,7 @@ private:
     T omega0;     //< "Laminar" relaxation parameter, used when the strain-rate is zero.
     T cSmago;     //< Smagorinsky constant.
     T preFactor;  //< A factor depending on the Smagorinky constant, used to compute the effective
-                  //viscosity.
+                  // viscosity.
     static int id;
 };
 
@@ -551,7 +551,7 @@ private:
     T omega0;     //< "Laminar" relaxation parameter, used when the strain-rate is zero.
     T cSmago;     //< Smagorinsky constant.
     T preFactor;  //< A factor depending on the Smagorinky constant, used to compute the effective
-                  //viscosity.
+                  // viscosity.
     static int id;
 };
 

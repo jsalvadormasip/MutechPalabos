@@ -67,10 +67,10 @@ int main(int argc, char *argv[])
 
     MultiScalarField3D<T> wave(N + 1, N + 1, N + 1);
 
-    T (*Tsin)
+    T(*Tsin)
     (T) = std::sin;  // Explicit reference to the overloaded "sin" is required for automatic
                      // template instantiation.
-    T (*Tcos)
+    T(*Tcos)
     (T) = std::cos;  // Explicit reference to the overloaded "cos" is required for automatic
                      // template instantiation.
     multiply(*evaluate(Tsin, xCoord), *evaluate(Tcos, yCoord), wave, wave.getBoundingBox());

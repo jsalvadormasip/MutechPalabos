@@ -391,9 +391,8 @@ WaveAbsorptionSigmaFunction2D<T>::WaveAbsorptionSigmaFunction2D(
     Box2D domain_, Array<plint, 4> const &numCells_, T omega_) :
     domain(domain_),
     numCells(numCells_),
-    xi((T)4 / omega_
-       - (T)1.0e-3)  // using (xi < 4/omega) or (xi < 4 * tau) to maintain the stability
-                     // xi = 4/s - epsilon, where epsilon = 0.001
+    xi((T)4 / omega_ - (T)1.0e-3)  // using (xi < 4/omega) or (xi < 4 * tau) to maintain the
+                                   // stability xi = 4/s - epsilon, where epsilon = 0.001
 { }
 
 template <typename T>

@@ -54,7 +54,7 @@ private:
 private:
     T omega0;     //< "Laminar" relaxation parameter, used when the strain-rate is zero.
     T preFactor;  //< A factor depending on the Smagorinky constant, used to compute the effective
-                  //viscosity.
+                  // viscosity.
 };
 
 }  // namespace plb
