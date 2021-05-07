@@ -30,7 +30,7 @@ void writeVtk(MultiBlockLattice3D<T,DESCRIPTOR>& lattice, MultiScalarField3D<pli
 {
     plint startPartIter = simParam.startParticleTime/simParam.dt;
 
-	std::string fileName = createFileName("vtk/voldata", 
+	std::string fileName = createFileName("tmp/vtk/voldata", 
         (simParam.overwriteVtk ? ((iter>=startPartIter && iter<=startPartIter+simParam.outIter+1) ? 0 : 1) : iter), 8);
     VtkImageOutput3D<T> vtkOut(fileName, simParam.dx, simParam.physicalLocation);
 
@@ -53,12 +53,12 @@ void writeVtk(MultiBlockLattice3D<T,DESCRIPTOR>& lattice, MultiScalarField3D<pli
     vtkOut.writeData<float>(*computeDensity(lattice), "densityLB", 1., -simParam.rho_LB);
    
 
-    std::string fileNameClot = createFileName("vtk/voldataClot", 
+    std::string fileNameClot = createFileName("tmp/vtk/voldataClot", 
         (simParam.overwriteVtk ? ((iter>=startPartIter && iter<=startPartIter+simParam.outIter+1) ? 0 : 1) : iter), 8);
     VtkImageOutput3D<plint> clotOut(fileNameClot, simParam.dx, simParam.physicalLocation);
     clotOut.writeData<plint>(clotFlags, "clotFlags");
 
-    std::string fileNameClotSF = createFileName("vtk/voldataSF", 
+    std::string fileNameClotSF = createFileName("tmp/vtk/voldataSF", 
         (simParam.overwriteVtk ? ((iter>=startPartIter && iter<=startPartIter+simParam.outIter+1) ? 0 : 1) : iter), 8);
     VtkImageOutput3D<double> clotOutSF(fileNameClotSF, simParam.dx, simParam.physicalLocation);
     clotOutSF.writeData<double>(clotSolidFraction, "clotSolidFraction (gamma)");

@@ -46,15 +46,21 @@ Open the current folder, namely:
 
 	palabos/examples/showCases/partialBounceBack
 	
-in a terminal. Then, compile using simply:
+in a terminal. 
+Then, compile using cmake:
 
+	mkdir build
+	cd build
+	cmake ..
 	make
-To run the code, you will then have to type:
-	
+To run the code, you will then have to return to the parent directory:
+
+	cd ..
 	./fibrinolysis
 
 for a single-processor execution, or:
 
+	cd ..
 	mpirun -n NCores ./fibrinolysis
 
 for a parallel execution, where *NCores* is the number of available CPU cores you wish to allocate.

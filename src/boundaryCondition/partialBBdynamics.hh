@@ -1,7 +1,7 @@
 #ifndef PARTIAL_BB_DYNAMICS_HH
 #define PARTIAL_BB_DYNAMICS_HH
 
-#include "PartialBBdynamics.h"
+#include "partialBBdynamics.h"
 #include <algorithm>
 #include <limits>
 #include <math.h>
