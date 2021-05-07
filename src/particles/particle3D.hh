@@ -368,12 +368,8 @@ void PointParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor>
         velocity2 *= maxVel;
     }
     if (contained(intPos, sF.getBoundingBox()))
-    {
-        // if (sF.get(intPos.x,intPos.y,intPos.z) > 0.5)
-        //     velocity.resetToZero();//(velocity1+velocity2)*(1.-sF.get(intPos.x,intPos.y,intPos.z))/(T)2 ;
-        // else
-            velocity = (velocity1+velocity2)*(1.-sF.get(intPos.x,intPos.y,intPos.z))/(T)2;
-    }
+		velocity = (velocity1+velocity2)*(1.-sF.get(intPos.x,intPos.y,intPos.z))/(T)2;
+    
     else
         velocity = (velocity1+velocity2)/(T)2 ;
 }
