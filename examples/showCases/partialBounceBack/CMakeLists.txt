@@ -97,7 +97,6 @@ endif()
 
 include_directories("../../../src")
 include_directories("../../../externalLibraries")
-include_directories("../../../externalLibraries/Eigen3")
 
 file(GLOB_RECURSE PALABOS_SRC "../../../src/*.cpp")
 file(GLOB_RECURSE EXT_SRC "../../../externalLibraries/tinyxml/*.cpp")
