@@ -313,21 +313,21 @@ void PointParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor>
     Array<T,3> tmpVel;
     Array<T,3> velocity1; velocity1.resetToZero();
     fluid.get(intPos.x  ,intPos.y  ,intPos.z  ).computeVelocity(tmpVel);
-    velocity1 += ((T)1.-u) * ((T)1.-v) * ((T)1.-w) *tmpVel;// *(1.-sF.get(intPos.x  ,intPos.y  ,intPos.z  ));
+    velocity1 += ((T)1.-u) * ((T)1.-v) * ((T)1.-w) *tmpVel;
     fluid.get(intPos.x  ,intPos.y  ,intPos.z+1).computeVelocity(tmpVel);
-    velocity1 += ((T)1.-u) * ((T)1.-v) * (      w) *tmpVel;// *(1.-sF.get(intPos.x  ,intPos.y  ,intPos.z+1  ));
+    velocity1 += ((T)1.-u) * ((T)1.-v) * (      w) *tmpVel;
     fluid.get(intPos.x  ,intPos.y+1,intPos.z  ).computeVelocity(tmpVel);
-    velocity1 += ((T)1.-u) * (      v) * ((T)1.-w) *tmpVel;// *(1.-sF.get(intPos.x  ,intPos.y+1  ,intPos.z  ));
+    velocity1 += ((T)1.-u) * (      v) * ((T)1.-w) *tmpVel;
     fluid.get(intPos.x  ,intPos.y+1,intPos.z+1).computeVelocity(tmpVel);
-    velocity1 += ((T)1.-u) * (      v) * (      w) *tmpVel;// *(1.-sF.get(intPos.x  ,intPos.y+1  ,intPos.z+1  ));
+    velocity1 += ((T)1.-u) * (      v) * (      w) *tmpVel;
     fluid.get(intPos.x+1,intPos.y  ,intPos.z  ).computeVelocity(tmpVel);
-    velocity1 += (      u) * ((T)1.-v) * ((T)1.-w) *tmpVel;// *(1.-sF.get(intPos.x+1  ,intPos.y  ,intPos.z  ));
+    velocity1 += (      u) * ((T)1.-v) * ((T)1.-w) *tmpVel;
     fluid.get(intPos.x+1,intPos.y  ,intPos.z+1).computeVelocity(tmpVel);
-    velocity1 += (      u) * ((T)1.-v) * (      w) *tmpVel;// *(1.-sF.get(intPos.x+1  ,intPos.y  ,intPos.z+1  ));
+    velocity1 += (      u) * ((T)1.-v) * (      w) *tmpVel;
     fluid.get(intPos.x+1,intPos.y+1,intPos.z  ).computeVelocity(tmpVel);
-    velocity1 += (      u) * (      v) * ((T)1.-w) *tmpVel;// *(1.-sF.get(intPos.x+1  ,intPos.y+1  ,intPos.z  ));
+    velocity1 += (      u) * (      v) * ((T)1.-w) *tmpVel;
     fluid.get(intPos.x+1,intPos.y+1,intPos.z+1).computeVelocity(tmpVel);
-    velocity1 += (      u) * (      v) * (      w) *tmpVel;// *(1.-sF.get(intPos.x  ,intPos.y+1  ,intPos.z+1  ));
+    velocity1 += (      u) * (      v) * (      w) *tmpVel;
 
     velocity1 *= scaling;
 
@@ -345,21 +345,21 @@ void PointParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor>
 
     Array<T,3> velocity2; velocity2.resetToZero();
     fluid.get(intPos.x  ,intPos.y  ,intPos.z  ).computeVelocity(tmpVel);
-    velocity2 += ((T)1.-u) * ((T)1.-v) * ((T)1.-w) *tmpVel;// *(1.-sF.get(intPos.x  ,intPos.y  ,intPos.z  ));
+    velocity2 += ((T)1.-u) * ((T)1.-v) * ((T)1.-w) *tmpVel;
     fluid.get(intPos.x  ,intPos.y  ,intPos.z+1).computeVelocity(tmpVel);
-    velocity2 += ((T)1.-u) * ((T)1.-v) * (      w) *tmpVel;// *(1.-sF.get(intPos.x  ,intPos.y  ,intPos.z+1  ));
+    velocity2 += ((T)1.-u) * ((T)1.-v) * (      w) *tmpVel;
     fluid.get(intPos.x  ,intPos.y+1,intPos.z  ).computeVelocity(tmpVel);
-    velocity2 += ((T)1.-u) * (      v) * ((T)1.-w) *tmpVel;// *(1.-sF.get(intPos.x  ,intPos.y+1  ,intPos.z  ));
+    velocity2 += ((T)1.-u) * (      v) * ((T)1.-w) *tmpVel;
     fluid.get(intPos.x  ,intPos.y+1,intPos.z+1).computeVelocity(tmpVel);
-    velocity2 += ((T)1.-u) * (      v) * (      w) *tmpVel;// *(1.-sF.get(intPos.x  ,intPos.y+1  ,intPos.z+1  ));
+    velocity2 += ((T)1.-u) * (      v) * (      w) *tmpVel;
     fluid.get(intPos.x+1,intPos.y  ,intPos.z  ).computeVelocity(tmpVel);
-    velocity2 += (      u) * ((T)1.-v) * ((T)1.-w) *tmpVel;// *(1.-sF.get(intPos.x+1  ,intPos.y  ,intPos.z  ));
+    velocity2 += (      u) * ((T)1.-v) * ((T)1.-w) *tmpVel;
     fluid.get(intPos.x+1,intPos.y  ,intPos.z+1).computeVelocity(tmpVel);
-    velocity2 += (      u) * ((T)1.-v) * (      w) *tmpVel;// *(1.-sF.get(intPos.x+1  ,intPos.y  ,intPos.z+1  ));
+    velocity2 += (      u) * ((T)1.-v) * (      w) *tmpVel;
     fluid.get(intPos.x+1,intPos.y+1,intPos.z  ).computeVelocity(tmpVel);
-    velocity2 += (      u) * (      v) * ((T)1.-w) *tmpVel;// *(1.-sF.get(intPos.x+1  ,intPos.y+1  ,intPos.z  ));
+    velocity2 += (      u) * (      v) * ((T)1.-w) *tmpVel;
     fluid.get(intPos.x+1,intPos.y+1,intPos.z+1).computeVelocity(tmpVel);
-    velocity2 += (      u) * (      v) * (      w) *tmpVel;// *(1.-sF.get(intPos.x+1  ,intPos.y+1  ,intPos.z+1  ));
+    velocity2 += (      u) * (      v) * (      w) *tmpVel;
     
     velocity2 *= scaling;
 
@@ -561,6 +561,9 @@ template<typename T, template<typename U> class Descriptor>
 void RestParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor>& fluid, T scaling) { }
 
 template<typename T, template<typename U> class Descriptor>
+void RestParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor>& fluid, ScalarField3D<T>& sF, T scaling) { }
+
+template<typename T, template<typename U> class Descriptor>
 void RestParticle3D<T,Descriptor>::advance() { }
 
 template<typename T, template<typename U> class Descriptor>
@@ -689,6 +692,33 @@ void VerletParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor
             tmpVel.resetToZero();
         }
         fluidVelocity += weights[iCell]*tmpVel*scaling;
+    }
+
+    Array<T,3> force( (fluidVelocity-this->get_v()) *fluidCompliance);
+    this->set_a(force / this->get_rho());
+}
+
+template<typename T, template<typename U> class Descriptor>
+void VerletParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor>& fluid, ScalarField3D<T>& sF, T scaling)
+{
+    Array<T,3> position(this->getPosition());
+    std::vector<Dot3D> pos(8);
+    std::vector<T> weights(8);
+    linearInterpolationCoefficients(fluid, position, pos, weights);
+    Array<T,3> tmpVel;
+    Array<T,3> fluidVelocity;
+    fluidVelocity.resetToZero();
+    for (plint iCell=0; iCell<8; ++iCell) {
+        if (contained(pos[iCell].x,pos[iCell].y,pos[iCell].z, fluid.getBoundingBox())) {
+            fluid.get(pos[iCell].x,pos[iCell].y,pos[iCell].z).computeVelocity(tmpVel);
+        }
+        else {
+            tmpVel.resetToZero();
+        }
+        if (contained(pos, sF.getBoundingBox()))
+			fluidVelocity += weights[iCell]*tmpVel*scaling*(1.-sF.get(intPos.x,intPos.y,intPos.z));
+		else
+		    fluidVelocity += weights[iCell]*tmpVel*scaling;
     }
 
     Array<T,3> force( (fluidVelocity-this->get_v()) *fluidCompliance);
