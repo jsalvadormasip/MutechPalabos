@@ -708,6 +708,7 @@ void VerletParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor
     Array<T,3> tmpVel;
     Array<T,3> fluidVelocity;
     fluidVelocity.resetToZero();
+    Dot3D intPos( (plint)position1[0], (plint)position1[1], (plint)position1[2] );
     for (plint iCell=0; iCell<8; ++iCell) {
         if (contained(pos[iCell].x,pos[iCell].y,pos[iCell].z, fluid.getBoundingBox())) {
             fluid.get(pos[iCell].x,pos[iCell].y,pos[iCell].z).computeVelocity(tmpVel);
@@ -715,8 +716,8 @@ void VerletParticle3D<T,Descriptor>::fluidToParticle(BlockLattice3D<T,Descriptor
         else {
             tmpVel.resetToZero();
         }
-        if (contained(pos, sF.getBoundingBox()))
-			fluidVelocity += weights[iCell]*tmpVel*scaling*(1.-sF.get((plint)position[0],(plint)position[1],(plint)position[2]));
+        if (contained(intPos, sF.getBoundingBox()))
+			fluidVelocity += weights[iCell]*tmpVel*scaling*(1.-sF.get(intPos.x, intPos.y, intPos.z));
 		else
 		    fluidVelocity += weights[iCell]*tmpVel*scaling;
     }
