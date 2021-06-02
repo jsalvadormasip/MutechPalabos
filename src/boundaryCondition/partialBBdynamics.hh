@@ -56,17 +56,6 @@ void PartialBBdynamics<T,Descriptor>::collide (
     }
 }
 
-template<typename T, template<typename U> class Descriptor>
-void PartialBBdynamics<T,Descriptor>::collideExternal (
-        Cell<T,Descriptor>& cell, T rhoBar,
-        Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat )
-{
-    T uSqr = dynamicsTemplates<T,Descriptor>::bgk_ma2_collision(cell, rhoBar, j, this->getOmega());
-    if (cell.takesStatistics()) {
-        gatherStatistics(stat, rhoBar, uSqr);
-    }
-}
-
 
 template<typename T, template<typename U> class Descriptor>
 void PartialBBdynamics<T,Descriptor>::decomposeOrder0 (
