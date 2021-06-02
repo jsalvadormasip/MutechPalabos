@@ -56,6 +56,13 @@ void PartialBBdynamics<T,Descriptor>::collide (
     }
 }
 
+template<typename T, template<typename U> class Descriptor>
+T PartialBBdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
+                                                T jSqr, T thetaBar) const
+{
+    T invRho = Descriptor<T>::invRho(rhoBar);
+    return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
+}
 
 template<typename T, template<typename U> class Descriptor>
 void PartialBBdynamics<T,Descriptor>::decomposeOrder0 (
