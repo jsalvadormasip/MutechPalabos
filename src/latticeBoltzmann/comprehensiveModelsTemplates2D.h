@@ -110,7 +110,7 @@ static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& r
     }
 };
 
-static void RMcomputeEquilibriumMoments(T rho, Array<T,D::d> const& u, Array<T, D::q>& RMeq) {
+static void RMcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& RMeq) {
     // Order 0
     RMeq[M00] = 1.;
 
@@ -170,14 +170,19 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega1 = omega[0];
     T omega2 = omega[1];
     T omega3 = omega[2];
-    T omega4 = omega[3];  
+    T omega4 = omega[3];
+    T omegaBulk = omega[4];
+    T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
+    T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei  
 
     // Post-collision moments.
     Array<T,D::q> RMcoll;
 
     // Order 2
-    RMcoll[M20] = (1.-omega1) * RM[M20] + omega1 * RMeq[M20] ;
-    RMcoll[M02] = (1.-omega1) * RM[M02] + omega1 * RMeq[M02] ;   
+/*    RMcoll[M20] = (1.-omega1) * RM[M20] + omega1 * RMeq[M20] ;
+    RMcoll[M02] = (1.-omega1) * RM[M02] + omega1 * RMeq[M02] ;*/
+    RMcoll[M20] = RM[M20] - omegaPlus  * (RM[M20]-RMeq[M20]) - omegaMinus * (RM[M02]-RMeq[M02]);
+    RMcoll[M02] = RM[M02] - omegaMinus * (RM[M20]-RMeq[M20]) - omegaPlus  * (RM[M02]-RMeq[M02]);    
 
     RMcoll[M11] = (1.-omega2) * RM[M11] + omega2 * RMeq[M11] ;
 
@@ -256,7 +261,7 @@ static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& r
 };
 
 
-static void HMcomputeEquilibriumMoments(T rho, Array<T,D::d> const& u, Array<T, D::q>& HMeq) {
+static void HMcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& HMeq) {
 
     // Order 0
     HMeq[M00] = 1.;
@@ -320,6 +325,9 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+    T omegaBulk = omega[4];
+    T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
+    T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
 
     T cs4 = D::cs2 * D::cs2;
 
@@ -329,8 +337,10 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
     // Collision in the Hermite moment space
     // Order 2
-    HMcoll[M20] = (1.-omega1) * HM[M20] + omega1 * HMeq[M20] ;
-    HMcoll[M02] = (1.-omega1) * HM[M02] + omega1 * HMeq[M02] ;   
+/*    HMcoll[M20] = (1.-omega1) * HM[M20] + omega1 * HMeq[M20] ;
+    HMcoll[M02] = (1.-omega1) * HM[M02] + omega1 * HMeq[M02] ;*/
+    HMcoll[M20] = HM[M20] - omegaPlus  * (HM[M20]-HMeq[M20]) - omegaMinus * (HM[M02]-HMeq[M02]);
+    HMcoll[M02] = HM[M02] - omegaMinus * (HM[M20]-HMeq[M20]) - omegaPlus  * (HM[M02]-HMeq[M02]);    
     
     HMcoll[M11] = (1.-omega2) * HM[M11] + omega2 * HMeq[M11] ;
 
@@ -490,6 +500,9 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+    T omegaBulk = omega[4];
+    T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
+    T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
 
     T ux2 = u[0]*u[0];
     T uy2 = u[1]*u[1];
@@ -500,9 +513,10 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
     // Collision in the central moment space
     // Order 2
-    CMcoll[M20] = (1.-omega1) * CM[M20] + omega1 * CMeq[M20] ;
-    CMcoll[M02] = (1.-omega1) * CM[M02] + omega1 * CMeq[M02] ;
-    
+/*    CMcoll[M20] = (1.-omega1) * CM[M20] + omega1 * CMeq[M20] ;
+    CMcoll[M02] = (1.-omega1) * CM[M02] + omega1 * CMeq[M02] ;*/
+    CMcoll[M20] = CM[M20] - omegaPlus  * (CM[M20]-CMeq[M20]) - omegaMinus * (CM[M02]-CMeq[M02]);
+    CMcoll[M02] = CM[M02] - omegaMinus * (CM[M20]-CMeq[M20]) - omegaPlus  * (CM[M02]-CMeq[M02]);    
     
     CMcoll[M11] = (1.-omega2) * CM[M11] + omega2 * CMeq[M11] ;
 
@@ -681,6 +695,9 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+    T omegaBulk = omega[4];
+    T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
+    T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
 
     T ux2 = u[0]*u[0];
     T uy2 = u[1]*u[1];
@@ -693,8 +710,10 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
     // Collision in the Hermite moment space
     // Order 2
-    CHMcoll[M20] = (1.-omega1) * CHM[M20] + omega1 * CHMeq[M20] ;
-    CHMcoll[M02] = (1.-omega1) * CHM[M02] + omega1 * CHMeq[M02] ;    
+/*    CHMcoll[M20] = (1.-omega1) * CHM[M20] + omega1 * CHMeq[M20] ;
+    CHMcoll[M02] = (1.-omega1) * CHM[M02] + omega1 * CHMeq[M02] ;*/
+    CHMcoll[M20] = CHM[M20] - omegaPlus  * (CHM[M20]-CHMeq[M20]) - omegaMinus * (CHM[M02]-CHMeq[M02]);
+    CHMcoll[M02] = CHM[M02] - omegaMinus * (CHM[M20]-CHMeq[M20]) - omegaPlus  * (CHM[M02]-CHMeq[M02]);    
     
     CHMcoll[M11] = (1.-omega2) * CHM[M11] + omega2 * CHMeq[M11] ;
 
@@ -803,9 +822,9 @@ static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho
     }
 
     // Computation of cumulants through central moments
-    K[M00] = CM[M00];// Named K for convenience but it is not the 0th-order cumulant !
-    K[M10] = CM[M10];// Named K for convenience but it is not the 1st-order cumulant !
-    K[M01] = CM[M01];// Named K for convenience but it is not the 1st-order cumulant !
+    K[M00] = CM[M00];
+    K[M10] = CM[M10] + u[0];
+    K[M01] = CM[M01] + u[1];
     K[M20] = CM[M20];
     K[M02] = CM[M02];
     K[M11] = CM[M11];
@@ -814,13 +833,13 @@ static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho
     K[M22] = CM[M22] - CM[M20]*CM[M02] - 2.*CM[M11]*CM[M11];
 }
 
-static void KcomputeEquilibriumMoments(Array<T, D::q>& Keq) {
+static void KcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& Keq) {
     // Order 0
-    Keq[M00] = 1.; // Named Keq for convenience but it is not the 0th-order cumulant !
+    Keq[M00] = 1.; 
 
     // Order 1
-    Keq[M10] = 0.; // Named Keq for convenience but it is not the 1st-order cumulant !
-    Keq[M01] = 0.; // Named Keq for convenience but it is not the 1st-order cumulant !
+    Keq[M10] = u[0]; 
+    Keq[M01] = u[1]; 
 
     // Order 2
     Keq[M20] = D::cs2;
@@ -889,6 +908,9 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+    T omegaBulk = omega[4];
+    T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
+    T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
 
     T ux2 = u[0]*u[0];
     T uy2 = u[1]*u[1];
@@ -900,8 +922,10 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
     // Collision in the cumulant space
     // Order 2
-    Kcoll[M20] = (1.-omega1) * K[M20] + omega1 * Keq[M20] ;
-    Kcoll[M02] = (1.-omega1) * K[M02] + omega1 * Keq[M02] ; 
+/*    Kcoll[M20] = (1.-omega1) * K[M20] + omega1 * Keq[M20] ;
+    Kcoll[M02] = (1.-omega1) * K[M02] + omega1 * Keq[M02] ;*/
+    Kcoll[M20] = K[M20] - omegaPlus  * (K[M20]-Keq[M20]) - omegaMinus * (K[M02]-Keq[M02]);
+    Kcoll[M02] = K[M02] - omegaMinus * (K[M20]-Keq[M20]) - omegaPlus  * (K[M02]-Keq[M02]);    
     
     Kcoll[M11] = (1.-omega2) * K[M11] + omega2 * Keq[M11] ;
 
@@ -1003,7 +1027,7 @@ static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& r
     }
 };
 
-static void GHcomputeEquilibriumMoments(T rho, Array<T,D::d> const& u, Array<T, D::q>& GHeq) {
+static void GHcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& GHeq) {
 
     // Order 0
     GHeq[M00] = 1.;
@@ -1055,14 +1079,19 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+    T omegaBulk = omega[4];
+    T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
+    T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
 
     // Post-collision moments.
     Array<T,D::q> GHcoll;
 
     // Collision in the Hermite moment space
     // Order 2
-    GHcoll[M20] = (1.-omega1) * GH[M20] + omega1 * GHeq[M20] ;
-    GHcoll[M02] = (1.-omega1) * GH[M02] + omega1 * GHeq[M02] ;  
+/*    GHcoll[M20] = (1.-omega1) * GH[M20] + omega1 * GHeq[M20] ;
+    GHcoll[M02] = (1.-omega1) * GH[M02] + omega1 * GHeq[M02] ;*/
+    GHcoll[M20] = GH[M20] - omegaPlus  * (GH[M20]-GHeq[M20]) - omegaMinus * (GH[M02]-GHeq[M02]);
+    GHcoll[M02] = GH[M02] - omegaMinus * (GH[M20]-GHeq[M20]) - omegaPlus  * (GH[M02]-GHeq[M02]);    
     
     GHcoll[M11] = (1.-omega2) * GH[M11] + omega2 * GHeq[M11] ;
 
@@ -1145,7 +1174,7 @@ static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& r
     }
 };
 
-static void RRcomputeEquilibriumMoments(T rho, Array<T,D::d> const& u, Array<T, D::q>& RReq) {
+static void RRcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& RReq) {
 
     // Order 0
     RReq[M00] = 1.;
@@ -1197,6 +1226,9 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+    T omegaBulk = omega[4];
+    T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
+    T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
 
     // Post-collision and Nonequilibrium moments.
     Array<T,D::q> RRneq;
@@ -1216,8 +1248,10 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
     // Collision in the Hermite moment space
     // Order 2
-    RRcoll[M20] = (1.-omega1) * RRneq[M20] + RReq[M20] ;
-    RRcoll[M02] = (1.-omega1) * RRneq[M02] + RReq[M02] ;
+/*    RRcoll[M20] = (1.-omega1) * RR[M20] + omega1 * RReq[M20] ;
+    RRcoll[M02] = (1.-omega1) * RR[M02] + omega1 * RReq[M02] ;*/
+    RRcoll[M20] = RR[M20] - omegaPlus  * RRneq[M20] - omegaMinus * RRneq[M02];
+    RRcoll[M02] = RR[M02] - omegaMinus * RRneq[M20] - omegaPlus  * RRneq[M02]; 
 
     RRcoll[M11] = (1.-omega2) * RRneq[M11] + RReq[M11] ;
 
