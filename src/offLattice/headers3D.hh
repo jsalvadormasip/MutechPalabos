@@ -52,6 +52,7 @@
 #include "offLattice/offLatticeModel3D.hh"
 #include "offLattice/guoOffLatticeModel3D.hh"
 #include "offLattice/bouzidiOffLatticeModel3D.hh"
+#include "offLattice/CLIoffLatticeModel3D.hh"
 #include "offLattice/guoAdvDiffOffLatticeModel3D.hh"
 #include "offLattice/triangleSetGenerator.hh"
 #include "offLattice/immersedWalls3D.hh"
