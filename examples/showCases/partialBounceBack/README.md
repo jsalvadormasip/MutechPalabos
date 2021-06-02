@@ -9,7 +9,14 @@
 
 # The Partially Saturated Method
 
-This exercise guides you through an example of implementation of the *Partially Saturated Method* or *Partial Bounce-Back* (PBB). In brief, this method consists of simulating voxels that block part of the incoming *populations*. This blocking fraction is commonly called the *solid fraction*.
+This example guides you through an implementation of the *Partially Saturated Method* or *Partial Bounce-Back* (PBB). In brief, this method consists of simulating voxels that block part of the incoming *populations*. This blocking fraction is commonly called the *solid fraction*.
+The problem simulates the breakdown of a fibrin thrombus. We simulate a Poiseuille flow driven by a pressure drop, inside a cylinder representing an artery. The thrombus, is a porous medium represented with partially saturated voxels, using the PBB method.
+<center>
+<br/>
+<img alt="System" src="./img/ClotModel.png" title="Lysis of a thrombus"/>
+<br/>
+</center>
+
 The method implemented is the one given by Walsh et al. ([https://doi.org/10.1016/j.cageo.2008.05.004](https://doi.org/10.1016/j.cageo.2008.05.004)), and which can be summarized in the following way: 
 
 ```math
@@ -65,3 +72,4 @@ for a single-processor execution, or:
 
 for a parallel execution, where *NCores* is the number of available CPU cores you wish to allocate.
 
+The clot geometry and composition is specified in the file *clot_0.0003.txt*. Each block of numbers represent a slice along the longitudinal (Z-)axis of the clot. A number represents the clot solid fraction in the voxel of the corresponding position. In the file provided, the solid fraction is 0.0003 everywhere, creating a homogeneous fibrin clot.

@@ -67,13 +67,6 @@ void PartialBBdynamics<T,Descriptor>::collideExternal (
     }
 }
 
-template<typename T, template<typename U> class Descriptor>
-T PartialBBdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
-                                                T jSqr, T thetaBar) const
-{
-    T invRho = Descriptor<T>::invRho(rhoBar);
-    return dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
-}
 
 template<typename T, template<typename U> class Descriptor>
 void PartialBBdynamics<T,Descriptor>::decomposeOrder0 (
@@ -135,9 +128,9 @@ T PartialBBdynamics<T,Descriptor>::PSMCollision (
     //const T jSqrWall = VectorTemplate<T,Descriptor>::normSqr(fullRho*wallVelocity);
     
     // recover populations for solid collision
-    Array<T,Descriptor<T>::q> f_tmp;
+    Array<T,Descriptor<T>::q> fTmp;
     for (plint iPop=0; iPop<Descriptor<T>::q; ++iPop) {
-        f_tmp[iPop] = cell[iPop];
+        fTmp[iPop] = cell[iPop];
     }
     
     // Weighting parameter for collision (fluid or solid) (see Krueger, Partially Saturated BB chapter)
@@ -145,7 +138,7 @@ T PartialBBdynamics<T,Descriptor>::PSMCollision (
     
     for (plint iPop=0; iPop < Descriptor<T>::q; ++iPop) {
 
-        plint iPop_opp = indexTemplates::opposite<Descriptor<T>>(iPop);
+        plint iPopOpp = indexTemplates::opposite<Descriptor<T>>(iPop);
 
         // ------------- Krueger method with B = sF------------
         // // Fluid collision
@@ -155,17 +148,17 @@ T PartialBBdynamics<T,Descriptor>::PSMCollision (
         // cell[iPop] += omega*(T(1)-B)*dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr); 
         
         // // Solid collision
-        // cell[iPop] += B*(f_tmp[iPop_opp] - dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop_opp,rhoBar, invRho, j, jSqr));
-        // cell[iPop] -= B*(f_tmp[iPop] - dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop,rhoBar, invRho, fullRho*wallVelocity, jSqrWall));
+        // cell[iPop] += B*(fTmp[iPopOpp] - dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPopOpp,rhoBar, invRho, j, jSqr));
+        // cell[iPop] -= B*(fTmp[iPop] - dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop,rhoBar, invRho, fullRho*wallVelocity, jSqrWall));
 
         // ----------- Walsh method "a new pbb model" eq 8 ------------------------
         // Notation : code = Krueger = Walsh
-        // f_tmp[iPop] = f_i(x,t) = f^in_a(x,t)
+        // fTmp[iPop] = f_i(x,t) = f^in_a(x,t)
         // cell[iPop] = f_i (x+c_i*dt, t+dt)
         // bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr) = f_i eq(x,t) = feq(x,t)
-        // f_tmp[iPop] + omega*(-f_tmp[iPop]+bgk_ma2_equi)  = | f_i(x,t) + (-f_i(x,t)+feq_i(x,t))/tau = f_i*(x,t) | = f^c_a (x,t) : f just after fluid collision
+        // fTmp[iPop] + omega*(-fTmp[iPop]+bgk_ma2_equi)  = | f_i(x,t) + (-f_i(x,t)+feq_i(x,t))/tau = f_i*(x,t) | = f^c_a (x,t) : f just after fluid collision
 	
-        cell[iPop] = (T(1.)-B)*(cell[iPop]*(1.-omega)+ omega*dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr)) + B*f_tmp[iPop_opp];
+        cell[iPop] = (T(1.)-B)*(cell[iPop]*(1.-omega)+ omega*dynamicsTemplates<T,Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr)) + B*fTmp[iPopOpp];
 
 
     }

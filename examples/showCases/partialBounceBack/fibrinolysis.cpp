@@ -138,7 +138,7 @@ private:
 };
 
 template<typename T, template<typename U> class Descriptor, int direction, int orientation>
-class myFluidPressureOutlet3D : public BoxProcessingFunctional3D_L<T,Descriptor>
+class MyFluidPressureOutlet3D : public BoxProcessingFunctional3D_L<T,Descriptor>
 {
 public:
     virtual void process(Box3D domain, BlockLattice3D<T,Descriptor>& lattice) {
@@ -173,8 +173,8 @@ public:
             }
         }
     }
-    virtual myFluidPressureOutlet3D<T,Descriptor,direction,orientation>* clone() const {
-        return new myFluidPressureOutlet3D<T,Descriptor,direction,orientation>(*this);
+    virtual MyFluidPressureOutlet3D<T,Descriptor,direction,orientation>* clone() const {
+        return new MyFluidPressureOutlet3D<T,Descriptor,direction,orientation>(*this);
     }
     virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const {
         modified[0] = modif::staticVariables;
@@ -465,7 +465,7 @@ int main(int argc, char* argv[])
         
         // here, one could adapt the BCs based on the evolution of the lysis
         Box3D outlet(0,simParam.nx-1, 0,simParam.ny-1, simParam.nz-1,simParam.nz-1);
-        applyProcessingFunctional(new myFluidPressureOutlet3D<T,DESCRIPTOR,2,1>(), outlet, *lattice);
+        applyProcessingFunctional(new MyFluidPressureOutlet3D<T,DESCRIPTOR,2,1>(), outlet, *lattice);
         Box3D inlet(0,simParam.nx-1, 0,simParam.ny-1, 0,0);
         applyProcessingFunctional(new FluidPressureInlet3D<T,DESCRIPTOR,2,-1>(*simParam.rhoWK_t_in), inlet, *lattice);
         
