@@ -73,7 +73,44 @@ enum {
     M22 = 8,
 };
 
-// General way to compute RMs
+// // General way to compute RMs
+// static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& rho) {
+
+//     Array<T, D::q> f;
+//     for (int i = 0; i<D::q; ++i) {
+//         RM[i] = 0.;
+//         f[i] = cell[i] + D::t[i];
+//     }
+
+//     for (int i = 0; i<D::q; ++i) {
+//         // Order 0
+//         RM[M00] += f[i];
+
+//         // Order 1
+//         RM[M10] += D::c[i][0] * f[i];
+//         RM[M01] += D::c[i][1] * f[i];
+
+//         // Order 2
+//         RM[M20] += D::c[i][0] * D::c[i][0] * f[i];
+//         RM[M02] += D::c[i][1] * D::c[i][1] * f[i];
+//         RM[M11] += D::c[i][0] * D::c[i][1] * f[i];
+
+//         // Order 3
+//         RM[M21] += D::c[i][0] * D::c[i][0] * D::c[i][1] * f[i];
+//         RM[M12] += D::c[i][0] * D::c[i][1] * D::c[i][1] * f[i];
+
+//         // Order 4
+//         RM[M22] += D::c[i][0] * D::c[i][0] * D::c[i][1] * D::c[i][1] * f[i];
+//     }
+
+//     rho = RM[M00];
+//     T invRho = 1. / rho;
+//     for (int i = 0; i<D::q; ++i) {
+//         RM[i] *= invRho;
+//     }
+// };
+
+// Optimized way to compute RMs
 static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& rho) {
 
     Array<T, D::q> f;
@@ -82,26 +119,31 @@ static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& r
         f[i] = cell[i] + D::t[i];
     }
 
-    for (int i = 0; i<D::q; ++i) {
-        // Order 0
-        RM[M00] += f[i];
+    double X_M1 = f[1] + f[2] + f[3];
+    double X_P1 = f[5] + f[6] + f[7];
+    double X_0  = f[0] + f[4] + f[8];
 
-        // Order 1
-        RM[M10] += D::c[i][0] * f[i];
-        RM[M01] += D::c[i][1] * f[i];
+    double Y_M1 = f[3] + f[4] + f[5];
+    double Y_P1 = f[1] + f[7] + f[8];
 
-        // Order 2
-        RM[M20] += D::c[i][0] * D::c[i][0] * f[i];
-        RM[M02] += D::c[i][1] * D::c[i][1] * f[i];
-        RM[M11] += D::c[i][0] * D::c[i][1] * f[i];
-
-        // Order 3
-        RM[M21] += D::c[i][0] * D::c[i][0] * D::c[i][1] * f[i];
-        RM[M12] += D::c[i][0] * D::c[i][1] * D::c[i][1] * f[i];
-
-        // Order 4
-        RM[M22] += D::c[i][0] * D::c[i][0] * D::c[i][1] * D::c[i][1] * f[i];
-    }
+    // Order 0
+    RM[M00] = X_M1 + X_P1 + X_0;
+    
+    // Order 1
+    RM[M10] = X_P1 - X_M1;
+    RM[M01] = Y_P1 - Y_M1;
+    
+    // Order 2
+    RM[M20] = X_P1 + X_M1;
+    RM[M02] = Y_P1 + Y_M1;
+    RM[M11] = - f[1] + f[3] - f[5] + f[7];
+    
+    // Order 3
+    RM[M21] =   f[1] - f[3] - f[5] + f[7];
+    RM[M12] = - f[1] - f[3] + f[5] + f[7];
+    
+    // Order 4
+    RM[M22] =   f[1] + f[3] + f[5] + f[7];
 
     rho = RM[M00];
     T invRho = 1. / rho;
@@ -216,7 +258,51 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-// General way to compute HMs
+// // General way to compute HMs
+// static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& rho) {
+
+//     Array<T, D::q> f;
+//     for (int i = 0; i<D::q; ++i) {
+//         HM[i] = 0.;
+//         f[i] = cell[i] + D::t[i];
+//     }
+
+//     T Hxx = 0.;
+//     T Hyy = 0.;
+
+//     for (int i = 0; i<D::q; ++i) {
+
+//         Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
+//         Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
+
+//         // Order 0
+//         HM[M00] += f[i];
+
+//         // Order 1
+//         HM[M10] += D::c[i][0] * f[i];
+//         HM[M01] += D::c[i][1] * f[i];
+
+//         // Order 2
+//         HM[M20] += Hxx * f[i];
+//         HM[M02] += Hyy * f[i];
+//         HM[M11] += D::c[i][0] * D::c[i][1] * f[i];
+
+//         // Order 3
+//         HM[M21] += Hxx * D::c[i][1] * f[i];
+//         HM[M12] += D::c[i][0] * Hyy * f[i];
+
+//         // Order 4
+//         HM[M22] += Hxx * Hyy * f[i];
+//     }
+
+//     rho = HM[M00];
+//     T invRho = 1. / rho;
+//     for (int i = 0; i<D::q; ++i) {
+//         HM[i] *= invRho;
+//     }
+// };
+
+// Optimized way to compute HMs
 static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& rho) {
 
     Array<T, D::q> f;
@@ -225,41 +311,48 @@ static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& r
         f[i] = cell[i] + D::t[i];
     }
 
-    T Hxx = 0.;
-    T Hyy = 0.;
+    double X_M1 = f[1] + f[2] + f[3];
+    double X_P1 = f[5] + f[6] + f[7];
+    double X_0  = f[0] + f[4] + f[8];
 
-    for (int i = 0; i<D::q; ++i) {
+    double Y_M1 = f[3] + f[4] + f[5];
+    double Y_P1 = f[1] + f[7] + f[8];
 
-        Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
-        Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
-
-        // Order 0
-        HM[M00] += f[i];
-
-        // Order 1
-        HM[M10] += D::c[i][0] * f[i];
-        HM[M01] += D::c[i][1] * f[i];
-
-        // Order 2
-        HM[M20] += Hxx * f[i];
-        HM[M02] += Hyy * f[i];
-        HM[M11] += D::c[i][0] * D::c[i][1] * f[i];
-
-        // Order 3
-        HM[M21] += Hxx * D::c[i][1] * f[i];
-        HM[M12] += D::c[i][0] * Hyy * f[i];
-
-        // Order 4
-        HM[M22] += Hxx * Hyy * f[i];
-    }
+    // Order 0
+    HM[M00] = X_M1 + X_P1 + X_0;
+    
+    // Order 1
+    HM[M10] = X_P1 - X_M1;
+    HM[M01] = Y_P1 - Y_M1;
+    
+    // Order 2
+    HM[M20] = X_P1 + X_M1;
+    HM[M02] = Y_P1 + Y_M1;
+    HM[M11] = - f[1] + f[3] - f[5] + f[7];
+    
+    // Order 3
+    HM[M21] =   f[1] - f[3] - f[5] + f[7];
+    HM[M12] = - f[1] - f[3] + f[5] + f[7];
+    
+    // Order 4
+    HM[M22] =   f[1] + f[3] + f[5] + f[7];
 
     rho = HM[M00];
     T invRho = 1. / rho;
     for (int i = 0; i<D::q; ++i) {
         HM[i] *= invRho;
     }
-};
 
+    // We come back to Hermite moments
+    T cs4 = D::cs2*D::cs2;
+    HM[M20] -= D::cs2;
+    HM[M02] -= D::cs2;
+
+    HM[M21] -= D::cs2 * HM[M01];
+    HM[M12] -= D::cs2 * HM[M10];
+
+    HM[M22] -= (D::cs2*(HM[M20] + HM[M02]) + cs4);
+};
 
 static void HMcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& HMeq) {
 
@@ -388,52 +481,109 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-// General way to compute CMs (computations of velocity components are based on Palabos ordering of discrete velocities !)
+// // General way to compute CMs (computations of velocity components are based on Palabos ordering of discrete velocities !)
+// static void CMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CM, T& rho, Array<T,D::d>& u) {
+
+//     Array<T, D::q> f;
+//     for (int i = 0; i<D::q; ++i) {
+//         f[i] = cell[i] + D::t[i];
+//         CM[i] = 0.;
+//     }
+
+//     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
+//     CM[M00] = 1.0;
+//     T invRho = 1./rho;
+
+//     u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
+//     u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
+
+//     T cMux = 0.;
+//     T cMuy = 0.;
+
+//     for (int i = 0; i<D::q; ++i) {
+
+//         cMux = D::c[i][0]- u[0];
+//         cMuy = D::c[i][1]- u[1];
+
+//         // Order 1
+//         CM[M10] += cMux * f[i];
+//         CM[M01] += cMuy * f[i];
+
+//         // Order 2
+//         CM[M20] += cMux * cMux * f[i];
+//         CM[M02] += cMuy * cMuy * f[i];
+//         CM[M11] += cMux * cMuy * f[i];
+
+
+//         // Order 3
+//         CM[M21] += cMux * cMux * cMuy * f[i];
+//         CM[M12] += cMux * cMuy * cMuy * f[i];
+
+//         // Order 4
+//         CM[M22] += cMux * cMux * cMuy * cMuy * f[i];
+//     }
+
+//     for (int i = 1; i<D::q; ++i) {
+//         CM[i] *= invRho;
+//     }
+// }
+
+// Optimized way to compute CMs
 static void CMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CM, T& rho, Array<T,D::d>& u) {
 
     Array<T, D::q> f;
     for (int i = 0; i<D::q; ++i) {
-        f[i] = cell[i] + D::t[i];
         CM[i] = 0.;
+        f[i] = cell[i] + D::t[i];
     }
 
-    rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
-    CM[M00] = 1.0;
-    T invRho = 1./rho;
+    double X_M1 = f[1] + f[2] + f[3];
+    double X_P1 = f[5] + f[6] + f[7];
+    double X_0  = f[0] + f[4] + f[8];
 
-    u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
-    u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
+    double Y_M1 = f[3] + f[4] + f[5];
+    double Y_P1 = f[1] + f[7] + f[8];
 
-    T cMux = 0.;
-    T cMuy = 0.;
+    // Order 0
+    CM[M00] = X_M1 + X_P1 + X_0;
+    
+    // Order 1
+    CM[M10] = 0.;
+    CM[M01] = 0.;
+    
+    // Order 2
+    CM[M20] = X_P1 + X_M1;
+    CM[M02] = Y_P1 + Y_M1;
+    CM[M11] = - f[1] + f[3] - f[5] + f[7];
+    
+    // Order 3
+    CM[M21] =   f[1] - f[3] - f[5] + f[7];
+    CM[M12] = - f[1] - f[3] + f[5] + f[7];
+    
+    // Order 4
+    CM[M22] =   f[1] + f[3] + f[5] + f[7];
 
+    rho = CM[M00];
+    T invRho = 1. / rho;
     for (int i = 0; i<D::q; ++i) {
-
-        cMux = D::c[i][0]- u[0];
-        cMuy = D::c[i][1]- u[1];
-
-        // Order 1
-        CM[M10] += cMux * f[i];
-        CM[M01] += cMuy * f[i];
-
-        // Order 2
-        CM[M20] += cMux * cMux * f[i];
-        CM[M02] += cMuy * cMuy * f[i];
-        CM[M11] += cMux * cMuy * f[i];
-
-
-        // Order 3
-        CM[M21] += cMux * cMux * cMuy * f[i];
-        CM[M12] += cMux * cMuy * cMuy * f[i];
-
-        // Order 4
-        CM[M22] += cMux * cMux * cMuy * cMuy * f[i];
-    }
-
-    for (int i = 1; i<D::q; ++i) {
         CM[i] *= invRho;
     }
-}
+
+    // Compute CMs from RMs using binomial formulas
+    u[0] = invRho * (X_P1 - X_M1);
+    u[1] = invRho * (Y_P1 - Y_M1);
+    T ux2  = u[0]*u[0];
+    T uy2  = u[1]*u[1];
+
+    CM[M20] -= (ux2);
+    CM[M02] -= (uy2);
+    CM[M11] -= (u[0]*u[1]);
+
+    CM[M21] -= (u[1]*CM[M20] + 2.*u[0]*CM[M11] + ux2*u[1]);
+    CM[M12] -= (u[0]*CM[M02] + 2.*u[1]*CM[M11] + u[0]*uy2);
+
+    CM[M22] -= (2.*u[1]*CM[M21] + 2.*u[0]*CM[M12] + uy2*CM[M20] + ux2*CM[M02] + 4.*u[0]*u[1]*CM[M11] + ux2*uy2);
+};
 
 static void CMcomputeEquilibriumMoments(Array<T, D::q>& CMeq) {
 
@@ -563,58 +713,123 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 // Central Hermite Moments Formalism (Equilibrium is computed through raw moments formalism) //
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-// General way to compute CHMs (computations of velocity components are based on Palabos ordering of discrete velocities !)
+// // General way to compute CHMs (computations of velocity components are based on Palabos ordering of discrete velocities !)
+// static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T& rho, Array<T,D::d>& u) {
+
+//     Array<T, D::q> f;
+//     for (int i = 0; i<D::q; ++i) {
+//         f[i] = cell[i] + D::t[i];
+//         CHM[i] = 0.;
+//     }
+
+//     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
+//     CHM[M00] = 1.0;
+//     T invRho = 1./rho;
+//     u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
+//     u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
+
+//     T cMux = 0.;
+//     T cMuy = 0.;
+//     T Hxx = 0.;
+//     T Hyy = 0.;
+
+//     for (int i = 0; i<D::q; ++i) {
+
+//         cMux = D::c[i][0] - u[0];
+//         cMuy = D::c[i][1] - u[1];
+
+//         Hxx = cMux * cMux - D::cs2;
+//         Hyy = cMuy * cMuy - D::cs2;
+
+//         // // Order 0
+//         // CHM[M000] += f[i];
+
+//         // Order 1
+//         CHM[M10] += cMux * f[i];
+//         CHM[M01] += cMuy * f[i];
+
+//         // Order 2
+//         CHM[M20] += Hxx * f[i];
+//         CHM[M02] += Hyy * f[i];
+//         CHM[M11] += cMux * cMuy * f[i];
+
+//         // Order 3
+//         CHM[M21] += Hxx * cMuy * f[i];
+//         CHM[M12] += cMux * Hyy * f[i];
+
+//         // Order 4
+//         CHM[M22] += Hxx * Hyy * f[i];
+//     }
+
+//     for (int i = 1; i<D::q; ++i) {
+//         CHM[i] *= invRho;
+//     }
+// }
+
+// Optimized way to compute CHMs
 static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T& rho, Array<T,D::d>& u) {
 
     Array<T, D::q> f;
     for (int i = 0; i<D::q; ++i) {
-        f[i] = cell[i] + D::t[i];
         CHM[i] = 0.;
+        f[i] = cell[i] + D::t[i];
     }
 
-    rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
-    CHM[M00] = 1.0;
-    T invRho = 1./rho;
-    u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
-    u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
+    double X_M1 = f[1] + f[2] + f[3];
+    double X_P1 = f[5] + f[6] + f[7];
+    double X_0  = f[0] + f[4] + f[8];
 
-    T cMux = 0.;
-    T cMuy = 0.;
-    T Hxx = 0.;
-    T Hyy = 0.;
+    double Y_M1 = f[3] + f[4] + f[5];
+    double Y_P1 = f[1] + f[7] + f[8];
 
+    // Order 0
+    CHM[M00] = X_M1 + X_P1 + X_0;
+    
+    // Order 1
+    CHM[M10] = 0.;
+    CHM[M01] = 0.;
+    
+    // Order 2
+    CHM[M20] = X_P1 + X_M1;
+    CHM[M02] = Y_P1 + Y_M1;
+    CHM[M11] = - f[1] + f[3] - f[5] + f[7];
+    
+    // Order 3
+    CHM[M21] =   f[1] - f[3] - f[5] + f[7];
+    CHM[M12] = - f[1] - f[3] + f[5] + f[7];
+    
+    // Order 4
+    CHM[M22] =   f[1] + f[3] + f[5] + f[7];
+
+    rho = CHM[M00];
+    T invRho = 1. / rho;
     for (int i = 0; i<D::q; ++i) {
-
-        cMux = D::c[i][0]- u[0];
-        cMuy = D::c[i][1]- u[1];
-
-        Hxx = cMux * cMux - D::cs2;
-        Hyy = cMuy * cMuy - D::cs2;
-
-        // // Order 0
-        // CHM[M000] += f[i];
-
-        // Order 1
-        CHM[M10] += cMux * f[i];
-        CHM[M01] += cMuy * f[i];
-
-        // Order 2
-        CHM[M20] += Hxx * f[i];
-        CHM[M02] += Hyy * f[i];
-        CHM[M11] += cMux * cMuy * f[i];
-
-        // Order 3
-        CHM[M21] += Hxx * cMuy * f[i];
-        CHM[M12] += cMux * Hyy * f[i];
-
-        // Order 4
-        CHM[M22] += Hxx * Hyy * f[i];
-    }
-
-    for (int i = 1; i<D::q; ++i) {
         CHM[i] *= invRho;
     }
-}
+
+    // Compute CMs from RMs using binomial formulas
+    u[0] = invRho * (X_P1 - X_M1);
+    u[1] = invRho * (Y_P1 - Y_M1);
+    T ux2  = u[0]*u[0];
+    T uy2  = u[1]*u[1];
+
+    CHM[M20] -= (ux2);
+    CHM[M02] -= (uy2);
+    CHM[M11] -= (u[0]*u[1]);
+
+    CHM[M21] -= (u[1]*CHM[M20] + 2.*u[0]*CHM[M11] + ux2*u[1]);
+    CHM[M12] -= (u[0]*CHM[M02] + 2.*u[1]*CHM[M11] + u[0]*uy2);
+
+    CHM[M22] -= (2.*u[1]*CHM[M21] + 2.*u[0]*CHM[M12] + uy2*CHM[M20] + ux2*CHM[M02] + 4.*u[0]*u[1]*CHM[M11] + ux2*uy2);
+
+    // Compute CHMs from CMs
+    T cs4 = D::cs2*D::cs2;
+
+    CHM[M20] -= (D::cs2);
+    CHM[M02] -= (D::cs2);
+    
+    CHM[M22] -= (D::cs2*(CHM[M20] + CHM[M02]) + cs4);
+};
 
 static void CHMcomputeEquilibriumMoments(Array<T, D::q>& CHMeq) {
     // Order 0
@@ -771,67 +986,127 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// General way to compute Ks (computations of velocity components are based on Palabos ordering of discrete velocities !)
+// // General way to compute Ks (computations of velocity components are based on Palabos ordering of discrete velocities !)
+// static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho, Array<T,D::d>& u) {
+
+//     Array<T, D::q> f;
+//     Array<T,D::q> CM;
+//     for (int i = 0; i<D::q; ++i) {
+//         f[i] = cell[i] + D::t[i];
+//         CM[i] = 0.;
+//     }
+
+//     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
+//     CM[M00] = 1.0;
+//     T invRho = 1./rho;
+//     u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
+//     u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
+
+//     T cMux = 0.;
+//     T cMuy = 0.;
+
+//     // Computation of central moments in a first time
+//     for (int i = 0; i<D::q; ++i) {
+
+//         cMux = D::c[i][0]- u[0];
+//         cMuy = D::c[i][1]- u[1];
+
+//         // // Order 0
+//         // CM[M000] += f[i]; 
+
+//         // Order 1
+//         CM[M10] += cMux * f[i]; 
+//         CM[M01] += cMuy * f[i]; 
+
+//         // Order 2
+//         CM[M20] += cMux * cMux * f[i];
+//         CM[M02] += cMuy * cMuy * f[i];
+//         CM[M11] += cMux * cMuy * f[i];
+
+//         // Order 3
+//         CM[M21] += cMux * cMux * cMuy * f[i];
+//         CM[M12] += cMux * cMuy * cMuy * f[i];
+
+//         // Order 4
+//         CM[M22] += cMux * cMux * cMuy * cMuy * f[i];
+//     }
+
+//     // Normalize before the computation of cumulants !
+//     for (int i = 1; i<D::q; ++i) {
+//         CM[i] *= invRho;
+//     }
+
+//     // Computation of cumulants through central moments
+//     K[M00] = CM[M00];
+//     K[M10] = CM[M10] + u[0];
+//     K[M01] = CM[M01] + u[1];
+//     K[M20] = CM[M20];
+//     K[M02] = CM[M02];
+//     K[M11] = CM[M11];
+//     K[M21] = CM[M21];
+//     K[M12] = CM[M12];
+//     K[M22] = CM[M22] - CM[M20]*CM[M02] - 2.*CM[M11]*CM[M11];
+// }
+
+// Optimized way to compute Ks
 static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho, Array<T,D::d>& u) {
 
     Array<T, D::q> f;
-    Array<T,D::q> CM;
     for (int i = 0; i<D::q; ++i) {
+        K[i] = 0.;
         f[i] = cell[i] + D::t[i];
-        CM[i] = 0.;
     }
 
-    rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
-    CM[M00] = 1.0;
-    T invRho = 1./rho;
-    u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
-    u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
+    double X_M1 = f[1] + f[2] + f[3];
+    double X_P1 = f[5] + f[6] + f[7];
+    double X_0  = f[0] + f[4] + f[8];
 
-    T cMux = 0.;
-    T cMuy = 0.;
+    double Y_M1 = f[3] + f[4] + f[5];
+    double Y_P1 = f[1] + f[7] + f[8];
 
-    // Computation of central moments in a first time
+    // Order 0
+    K[M00] = X_M1 + X_P1 + X_0;
+    
+    // Order 1
+    K[M10] = X_P1 - X_M1;
+    K[M01] = Y_P1 - Y_M1;
+    
+    // Order 2
+    K[M20] = X_P1 + X_M1;
+    K[M02] = Y_P1 + Y_M1;
+    K[M11] = - f[1] + f[3] - f[5] + f[7];
+    
+    // Order 3
+    K[M21] =   f[1] - f[3] - f[5] + f[7];
+    K[M12] = - f[1] - f[3] + f[5] + f[7];
+    
+    // Order 4
+    K[M22] =   f[1] + f[3] + f[5] + f[7];
+
+    rho = K[M00];
+    T invRho = 1. / rho;
     for (int i = 0; i<D::q; ++i) {
-
-        cMux = D::c[i][0]- u[0];
-        cMuy = D::c[i][1]- u[1];
-
-        // // Order 0
-        // CM[M000] += f[i]; 
-
-        // Order 1
-        CM[M10] += cMux * f[i]; 
-        CM[M01] += cMuy * f[i]; 
-
-        // Order 2
-        CM[M20] += cMux * cMux * f[i];
-        CM[M02] += cMuy * cMuy * f[i];
-        CM[M11] += cMux * cMuy * f[i];
-
-        // Order 3
-        CM[M21] += cMux * cMux * cMuy * f[i];
-        CM[M12] += cMux * cMuy * cMuy * f[i];
-
-        // Order 4
-        CM[M22] += cMux * cMux * cMuy * cMuy * f[i];
+        K[i] *= invRho;
     }
 
-    // Normalize before the computation of cumulants !
-    for (int i = 1; i<D::q; ++i) {
-        CM[i] *= invRho;
-    }
+    // Compute CMs from RMs using binomial formulas
+    u[0] = K[M10];
+    u[1] = K[M01];
+    T ux2  = u[0]*u[0];
+    T uy2  = u[1]*u[1];
 
-    // Computation of cumulants through central moments
-    K[M00] = CM[M00];
-    K[M10] = CM[M10] + u[0];
-    K[M01] = CM[M01] + u[1];
-    K[M20] = CM[M20];
-    K[M02] = CM[M02];
-    K[M11] = CM[M11];
-    K[M21] = CM[M21];
-    K[M12] = CM[M12];
-    K[M22] = CM[M22] - CM[M20]*CM[M02] - 2.*CM[M11]*CM[M11];
-}
+    K[M20] -= (ux2);
+    K[M02] -= (uy2);
+    K[M11] -= (u[0]*u[1]);
+
+    K[M21] -= (u[1]*K[M20] + 2.*u[0]*K[M11] + ux2*u[1]);
+    K[M12] -= (u[0]*K[M02] + 2.*u[1]*K[M11] + u[0]*uy2);
+
+    K[M22] -= (2.*u[1]*K[M21] + 2.*u[0]*K[M12] + uy2*K[M20] + ux2*K[M02] + 4.*u[0]*u[1]*K[M11] + ux2*uy2);
+
+    // Computation of Ks through non-linear transformations of CMs
+    K[M22] -= (K[M20]*K[M02] + 2.*K[M11]*K[M11]);
+};
 
 static void KcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& Keq) {
     // Order 0
@@ -978,12 +1253,56 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 };
 
-/////////////////////////////////////////////////////////////////////////////////
-// Gauss-Hermite Formalism (Equilibrium is computed through the GH  formalism) //
-/////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Gauss-Hermite Formalism (Equilibrium is computed through the GH formalism) //
+////////////////////////////////////////////////////////////////////////////////
 
 
-// General way to compute GHs
+// // General way to compute GHs
+// static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& rho) {
+
+//     Array<T, D::q> f;
+//     for (int i = 0; i<D::q; ++i) {
+//         GH[i] = 0.;
+//         f[i] = cell[i] + D::t[i];
+//     }
+
+//     T Hxx = 0.;
+//     T Hyy = 0.;
+
+//     for (int i = 0; i<D::q; ++i) {
+
+//         Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
+//         Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
+
+//         // Order 0
+//         GH[M00] += f[i];
+
+//         // Order 1
+//         GH[M10] += D::c[i][0] * f[i];
+//         GH[M01] += D::c[i][1] * f[i];
+
+//         // Order 2
+//         GH[M20] += Hxx * f[i];
+//         GH[M02] += Hyy * f[i];
+//         GH[M11] += D::c[i][0] * D::c[i][1] * f[i];
+
+//         // Order 3
+//         GH[M21] += Hxx * D::c[i][1] * f[i];
+//         GH[M12] += D::c[i][0] * Hyy * f[i];
+
+//         // Order 4
+//         GH[M22] += Hxx * Hyy * f[i];
+//     }
+
+//     rho = GH[M00];
+//     T invRho = 1. / rho;
+//     for (int i = 0; i<D::q; ++i) {
+//         GH[i] *= invRho;
+//     }
+// };
+
+// Optimized way to compute GHs
 static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& rho) {
 
     Array<T, D::q> f;
@@ -992,39 +1311,47 @@ static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& r
         f[i] = cell[i] + D::t[i];
     }
 
-    T Hxx = 0.;
-    T Hyy = 0.;
+    double X_M1 = f[1] + f[2] + f[3];
+    double X_P1 = f[5] + f[6] + f[7];
+    double X_0  = f[0] + f[4] + f[8];
 
-    for (int i = 0; i<D::q; ++i) {
+    double Y_M1 = f[3] + f[4] + f[5];
+    double Y_P1 = f[1] + f[7] + f[8];
 
-        Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
-        Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
-
-        // Order 0
-        GH[M00] += f[i];
-
-        // Order 1
-        GH[M10] += D::c[i][0] * f[i];
-        GH[M01] += D::c[i][1] * f[i];
-
-        // Order 2
-        GH[M20] += Hxx * f[i];
-        GH[M02] += Hyy * f[i];
-        GH[M11] += D::c[i][0] * D::c[i][1] * f[i];
-
-        // Order 3
-        GH[M21] += Hxx * D::c[i][1] * f[i];
-        GH[M12] += D::c[i][0] * Hyy * f[i];
-
-        // Order 4
-        GH[M22] += Hxx * Hyy * f[i];
-    }
+    // Order 0
+    GH[M00] = X_M1 + X_P1 + X_0;
+    
+    // Order 1
+    GH[M10] = X_P1 - X_M1;
+    GH[M01] = Y_P1 - Y_M1;
+    
+    // Order 2
+    GH[M20] = X_P1 + X_M1;
+    GH[M02] = Y_P1 + Y_M1;
+    GH[M11] = - f[1] + f[3] - f[5] + f[7];
+    
+    // Order 3
+    GH[M21] =   f[1] - f[3] - f[5] + f[7];
+    GH[M12] = - f[1] - f[3] + f[5] + f[7];
+    
+    // Order 4
+    GH[M22] =   f[1] + f[3] + f[5] + f[7];
 
     rho = GH[M00];
     T invRho = 1. / rho;
     for (int i = 0; i<D::q; ++i) {
         GH[i] *= invRho;
     }
+
+    // We come back to Hermite moments
+    T cs4 = D::cs2*D::cs2;
+    GH[M20] -= D::cs2;
+    GH[M02] -= D::cs2;
+
+    GH[M21] -= D::cs2 * GH[M01];
+    GH[M12] -= D::cs2 * GH[M10];
+
+    GH[M22] -= (D::cs2*(GH[M20] + GH[M02]) + cs4);
 };
 
 static void GHcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& GHeq) {
@@ -1130,7 +1457,44 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 ///////////////////////////////////////////////////////////////////////////////
 
 
-// General way to compute RRs
+// // General way to compute RRs (we only need 2nd-order RRs)
+// static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& rho) {
+
+//     Array<T, D::q> f;
+//     for (int i = 0; i<D::q; ++i) {
+//         RR[i] = 0.;
+//         f[i] = cell[i] + D::t[i];
+//     }
+
+//     T Hxx = 0.;
+//     T Hyy = 0.;
+
+//     for (int i = 0; i<D::q; ++i) {
+
+//         Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
+//         Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
+
+//         // Order 0
+//         RR[M00] += f[i];
+
+//         // Order 1
+//         RR[M10] += D::c[i][0] * f[i];
+//         RR[M01] += D::c[i][1] * f[i];
+
+//         // Order 2
+//         RR[M20] += Hxx * f[i];
+//         RR[M02] += Hyy * f[i];
+//         RR[M11] += D::c[i][0] * D::c[i][1] * f[i];
+//     }
+
+//     rho = RR[M00];
+//     T invRho = 1. / rho;
+//     for (int i = 0; i<D::q; ++i) {
+//         RR[i] *= invRho;
+//     }
+// };
+
+// Optimized way to compute RRs (we only need 2nd-order RRs)
 static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& rho) {
 
     Array<T, D::q> f;
@@ -1139,39 +1503,34 @@ static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& r
         f[i] = cell[i] + D::t[i];
     }
 
-    T Hxx = 0.;
-    T Hyy = 0.;
+    double X_M1 = f[1] + f[2] + f[3];
+    double X_P1 = f[5] + f[6] + f[7];
+    double X_0  = f[0] + f[4] + f[8];
 
-    for (int i = 0; i<D::q; ++i) {
+    double Y_M1 = f[3] + f[4] + f[5];
+    double Y_P1 = f[1] + f[7] + f[8];
 
-        Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
-        Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
-
-        // Order 0
-        RR[M00] += f[i];
-
-        // Order 1
-        RR[M10] += D::c[i][0] * f[i];
-        RR[M01] += D::c[i][1] * f[i];
-
-        // Order 2
-        RR[M20] += Hxx * f[i];
-        RR[M02] += Hyy * f[i];
-        RR[M11] += D::c[i][0] * D::c[i][1] * f[i];
-
-        // Order 3
-        RR[M21] += Hxx * D::c[i][1] * f[i];
-        RR[M12] += D::c[i][0] * Hyy * f[i];
-
-        // Order 4
-        RR[M22] += Hxx * Hyy * f[i];
-    }
+    // Order 0
+    RR[M00] = X_M1 + X_P1 + X_0;
+    
+    // Order 1
+    RR[M10] = X_P1 - X_M1;
+    RR[M01] = Y_P1 - Y_M1;
+    
+    // Order 2
+    RR[M20] = X_P1 + X_M1;
+    RR[M02] = Y_P1 + Y_M1;
+    RR[M11] = - f[1] + f[3] - f[5] + f[7];
 
     rho = RR[M00];
     T invRho = 1. / rho;
     for (int i = 0; i<D::q; ++i) {
         RR[i] *= invRho;
     }
+
+    // We come back to Hermite moments
+    RR[M20] -= D::cs2;
+    RR[M02] -= D::cs2;
 };
 
 static void RRcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& RReq) {
@@ -1216,7 +1575,8 @@ static void RRcomputeEquilibrium(T rho, Array<T, D::q> const& RReq, Array<T, D::
     eq[FMM] = (rho / 36.)*(1. + 3.* (- u[0] - u[1]) +(3./2.)*(2.*RReq[M20] + 2.*RReq[M02]) +9.*RReq[M11] +(9./2.)*(-2.*RReq[M21]- 2.*RReq[M12]) + (9./2.)*( 2.*RReq[M22]));
 };
 
-
+// Compute post collision populations from RM instead of RR
+// (this is 5-10% more efficient than with Gauss-Hermite formulas)
 static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
                       Array<T, D::q> const& RR,    // Hermite moments
                       Array<T, D::q> const& RReq,  // Equilibrium moments (hermite)
@@ -1262,20 +1622,33 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     // Order 4
     RRcoll[M22] = (1.-omega4) * RRneq[M22] + RReq[M22] ;
 
-    // Compute post collision populations from RR
-    cell[F00] = (rho * 4./9.) *(1. -(3./2.)*(RRcoll[M20] + RRcoll[M02])+(9./4.)* (RRcoll[M22]));
+    // Come back to RMcoll using relationships between RRs and RMs
+    T cs4 = D::cs2*D::cs2;
+    Array<T,D::q> RMcoll;
 
-    cell[FP0] = (rho / 9.)*(1. + 3.*u[0]+(3./2.)* (2.*RRcoll[M20]-RRcoll[M02]) -(9./2.)*(RRcoll[M12])-(9./4.)* (2.*RRcoll[M22]));
-    cell[FM0] = (rho / 9.)*(1. - 3.*u[0]+(3./2.)* (2.*RRcoll[M20]-RRcoll[M02]) +(9./2.)*(RRcoll[M12])-(9./4.)* (2.*RRcoll[M22]));
-    cell[F0P] = (rho / 9.)*(1. + 3.*u[1]+(3./2.)* (2.*RRcoll[M02]-RRcoll[M20]) -(9./2.)*(RRcoll[M21])-(9./4.)* (2.*RRcoll[M22]));
-    cell[F0M] = (rho / 9.)*(1. - 3.*u[1]+(3./2.)* (2.*RRcoll[M02]-RRcoll[M20]) +(9./2.)*(RRcoll[M21])-(9./4.)* (2.*RRcoll[M22]));
+    RMcoll[M20] = RRcoll[M20] + D::cs2;
+    RMcoll[M02] = RRcoll[M02] + D::cs2;
+    
+    RMcoll[M11] = RRcoll[M11];
 
-    cell[FPP] = (rho / 36.)*(1. + 3.* (+ u[0] + u[1]) +(3./2.)*(2.*RRcoll[M20] + 2.*RRcoll[M02]) +9.*RRcoll[M11] +(9./2.)*( 2.*RRcoll[M21]+ 2.*RRcoll[M12]) + (9./2.)*( 2.*RRcoll[M22]));
-    cell[FMP] = (rho / 36.)*(1. + 3.* (- u[0] + u[1]) +(3./2.)*(2.*RRcoll[M20] + 2.*RRcoll[M02]) -9.*RRcoll[M11] +(9./2.)*( 2.*RRcoll[M21]- 2.*RRcoll[M12]) + (9./2.)*( 2.*RRcoll[M22]));
-    cell[FPM] = (rho / 36.)*(1. + 3.* (+ u[0] - u[1]) +(3./2.)*(2.*RRcoll[M20] + 2.*RRcoll[M02]) -9.*RRcoll[M11] +(9./2.)*(-2.*RRcoll[M21]+ 2.*RRcoll[M12]) + (9./2.)*( 2.*RRcoll[M22]));
-    cell[FMM] = (rho / 36.)*(1. + 3.* (- u[0] - u[1]) +(3./2.)*(2.*RRcoll[M20] + 2.*RRcoll[M02]) +9.*RRcoll[M11] +(9./2.)*(-2.*RRcoll[M21]- 2.*RRcoll[M12]) + (9./2.)*( 2.*RRcoll[M22]));
+    RMcoll[M21] = RRcoll[M21] + D::cs2*u[1];
+    RMcoll[M12] = RRcoll[M12] + D::cs2*u[0];
+    
+    RMcoll[M22] = RRcoll[M22] + D::cs2*(RRcoll[M20] + RRcoll[M02]) + cs4;
 
+    // Compute post collision populations from RM 
+    cell[F00] = rho *(1. - RMcoll[M20] - RMcoll[M02] + RMcoll[M22]);
+    
+    cell[FP0] = 0.5*rho * ( u[0] + RMcoll[M20] - RMcoll[M12] - RMcoll[M22]);
+    cell[FM0] = 0.5*rho * (-u[0] + RMcoll[M20] + RMcoll[M12] - RMcoll[M22]);
 
+    cell[F0P] = 0.5*rho * ( u[1] + RMcoll[M02] - RMcoll[M21] - RMcoll[M22]);
+    cell[F0M] = 0.5*rho * (-u[1] + RMcoll[M02] + RMcoll[M21] - RMcoll[M22]);
+
+    cell[FPP] = 0.25*rho * ( RMcoll[M11] + RMcoll[M21] + RMcoll[M12] + RMcoll[M22]);
+    cell[FMP] = 0.25*rho * (-RMcoll[M11] + RMcoll[M21] - RMcoll[M12] + RMcoll[M22]);
+    cell[FPM] = 0.25*rho * (-RMcoll[M11] - RMcoll[M21] + RMcoll[M12] + RMcoll[M22]);
+    cell[FMM] = 0.25*rho * ( RMcoll[M11] - RMcoll[M21] - RMcoll[M12] + RMcoll[M22]);
     for (int i = 0; i<D::q; ++i) {
         cell[i] -= D::t[i];
     }

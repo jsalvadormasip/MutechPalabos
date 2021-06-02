@@ -1592,7 +1592,7 @@ static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T&
     // Order 0
     CHM[M001] = 1.;
 
-    // Compute CHMs from RMs using binomial formulas
+    // Compute CMs from RMs using binomial formulas
     u[0] = invRho * (X_P1 - X_M1);
     u[1] = invRho * (Y_P1 - Y_M1);
     u[2] = invRho * (Z_P1 - Z_M1);
@@ -1632,9 +1632,7 @@ static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T&
 
     CHM[M222] -= (2.*u[2]*CHM[M221] + 2.*u[1]*CHM[M212] + 2.*u[0]*CHM[M122] + uz2*CHM[M220] + uy2*CHM[M202] + ux2*CHM[M022] + 4.*u[1]*u[2]*CHM[M211] + 4.*u[0]*u[2]*CHM[M121] + 4.*u[0]*u[1]*CHM[M112] + 2.*u[1]*uz2*CHM[M210] + 2.*uy2*u[2]*CHM[M201] + 2.*ux2*u[2]*CHM[M021] + 2.*u[0]*uz2*CHM[M120] + 2.*u[0]*uy2*CHM[M102] + 2.*ux2*u[1]*CHM[M012] + 8.*uxyz*CHM[M111] + uy2*uz2*CHM[M200] + ux2*uz2*CHM[M020] + ux2*uy2*CHM[M002] + 4.*u[0]*u[1]*uz2*CHM[M110] + 4.*u[0]*uy2*u[2]*CHM[M101] + 4.*ux2*u[1]*u[2]*CHM[M011] + ux2*uy2*uz2);
 
-    // Compute central Hermite moments from central moments
-    // I further assumed that 1st-order CHM = 0 since they
-    // are used to store velocity components
+    // Compute CHMs from CMs
     T cs4 = D::cs2*D::cs2;
 
     CHM[M200] -= (D::cs2);
@@ -2112,7 +2110,7 @@ static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho
     // Order 0
     K[M001] = 1.;
 
-    // Compute Ks from RMs using binomial formulas
+    // Compute CMs from RMs using binomial formulas
     u[0] = invRho * (X_P1 - X_M1);
     u[1] = invRho * (Y_P1 - Y_M1);
     u[2] = invRho * (Z_P1 - Z_M1);
