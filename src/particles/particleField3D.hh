@@ -484,7 +484,7 @@ void DenseParticleField3D<T,Descriptor>::fluidToParticleCoupling(Box3D domain, B
 }
 
 template<typename T, template<typename U> class Descriptor>
-void DenseParticleField3D<T,Descriptor>::advanceParticles(Box3D domain, T cutOffValue) {
+void DenseParticleField3D<T,Descriptor>::advanceParticles(Box3D domain, T cutOffSpeedSqr) {
     Box3D finalDomain;
     if( intersect(domain, particleGrid.getBoundingBox(), finalDomain) )
     {
@@ -498,7 +498,7 @@ void DenseParticleField3D<T,Descriptor>::advanceParticles(Box3D domain, T cutOff
                         Particle3D<T,Descriptor>* particle = particles[iParticle];
                         Array<T,3> oldPos( particle->getPosition() );
                         particle->advance();
-                        if (cutOffValue>=T() && normSqr(oldPos-particle->getPosition())<cutOffValue)
+                        if (cutOffSpeedSqr>=T() && normSqr(oldPos-particle->getPosition())<cutOffSpeedSqr)
                         {
                             delete particle;
                         }
@@ -873,7 +873,7 @@ void LightParticleField3D<T,Descriptor>::fluidToParticleCoupling (
 }
 
 template<typename T, template<typename U> class Descriptor>
-void LightParticleField3D<T,Descriptor>::advanceParticles(Box3D domain, T cutOffValue) {
+void LightParticleField3D<T,Descriptor>::advanceParticles(Box3D domain, T cutOffSpeedSqr) {
     std::vector<Particle3D<T,Descriptor>*> remainingParticles;
     Box3D finalDomain;
     if( intersect(domain, this->getBoundingBox(), finalDomain) )
@@ -883,7 +883,7 @@ void LightParticleField3D<T,Descriptor>::advanceParticles(Box3D domain, T cutOff
             if (this->isContained(particle->getPosition(),finalDomain)) {
                 Array<T,3> oldPos( particle->getPosition() );
                 particle->advance();
-                if ( (cutOffValue>=T() && normSqr(oldPos-particle->getPosition())<cutOffValue) ||
+                if ( (cutOffSpeedSqr>=T() && normSqr(oldPos-particle->getPosition())<cutOffSpeedSqr) ||
                      (!this->isContained(particle->getPosition(),this->getBoundingBox()))  )
                 {
                     delete particle;

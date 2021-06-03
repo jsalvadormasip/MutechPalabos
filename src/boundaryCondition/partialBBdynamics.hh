@@ -57,6 +57,14 @@ void PartialBBdynamics<T,Descriptor>::collide (
 }
 
 template<typename T, template<typename U> class Descriptor>
+void PartialBBdynamics<T,Descriptor>::collideExternal (
+        Cell<T,Descriptor>& cell, T rhoBar,
+        Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat )
+{
+    PLB_ASSERT(true);
+}
+
+template<typename T, template<typename U> class Descriptor>
 T PartialBBdynamics<T,Descriptor>::computeEquilibrium(plint iPop, T rhoBar, Array<T,Descriptor<T>::d> const& j,
                                                 T jSqr, T thetaBar) const
 {
