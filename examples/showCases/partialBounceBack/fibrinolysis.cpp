@@ -388,32 +388,6 @@ int main(int argc, char* argv[])
 
         lattice->executeInternalProcessors();
 
-        // optional output statistics for particles
-        if (simParam.usesParticles && iter*simParam.dt >= simParam.startParticleTime){       
-            // counting particles going out
-            // std::vector<Particle3D<T,DESCRIPTOR>*> exitingParticles;      // vector that will contain the particles found
-            // Box3D absorptionZone(lattice->getBoundingBox());
-            // absorptionZone.z0 = simParam.nz-1;
-            // absorptionZone.z1 = simParam.nz-1; 
-
-            // gatherParticles(*particles, exitingParticles, absorptionZone); 
-
-            // plint partsBefore = exitingParticles.size();
-            // for(pluint i = 0 ; i < exitingParticles.size() ; ++i)
-            //     delete exitingParticles[i];
- 
-            // execute particles internal processors
-            particles->executeInternalProcessors();
-            // gatherParticles(*particles, exitingParticles, absorptionZone);
-            // plint partsAfter = exitingParticles.size();
-            // for(pluint i = 0 ; i < exitingParticles.size() ; ++i)
-            //     delete exitingParticles[i];
-
-            // if(iter % simParam.statIter == 0)
-            //     partStatFile << partsBefore - partsAfter << " " << iter*simParam.dt << endl;
-            
-        }
-
         // output flow.dat data
         if (iter % simParam.outIter == 0)
         {
