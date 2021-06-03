@@ -57,9 +57,10 @@ namespace plb {
  */
 template<typename T, template<typename U> class Descriptor>
 ELIULlocalModel3D<T,Descriptor>::ELIULlocalModel3D (
-        BoundaryShape3D<T,Array<T,3> >* shape_, int flowType_)
-    : OffLatticeModel3D<T,Array<T,3> >(shape_, flowType_)
-{ }
+        BoundaryShape3D<T,Array<T,3> >* shape_, int flowType_,ParametrizationType param_,NonEquilibriumType neq_t_)
+    : OffLatticeModel3D<T,Array<T,3> >(shape_, flowType_), param(param_), neq_t(neq_t_)
+{
+}
 
 template<typename T, template<typename U> class Descriptor>
 ELIULlocalModel3D<T,Descriptor>* ELIULlocalModel3D<T,Descriptor>::clone() const {
@@ -201,9 +202,9 @@ void ELIULlocalModel3D<T,Descriptor>::cellCompletion (
                && "Filippova-Haenel BC needs the dynamics to be set to NoDynamics.");
     for (plint iDirection=0; iDirection<(plint)dryNodeFluidDirections.size(); ++iDirection)
     {
-        int iOpp = dryNodeFluidDirections[iDirection];
-        int iPop = indexTemplates::opposite<Descriptor<T> >(iOpp);
-        Dot3D fluidDirection(D::c[iOpp][0],D::c[iOpp][1],D::c[iOpp][2]);
+        int i = dryNodeFluidDirections[iDirection];
+        int i_bar = indexTemplates::opposite<Descriptor<T> >(i);
+        Dot3D fluidDirection(D::c[i][0], D::c[i][1], D::c[i][2]);
         plint dryNodeId = dryNodeIds[iDirection];
 
         Array<T,3> wallNode, wall_vel;
@@ -218,18 +219,12 @@ void ELIULlocalModel3D<T,Descriptor>::cellCompletion (
         BlockStatistics statsCopy(lattice.getInternalStatistics());
         cellFstar.collide(statsCopy);
 
-        T f_rhoBar, ff_rhoBar;
-        Array<T,3> f_j, ff_j;
+        T f_rhoBar;
+        Array<T,3> f_j;
         Array<T,3> wallNormal;
 
         if (args.empty()) {
-            Cell<T,Descriptor> const& cellFF =
-            lattice.get( guoNode.x+2*fluidDirection.x,
-                         guoNode.y+2*fluidDirection.y,
-                         guoNode.z+2*fluidDirection.z );
-
             cellF.getDynamics().computeRhoBarJ(cellF, f_rhoBar, f_j);
-            cellFF.getDynamics().computeRhoBarJ(cellFF, ff_rhoBar, ff_j);
         } else {
             if ((plint) args.size() == 2) {
                 // 1 field for rhoBar, 1 field for j.
@@ -248,8 +243,6 @@ void ELIULlocalModel3D<T,Descriptor>::cellCompletion (
                 f_rhoBar = rhoBarField->get(posRho.x, posRho.y, posRho.z);
                 f_j = jField->get(posJ.x, posJ.y, posJ.z);
                 Dot3D posJ2 = posJ + fluidDirection;
-
-                ff_j = jField->get(posJ2.x, posJ2.y, posJ2.z);
             } else {
                 PLB_ASSERT(false); // Not implemented for 1 arg.
             }
@@ -267,25 +260,38 @@ void ELIULlocalModel3D<T,Descriptor>::cellCompletion (
         PLB_ASSERT( ok );
 
         Array<T,3> w_j = wall_vel*f_rho;
-        T d = std::sqrt(D::cNormSqr[iOpp]);
+        T d = std::sqrt(D::cNormSqr[i]);
         PLB_ASSERT( wallDistance <= d );
         T q = 1.0 - wallDistance / d;
 
         Array<T,3> wf_j; wf_j.resetToZero();
-        T omega = cellF.getDynamics().getOmega(); // TODO: add TRT case with omega- and omega+
+        const auto trt = dynamic_cast<const BaseTRTdynamics<T, Descriptor> *>(&cellF.getDynamics());
+        T omega_plus  = cellF.getDynamics().getOmega(); // TODO: add TRT case with omega- and omega+
+        T omega_minus = 0.;
+        if(trt)
+            omega_minus = cellF.getDynamics().getParameter(dynamicParams::omega_minus);
+        else
+            omega_minus = omega_plus;
 
-        T k = 0;
         T a4 = 1. - q;
         T a5 = q;
-        T f0eq = cellF.getDynamics().computeEquilibrium(iOpp,f_rhoBar,w_j,normSqr(w_j));
-        T f0neq = (cellF[iPop]-cellF.getDynamics().computeEquilibrium(iPop,f_rhoBar,f_j,f_jSqr));
+        T k = a4;
+        T f1minq_eq = cellF.getDynamics().computeEquilibrium(i_bar, f_rhoBar, f_j, f_jSqr);
+        T f1plusq_eq = cellF.getDynamics().computeEquilibrium(i, f_rhoBar, f_j, f_jSqr);
+        T f0eq = cellF.getDynamics().computeEquilibrium(i, f_rhoBar, w_j, normSqr(w_j));
+        T f0eq_ibar = cellF.getDynamics().computeEquilibrium(i_bar, f_rhoBar, w_j, normSqr(w_j));
+        T f0eq_plus = 0.5*f0eq + 0.5*f0eq_ibar;
+        T f0eq_minus = 0.5*f0eq - 0.5*f0eq_ibar;
+        T f0neq = cellF[i_bar] - f1minq_eq;
+        T f0neq_plus = 0.5*(cellF[i_bar] - f1minq_eq)+0.5*(cellF[i] - f1plusq_eq);
+        T f0neq_minus = 0.5*(cellF[i_bar] - f1minq_eq)-0.5*(cellF[i] - f1plusq_eq);
         T f_0 = f0eq + f0neq;
-        T f_1 = f_0 - omega * f0neq;
-        cellS[iOpp] = a4 * f_0 + a5 * f_1;
+        T f_1 = f_0 - (omega_plus * f0neq_plus + omega_minus * f0neq_minus) ;
+        cellS[i] = a4 * f_0 + a5 * f_1 - (this->param == PT::k2) ? k*f0neq_minus*omega_minus : 0.0;
 
-        localForce[0] += D::c[iPop][0]*(cellS[iPop] - cellS[iOpp]);
-        localForce[1] += D::c[iPop][1]*(cellS[iPop] - cellS[iOpp]);
-        localForce[2] += D::c[iPop][2]*(cellS[iPop] - cellS[iOpp]);
+        localForce[0] += D::c[i_bar][0] * (cellFstar[i_bar] - cellS[i]);
+        localForce[1] += D::c[i_bar][1] * (cellFstar[i_bar] - cellS[i]);
+        localForce[2] += D::c[i_bar][2] * (cellFstar[i_bar] - cellS[i]);
     }
 }
 

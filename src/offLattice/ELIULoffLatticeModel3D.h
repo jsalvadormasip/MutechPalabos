@@ -54,8 +54,12 @@ template<typename T, template<typename U> class Descriptor>
 class ELIULlocalModel3D : public OffLatticeModel3D<T, Array < T,3> >
 {
 public:
+    enum class ParametrizationType{no_param=0,k2=2};
+    using PT = ParametrizationType;
+    enum class NonEquilibriumType{N=1};
+    using NEQ = NonEquilibriumType;
     ELIULlocalModel3D(BoundaryShape3D<T,Array<T,3> >* shape_,
-                       int flowType_);
+                       int flowType_,ParametrizationType param_ = PT::k2,NonEquilibriumType neq_t_ = NEQ::N);
     virtual ELIULlocalModel3D<T,Descriptor>* clone() const;
     virtual plint getNumNeighbors() const;
     virtual bool isExtrapolated() const;
@@ -78,6 +82,8 @@ private:
             Array<T,3>& localForce, std::vector<AtomicBlock3D *> const& args );
 private:
     bool computeStat;
+    ParametrizationType param;
+    NonEquilibriumType neq_t;
 private:
     /// Store the location of wall nodes, as well as the pattern of missing vs. known
     ///   populations.
@@ -102,7 +108,7 @@ private:
         { return localForce; }
         Array<T,3>&                              getLocalForce()
         { return localForce; }
-        virtual OffLatticeInfo3D* clone() const {
+        OffLatticeInfo3D* clone() const override {
             return new OffLatticeInfo3D(*this);
         }
     private:
