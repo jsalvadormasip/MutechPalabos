@@ -326,81 +326,12 @@ enum {
     FPPM = 24,
     FPMP = 25,
     FPMM = 26
-
-    // Ordering used for all functions
-    // F000 = 0,
-
-    // FP00 = 14,
-    // FM00 = 1,
-    // F0P0 = 15,
-    // F0M0 = 2,
-    // F00P = 16,
-    // F00M = 3,
-
-    // FPP0 = 17,
-    // FMP0 = 5,
-    // FPM0 = 18,
-    // FMM0 = 4,
-
-    // FP0P = 19,
-    // FM0P = 7,
-    // FP0M = 20,
-    // FM0M = 6,
-
-    // F0PP = 21,
-    // F0MP = 9,
-    // F0PM = 22,
-    // F0MM = 8,
-
-    // FPPP = 23,
-    // FMPP = 13,
-    // FPMP = 25,
-    // FPPM = 24,
-    // FMMP = 11,
-    // FMPM = 12,
-    // FPMM = 26,
-    // FMMM = 10
 };
 
 // Equilibrium populations based on 27 moments can be computed using either RM, HM, CM, CHM or Gauss-Hermite formalisms. 
 // Here we use raw moments (RMs)
 static void RMcomputeEquilibrium(T rho, Array<T, D::q> const& RMeq, Array<T, D::q>& eq) {
     Array<T, D::d> u(RMeq[1], RMeq[2], RMeq[3]); 
-    // eq[F000] = rho *(1. - RMeq[M200] - RMeq[M020] - RMeq[M002] + RMeq[M220] + RMeq[M202] + RMeq[M022] - RMeq[M222]);
-    
-    // eq[FP00] = 0.5*rho * ( u[0] + RMeq[M200] - RMeq[M120] - RMeq[M102] - RMeq[M220] - RMeq[M202] + RMeq[M122] + RMeq[M222]);
-    // eq[FM00] = 0.5*rho * (-u[0] + RMeq[M200] + RMeq[M120] + RMeq[M102] - RMeq[M220] - RMeq[M202] - RMeq[M122] + RMeq[M222]);
-
-    // eq[F0P0] = 0.5*rho * ( u[1] + RMeq[M020] - RMeq[M210] - RMeq[M012] - RMeq[M220] - RMeq[M022] + RMeq[M212] + RMeq[M222]);
-    // eq[F0M0] = 0.5*rho * (-u[1] + RMeq[M020] + RMeq[M210] + RMeq[M012] - RMeq[M220] - RMeq[M022] - RMeq[M212] + RMeq[M222]);
-
-    // eq[F00P] = 0.5*rho * ( u[2] + RMeq[M002] - RMeq[M201] - RMeq[M021] - RMeq[M202] - RMeq[M022] + RMeq[M221] + RMeq[M222]);
-    // eq[F00M] = 0.5*rho * (-u[2] + RMeq[M002] + RMeq[M201] + RMeq[M021] - RMeq[M202] - RMeq[M022] - RMeq[M221] + RMeq[M222]);
-
-    // eq[FPP0] = 0.25*rho * ( RMeq[M110] + RMeq[M210] + RMeq[M120] - RMeq[M112] + RMeq[M220] - RMeq[M212] - RMeq[M122] - RMeq[M222]);
-    // eq[FMP0] = 0.25*rho * (-RMeq[M110] + RMeq[M210] - RMeq[M120] + RMeq[M112] + RMeq[M220] - RMeq[M212] + RMeq[M122] - RMeq[M222]);
-    // eq[FPM0] = 0.25*rho * (-RMeq[M110] - RMeq[M210] + RMeq[M120] + RMeq[M112] + RMeq[M220] + RMeq[M212] - RMeq[M122] - RMeq[M222]);
-    // eq[FMM0] = 0.25*rho * ( RMeq[M110] - RMeq[M210] - RMeq[M120] - RMeq[M112] + RMeq[M220] + RMeq[M212] + RMeq[M122] - RMeq[M222]);
-
-    // eq[FP0P] = 0.25*rho * ( RMeq[M101] + RMeq[M201] + RMeq[M102] - RMeq[M121] + RMeq[M202] - RMeq[M221] - RMeq[M122] - RMeq[M222]);
-    // eq[FM0P] = 0.25*rho * (-RMeq[M101] + RMeq[M201] - RMeq[M102] + RMeq[M121] + RMeq[M202] - RMeq[M221] + RMeq[M122] - RMeq[M222]);
-    // eq[FP0M] = 0.25*rho * (-RMeq[M101] - RMeq[M201] + RMeq[M102] + RMeq[M121] + RMeq[M202] + RMeq[M221] - RMeq[M122] - RMeq[M222]);
-    // eq[FM0M] = 0.25*rho * ( RMeq[M101] - RMeq[M201] - RMeq[M102] - RMeq[M121] + RMeq[M202] + RMeq[M221] + RMeq[M122] - RMeq[M222]);
-
-    // eq[F0PP] = 0.25*rho * ( RMeq[M011] + RMeq[M021] + RMeq[M012] - RMeq[M211] + RMeq[M022] - RMeq[M221] - RMeq[M212] - RMeq[M222]);
-    // eq[F0MP] = 0.25*rho * (-RMeq[M011] + RMeq[M021] - RMeq[M012] + RMeq[M211] + RMeq[M022] - RMeq[M221] + RMeq[M212] - RMeq[M222]);
-    // eq[F0PM] = 0.25*rho * (-RMeq[M011] - RMeq[M021] + RMeq[M012] + RMeq[M211] + RMeq[M022] + RMeq[M221] - RMeq[M212] - RMeq[M222]);
-    // eq[F0MM] = 0.25*rho * ( RMeq[M011] - RMeq[M021] - RMeq[M012] - RMeq[M211] + RMeq[M022] + RMeq[M221] + RMeq[M212] - RMeq[M222]);
-
-    // eq[FPPP] = 0.125*rho * ( RMeq[M111] + RMeq[M211] + RMeq[M121] + RMeq[M112] + RMeq[M221] + RMeq[M212] + RMeq[M122] + RMeq[M222]);
-    // eq[FMPP] = 0.125*rho * (-RMeq[M111] + RMeq[M211] - RMeq[M121] - RMeq[M112] + RMeq[M221] + RMeq[M212] - RMeq[M122] + RMeq[M222]);
-    // eq[FPMP] = 0.125*rho * (-RMeq[M111] - RMeq[M211] + RMeq[M121] - RMeq[M112] + RMeq[M221] - RMeq[M212] + RMeq[M122] + RMeq[M222]);
-    // eq[FPPM] = 0.125*rho * (-RMeq[M111] - RMeq[M211] - RMeq[M121] + RMeq[M112] - RMeq[M221] + RMeq[M212] + RMeq[M122] + RMeq[M222]);
-    // eq[FMMP] = 0.125*rho * ( RMeq[M111] - RMeq[M211] - RMeq[M121] + RMeq[M112] + RMeq[M221] - RMeq[M212] - RMeq[M122] + RMeq[M222]);
-    // eq[FMPM] = 0.125*rho * ( RMeq[M111] - RMeq[M211] + RMeq[M121] - RMeq[M112] - RMeq[M221] + RMeq[M212] - RMeq[M122] + RMeq[M222]);
-    // eq[FPMM] = 0.125*rho * ( RMeq[M111] + RMeq[M211] - RMeq[M121] - RMeq[M112] - RMeq[M221] - RMeq[M212] + RMeq[M122] + RMeq[M222]);
-    // eq[FMMM] = 0.125*rho * (-RMeq[M111] + RMeq[M211] + RMeq[M121] + RMeq[M112] - RMeq[M221] - RMeq[M212] - RMeq[M122] + RMeq[M222]);
-
     // Optimization based on symmetries between populations and their opposite counterpart
     eq[F000] = rho *(1. - RMeq[M200] - RMeq[M020] - RMeq[M002] + RMeq[M220] + RMeq[M202] + RMeq[M022] - RMeq[M222]);
         
@@ -459,10 +390,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     // Post-collision moments.
     Array<T,D::q> RMcoll;
 
-    // Order 2
-    // RMcoll[M200] = (1.-omega1) * RM[M200] + omega1 * RMeq[M200] ;
-    // RMcoll[M020] = (1.-omega1) * RM[M020] + omega1 * RMeq[M020] ;
-    // RMcoll[M002] = (1.-omega1) * RM[M002] + omega1 * RMeq[M002] ;
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     RMcoll[M200] = RM[M200] - omegaPlus  * (RM[M200]-RMeq[M200]) - omegaMinus * (RM[M020]-RMeq[M020]) - omegaMinus * (RM[M002]-RMeq[M002]) ;
     RMcoll[M020] = RM[M020] - omegaMinus * (RM[M200]-RMeq[M200]) - omegaPlus  * (RM[M020]-RMeq[M020]) - omegaMinus * (RM[M002]-RMeq[M002]) ;
     RMcoll[M002] = RM[M002] - omegaMinus * (RM[M200]-RMeq[M200]) - omegaMinus * (RM[M020]-RMeq[M020]) - omegaPlus  * (RM[M002]-RMeq[M002]) ;
@@ -497,41 +425,6 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
     // Order 6
     RMcoll[M222] = (1.-omega8) * RM[M222] + omega8 * RMeq[M222] ;
-
-    // cell[F000] = rho *(1. - RMcoll[M200] - RMcoll[M020] - RMcoll[M002] + RMcoll[M220] + RMcoll[M202] + RMcoll[M022] - RMcoll[M222]);
-    
-    // cell[FP00] = 0.5*rho * ( u[0] + RMcoll[M200] - RMcoll[M120] - RMcoll[M102] - RMcoll[M220] - RMcoll[M202] + RMcoll[M122] + RMcoll[M222]);
-    // cell[FM00] = 0.5*rho * (-u[0] + RMcoll[M200] + RMcoll[M120] + RMcoll[M102] - RMcoll[M220] - RMcoll[M202] - RMcoll[M122] + RMcoll[M222]);
-
-    // cell[F0P0] = 0.5*rho * ( u[1] + RMcoll[M020] - RMcoll[M210] - RMcoll[M012] - RMcoll[M220] - RMcoll[M022] + RMcoll[M212] + RMcoll[M222]);
-    // cell[F0M0] = 0.5*rho * (-u[1] + RMcoll[M020] + RMcoll[M210] + RMcoll[M012] - RMcoll[M220] - RMcoll[M022] - RMcoll[M212] + RMcoll[M222]);
-
-    // cell[F00P] = 0.5*rho * ( u[2] + RMcoll[M002] - RMcoll[M201] - RMcoll[M021] - RMcoll[M202] - RMcoll[M022] + RMcoll[M221] + RMcoll[M222]);
-    // cell[F00M] = 0.5*rho * (-u[2] + RMcoll[M002] + RMcoll[M201] + RMcoll[M021] - RMcoll[M202] - RMcoll[M022] - RMcoll[M221] + RMcoll[M222]);
-
-    // cell[FPP0] = 0.25*rho * ( RMcoll[M110] + RMcoll[M210] + RMcoll[M120] - RMcoll[M112] + RMcoll[M220] - RMcoll[M212] - RMcoll[M122] - RMcoll[M222]);
-    // cell[FMP0] = 0.25*rho * (-RMcoll[M110] + RMcoll[M210] - RMcoll[M120] + RMcoll[M112] + RMcoll[M220] - RMcoll[M212] + RMcoll[M122] - RMcoll[M222]);
-    // cell[FPM0] = 0.25*rho * (-RMcoll[M110] - RMcoll[M210] + RMcoll[M120] + RMcoll[M112] + RMcoll[M220] + RMcoll[M212] - RMcoll[M122] - RMcoll[M222]);
-    // cell[FMM0] = 0.25*rho * ( RMcoll[M110] - RMcoll[M210] - RMcoll[M120] - RMcoll[M112] + RMcoll[M220] + RMcoll[M212] + RMcoll[M122] - RMcoll[M222]);
-
-    // cell[FP0P] = 0.25*rho * ( RMcoll[M101] + RMcoll[M201] + RMcoll[M102] - RMcoll[M121] + RMcoll[M202] - RMcoll[M221] - RMcoll[M122] - RMcoll[M222]);
-    // cell[FM0P] = 0.25*rho * (-RMcoll[M101] + RMcoll[M201] - RMcoll[M102] + RMcoll[M121] + RMcoll[M202] - RMcoll[M221] + RMcoll[M122] - RMcoll[M222]);
-    // cell[FP0M] = 0.25*rho * (-RMcoll[M101] - RMcoll[M201] + RMcoll[M102] + RMcoll[M121] + RMcoll[M202] + RMcoll[M221] - RMcoll[M122] - RMcoll[M222]);
-    // cell[FM0M] = 0.25*rho * ( RMcoll[M101] - RMcoll[M201] - RMcoll[M102] - RMcoll[M121] + RMcoll[M202] + RMcoll[M221] + RMcoll[M122] - RMcoll[M222]);
-
-    // cell[F0PP] = 0.25*rho * ( RMcoll[M011] + RMcoll[M021] + RMcoll[M012] - RMcoll[M211] + RMcoll[M022] - RMcoll[M221] - RMcoll[M212] - RMcoll[M222]);
-    // cell[F0MP] = 0.25*rho * (-RMcoll[M011] + RMcoll[M021] - RMcoll[M012] + RMcoll[M211] + RMcoll[M022] - RMcoll[M221] + RMcoll[M212] - RMcoll[M222]);
-    // cell[F0PM] = 0.25*rho * (-RMcoll[M011] - RMcoll[M021] + RMcoll[M012] + RMcoll[M211] + RMcoll[M022] + RMcoll[M221] - RMcoll[M212] - RMcoll[M222]);
-    // cell[F0MM] = 0.25*rho * ( RMcoll[M011] - RMcoll[M021] - RMcoll[M012] - RMcoll[M211] + RMcoll[M022] + RMcoll[M221] + RMcoll[M212] - RMcoll[M222]);
-
-    // cell[FPPP] = 0.125*rho * ( RMcoll[M111] + RMcoll[M211] + RMcoll[M121] + RMcoll[M112] + RMcoll[M221] + RMcoll[M212] + RMcoll[M122] + RMcoll[M222]);
-    // cell[FMPP] = 0.125*rho * (-RMcoll[M111] + RMcoll[M211] - RMcoll[M121] - RMcoll[M112] + RMcoll[M221] + RMcoll[M212] - RMcoll[M122] + RMcoll[M222]);
-    // cell[FPMP] = 0.125*rho * (-RMcoll[M111] - RMcoll[M211] + RMcoll[M121] - RMcoll[M112] + RMcoll[M221] - RMcoll[M212] + RMcoll[M122] + RMcoll[M222]);
-    // cell[FPPM] = 0.125*rho * (-RMcoll[M111] - RMcoll[M211] - RMcoll[M121] + RMcoll[M112] - RMcoll[M221] + RMcoll[M212] + RMcoll[M122] + RMcoll[M222]);
-    // cell[FMMP] = 0.125*rho * ( RMcoll[M111] - RMcoll[M211] - RMcoll[M121] + RMcoll[M112] + RMcoll[M221] - RMcoll[M212] - RMcoll[M122] + RMcoll[M222]);
-    // cell[FMPM] = 0.125*rho * ( RMcoll[M111] - RMcoll[M211] + RMcoll[M121] - RMcoll[M112] - RMcoll[M221] + RMcoll[M212] - RMcoll[M122] + RMcoll[M222]);
-    // cell[FPMM] = 0.125*rho * ( RMcoll[M111] + RMcoll[M211] - RMcoll[M121] - RMcoll[M112] - RMcoll[M221] - RMcoll[M212] + RMcoll[M122] + RMcoll[M222]);
-    // cell[FMMM] = 0.125*rho * (-RMcoll[M111] + RMcoll[M211] + RMcoll[M121] + RMcoll[M112] - RMcoll[M221] - RMcoll[M212] - RMcoll[M122] + RMcoll[M222]);
 
     // Optimization based on symmetries between populations and their opposite counterpart
     cell[F000] = rho *(1. - RMcoll[M200] - RMcoll[M020] - RMcoll[M002] + RMcoll[M220] + RMcoll[M202] + RMcoll[M022] - RMcoll[M222]);
@@ -923,10 +816,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the Hermite moment space
-    // Order 2
-/*    HMcoll[M200] = (1.-omega1) * HM[M200] + omega1 * HMeq[M200] ;
-    HMcoll[M020] = (1.-omega1) * HM[M020] + omega1 * HMeq[M020] ;
-    HMcoll[M002] = (1.-omega1) * HM[M002] + omega1 * HMeq[M002] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     HMcoll[M200] = HM[M200] - omegaPlus  * (HM[M200]-HMeq[M200]) - omegaMinus * (HM[M020]-HMeq[M020]) - omegaMinus * (HM[M002]-HMeq[M002]) ;
     HMcoll[M020] = HM[M020] - omegaMinus * (HM[M200]-HMeq[M200]) - omegaPlus  * (HM[M020]-HMeq[M020]) - omegaMinus * (HM[M002]-HMeq[M002]) ;
     HMcoll[M002] = HM[M002] - omegaMinus * (HM[M200]-HMeq[M200]) - omegaMinus * (HM[M020]-HMeq[M020]) - omegaPlus  * (HM[M002]-HMeq[M002]) ;
@@ -1338,10 +1228,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the central moment space
-    // Order 2
-/*    CMcoll[M200] = (1.-omega1) * CM[M200] + omega1 * CMeq[M200] ;
-    CMcoll[M020] = (1.-omega1) * CM[M020] + omega1 * CMeq[M020] ;
-    CMcoll[M002] = (1.-omega1) * CM[M002] + omega1 * CMeq[M002] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     CMcoll[M200] = CM[M200] - omegaPlus  * (CM[M200]-CMeq[M200]) - omegaMinus * (CM[M020]-CMeq[M020]) - omegaMinus * (CM[M002]-CMeq[M002]) ;
     CMcoll[M020] = CM[M020] - omegaMinus * (CM[M200]-CMeq[M200]) - omegaPlus  * (CM[M020]-CMeq[M020]) - omegaMinus * (CM[M002]-CMeq[M002]) ;
     CMcoll[M002] = CM[M002] - omegaMinus * (CM[M200]-CMeq[M200]) - omegaMinus * (CM[M020]-CMeq[M020]) - omegaPlus  * (CM[M002]-CMeq[M002]) ;
@@ -1794,10 +1681,7 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 
     // Collision in the central Hermite moment space
-    // Order 2
-    /*    CHMcoll[M200] = (1.-omega1) * CHM[M200] + omega1 * CHMeq[M200] ;
-    CHMcoll[M020] = (1.-omega1) * CHM[M020] + omega1 * CHMeq[M020] ;
-    CHMcoll[M002] = (1.-omega1) * CHM[M002] + omega1 * CHMeq[M002] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     CHMcoll[M200] = CHM[M200] - omegaPlus  * (CHM[M200]-CHMeq[M200]) - omegaMinus * (CHM[M020]-CHMeq[M020]) - omegaMinus * (CHM[M002]-CHMeq[M002]) ;
     CHMcoll[M020] = CHM[M020] - omegaMinus * (CHM[M200]-CHMeq[M200]) - omegaPlus  * (CHM[M020]-CHMeq[M020]) - omegaMinus * (CHM[M002]-CHMeq[M002]) ;
     CHMcoll[M002] = CHM[M002] - omegaMinus * (CHM[M200]-CHMeq[M200]) - omegaMinus * (CHM[M020]-CHMeq[M020]) - omegaPlus  * (CHM[M002]-CHMeq[M002]) ;
@@ -2305,10 +2189,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the cumulant space
-    // Order 2
-    // Kcoll[M200] = (1.-omega1) * K[M200] + omega1 * Keq[M200] ;
-    // Kcoll[M020] = (1.-omega1) * K[M020] + omega1 * Keq[M020] ;
-    // Kcoll[M002] = (1.-omega1) * K[M002] + omega1 * Keq[M002] ;
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     Kcoll[M200] = K[M200] - omegaPlus  * (K[M200]-Keq[M200]) - omegaMinus * (K[M020]-Keq[M020]) - omegaMinus * (K[M002]-Keq[M002]) ;
     Kcoll[M020] = K[M020] - omegaMinus * (K[M200]-Keq[M200]) - omegaPlus  * (K[M020]-Keq[M020]) - omegaMinus * (K[M002]-Keq[M002]) ;
     Kcoll[M002] = K[M002] - omegaMinus * (K[M200]-Keq[M200]) - omegaMinus * (K[M020]-Keq[M020]) - omegaPlus  * (K[M002]-Keq[M002]) ;
@@ -2657,38 +2538,6 @@ static void GHcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& 
 static void GHcomputeEquilibrium(T rho, Array<T, D::q> const& GHeq, Array<T, D::q>& eq) {
 
     Array<T, D::d> u(GHeq[1], GHeq[2], GHeq[3]);
-
-    // eq[F000] = (rho*8./27.) * (1. - 3./2.*GHeq[M200] - 3./2.*GHeq[M020] - 3./2.*GHeq[M002] + 9./4.*GHeq[M220] + 9./4.*GHeq[M202] + 9./4.*GHeq[M022] - 27./8.*GHeq[M222]);
-
-    // eq[FP00] = (rho*2./27.) * (1. + 3.*u[0] + 3.*GHeq[M200] - 3./2.*GHeq[M020] - 3./2.*GHeq[M002] - 9./2.*GHeq[M120] - 9./2.*GHeq[M102] - 9./2.*GHeq[M220] - 9./2.*GHeq[M202] + 9./4.*GHeq[M022] + 27./4.*GHeq[M122] + 27./4.*GHeq[M222]);
-    // eq[FM00] = (rho*2./27.) * (1. - 3.*u[0] + 3.*GHeq[M200] - 3./2.*GHeq[M020] - 3./2.*GHeq[M002] + 9./2.*GHeq[M120] + 9./2.*GHeq[M102] - 9./2.*GHeq[M220] - 9./2.*GHeq[M202] + 9./4.*GHeq[M022] - 27./4.*GHeq[M122] + 27./4.*GHeq[M222]);
-    // eq[F0P0] = (rho*2./27.) * (1. + 3.*u[1] - 3./2.*GHeq[M200] + 3.*GHeq[M020] - 3./2.*GHeq[M002] - 9./2.*GHeq[M210] - 9./2.*GHeq[M012] - 9./2.*GHeq[M220] + 9./4.*GHeq[M202] - 9./2.*GHeq[M022] + 27./4.*GHeq[M212] + 27./4.*GHeq[M222]);
-    // eq[F0M0] = (rho*2./27.) * (1. - 3.*u[1] - 3./2.*GHeq[M200] + 3.*GHeq[M020] - 3./2.*GHeq[M002] + 9./2.*GHeq[M210] + 9./2.*GHeq[M012] - 9./2.*GHeq[M220] + 9./4.*GHeq[M202] - 9./2.*GHeq[M022] - 27./4.*GHeq[M212] + 27./4.*GHeq[M222]);
-    // eq[F00P] = (rho*2./27.) * (1. + 3.*u[2] - 3./2.*GHeq[M200] - 3./2.*GHeq[M020] + 3.*GHeq[M002] - 9./2.*GHeq[M201] - 9./2.*GHeq[M021] + 9./4.*GHeq[M220] - 9./2.*GHeq[M202] - 9./2.*GHeq[M022] + 27./4.*GHeq[M221] + 27./4.*GHeq[M222]);
-    // eq[F00M] = (rho*2./27.) * (1. - 3.*u[2] - 3./2.*GHeq[M200] - 3./2.*GHeq[M020] + 3.*GHeq[M002] + 9./2.*GHeq[M201] + 9./2.*GHeq[M021] + 9./4.*GHeq[M220] - 9./2.*GHeq[M202] - 9./2.*GHeq[M022] - 27./4.*GHeq[M221] + 27./4.*GHeq[M222]);
-
-    // eq[FPP0] = (rho / 54.)  * (1. + 3.*u[0] + 3.*u[1] + 3.*GHeq[M200] + 3.*GHeq[M020] - 3./2.*GHeq[M002] + 9.*GHeq[M110] + 9.*GHeq[M210] + 9.*GHeq[M120] - 9./2.*GHeq[M102] - 9./2.*GHeq[M012] + 9.*GHeq[M220] - 9./2.*GHeq[M202] - 9./2.*GHeq[M022] - 27./2.*GHeq[M112] - 27./2.*GHeq[M212] - 27./2.*GHeq[M122] - 27./2.*GHeq[M222]);
-    // eq[FMP0] = (rho / 54.)  * (1. - 3.*u[0] + 3.*u[1] + 3.*GHeq[M200] + 3.*GHeq[M020] - 3./2.*GHeq[M002] - 9.*GHeq[M110] + 9.*GHeq[M210] - 9.*GHeq[M120] + 9./2.*GHeq[M102] - 9./2.*GHeq[M012] + 9.*GHeq[M220] - 9./2.*GHeq[M202] - 9./2.*GHeq[M022] + 27./2.*GHeq[M112] - 27./2.*GHeq[M212] + 27./2.*GHeq[M122] - 27./2.*GHeq[M222]);
-    // eq[FPM0] = (rho / 54.)  * (1. + 3.*u[0] - 3.*u[1] + 3.*GHeq[M200] + 3.*GHeq[M020] - 3./2.*GHeq[M002] - 9.*GHeq[M110] - 9.*GHeq[M210] + 9.*GHeq[M120] - 9./2.*GHeq[M102] + 9./2.*GHeq[M012] + 9.*GHeq[M220] - 9./2.*GHeq[M202] - 9./2.*GHeq[M022] + 27./2.*GHeq[M112] + 27./2.*GHeq[M212] - 27./2.*GHeq[M122] - 27./2.*GHeq[M222]);
-    // eq[FMM0] = (rho / 54.)  * (1. - 3.*u[0] - 3.*u[1] + 3.*GHeq[M200] + 3.*GHeq[M020] - 3./2.*GHeq[M002] + 9.*GHeq[M110] - 9.*GHeq[M210] - 9.*GHeq[M120] + 9./2.*GHeq[M102] + 9./2.*GHeq[M012] + 9.*GHeq[M220] - 9./2.*GHeq[M202] - 9./2.*GHeq[M022] - 27./2.*GHeq[M112] + 27./2.*GHeq[M212] + 27./2.*GHeq[M122] - 27./2.*GHeq[M222]);
-    // eq[FP0P] = (rho / 54.)  * (1. + 3.*u[0] + 3.*u[2] + 3.*GHeq[M200] - 3./2.*GHeq[M020] + 3.*GHeq[M002] + 9.*GHeq[M101] + 9.*GHeq[M201] - 9./2.*GHeq[M021] - 9./2.*GHeq[M120] + 9.*GHeq[M102] - 9./2.*GHeq[M220] + 9.*GHeq[M202] - 9./2.*GHeq[M022] - 27./2.*GHeq[M121] - 27./2.*GHeq[M221] - 27./2.*GHeq[M122] - 27./2.*GHeq[M222]);
-    // eq[FM0P] = (rho / 54.)  * (1. - 3.*u[0] + 3.*u[2] + 3.*GHeq[M200] - 3./2.*GHeq[M020] + 3.*GHeq[M002] - 9.*GHeq[M101] + 9.*GHeq[M201] - 9./2.*GHeq[M021] + 9./2.*GHeq[M120] - 9.*GHeq[M102] - 9./2.*GHeq[M220] + 9.*GHeq[M202] - 9./2.*GHeq[M022] + 27./2.*GHeq[M121] - 27./2.*GHeq[M221] + 27./2.*GHeq[M122] - 27./2.*GHeq[M222]);
-    // eq[FP0M] = (rho / 54.)  * (1. + 3.*u[0] - 3.*u[2] + 3.*GHeq[M200] - 3./2.*GHeq[M020] + 3.*GHeq[M002] - 9.*GHeq[M101] - 9.*GHeq[M201] + 9./2.*GHeq[M021] - 9./2.*GHeq[M120] + 9.*GHeq[M102] - 9./2.*GHeq[M220] + 9.*GHeq[M202] - 9./2.*GHeq[M022] + 27./2.*GHeq[M121] + 27./2.*GHeq[M221] - 27./2.*GHeq[M122] - 27./2.*GHeq[M222]);
-    // eq[FM0M] = (rho / 54.)  * (1. - 3.*u[0] - 3.*u[2] + 3.*GHeq[M200] - 3./2.*GHeq[M020] + 3.*GHeq[M002] + 9.*GHeq[M101] - 9.*GHeq[M201] + 9./2.*GHeq[M021] + 9./2.*GHeq[M120] - 9.*GHeq[M102] - 9./2.*GHeq[M220] + 9.*GHeq[M202] - 9./2.*GHeq[M022] - 27./2.*GHeq[M121] + 27./2.*GHeq[M221] + 27./2.*GHeq[M122] - 27./2.*GHeq[M222]);
-    // eq[F0PP] = (rho / 54.)  * (1. + 3.*u[1] + 3.*u[2] - 3./2.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] + 9.*GHeq[M011] - 9./2.*GHeq[M210] - 9./2.*GHeq[M201] + 9.*GHeq[M021] + 9.*GHeq[M012] - 9./2.*GHeq[M220] - 9./2.*GHeq[M202] + 9.*GHeq[M022] - 27./2.*GHeq[M211] - 27./2.*GHeq[M221] - 27./2.*GHeq[M212] - 27./2.*GHeq[M222]);
-    // eq[F0MP] = (rho / 54.)  * (1. - 3.*u[1] + 3.*u[2] - 3./2.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] - 9.*GHeq[M011] + 9./2.*GHeq[M210] - 9./2.*GHeq[M201] + 9.*GHeq[M021] - 9.*GHeq[M012] - 9./2.*GHeq[M220] - 9./2.*GHeq[M202] + 9.*GHeq[M022] + 27./2.*GHeq[M211] - 27./2.*GHeq[M221] + 27./2.*GHeq[M212] - 27./2.*GHeq[M222]);
-    // eq[F0PM] = (rho / 54.)  * (1. + 3.*u[1] - 3.*u[2] - 3./2.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] - 9.*GHeq[M011] - 9./2.*GHeq[M210] + 9./2.*GHeq[M201] - 9.*GHeq[M021] + 9.*GHeq[M012] - 9./2.*GHeq[M220] - 9./2.*GHeq[M202] + 9.*GHeq[M022] + 27./2.*GHeq[M211] + 27./2.*GHeq[M221] - 27./2.*GHeq[M212] - 27./2.*GHeq[M222]);
-    // eq[F0MM] = (rho / 54.)  * (1. - 3.*u[1] - 3.*u[2] - 3./2.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] + 9.*GHeq[M011] + 9./2.*GHeq[M210] + 9./2.*GHeq[M201] - 9.*GHeq[M021] - 9.*GHeq[M012] - 9./2.*GHeq[M220] - 9./2.*GHeq[M202] + 9.*GHeq[M022] - 27./2.*GHeq[M211] + 27./2.*GHeq[M221] + 27./2.*GHeq[M212] - 27./2.*GHeq[M222]);
-
-    // eq[FPPP] = (rho / 216.) * (1. + 3.*u[0] + 3.*u[1] + 3.*u[2] + 3.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] + 9.*GHeq[M110] + 9.*GHeq[M101] + 9.*GHeq[M011] + 9.*GHeq[M210] + 9.*GHeq[M201] + 9.*GHeq[M021] + 9.*GHeq[M120] + 9.*GHeq[M102] + 9.*GHeq[M012] + 27.*GHeq[M111] + 9.*GHeq[M220] + 9.*GHeq[M202] + 9.*GHeq[M022] + 27.*GHeq[M211] + 27.*GHeq[M121] + 27.*GHeq[M112] + 27.*GHeq[M221] + 27.*GHeq[M212] + 27.*GHeq[M122] + 27.*GHeq[M222]);
-    // eq[FMPP] = (rho / 216.) * (1. - 3.*u[0] + 3.*u[1] + 3.*u[2] + 3.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] - 9.*GHeq[M110] - 9.*GHeq[M101] + 9.*GHeq[M011] + 9.*GHeq[M210] + 9.*GHeq[M201] + 9.*GHeq[M021] - 9.*GHeq[M120] - 9.*GHeq[M102] + 9.*GHeq[M012] - 27.*GHeq[M111] + 9.*GHeq[M220] + 9.*GHeq[M202] + 9.*GHeq[M022] + 27.*GHeq[M211] - 27.*GHeq[M121] - 27.*GHeq[M112] + 27.*GHeq[M221] + 27.*GHeq[M212] - 27.*GHeq[M122] + 27.*GHeq[M222]);
-    // eq[FPMP] = (rho / 216.) * (1. + 3.*u[0] - 3.*u[1] + 3.*u[2] + 3.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] - 9.*GHeq[M110] + 9.*GHeq[M101] - 9.*GHeq[M011] - 9.*GHeq[M210] + 9.*GHeq[M201] + 9.*GHeq[M021] + 9.*GHeq[M120] + 9.*GHeq[M102] - 9.*GHeq[M012] - 27.*GHeq[M111] + 9.*GHeq[M220] + 9.*GHeq[M202] + 9.*GHeq[M022] - 27.*GHeq[M211] + 27.*GHeq[M121] - 27.*GHeq[M112] + 27.*GHeq[M221] - 27.*GHeq[M212] + 27.*GHeq[M122] + 27.*GHeq[M222]);
-    // eq[FPPM] = (rho / 216.) * (1. + 3.*u[0] + 3.*u[1] - 3.*u[2] + 3.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] + 9.*GHeq[M110] - 9.*GHeq[M101] - 9.*GHeq[M011] + 9.*GHeq[M210] - 9.*GHeq[M201] - 9.*GHeq[M021] + 9.*GHeq[M120] + 9.*GHeq[M102] + 9.*GHeq[M012] - 27.*GHeq[M111] + 9.*GHeq[M220] + 9.*GHeq[M202] + 9.*GHeq[M022] - 27.*GHeq[M211] - 27.*GHeq[M121] + 27.*GHeq[M112] - 27.*GHeq[M221] + 27.*GHeq[M212] + 27.*GHeq[M122] + 27.*GHeq[M222]);
-    // eq[FMMP] = (rho / 216.) * (1. - 3.*u[0] - 3.*u[1] + 3.*u[2] + 3.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] + 9.*GHeq[M110] - 9.*GHeq[M101] - 9.*GHeq[M011] - 9.*GHeq[M210] + 9.*GHeq[M201] + 9.*GHeq[M021] - 9.*GHeq[M120] - 9.*GHeq[M102] - 9.*GHeq[M012] + 27.*GHeq[M111] + 9.*GHeq[M220] + 9.*GHeq[M202] + 9.*GHeq[M022] - 27.*GHeq[M211] - 27.*GHeq[M121] + 27.*GHeq[M112] + 27.*GHeq[M221] - 27.*GHeq[M212] - 27.*GHeq[M122] + 27.*GHeq[M222]);
-    // eq[FMPM] = (rho / 216.) * (1. - 3.*u[0] + 3.*u[1] - 3.*u[2] + 3.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] - 9.*GHeq[M110] + 9.*GHeq[M101] - 9.*GHeq[M011] + 9.*GHeq[M210] - 9.*GHeq[M201] - 9.*GHeq[M021] - 9.*GHeq[M120] - 9.*GHeq[M102] + 9.*GHeq[M012] + 27.*GHeq[M111] + 9.*GHeq[M220] + 9.*GHeq[M202] + 9.*GHeq[M022] - 27.*GHeq[M211] + 27.*GHeq[M121] - 27.*GHeq[M112] - 27.*GHeq[M221] + 27.*GHeq[M212] - 27.*GHeq[M122] + 27.*GHeq[M222]);
-    // eq[FPMM] = (rho / 216.) * (1. + 3.*u[0] - 3.*u[1] - 3.*u[2] + 3.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] - 9.*GHeq[M110] - 9.*GHeq[M101] + 9.*GHeq[M011] - 9.*GHeq[M210] - 9.*GHeq[M201] - 9.*GHeq[M021] + 9.*GHeq[M120] + 9.*GHeq[M102] - 9.*GHeq[M012] + 27.*GHeq[M111] + 9.*GHeq[M220] + 9.*GHeq[M202] + 9.*GHeq[M022] + 27.*GHeq[M211] - 27.*GHeq[M121] - 27.*GHeq[M112] - 27.*GHeq[M221] - 27.*GHeq[M212] + 27.*GHeq[M122] + 27.*GHeq[M222]);
-    // eq[FMMM] = (rho / 216.) * (1. - 3.*u[0] - 3.*u[1] - 3.*u[2] + 3.*GHeq[M200] + 3.*GHeq[M020] + 3.*GHeq[M002] + 9.*GHeq[M110] + 9.*GHeq[M101] + 9.*GHeq[M011] - 9.*GHeq[M210] - 9.*GHeq[M201] - 9.*GHeq[M021] - 9.*GHeq[M120] - 9.*GHeq[M102] - 9.*GHeq[M012] - 27.*GHeq[M111] + 9.*GHeq[M220] + 9.*GHeq[M202] + 9.*GHeq[M022] + 27.*GHeq[M211] + 27.*GHeq[M121] + 27.*GHeq[M112] - 27.*GHeq[M221] - 27.*GHeq[M212] - 27.*GHeq[M122] + 27.*GHeq[M222]);
-
     Array<T,D::q> RMeq;
     // Order 2
     RMeq[M200] = u[0] * u[0] + D::cs2;
@@ -2778,10 +2627,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> GHcoll;
 
     // Collision in the Hermite moment space
-    // Order 2
-    // GHcoll[M200] = (1.-omega1) * GH[M200] + omega1 * GHeq[M200] ;
-    // GHcoll[M020] = (1.-omega1) * GH[M020] + omega1 * GHeq[M020] ;
-    // GHcoll[M002] = (1.-omega1) * GH[M002] + omega1 * GHeq[M002] ;
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     GHcoll[M200] = GH[M200] - omegaPlus  * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
     GHcoll[M020] = GH[M020] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaPlus  * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
     GHcoll[M002] = GH[M002] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaPlus  * (GH[M002]-GHeq[M002]) ;
@@ -2989,38 +2835,6 @@ static void RRcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& 
 static void RRcomputeEquilibrium(T rho, Array<T, D::q> const& RReq, Array<T, D::q>& eq) {
 
     Array<T, D::d> u(RReq[1], RReq[2], RReq[3]);
-
-/*    eq[F000] = (rho*8./27.) * (1. - 3./2.*RReq[M200] - 3./2.*RReq[M020] - 3./2.*RReq[M002] + 9./4.*RReq[M220] + 9./4.*RReq[M202] + 9./4.*RReq[M022] - 27./8.*RReq[M222]);
-
-    eq[FP00] = (rho*2./27.) * (1. + 3.*u[0] + 3.*RReq[M200] - 3./2.*RReq[M020] - 3./2.*RReq[M002] - 9./2.*RReq[M120] - 9./2.*RReq[M102] - 9./2.*RReq[M220] - 9./2.*RReq[M202] + 9./4.*RReq[M022] + 27./4.*RReq[M122] + 27./4.*RReq[M222]);
-    eq[FM00] = (rho*2./27.) * (1. - 3.*u[0] + 3.*RReq[M200] - 3./2.*RReq[M020] - 3./2.*RReq[M002] + 9./2.*RReq[M120] + 9./2.*RReq[M102] - 9./2.*RReq[M220] - 9./2.*RReq[M202] + 9./4.*RReq[M022] - 27./4.*RReq[M122] + 27./4.*RReq[M222]);
-    eq[F0P0] = (rho*2./27.) * (1. + 3.*u[1] - 3./2.*RReq[M200] + 3.*RReq[M020] - 3./2.*RReq[M002] - 9./2.*RReq[M210] - 9./2.*RReq[M012] - 9./2.*RReq[M220] + 9./4.*RReq[M202] - 9./2.*RReq[M022] + 27./4.*RReq[M212] + 27./4.*RReq[M222]);
-    eq[F0M0] = (rho*2./27.) * (1. - 3.*u[1] - 3./2.*RReq[M200] + 3.*RReq[M020] - 3./2.*RReq[M002] + 9./2.*RReq[M210] + 9./2.*RReq[M012] - 9./2.*RReq[M220] + 9./4.*RReq[M202] - 9./2.*RReq[M022] - 27./4.*RReq[M212] + 27./4.*RReq[M222]);
-    eq[F00P] = (rho*2./27.) * (1. + 3.*u[2] - 3./2.*RReq[M200] - 3./2.*RReq[M020] + 3.*RReq[M002] - 9./2.*RReq[M201] - 9./2.*RReq[M021] + 9./4.*RReq[M220] - 9./2.*RReq[M202] - 9./2.*RReq[M022] + 27./4.*RReq[M221] + 27./4.*RReq[M222]);
-    eq[F00M] = (rho*2./27.) * (1. - 3.*u[2] - 3./2.*RReq[M200] - 3./2.*RReq[M020] + 3.*RReq[M002] + 9./2.*RReq[M201] + 9./2.*RReq[M021] + 9./4.*RReq[M220] - 9./2.*RReq[M202] - 9./2.*RReq[M022] - 27./4.*RReq[M221] + 27./4.*RReq[M222]);
-
-    eq[FPP0] = (rho / 54.)  * (1. + 3.*u[0] + 3.*u[1] + 3.*RReq[M200] + 3.*RReq[M020] - 3./2.*RReq[M002] + 9.*RReq[M110] + 9.*RReq[M210] + 9.*RReq[M120] - 9./2.*RReq[M102] - 9./2.*RReq[M012] + 9.*RReq[M220] - 9./2.*RReq[M202] - 9./2.*RReq[M022] - 27./2.*RReq[M112] - 27./2.*RReq[M212] - 27./2.*RReq[M122] - 27./2.*RReq[M222]);
-    eq[FMP0] = (rho / 54.)  * (1. - 3.*u[0] + 3.*u[1] + 3.*RReq[M200] + 3.*RReq[M020] - 3./2.*RReq[M002] - 9.*RReq[M110] + 9.*RReq[M210] - 9.*RReq[M120] + 9./2.*RReq[M102] - 9./2.*RReq[M012] + 9.*RReq[M220] - 9./2.*RReq[M202] - 9./2.*RReq[M022] + 27./2.*RReq[M112] - 27./2.*RReq[M212] + 27./2.*RReq[M122] - 27./2.*RReq[M222]);
-    eq[FPM0] = (rho / 54.)  * (1. + 3.*u[0] - 3.*u[1] + 3.*RReq[M200] + 3.*RReq[M020] - 3./2.*RReq[M002] - 9.*RReq[M110] - 9.*RReq[M210] + 9.*RReq[M120] - 9./2.*RReq[M102] + 9./2.*RReq[M012] + 9.*RReq[M220] - 9./2.*RReq[M202] - 9./2.*RReq[M022] + 27./2.*RReq[M112] + 27./2.*RReq[M212] - 27./2.*RReq[M122] - 27./2.*RReq[M222]);
-    eq[FMM0] = (rho / 54.)  * (1. - 3.*u[0] - 3.*u[1] + 3.*RReq[M200] + 3.*RReq[M020] - 3./2.*RReq[M002] + 9.*RReq[M110] - 9.*RReq[M210] - 9.*RReq[M120] + 9./2.*RReq[M102] + 9./2.*RReq[M012] + 9.*RReq[M220] - 9./2.*RReq[M202] - 9./2.*RReq[M022] - 27./2.*RReq[M112] + 27./2.*RReq[M212] + 27./2.*RReq[M122] - 27./2.*RReq[M222]);
-    eq[FP0P] = (rho / 54.)  * (1. + 3.*u[0] + 3.*u[2] + 3.*RReq[M200] - 3./2.*RReq[M020] + 3.*RReq[M002] + 9.*RReq[M101] + 9.*RReq[M201] - 9./2.*RReq[M021] - 9./2.*RReq[M120] + 9.*RReq[M102] - 9./2.*RReq[M220] + 9.*RReq[M202] - 9./2.*RReq[M022] - 27./2.*RReq[M121] - 27./2.*RReq[M221] - 27./2.*RReq[M122] - 27./2.*RReq[M222]);
-    eq[FM0P] = (rho / 54.)  * (1. - 3.*u[0] + 3.*u[2] + 3.*RReq[M200] - 3./2.*RReq[M020] + 3.*RReq[M002] - 9.*RReq[M101] + 9.*RReq[M201] - 9./2.*RReq[M021] + 9./2.*RReq[M120] - 9.*RReq[M102] - 9./2.*RReq[M220] + 9.*RReq[M202] - 9./2.*RReq[M022] + 27./2.*RReq[M121] - 27./2.*RReq[M221] + 27./2.*RReq[M122] - 27./2.*RReq[M222]);
-    eq[FP0M] = (rho / 54.)  * (1. + 3.*u[0] - 3.*u[2] + 3.*RReq[M200] - 3./2.*RReq[M020] + 3.*RReq[M002] - 9.*RReq[M101] - 9.*RReq[M201] + 9./2.*RReq[M021] - 9./2.*RReq[M120] + 9.*RReq[M102] - 9./2.*RReq[M220] + 9.*RReq[M202] - 9./2.*RReq[M022] + 27./2.*RReq[M121] + 27./2.*RReq[M221] - 27./2.*RReq[M122] - 27./2.*RReq[M222]);
-    eq[FM0M] = (rho / 54.)  * (1. - 3.*u[0] - 3.*u[2] + 3.*RReq[M200] - 3./2.*RReq[M020] + 3.*RReq[M002] + 9.*RReq[M101] - 9.*RReq[M201] + 9./2.*RReq[M021] + 9./2.*RReq[M120] - 9.*RReq[M102] - 9./2.*RReq[M220] + 9.*RReq[M202] - 9./2.*RReq[M022] - 27./2.*RReq[M121] + 27./2.*RReq[M221] + 27./2.*RReq[M122] - 27./2.*RReq[M222]);
-    eq[F0PP] = (rho / 54.)  * (1. + 3.*u[1] + 3.*u[2] - 3./2.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] + 9.*RReq[M011] - 9./2.*RReq[M210] - 9./2.*RReq[M201] + 9.*RReq[M021] + 9.*RReq[M012] - 9./2.*RReq[M220] - 9./2.*RReq[M202] + 9.*RReq[M022] - 27./2.*RReq[M211] - 27./2.*RReq[M221] - 27./2.*RReq[M212] - 27./2.*RReq[M222]);
-    eq[F0MP] = (rho / 54.)  * (1. - 3.*u[1] + 3.*u[2] - 3./2.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] - 9.*RReq[M011] + 9./2.*RReq[M210] - 9./2.*RReq[M201] + 9.*RReq[M021] - 9.*RReq[M012] - 9./2.*RReq[M220] - 9./2.*RReq[M202] + 9.*RReq[M022] + 27./2.*RReq[M211] - 27./2.*RReq[M221] + 27./2.*RReq[M212] - 27./2.*RReq[M222]);
-    eq[F0PM] = (rho / 54.)  * (1. + 3.*u[1] - 3.*u[2] - 3./2.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] - 9.*RReq[M011] - 9./2.*RReq[M210] + 9./2.*RReq[M201] - 9.*RReq[M021] + 9.*RReq[M012] - 9./2.*RReq[M220] - 9./2.*RReq[M202] + 9.*RReq[M022] + 27./2.*RReq[M211] + 27./2.*RReq[M221] - 27./2.*RReq[M212] - 27./2.*RReq[M222]);
-    eq[F0MM] = (rho / 54.)  * (1. - 3.*u[1] - 3.*u[2] - 3./2.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] + 9.*RReq[M011] + 9./2.*RReq[M210] + 9./2.*RReq[M201] - 9.*RReq[M021] - 9.*RReq[M012] - 9./2.*RReq[M220] - 9./2.*RReq[M202] + 9.*RReq[M022] - 27./2.*RReq[M211] + 27./2.*RReq[M221] + 27./2.*RReq[M212] - 27./2.*RReq[M222]);
-
-    eq[FPPP] = (rho / 216.) * (1. + 3.*u[0] + 3.*u[1] + 3.*u[2] + 3.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] + 9.*RReq[M110] + 9.*RReq[M101] + 9.*RReq[M011] + 9.*RReq[M210] + 9.*RReq[M201] + 9.*RReq[M021] + 9.*RReq[M120] + 9.*RReq[M102] + 9.*RReq[M012] + 27.*RReq[M111] + 9.*RReq[M220] + 9.*RReq[M202] + 9.*RReq[M022] + 27.*RReq[M211] + 27.*RReq[M121] + 27.*RReq[M112] + 27.*RReq[M221] + 27.*RReq[M212] + 27.*RReq[M122] + 27.*RReq[M222]);
-    eq[FMPP] = (rho / 216.) * (1. - 3.*u[0] + 3.*u[1] + 3.*u[2] + 3.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] - 9.*RReq[M110] - 9.*RReq[M101] + 9.*RReq[M011] + 9.*RReq[M210] + 9.*RReq[M201] + 9.*RReq[M021] - 9.*RReq[M120] - 9.*RReq[M102] + 9.*RReq[M012] - 27.*RReq[M111] + 9.*RReq[M220] + 9.*RReq[M202] + 9.*RReq[M022] + 27.*RReq[M211] - 27.*RReq[M121] - 27.*RReq[M112] + 27.*RReq[M221] + 27.*RReq[M212] - 27.*RReq[M122] + 27.*RReq[M222]);
-    eq[FPMP] = (rho / 216.) * (1. + 3.*u[0] - 3.*u[1] + 3.*u[2] + 3.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] - 9.*RReq[M110] + 9.*RReq[M101] - 9.*RReq[M011] - 9.*RReq[M210] + 9.*RReq[M201] + 9.*RReq[M021] + 9.*RReq[M120] + 9.*RReq[M102] - 9.*RReq[M012] - 27.*RReq[M111] + 9.*RReq[M220] + 9.*RReq[M202] + 9.*RReq[M022] - 27.*RReq[M211] + 27.*RReq[M121] - 27.*RReq[M112] + 27.*RReq[M221] - 27.*RReq[M212] + 27.*RReq[M122] + 27.*RReq[M222]);
-    eq[FPPM] = (rho / 216.) * (1. + 3.*u[0] + 3.*u[1] - 3.*u[2] + 3.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] + 9.*RReq[M110] - 9.*RReq[M101] - 9.*RReq[M011] + 9.*RReq[M210] - 9.*RReq[M201] - 9.*RReq[M021] + 9.*RReq[M120] + 9.*RReq[M102] + 9.*RReq[M012] - 27.*RReq[M111] + 9.*RReq[M220] + 9.*RReq[M202] + 9.*RReq[M022] - 27.*RReq[M211] - 27.*RReq[M121] + 27.*RReq[M112] - 27.*RReq[M221] + 27.*RReq[M212] + 27.*RReq[M122] + 27.*RReq[M222]);
-    eq[FMMP] = (rho / 216.) * (1. - 3.*u[0] - 3.*u[1] + 3.*u[2] + 3.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] + 9.*RReq[M110] - 9.*RReq[M101] - 9.*RReq[M011] - 9.*RReq[M210] + 9.*RReq[M201] + 9.*RReq[M021] - 9.*RReq[M120] - 9.*RReq[M102] - 9.*RReq[M012] + 27.*RReq[M111] + 9.*RReq[M220] + 9.*RReq[M202] + 9.*RReq[M022] - 27.*RReq[M211] - 27.*RReq[M121] + 27.*RReq[M112] + 27.*RReq[M221] - 27.*RReq[M212] - 27.*RReq[M122] + 27.*RReq[M222]);
-    eq[FMPM] = (rho / 216.) * (1. - 3.*u[0] + 3.*u[1] - 3.*u[2] + 3.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] - 9.*RReq[M110] + 9.*RReq[M101] - 9.*RReq[M011] + 9.*RReq[M210] - 9.*RReq[M201] - 9.*RReq[M021] - 9.*RReq[M120] - 9.*RReq[M102] + 9.*RReq[M012] + 27.*RReq[M111] + 9.*RReq[M220] + 9.*RReq[M202] + 9.*RReq[M022] - 27.*RReq[M211] + 27.*RReq[M121] - 27.*RReq[M112] - 27.*RReq[M221] + 27.*RReq[M212] - 27.*RReq[M122] + 27.*RReq[M222]);
-    eq[FPMM] = (rho / 216.) * (1. + 3.*u[0] - 3.*u[1] - 3.*u[2] + 3.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] - 9.*RReq[M110] - 9.*RReq[M101] + 9.*RReq[M011] - 9.*RReq[M210] - 9.*RReq[M201] - 9.*RReq[M021] + 9.*RReq[M120] + 9.*RReq[M102] - 9.*RReq[M012] + 27.*RReq[M111] + 9.*RReq[M220] + 9.*RReq[M202] + 9.*RReq[M022] + 27.*RReq[M211] - 27.*RReq[M121] - 27.*RReq[M112] - 27.*RReq[M221] - 27.*RReq[M212] + 27.*RReq[M122] + 27.*RReq[M222]);
-    eq[FMMM] = (rho / 216.) * (1. - 3.*u[0] - 3.*u[1] - 3.*u[2] + 3.*RReq[M200] + 3.*RReq[M020] + 3.*RReq[M002] + 9.*RReq[M110] + 9.*RReq[M101] + 9.*RReq[M011] - 9.*RReq[M210] - 9.*RReq[M201] - 9.*RReq[M021] - 9.*RReq[M120] - 9.*RReq[M102] - 9.*RReq[M012] - 27.*RReq[M111] + 9.*RReq[M220] + 9.*RReq[M202] + 9.*RReq[M022] + 27.*RReq[M211] + 27.*RReq[M121] + 27.*RReq[M112] - 27.*RReq[M221] - 27.*RReq[M212] - 27.*RReq[M122] + 27.*RReq[M222]);
-*/
     Array<T,D::q> RMeq;
     // Order 2
     RMeq[M200] = u[0] * u[0] + D::cs2;
@@ -3102,113 +2916,9 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega7 = omega[6];
     T omega8 = omega[7];
 
-    // // Post-collision and Nonequilibrium moments.
-    // Array<T,D::q> RRneq;
-    // Array<T,D::q> RRcoll;
-
-    // // Recursive computation of nonequilibrium Hermite moments
-    // // Order 2 (standard way to compute them)
-    // RRneq[M200] = RR[M200] - RReq[M200] ;
-    // RRneq[M020] = RR[M020] - RReq[M020] ;
-    // RRneq[M002] = RR[M002] - RReq[M002] ;
-    // RRneq[M110] = RR[M110] - RReq[M110] ;
-    // RRneq[M101] = RR[M101] - RReq[M101] ;
-    // RRneq[M011] = RR[M011] - RReq[M011] ;
-    
-    // // Order 3 (reconstruction using Chapman-Enskog formulas)
-    // RRneq[M210] = u[1]*RRneq[M200] + 2.*u[0]*RRneq[M110] ;
-    // RRneq[M201] = u[2]*RRneq[M200] + 2.*u[0]*RRneq[M101] ;
-    // RRneq[M021] = u[2]*RRneq[M020] + 2.*u[1]*RRneq[M011] ;
-    // RRneq[M120] = u[0]*RRneq[M020] + 2.*u[1]*RRneq[M110] ;
-    // RRneq[M102] = u[0]*RRneq[M002] + 2.*u[2]*RRneq[M101] ;
-    // RRneq[M012] = u[1]*RRneq[M002] + 2.*u[2]*RRneq[M011] ;
-    // RRneq[M111] = u[2]*RRneq[M110] + u[1]*RRneq[M101] + u[0]*RRneq[M011];
-    
-    // // Order 4 (reconstruction using Chapman-Enskog formulas)
-    // RRneq[M220] = u[1]*u[1]*RRneq[M200] + u[0]*u[0]*RRneq[M020] + 4.*u[0]*u[1]*RRneq[M110];
-    // RRneq[M202] = u[2]*u[2]*RRneq[M200] + u[0]*u[0]*RRneq[M002] + 4.*u[0]*u[2]*RRneq[M101];
-    // RRneq[M022] = u[2]*u[2]*RRneq[M020] + u[1]*u[1]*RRneq[M002] + 4.*u[1]*u[2]*RRneq[M011];
-    // RRneq[M211] = u[1]*u[2]*RRneq[M200] + 2.*u[0]*u[2]*RRneq[M110] + 2.*u[0]*u[1]*RRneq[M101] + u[0]*u[0]*RRneq[M011];
-    // RRneq[M121] = u[0]*u[2]*RRneq[M020] + 2.*u[1]*u[2]*RRneq[M110] + u[1]*u[1]*RRneq[M101] + 2.*u[0]*u[1]*RRneq[M011];
-    // RRneq[M112] = u[0]*u[1]*RRneq[M002] + u[2]*u[2]*RRneq[M110] + 2.*u[1]*u[2]*RRneq[M101] + 2.*u[0]*u[2]*RRneq[M011];
-
-    // // Order 5 (reconstruction using Chapman-Enskog formulas)
-    // RRneq[M221] = u[1]*u[1]*u[2]*RRneq[M200] + u[0]*u[0]*u[2]*RRneq[M020] + 4.*u[0]*u[1]*u[2]*RRneq[M110] + 2.*u[0]*u[1]*u[1]*RRneq[M101] + 2.*u[0]*u[0]*u[1]*RRneq[M011];
-    // RRneq[M212] = u[2]*u[2]*u[1]*RRneq[M200] + u[0]*u[0]*u[1]*RRneq[M002] + 2.*u[0]*u[2]*u[2]*RRneq[M110] + 4.*u[0]*u[1]*u[2]*RRneq[M101] + 2.*u[0]*u[0]*u[2]*RRneq[M011];
-    // RRneq[M122] = u[2]*u[2]*u[0]*RRneq[M020] + u[1]*u[1]*u[0]*RRneq[M002] + 2.*u[1]*u[2]*u[2]*RRneq[M110] + 2.*u[1]*u[1]*u[2]*RRneq[M101] + 4.*u[0]*u[1]*u[2]*RRneq[M011];
-
-    // // Order 6 (reconstruction using Chapman-Enskog formulas)
-    // RRneq[M222] = u[1]*u[1]*u[2]*u[2]*RRneq[M200] + u[0]*u[0]*u[2]*u[2]*RRneq[M020] + u[0]*u[0]*u[1]*u[1]*RRneq[M002] + 4.*u[0]*u[1]*u[2]*u[2]*RRneq[M110] + 4.*u[0]*u[1]*u[1]*u[2]*RRneq[M101] + 4.*u[0]*u[0]*u[1]*u[2]*RRneq[M011];
-
-    // // Collision in the Hermite moment space
-    // // Order 2
-    // RRcoll[M200] = (1.-omega1) * RRneq[M200] + RReq[M200] ;
-    // RRcoll[M020] = (1.-omega1) * RRneq[M020] + RReq[M020] ;
-    // RRcoll[M002] = (1.-omega1) * RRneq[M002] + RReq[M002] ;
-    
-    // RRcoll[M110] = (1.-omega2) * RRneq[M110] + RReq[M110] ;
-    // RRcoll[M101] = (1.-omega2) * RRneq[M101] + RReq[M101] ;
-    // RRcoll[M011] = (1.-omega2) * RRneq[M011] + RReq[M011] ;
-
-    // // Order 3
-    // RRcoll[M210] = (1.-omega3) * RRneq[M210] + RReq[M210] ;
-    // RRcoll[M201] = (1.-omega3) * RRneq[M201] + RReq[M201] ;
-    // RRcoll[M021] = (1.-omega3) * RRneq[M021] + RReq[M021] ;
-    // RRcoll[M120] = (1.-omega3) * RRneq[M120] + RReq[M120] ;
-    // RRcoll[M102] = (1.-omega3) * RRneq[M102] + RReq[M102] ;
-    // RRcoll[M012] = (1.-omega3) * RRneq[M012] + RReq[M012] ;
-    
-    // RRcoll[M111] = (1.-omega4) * RRneq[M111] + RReq[M111] ;
-
-    // // Order 4
-    // RRcoll[M220] = (1.-omega5) * RRneq[M220] + RReq[M220] ;
-    // RRcoll[M202] = (1.-omega5) * RRneq[M202] + RReq[M202] ;
-    // RRcoll[M022] = (1.-omega5) * RRneq[M022] + RReq[M022] ;
-
-    // RRcoll[M211] = (1.-omega6) * RRneq[M211] + RReq[M211] ;
-    // RRcoll[M121] = (1.-omega6) * RRneq[M121] + RReq[M121] ;
-    // RRcoll[M112] = (1.-omega6) * RRneq[M112] + RReq[M112] ;
-
-    // // Order 5
-    // RRcoll[M221] = (1.-omega7) * RRneq[M221] + RReq[M221] ;
-    // RRcoll[M212] = (1.-omega7) * RRneq[M212] + RReq[M212] ;
-    // RRcoll[M122] = (1.-omega7) * RRneq[M122] + RReq[M122] ;
-
-    // // Order 6
-    // RRcoll[M222] = (1.-omega8) * RRneq[M222] + RReq[M222] ;
-
-    // // Compute post collision populations from RR
-
-    // cell[F000] = (rho*8./27.) * (1. - 3./2.*RRcoll[M200] - 3./2.*RRcoll[M020] - 3./2.*RRcoll[M002] + 9./4.*RRcoll[M220] + 9./4.*RRcoll[M202] + 9./4.*RRcoll[M022] - 27./8.*RRcoll[M222]);
-
-    // cell[FP00] = (rho*2./27.) * (1. + 3.*u[0] + 3.*RRcoll[M200] - 3./2.*RRcoll[M020] - 3./2.*RRcoll[M002] - 9./2.*RRcoll[M120] - 9./2.*RRcoll[M102] - 9./2.*RRcoll[M220] - 9./2.*RRcoll[M202] + 9./4.*RRcoll[M022] + 27./4.*RRcoll[M122] + 27./4.*RRcoll[M222]);
-    // cell[FM00] = (rho*2./27.) * (1. - 3.*u[0] + 3.*RRcoll[M200] - 3./2.*RRcoll[M020] - 3./2.*RRcoll[M002] + 9./2.*RRcoll[M120] + 9./2.*RRcoll[M102] - 9./2.*RRcoll[M220] - 9./2.*RRcoll[M202] + 9./4.*RRcoll[M022] - 27./4.*RRcoll[M122] + 27./4.*RRcoll[M222]);
-    // cell[F0P0] = (rho*2./27.) * (1. + 3.*u[1] - 3./2.*RRcoll[M200] + 3.*RRcoll[M020] - 3./2.*RRcoll[M002] - 9./2.*RRcoll[M210] - 9./2.*RRcoll[M012] - 9./2.*RRcoll[M220] + 9./4.*RRcoll[M202] - 9./2.*RRcoll[M022] + 27./4.*RRcoll[M212] + 27./4.*RRcoll[M222]);
-    // cell[F0M0] = (rho*2./27.) * (1. - 3.*u[1] - 3./2.*RRcoll[M200] + 3.*RRcoll[M020] - 3./2.*RRcoll[M002] + 9./2.*RRcoll[M210] + 9./2.*RRcoll[M012] - 9./2.*RRcoll[M220] + 9./4.*RRcoll[M202] - 9./2.*RRcoll[M022] - 27./4.*RRcoll[M212] + 27./4.*RRcoll[M222]);
-    // cell[F00P] = (rho*2./27.) * (1. + 3.*u[2] - 3./2.*RRcoll[M200] - 3./2.*RRcoll[M020] + 3.*RRcoll[M002] - 9./2.*RRcoll[M201] - 9./2.*RRcoll[M021] + 9./4.*RRcoll[M220] - 9./2.*RRcoll[M202] - 9./2.*RRcoll[M022] + 27./4.*RRcoll[M221] + 27./4.*RRcoll[M222]);
-    // cell[F00M] = (rho*2./27.) * (1. - 3.*u[2] - 3./2.*RRcoll[M200] - 3./2.*RRcoll[M020] + 3.*RRcoll[M002] + 9./2.*RRcoll[M201] + 9./2.*RRcoll[M021] + 9./4.*RRcoll[M220] - 9./2.*RRcoll[M202] - 9./2.*RRcoll[M022] - 27./4.*RRcoll[M221] + 27./4.*RRcoll[M222]);
-
-    // cell[FPP0] = (rho / 54.)  * (1. + 3.*u[0] + 3.*u[1] + 3.*RRcoll[M200] + 3.*RRcoll[M020] - 3./2.*RRcoll[M002] + 9.*RRcoll[M110] + 9.*RRcoll[M210] + 9.*RRcoll[M120] - 9./2.*RRcoll[M102] - 9./2.*RRcoll[M012] + 9.*RRcoll[M220] - 9./2.*RRcoll[M202] - 9./2.*RRcoll[M022] - 27./2.*RRcoll[M112] - 27./2.*RRcoll[M212] - 27./2.*RRcoll[M122] - 27./2.*RRcoll[M222]);
-    // cell[FMP0] = (rho / 54.)  * (1. - 3.*u[0] + 3.*u[1] + 3.*RRcoll[M200] + 3.*RRcoll[M020] - 3./2.*RRcoll[M002] - 9.*RRcoll[M110] + 9.*RRcoll[M210] - 9.*RRcoll[M120] + 9./2.*RRcoll[M102] - 9./2.*RRcoll[M012] + 9.*RRcoll[M220] - 9./2.*RRcoll[M202] - 9./2.*RRcoll[M022] + 27./2.*RRcoll[M112] - 27./2.*RRcoll[M212] + 27./2.*RRcoll[M122] - 27./2.*RRcoll[M222]);
-    // cell[FPM0] = (rho / 54.)  * (1. + 3.*u[0] - 3.*u[1] + 3.*RRcoll[M200] + 3.*RRcoll[M020] - 3./2.*RRcoll[M002] - 9.*RRcoll[M110] - 9.*RRcoll[M210] + 9.*RRcoll[M120] - 9./2.*RRcoll[M102] + 9./2.*RRcoll[M012] + 9.*RRcoll[M220] - 9./2.*RRcoll[M202] - 9./2.*RRcoll[M022] + 27./2.*RRcoll[M112] + 27./2.*RRcoll[M212] - 27./2.*RRcoll[M122] - 27./2.*RRcoll[M222]);
-    // cell[FMM0] = (rho / 54.)  * (1. - 3.*u[0] - 3.*u[1] + 3.*RRcoll[M200] + 3.*RRcoll[M020] - 3./2.*RRcoll[M002] + 9.*RRcoll[M110] - 9.*RRcoll[M210] - 9.*RRcoll[M120] + 9./2.*RRcoll[M102] + 9./2.*RRcoll[M012] + 9.*RRcoll[M220] - 9./2.*RRcoll[M202] - 9./2.*RRcoll[M022] - 27./2.*RRcoll[M112] + 27./2.*RRcoll[M212] + 27./2.*RRcoll[M122] - 27./2.*RRcoll[M222]);
-    // cell[FP0P] = (rho / 54.)  * (1. + 3.*u[0] + 3.*u[2] + 3.*RRcoll[M200] - 3./2.*RRcoll[M020] + 3.*RRcoll[M002] + 9.*RRcoll[M101] + 9.*RRcoll[M201] - 9./2.*RRcoll[M021] - 9./2.*RRcoll[M120] + 9.*RRcoll[M102] - 9./2.*RRcoll[M220] + 9.*RRcoll[M202] - 9./2.*RRcoll[M022] - 27./2.*RRcoll[M121] - 27./2.*RRcoll[M221] - 27./2.*RRcoll[M122] - 27./2.*RRcoll[M222]);
-    // cell[FM0P] = (rho / 54.)  * (1. - 3.*u[0] + 3.*u[2] + 3.*RRcoll[M200] - 3./2.*RRcoll[M020] + 3.*RRcoll[M002] - 9.*RRcoll[M101] + 9.*RRcoll[M201] - 9./2.*RRcoll[M021] + 9./2.*RRcoll[M120] - 9.*RRcoll[M102] - 9./2.*RRcoll[M220] + 9.*RRcoll[M202] - 9./2.*RRcoll[M022] + 27./2.*RRcoll[M121] - 27./2.*RRcoll[M221] + 27./2.*RRcoll[M122] - 27./2.*RRcoll[M222]);
-    // cell[FP0M] = (rho / 54.)  * (1. + 3.*u[0] - 3.*u[2] + 3.*RRcoll[M200] - 3./2.*RRcoll[M020] + 3.*RRcoll[M002] - 9.*RRcoll[M101] - 9.*RRcoll[M201] + 9./2.*RRcoll[M021] - 9./2.*RRcoll[M120] + 9.*RRcoll[M102] - 9./2.*RRcoll[M220] + 9.*RRcoll[M202] - 9./2.*RRcoll[M022] + 27./2.*RRcoll[M121] + 27./2.*RRcoll[M221] - 27./2.*RRcoll[M122] - 27./2.*RRcoll[M222]);
-    // cell[FM0M] = (rho / 54.)  * (1. - 3.*u[0] - 3.*u[2] + 3.*RRcoll[M200] - 3./2.*RRcoll[M020] + 3.*RRcoll[M002] + 9.*RRcoll[M101] - 9.*RRcoll[M201] + 9./2.*RRcoll[M021] + 9./2.*RRcoll[M120] - 9.*RRcoll[M102] - 9./2.*RRcoll[M220] + 9.*RRcoll[M202] - 9./2.*RRcoll[M022] - 27./2.*RRcoll[M121] + 27./2.*RRcoll[M221] + 27./2.*RRcoll[M122] - 27./2.*RRcoll[M222]);
-    // cell[F0PP] = (rho / 54.)  * (1. + 3.*u[1] + 3.*u[2] - 3./2.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] + 9.*RRcoll[M011] - 9./2.*RRcoll[M210] - 9./2.*RRcoll[M201] + 9.*RRcoll[M021] + 9.*RRcoll[M012] - 9./2.*RRcoll[M220] - 9./2.*RRcoll[M202] + 9.*RRcoll[M022] - 27./2.*RRcoll[M211] - 27./2.*RRcoll[M221] - 27./2.*RRcoll[M212] - 27./2.*RRcoll[M222]);
-    // cell[F0MP] = (rho / 54.)  * (1. - 3.*u[1] + 3.*u[2] - 3./2.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] - 9.*RRcoll[M011] + 9./2.*RRcoll[M210] - 9./2.*RRcoll[M201] + 9.*RRcoll[M021] - 9.*RRcoll[M012] - 9./2.*RRcoll[M220] - 9./2.*RRcoll[M202] + 9.*RRcoll[M022] + 27./2.*RRcoll[M211] - 27./2.*RRcoll[M221] + 27./2.*RRcoll[M212] - 27./2.*RRcoll[M222]);
-    // cell[F0PM] = (rho / 54.)  * (1. + 3.*u[1] - 3.*u[2] - 3./2.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] - 9.*RRcoll[M011] - 9./2.*RRcoll[M210] + 9./2.*RRcoll[M201] - 9.*RRcoll[M021] + 9.*RRcoll[M012] - 9./2.*RRcoll[M220] - 9./2.*RRcoll[M202] + 9.*RRcoll[M022] + 27./2.*RRcoll[M211] + 27./2.*RRcoll[M221] - 27./2.*RRcoll[M212] - 27./2.*RRcoll[M222]);
-    // cell[F0MM] = (rho / 54.)  * (1. - 3.*u[1] - 3.*u[2] - 3./2.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] + 9.*RRcoll[M011] + 9./2.*RRcoll[M210] + 9./2.*RRcoll[M201] - 9.*RRcoll[M021] - 9.*RRcoll[M012] - 9./2.*RRcoll[M220] - 9./2.*RRcoll[M202] + 9.*RRcoll[M022] - 27./2.*RRcoll[M211] + 27./2.*RRcoll[M221] + 27./2.*RRcoll[M212] - 27./2.*RRcoll[M222]);
-
-    // cell[FPPP] = (rho / 216.) * (1. + 3.*u[0] + 3.*u[1] + 3.*u[2] + 3.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] + 9.*RRcoll[M110] + 9.*RRcoll[M101] + 9.*RRcoll[M011] + 9.*RRcoll[M210] + 9.*RRcoll[M201] + 9.*RRcoll[M021] + 9.*RRcoll[M120] + 9.*RRcoll[M102] + 9.*RRcoll[M012] + 27.*RRcoll[M111] + 9.*RRcoll[M220] + 9.*RRcoll[M202] + 9.*RRcoll[M022] + 27.*RRcoll[M211] + 27.*RRcoll[M121] + 27.*RRcoll[M112] + 27.*RRcoll[M221] + 27.*RRcoll[M212] + 27.*RRcoll[M122] + 27.*RRcoll[M222]);
-    // cell[FMPP] = (rho / 216.) * (1. - 3.*u[0] + 3.*u[1] + 3.*u[2] + 3.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] - 9.*RRcoll[M110] - 9.*RRcoll[M101] + 9.*RRcoll[M011] + 9.*RRcoll[M210] + 9.*RRcoll[M201] + 9.*RRcoll[M021] - 9.*RRcoll[M120] - 9.*RRcoll[M102] + 9.*RRcoll[M012] - 27.*RRcoll[M111] + 9.*RRcoll[M220] + 9.*RRcoll[M202] + 9.*RRcoll[M022] + 27.*RRcoll[M211] - 27.*RRcoll[M121] - 27.*RRcoll[M112] + 27.*RRcoll[M221] + 27.*RRcoll[M212] - 27.*RRcoll[M122] + 27.*RRcoll[M222]);
-    // cell[FPMP] = (rho / 216.) * (1. + 3.*u[0] - 3.*u[1] + 3.*u[2] + 3.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] - 9.*RRcoll[M110] + 9.*RRcoll[M101] - 9.*RRcoll[M011] - 9.*RRcoll[M210] + 9.*RRcoll[M201] + 9.*RRcoll[M021] + 9.*RRcoll[M120] + 9.*RRcoll[M102] - 9.*RRcoll[M012] - 27.*RRcoll[M111] + 9.*RRcoll[M220] + 9.*RRcoll[M202] + 9.*RRcoll[M022] - 27.*RRcoll[M211] + 27.*RRcoll[M121] - 27.*RRcoll[M112] + 27.*RRcoll[M221] - 27.*RRcoll[M212] + 27.*RRcoll[M122] + 27.*RRcoll[M222]);
-    // cell[FPPM] = (rho / 216.) * (1. + 3.*u[0] + 3.*u[1] - 3.*u[2] + 3.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] + 9.*RRcoll[M110] - 9.*RRcoll[M101] - 9.*RRcoll[M011] + 9.*RRcoll[M210] - 9.*RRcoll[M201] - 9.*RRcoll[M021] + 9.*RRcoll[M120] + 9.*RRcoll[M102] + 9.*RRcoll[M012] - 27.*RRcoll[M111] + 9.*RRcoll[M220] + 9.*RRcoll[M202] + 9.*RRcoll[M022] - 27.*RRcoll[M211] - 27.*RRcoll[M121] + 27.*RRcoll[M112] - 27.*RRcoll[M221] + 27.*RRcoll[M212] + 27.*RRcoll[M122] + 27.*RRcoll[M222]);
-    // cell[FMMP] = (rho / 216.) * (1. - 3.*u[0] - 3.*u[1] + 3.*u[2] + 3.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] + 9.*RRcoll[M110] - 9.*RRcoll[M101] - 9.*RRcoll[M011] - 9.*RRcoll[M210] + 9.*RRcoll[M201] + 9.*RRcoll[M021] - 9.*RRcoll[M120] - 9.*RRcoll[M102] - 9.*RRcoll[M012] + 27.*RRcoll[M111] + 9.*RRcoll[M220] + 9.*RRcoll[M202] + 9.*RRcoll[M022] - 27.*RRcoll[M211] - 27.*RRcoll[M121] + 27.*RRcoll[M112] + 27.*RRcoll[M221] - 27.*RRcoll[M212] - 27.*RRcoll[M122] + 27.*RRcoll[M222]);
-    // cell[FMPM] = (rho / 216.) * (1. - 3.*u[0] + 3.*u[1] - 3.*u[2] + 3.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] - 9.*RRcoll[M110] + 9.*RRcoll[M101] - 9.*RRcoll[M011] + 9.*RRcoll[M210] - 9.*RRcoll[M201] - 9.*RRcoll[M021] - 9.*RRcoll[M120] - 9.*RRcoll[M102] + 9.*RRcoll[M012] + 27.*RRcoll[M111] + 9.*RRcoll[M220] + 9.*RRcoll[M202] + 9.*RRcoll[M022] - 27.*RRcoll[M211] + 27.*RRcoll[M121] - 27.*RRcoll[M112] - 27.*RRcoll[M221] + 27.*RRcoll[M212] - 27.*RRcoll[M122] + 27.*RRcoll[M222]);
-    // cell[FPMM] = (rho / 216.) * (1. + 3.*u[0] - 3.*u[1] - 3.*u[2] + 3.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] - 9.*RRcoll[M110] - 9.*RRcoll[M101] + 9.*RRcoll[M011] - 9.*RRcoll[M210] - 9.*RRcoll[M201] - 9.*RRcoll[M021] + 9.*RRcoll[M120] + 9.*RRcoll[M102] - 9.*RRcoll[M012] + 27.*RRcoll[M111] + 9.*RRcoll[M220] + 9.*RRcoll[M202] + 9.*RRcoll[M022] + 27.*RRcoll[M211] - 27.*RRcoll[M121] - 27.*RRcoll[M112] - 27.*RRcoll[M221] - 27.*RRcoll[M212] + 27.*RRcoll[M122] + 27.*RRcoll[M222]);
-    // cell[FMMM] = (rho / 216.) * (1. - 3.*u[0] - 3.*u[1] - 3.*u[2] + 3.*RRcoll[M200] + 3.*RRcoll[M020] + 3.*RRcoll[M002] + 9.*RRcoll[M110] + 9.*RRcoll[M101] + 9.*RRcoll[M011] - 9.*RRcoll[M210] - 9.*RRcoll[M201] - 9.*RRcoll[M021] - 9.*RRcoll[M120] - 9.*RRcoll[M102] - 9.*RRcoll[M012] - 27.*RRcoll[M111] + 9.*RRcoll[M220] + 9.*RRcoll[M202] + 9.*RRcoll[M022] + 27.*RRcoll[M211] + 27.*RRcoll[M121] + 27.*RRcoll[M112] - 27.*RRcoll[M221] - 27.*RRcoll[M212] - 27.*RRcoll[M122] + 27.*RRcoll[M222]);
+    T omegaBulk = omega1;
+    T omegaPlus  = (omegaBulk + 2.*omega1)/3.; // Notation used by Fei
+    T omegaMinus = (omegaBulk -    omega1)/3.; // Notation used by Fei
 
     // Post-collision and Nonequilibrium moments.
     Array<T,D::q> RRneq;
@@ -3250,11 +2960,11 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     RRneq[M222] = u[1]*u[1]*u[2]*u[2]*RRneq[M200] + u[0]*u[0]*u[2]*u[2]*RRneq[M020] + u[0]*u[0]*u[1]*u[1]*RRneq[M002] + 4.*u[0]*u[1]*u[2]*u[2]*RRneq[M110] + 4.*u[0]*u[1]*u[1]*u[2]*RRneq[M101] + 4.*u[0]*u[0]*u[1]*u[2]*RRneq[M011];
 
     // Collision in the Hermite moment space
-    // Order 2
-    RRcoll[M200] = (1.-omega1) * RRneq[M200] + RReq[M200] ;
-    RRcoll[M020] = (1.-omega1) * RRneq[M020] + RReq[M020] ;
-    RRcoll[M002] = (1.-omega1) * RRneq[M002] + RReq[M002] ;
-    
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
+    RRcoll[M200] = RR[M200] - omegaPlus  * RRneq[M200] - omegaMinus * RRneq[M020] - omegaMinus * RRneq[M002] ;
+    RRcoll[M020] = RR[M020] - omegaMinus * RRneq[M200] - omegaPlus  * RRneq[M020] - omegaMinus * RRneq[M002] ;
+    RRcoll[M002] = RR[M002] - omegaMinus * RRneq[M200] - omegaMinus * RRneq[M020] - omegaPlus  * RRneq[M002] ;
+
     RRcoll[M110] = (1.-omega2) * RRneq[M110] + RReq[M110] ;
     RRcoll[M101] = (1.-omega2) * RRneq[M101] + RReq[M101] ;
     RRcoll[M011] = (1.-omega2) * RRneq[M011] + RReq[M011] ;
@@ -3629,10 +3339,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     // Post-collision moments.
     Array<T,D::q> RMcoll;
 
-    // Order 2
-/*    RMcoll[M200] = (1.-omega1) * RM[M200] + omega1 * RMeq[M200] ;
-    RMcoll[M020] = (1.-omega1) * RM[M020] + omega1 * RMeq[M020] ;
-    RMcoll[M002] = (1.-omega1) * RM[M002] + omega1 * RMeq[M002] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     RMcoll[M200] = RM[M200] - omegaPlus  * (RM[M200]-RMeq[M200]) - omegaMinus * (RM[M020]-RMeq[M020]) - omegaMinus * (RM[M002]-RMeq[M002]) ;
     RMcoll[M020] = RM[M020] - omegaMinus * (RM[M200]-RMeq[M200]) - omegaPlus  * (RM[M020]-RMeq[M020]) - omegaMinus * (RM[M002]-RMeq[M002]) ;
     RMcoll[M002] = RM[M002] - omegaMinus * (RM[M200]-RMeq[M200]) - omegaMinus * (RM[M020]-RMeq[M020]) - omegaPlus  * (RM[M002]-RMeq[M002]) ;
@@ -3946,10 +3653,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the Hermite moment space
-    // Order 2
-/*    HMcoll[M200] = (1.-omega1) * HM[M200] + omega1 * HMeq[M200] ;
-    HMcoll[M020] = (1.-omega1) * HM[M020] + omega1 * HMeq[M020] ;
-    HMcoll[M002] = (1.-omega1) * HM[M002] + omega1 * HMeq[M002] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     HMcoll[M200] = HM[M200] - omegaPlus  * (HM[M200]-HMeq[M200]) - omegaMinus * (HM[M020]-HMeq[M020]) - omegaMinus * (HM[M002]-HMeq[M002]) ;
     HMcoll[M020] = HM[M020] - omegaMinus * (HM[M200]-HMeq[M200]) - omegaPlus  * (HM[M020]-HMeq[M020]) - omegaMinus * (HM[M002]-HMeq[M002]) ;
     HMcoll[M002] = HM[M002] - omegaMinus * (HM[M200]-HMeq[M200]) - omegaMinus * (HM[M020]-HMeq[M020]) - omegaPlus  * (HM[M002]-HMeq[M002]) ;
@@ -4268,11 +3972,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the central moment space
-    // Order 2
-
-/*    CMcoll[M200] = (1.-omega1) * CM[M200] + omega1 * CMeq[M200] ;
-    CMcoll[M020] = (1.-omega1) * CM[M020] + omega1 * CMeq[M020] ;
-    CMcoll[M002] = (1.-omega1) * CM[M002] + omega1 * CMeq[M002] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     CMcoll[M200] = CM[M200] - omegaPlus  * (CM[M200]-CMeq[M200]) - omegaMinus * (CM[M020]-CMeq[M020]) - omegaMinus * (CM[M002]-CMeq[M002]) ;
     CMcoll[M020] = CM[M020] - omegaMinus * (CM[M200]-CMeq[M200]) - omegaPlus  * (CM[M020]-CMeq[M020]) - omegaMinus * (CM[M002]-CMeq[M002]) ;
     CMcoll[M002] = CM[M002] - omegaMinus * (CM[M200]-CMeq[M200]) - omegaMinus * (CM[M020]-CMeq[M020]) - omegaPlus  * (CM[M002]-CMeq[M002]) ;
@@ -4613,10 +4313,7 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 
     // Collision in the central Hermite moment space
-    // Order 2
-/*    CHMcoll[M200] = (1.-omega1) * CHM[M200] + omega1 * CHMeq[M200] ;
-    CHMcoll[M020] = (1.-omega1) * CHM[M020] + omega1 * CHMeq[M020] ;
-    CHMcoll[M002] = (1.-omega1) * CHM[M002] + omega1 * CHMeq[M002] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     CHMcoll[M200] = CHM[M200] - omegaPlus  * (CHM[M200]-CHMeq[M200]) - omegaMinus * (CHM[M020]-CHMeq[M020]) - omegaMinus * (CHM[M002]-CHMeq[M002]) ;
     CHMcoll[M020] = CHM[M020] - omegaMinus * (CHM[M200]-CHMeq[M200]) - omegaPlus  * (CHM[M020]-CHMeq[M020]) - omegaMinus * (CHM[M002]-CHMeq[M002]) ;
     CHMcoll[M002] = CHM[M002] - omegaMinus * (CHM[M200]-CHMeq[M200]) - omegaMinus * (CHM[M020]-CHMeq[M020]) - omegaPlus  * (CHM[M002]-CHMeq[M002]) ;
@@ -4639,7 +4336,6 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     CHMcoll[M022] = (1.-omega4) * CHM[M022] + omega4 * CHMeq[M022] ;
 
     // Come back to HMcoll using relationships between CHMs and HMs
-
     HMcoll[M200] = CHMcoll[M200] + ux2;
     HMcoll[M020] = CHMcoll[M020] + uy2;
     HMcoll[M002] = CHMcoll[M002] + uz2;
@@ -4983,10 +4679,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the cumulant space
-    // Order 2
-/*    Kcoll[M200] = (1.-omega1) * K[M200] + omega1 * Keq[M200] ;
-    Kcoll[M020] = (1.-omega1) * K[M020] + omega1 * Keq[M020] ;
-    Kcoll[M002] = (1.-omega1) * K[M002] + omega1 * Keq[M002] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     Kcoll[M200] = K[M200] - omegaPlus  * (K[M200]-Keq[M200]) - omegaMinus * (K[M020]-Keq[M020]) - omegaMinus * (K[M002]-Keq[M002]) ;
     Kcoll[M020] = K[M020] - omegaMinus * (K[M200]-Keq[M200]) - omegaPlus  * (K[M020]-Keq[M020]) - omegaMinus * (K[M002]-Keq[M002]) ;
     Kcoll[M002] = K[M002] - omegaMinus * (K[M200]-Keq[M200]) - omegaMinus * (K[M020]-Keq[M020]) - omegaPlus  * (K[M002]-Keq[M002]) ;
@@ -5265,368 +4958,55 @@ static void GHcomputeEquilibriumMoments(Array<T,D::d> const& u, Array<T, D::q>& 
 };
 
 
-// Equilibrium populations based on 19 moments can be computed using either RM, GH, CM, CGH or Gauss-Hermite formalisms. 
+// Equilibrium populations based on 19 moments can be computed using either RM, HM, CM, CHM or Gauss-Hermite formalisms. 
 // Here we use the Gauss-Hermite formalism that requires the orthogonalisation of moments due to spurious couplings
-// between thir-order moments, and second/fourth order moments.
+// between third-order moments, and second/fourth order moments.
 static void GHcomputeEquilibrium(T rho, Array<T, D::q> const& GHeq, Array<T, D::q>& eq) {
 
     Array<T, D::d> u(GHeq[1], GHeq[2], GHeq[3]);
 
-    T GHor220 = (GHeq[M220] + (1./6.)*GHeq[M002]);
-    T GHor202 = (GHeq[M202] + (1./6.)*GHeq[M020]);
-    T GHor022 = (GHeq[M022] + (1./6.)*GHeq[M200]);
+    // Orthogonalization
+    // Order 3 
+    T GHeq_M210 = GHeq[M210] + GHeq[M012];
+    T GHeq_M201 = GHeq[M201] + GHeq[M021];
+    T GHeq_M120 = GHeq[M120] + GHeq[M102];
+    T GHeq_M012 = GHeq[M012] - GHeq[M210];
+    T GHeq_M021 = GHeq[M021] - GHeq[M201];
+    T GHeq_M102 = GHeq[M102] - GHeq[M120];
+    // 4 ortho with 2  
+    T GHeq_M220 = GHeq[M220] + (1./6.)*GHeq[M002];
+    T GHeq_M202 = GHeq[M202] + (1./6.)*GHeq[M020];
+    T GHeq_M022 = GHeq[M022] + (1./6.)*GHeq[M200];
+    // 4 ortho with 4
+    GHeq_M202 = GHeq[M202] + (2./7.)*GHeq_M220;
+    GHeq_M022 = GHeq[M022] + (2./7.)*GHeq_M220 + (2./5.)*GHeq_M202;
 
-    eq[F000] = (rho / 3.) *(1. -(3./2.)*(GHeq[M200] + GHeq[M020] + GHeq[M002])+(9./8.)* (GHeq[M220] + GHeq[M202] + GHeq[M022] + (1./6.)*(GHeq[M200] + GHeq[M020] + GHeq[M002])));
+    eq[F000] = (rho * D::t[F000]) * (1. -1.5*(GHeq[M200] + GHeq[M020] + GHeq[M002])+ (9./7.)*GHeq_M220 + (9./5.)*GHeq_M202 + 3.*GHeq_M022);
 
-    eq[FP00] = (rho / 18.)*(1. + 3.*u[0] + (3./2.)* (2.*GHeq[M200]-GHeq[M020]-GHeq[M002]) -(9./2.)*(GHeq[M120] + GHeq[M102])-(9./8.)* (5.*GHor220 + 5.*GHor202 - 4.*GHor022));
-    eq[FM00] = (rho / 18.)*(1. - 3.*u[0] + (3./2.)* (2.*GHeq[M200]-GHeq[M020]-GHeq[M002]) +(9./2.)*(GHeq[M120] + GHeq[M102])-(9./8.)* (5.*GHor220 + 5.*GHor202 - 4.*GHor022));
-    eq[F0P0] = (rho / 18.)*(1. + 3.*u[1] + (3./2.)* (2.*GHeq[M020]-GHeq[M200]-GHeq[M002]) -(9./2.)*(GHeq[M210] + GHeq[M012])-(9./8.)* (5.*GHor220 + 5.*GHor022 - 4.*GHor202));
-    eq[F0M0] = (rho / 18.)*(1. - 3.*u[1] + (3./2.)* (2.*GHeq[M020]-GHeq[M200]-GHeq[M002]) +(9./2.)*(GHeq[M210] + GHeq[M012])-(9./8.)* (5.*GHor220 + 5.*GHor022 - 4.*GHor202));
-    eq[F00P] = (rho / 18.)*(1. + 3.*u[2] + (3./2.)* (2.*GHeq[M002]-GHeq[M200]-GHeq[M020]) -(9./2.)*(GHeq[M201] + GHeq[M021])-(9./8.)* (5.*GHor202 + 5.*GHor022 - 4.*GHor220));
-    eq[F00M] = (rho / 18.)*(1. - 3.*u[2] + (3./2.)* (2.*GHeq[M002]-GHeq[M200]-GHeq[M020]) +(9./2.)*(GHeq[M201] + GHeq[M021])-(9./8.)* (5.*GHor202 + 5.*GHor022 - 4.*GHor220));
+    eq[FP00] = (rho * D::t[FP00]) * (1. + 3.*u[0] + 1.5* (2.*GHeq[M200]-GHeq[M020]-GHeq[M002]) - 9.*GHeq_M120 - (45./7.)*GHeq_M220 - 9.*GHeq_M202 );
+    eq[FM00] = (rho * D::t[FM00]) * (1. - 3.*u[0] + 1.5* (2.*GHeq[M200]-GHeq[M020]-GHeq[M002]) + 9.*GHeq_M120 - (45./7.)*GHeq_M220 - 9.*GHeq_M202 );
 
-    eq[FPP0] = (rho / 36.)*(1. + 3.* (+ u[0] + u[1]) +(3./2.)*(2.*GHeq[M200] + 2.*GHeq[M020] - GHeq[M002]) +9.*GHeq[M110] +(9./2.)*( 2.*GHeq[M210] +  2.*GHeq[M120] - GHeq[M102] - GHeq[M012]) + (9./8.)*( 7.*GHor220-2.*GHor202-2.*GHor022));
-    eq[FMP0] = (rho / 36.)*(1. + 3.* (- u[0] + u[1]) +(3./2.)*(2.*GHeq[M200] + 2.*GHeq[M020] - GHeq[M002]) -9.*GHeq[M110] +(9./2.)*( 2.*GHeq[M210]- 2.*GHeq[M120] + GHeq[M102] - GHeq[M012]) + (9./8.)*( 7.*GHor220-2.*GHor202-2.*GHor022));
-    eq[FPM0] = (rho / 36.)*(1. + 3.* (+ u[0] - u[1]) +(3./2.)*(2.*GHeq[M200] + 2.*GHeq[M020] - GHeq[M002]) -9.*GHeq[M110] +(9./2.)*(-2.*GHeq[M210] +  2.*GHeq[M120] - GHeq[M102] + GHeq[M012]) + (9./8.)*( 7.*GHor220-2.*GHor202-2.*GHor022));
-    eq[FMM0] = (rho / 36.)*(1. + 3.* (- u[0] - u[1]) +(3./2.)*(2.*GHeq[M200] + 2.*GHeq[M020] - GHeq[M002]) +9.*GHeq[M110] +(9./2.)*(-2.*GHeq[M210]- 2.*GHeq[M120] + GHeq[M102] + GHeq[M012]) + (9./8.)*( 7.*GHor220-2.*GHor202-2.*GHor022));
-    eq[FP0P] = (rho / 36.)*(1. + 3.* (+ u[0] + u[2]) +(3./2.)*(2.*GHeq[M200] + 2.*GHeq[M002] - GHeq[M020]) +9.*GHeq[M101] +(9./2.)*( 2.*GHeq[M201] +  2.*GHeq[M102] - GHeq[M120] - GHeq[M021]) + (9./8.)*( 7.*GHor202-2.*GHor220-2.*GHor022));
-    eq[FM0P] = (rho / 36.)*(1. + 3.* (- u[0] + u[2]) +(3./2.)*(2.*GHeq[M200] + 2.*GHeq[M002] - GHeq[M020]) -9.*GHeq[M101] +(9./2.)*( 2.*GHeq[M201]- 2.*GHeq[M102] + GHeq[M120] - GHeq[M021]) + (9./8.)*( 7.*GHor202-2.*GHor220-2.*GHor022));
-    eq[FP0M] = (rho / 36.)*(1. + 3.* (+ u[0] - u[2]) +(3./2.)*(2.*GHeq[M200] + 2.*GHeq[M002] - GHeq[M020]) -9.*GHeq[M101] +(9./2.)*(-2.*GHeq[M201] +  2.*GHeq[M102] - GHeq[M120] + GHeq[M021]) + (9./8.)*( 7.*GHor202-2.*GHor220-2.*GHor022));
-    eq[FM0M] = (rho / 36.)*(1. + 3.* (- u[0] - u[2]) +(3./2.)*(2.*GHeq[M200] + 2.*GHeq[M002] - GHeq[M020]) +9.*GHeq[M101] +(9./2.)*(-2.*GHeq[M201]- 2.*GHeq[M102] + GHeq[M120] + GHeq[M021]) + (9./8.)*( 7.*GHor202-2.*GHor220-2.*GHor022));
-    eq[F0PP] = (rho / 36.)*(1. + 3.* (+ u[1] + u[2]) +(3./2.)*(2.*GHeq[M020] + 2.*GHeq[M002] - GHeq[M200]) +9.*GHeq[M011] +(9./2.)*( 2.*GHeq[M021] +  2.*GHeq[M012] - GHeq[M210] - GHeq[M201]) + (9./8.)*( 7.*GHor022-2.*GHor220-2.*GHor202));
-    eq[F0MP] = (rho / 36.)*(1. + 3.* (- u[1] + u[2]) +(3./2.)*(2.*GHeq[M020] + 2.*GHeq[M002] - GHeq[M200]) -9.*GHeq[M011] +(9./2.)*( 2.*GHeq[M021]- 2.*GHeq[M012] + GHeq[M210] - GHeq[M201]) + (9./8.)*( 7.*GHor022-2.*GHor220-2.*GHor202));
-    eq[F0PM] = (rho / 36.)*(1. + 3.* (+ u[1] - u[2]) +(3./2.)*(2.*GHeq[M020] + 2.*GHeq[M002] - GHeq[M200]) -9.*GHeq[M011] +(9./2.)*(-2.*GHeq[M021] +  2.*GHeq[M012] - GHeq[M210] + GHeq[M201]) + (9./8.)*( 7.*GHor022-2.*GHor220-2.*GHor202));
-    eq[F0MM] = (rho / 36.)*(1. + 3.* (- u[1] - u[2]) +(3./2.)*(2.*GHeq[M020] + 2.*GHeq[M002] - GHeq[M200]) +9.*GHeq[M011] +(9./2.)*(-2.*GHeq[M021]- 2.*GHeq[M012] + GHeq[M210] + GHeq[M201]) + (9./8.)*( 7.*GHor022-2.*GHor220-2.*GHor202));
+    eq[F0P0] = (rho * D::t[F0P0]) * (1. + 3.*u[1] + 1.5* (2.*GHeq[M020]-GHeq[M200]-GHeq[M002]) - 9.*GHeq_M210 - (45./7.)*GHeq_M220 + (18./5.)*GHeq_M202 - 9.*GHeq_M022 );
+    eq[F0M0] = (rho * D::t[F0M0]) * (1. - 3.*u[1] + 1.5* (2.*GHeq[M020]-GHeq[M200]-GHeq[M002]) + 9.*GHeq_M210 - (45./7.)*GHeq_M220 + (18./5.)*GHeq_M202 - 9.*GHeq_M022 );
+
+    eq[F00P] = (rho * D::t[F00P]) * (1. + 3.*u[2] + 1.5* (2.*GHeq[M002]-GHeq[M200]-GHeq[M020]) - 9.*GHeq_M201 + (36./7.)*GHeq_M220 - (27./5.)*GHeq_M202 - 9.*GHeq_M022 );
+    eq[F00M] = (rho * D::t[F00M]) * (1. - 3.*u[2] + 1.5* (2.*GHeq[M002]-GHeq[M200]-GHeq[M020]) + 9.*GHeq_M201 + (36./7.)*GHeq_M220 - (27./5.)*GHeq_M202 - 9.*GHeq_M022 );
+
+    eq[FPP0] = (rho * D::t[FPP0]) * (1. + 3.* (+ u[0] + u[1]) +1.5*(2.*GHeq[M200] + 2.*GHeq[M020] - GHeq[M002]) +9.*GHeq[M110] + 4.5*( GHeq_M210 + GHeq_M120 - GHeq_M102 - GHeq_M012) + 9.*GHeq_M220 );
+    eq[FMP0] = (rho * D::t[FMP0]) * (1. + 3.* (- u[0] + u[1]) +1.5*(2.*GHeq[M200] + 2.*GHeq[M020] - GHeq[M002]) -9.*GHeq[M110] + 4.5*( GHeq_M210 - GHeq_M120 + GHeq_M102 - GHeq_M012) + 9.*GHeq_M220 );
+    eq[FPM0] = (rho * D::t[FPM0]) * (1. + 3.* (+ u[0] - u[1]) +1.5*(2.*GHeq[M200] + 2.*GHeq[M020] - GHeq[M002]) -9.*GHeq[M110] + 4.5*(-GHeq_M210 + GHeq_M120 - GHeq_M102 + GHeq_M012) + 9.*GHeq_M220 );
+    eq[FMM0] = (rho * D::t[FMM0]) * (1. + 3.* (- u[0] - u[1]) +1.5*(2.*GHeq[M200] + 2.*GHeq[M020] - GHeq[M002]) +9.*GHeq[M110] + 4.5*(-GHeq_M210 - GHeq_M120 + GHeq_M102 + GHeq_M012) + 9.*GHeq_M220 );
+
+    eq[FP0P] = (rho * D::t[FP0P]) * (1. + 3.* (+ u[0] + u[2]) +1.5*(2.*GHeq[M200] + 2.*GHeq[M002] - GHeq[M020]) +9.*GHeq[M101] + 4.5*( GHeq_M201 + GHeq_M102 + GHeq_M120 - GHeq_M021) - (18./7.)*GHeq_M220 + 9.*GHeq_M202 );
+    eq[FM0P] = (rho * D::t[FM0P]) * (1. + 3.* (- u[0] + u[2]) +1.5*(2.*GHeq[M200] + 2.*GHeq[M002] - GHeq[M020]) -9.*GHeq[M101] + 4.5*( GHeq_M201 - GHeq_M102 - GHeq_M120 - GHeq_M021) - (18./7.)*GHeq_M220 + 9.*GHeq_M202 );
+    eq[FP0M] = (rho * D::t[FP0M]) * (1. + 3.* (+ u[0] - u[2]) +1.5*(2.*GHeq[M200] + 2.*GHeq[M002] - GHeq[M020]) -9.*GHeq[M101] + 4.5*(-GHeq_M201 + GHeq_M102 + GHeq_M120 + GHeq_M021) - (18./7.)*GHeq_M220 + 9.*GHeq_M202 );
+    eq[FM0M] = (rho * D::t[FM0M]) * (1. + 3.* (- u[0] - u[2]) +1.5*(2.*GHeq[M200] + 2.*GHeq[M002] - GHeq[M020]) +9.*GHeq[M101] + 4.5*(-GHeq_M201 - GHeq_M102 - GHeq_M120 + GHeq_M021) - (18./7.)*GHeq_M220 + 9.*GHeq_M202 );
+
+    eq[F0PP] = (rho * D::t[F0PP]) * (1. + 3.* (+ u[1] + u[2]) +1.5*(2.*GHeq[M020] + 2.*GHeq[M002] - GHeq[M200]) +9.*GHeq[M011] + 4.5*( GHeq_M021 + GHeq_M012 + GHeq_M210 + GHeq_M201) - (18./7.)*GHeq_M220 - (18./5.)*GHeq_M202 + 9.*GHeq_M022 );
+    eq[F0MP] = (rho * D::t[F0MP]) * (1. + 3.* (- u[1] + u[2]) +1.5*(2.*GHeq[M020] + 2.*GHeq[M002] - GHeq[M200]) -9.*GHeq[M011] + 4.5*( GHeq_M021 - GHeq_M012 - GHeq_M210 + GHeq_M201) - (18./7.)*GHeq_M220 - (18./5.)*GHeq_M202 + 9.*GHeq_M022 );
+    eq[F0PM] = (rho * D::t[F0PM]) * (1. + 3.* (+ u[1] - u[2]) +1.5*(2.*GHeq[M020] + 2.*GHeq[M002] - GHeq[M200]) -9.*GHeq[M011] + 4.5*(-GHeq_M021 + GHeq_M012 + GHeq_M210 - GHeq_M201) - (18./7.)*GHeq_M220 - (18./5.)*GHeq_M202 + 9.*GHeq_M022 );
+    eq[F0MM] = (rho * D::t[F0MM]) * (1. + 3.* (- u[1] - u[2]) +1.5*(2.*GHeq[M020] + 2.*GHeq[M002] - GHeq[M200]) +9.*GHeq[M011] + 4.5*(-GHeq_M021 - GHeq_M012 - GHeq_M210 - GHeq_M201) - (18./7.)*GHeq_M220 - (18./5.)*GHeq_M202 + 9.*GHeq_M022 );
 };
-
-
-// If 3rd and 4th order moments are neither equilibriated nor orthogonalized 
-// then the code is unstable... This is because there is a coupling between 
-// 2nd and higher order moments when the weighted scalar product is used (not 
-// the case with the standard one). This is why it works with HM formulations 
-// and not here with the GH one.
-// NB: For the D3Q27 both approaches are equivalent so we do not experience 
-// numerical instability.
-
-// /////////// STANDARD (NON-ORTHOGONAL) ///////////
-// static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
-//                       Array<T, D::q> const& GH,    // Hermite moments
-//                       Array<T, D::q> const& GHeq,  // Equilibrium moments (Hermite)
-//                       Array<T, D::numRelaxationTimes> const& omega)
-// {
-//     T omega1 = omega[0];
-//     T omega2 = omega[1];
-//     T omega3 = omega[2];
-//     T omega4 = omega[3];
-
-//     T omegaBulk = omega1;
-//     T omegaPlus  = (omegaBulk + 2.*omega1)/3.; // Notation used by Fei
-//     T omegaMinus = (omegaBulk -    omega1)/3.; // Notation used by Fei
-
-//     // Post-collision moments.
-//     Array<T,D::q> GHcoll;
-
-//     // Collision in the Hermite moment space
-//     // Order 2
-// /*    GHcoll[M200] = (1.-omega1) * GH[M200] + omega1 * GHeq[M200] ;
-//     GHcoll[M020] = (1.-omega1) * GH[M020] + omega1 * GHeq[M020] ;
-//     GHcoll[M002] = (1.-omega1) * GH[M002] + omega1 * GHeq[M002] ;*/
-//     GHcoll[M200] = GH[M200] - omegaPlus  * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
-//     GHcoll[M020] = GH[M020] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaPlus  * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
-//     GHcoll[M002] = GH[M002] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaPlus  * (GH[M002]-GHeq[M002]) ;
-    
-//     GHcoll[M110] = (1.-omega2) * GH[M110] + omega2 * GHeq[M110] ;
-//     GHcoll[M101] = (1.-omega2) * GH[M101] + omega2 * GHeq[M101] ;
-//     GHcoll[M011] = (1.-omega2) * GH[M011] + omega2 * GHeq[M011] ;
-
-//     // Order 3 
-//     GHcoll[M210] = (1.-omega3) * GH[M210] + omega3 * GHeq[M210] ;
-//     GHcoll[M201] = (1.-omega3) * GH[M201] + omega3 * GHeq[M201] ;
-//     GHcoll[M021] = (1.-omega3) * GH[M021] + omega3 * GHeq[M021] ;
-//     GHcoll[M120] = (1.-omega3) * GH[M120] + omega3 * GHeq[M120] ;
-//     GHcoll[M102] = (1.-omega3) * GH[M102] + omega3 * GHeq[M102] ;
-//     GHcoll[M012] = (1.-omega3) * GH[M012] + omega3 * GHeq[M012] ;
-
-//     // Order 4
-//     GHcoll[M220] = (1.-omega4) * GH[M220] + omega4 * GHeq[M220] ;
-//     GHcoll[M202] = (1.-omega4) * GH[M202] + omega4 * GHeq[M202] ;
-//     GHcoll[M022] = (1.-omega4) * GH[M022] + omega4 * GHeq[M022] ;
-
-//     // Compute post collision populations from RM
-//     cell[F000] = (rho / 3.) *(1. -(3./2.)*(GHcoll[M200] + GHcoll[M020] + GHcoll[M002])+(9./4.)* (GHcoll[M220] + GHcoll[M202] + GHcoll[M022]));
-
-//     cell[FP00] = (rho / 18.)*(1. + 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) -(9./2.)*(GHcoll[M120] + GHcoll[M102])-(9./4.)* (2.*GHcoll[M220] + 2.*GHcoll[M202] - GHcoll[M022]));
-//     cell[FM00] = (rho / 18.)*(1. - 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) +(9./2.)*(GHcoll[M120] + GHcoll[M102])-(9./4.)* (2.*GHcoll[M220] + 2.*GHcoll[M202] - GHcoll[M022]));
-//     cell[F0P0] = (rho / 18.)*(1. + 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) -(9./2.)*(GHcoll[M210] + GHcoll[M012])-(9./4.)* (2.*GHcoll[M220] + 2.*GHcoll[M022] - GHcoll[M202]));
-//     cell[F0M0] = (rho / 18.)*(1. - 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) +(9./2.)*(GHcoll[M210] + GHcoll[M012])-(9./4.)* (2.*GHcoll[M220] + 2.*GHcoll[M022] - GHcoll[M202]));
-//     cell[F00P] = (rho / 18.)*(1. + 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) -(9./2.)*(GHcoll[M201] + GHcoll[M021])-(9./4.)* (2.*GHcoll[M202] + 2.*GHcoll[M022] - GHcoll[M220]));
-//     cell[F00M] = (rho / 18.)*(1. - 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) +(9./2.)*(GHcoll[M201] + GHcoll[M021])-(9./4.)* (2.*GHcoll[M202] + 2.*GHcoll[M022] - GHcoll[M220]));
-
-//     cell[FPP0] = (rho / 36.)*(1. + 3.* (+ u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] +(9./2.)*( 2.*GHcoll[M210] +  2.*GHcoll[M120] - GHcoll[M102] - GHcoll[M012]) + (9./2.)*( 2.*GHcoll[M220]-GHcoll[M202]-GHcoll[M022]));
-//     cell[FMP0] = (rho / 36.)*(1. + 3.* (- u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] +(9./2.)*( 2.*GHcoll[M210]- 2.*GHcoll[M120] + GHcoll[M102] - GHcoll[M012]) + (9./2.)*( 2.*GHcoll[M220]-GHcoll[M202]-GHcoll[M022]));
-//     cell[FPM0] = (rho / 36.)*(1. + 3.* (+ u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] +(9./2.)*(-2.*GHcoll[M210] +  2.*GHcoll[M120] - GHcoll[M102] + GHcoll[M012]) + (9./2.)*( 2.*GHcoll[M220]-GHcoll[M202]-GHcoll[M022]));
-//     cell[FMM0] = (rho / 36.)*(1. + 3.* (- u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] +(9./2.)*(-2.*GHcoll[M210]- 2.*GHcoll[M120] + GHcoll[M102] + GHcoll[M012]) + (9./2.)*( 2.*GHcoll[M220]-GHcoll[M202]-GHcoll[M022]));
-//     cell[FP0P] = (rho / 36.)*(1. + 3.* (+ u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] +(9./2.)*( 2.*GHcoll[M201] +  2.*GHcoll[M102] - GHcoll[M120] - GHcoll[M021]) + (9./2.)*( 2.*GHcoll[M202]-GHcoll[M220]-GHcoll[M022]));
-//     cell[FM0P] = (rho / 36.)*(1. + 3.* (- u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] +(9./2.)*( 2.*GHcoll[M201]- 2.*GHcoll[M102] + GHcoll[M120] - GHcoll[M021]) + (9./2.)*( 2.*GHcoll[M202]-GHcoll[M220]-GHcoll[M022]));
-//     cell[FP0M] = (rho / 36.)*(1. + 3.* (+ u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] +(9./2.)*(-2.*GHcoll[M201] +  2.*GHcoll[M102] - GHcoll[M120] + GHcoll[M021]) + (9./2.)*( 2.*GHcoll[M202]-GHcoll[M220]-GHcoll[M022]));
-//     cell[FM0M] = (rho / 36.)*(1. + 3.* (- u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] +(9./2.)*(-2.*GHcoll[M201]- 2.*GHcoll[M102] + GHcoll[M120] + GHcoll[M021]) + (9./2.)*( 2.*GHcoll[M202]-GHcoll[M220]-GHcoll[M022]));
-//     cell[F0PP] = (rho / 36.)*(1. + 3.* (+ u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] +(9./2.)*( 2.*GHcoll[M021] +  2.*GHcoll[M012] - GHcoll[M210] - GHcoll[M201]) + (9./2.)*( 2.*GHcoll[M022]-GHcoll[M220]-GHcoll[M202]));
-//     cell[F0MP] = (rho / 36.)*(1. + 3.* (- u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] +(9./2.)*( 2.*GHcoll[M021]- 2.*GHcoll[M012] + GHcoll[M210] - GHcoll[M201]) + (9./2.)*( 2.*GHcoll[M022]-GHcoll[M220]-GHcoll[M202]));
-//     cell[F0PM] = (rho / 36.)*(1. + 3.* (+ u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] +(9./2.)*(-2.*GHcoll[M021] +  2.*GHcoll[M012] - GHcoll[M210] + GHcoll[M201]) + (9./2.)*( 2.*GHcoll[M022]-GHcoll[M220]-GHcoll[M202]));
-//     cell[F0MM] = (rho / 36.)*(1. + 3.* (- u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] +(9./2.)*(-2.*GHcoll[M021]- 2.*GHcoll[M012] + GHcoll[M210] + GHcoll[M201]) + (9./2.)*( 2.*GHcoll[M022]-GHcoll[M220]-GHcoll[M202]));
-
-//     for (int i = 0; i<19; ++i) {
-//         cell[i] -= D::t[i];
-//     }
-
-// };
-
-// /////////// Only 3 ortho ///////////
-// static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
-//                       Array<T, D::q> const& GH,    // Hermite moments
-//                       Array<T, D::q> const& GHeq,  // Equilibrium moments (Hermite)
-//                       Array<T, D::numRelaxationTimes> const& omega)
-// {
-//     T omega1 = omega[0];
-//     T omega2 = omega[1];
-//     T omega3 = omega[2];
-//     T omega4 = omega[3];
-
-//     T omegaBulk = omega1;
-//     T omegaPlus  = (omegaBulk + 2.*omega1)/3.; // Notation used by Fei
-//     T omegaMinus = (omegaBulk -    omega1)/3.; // Notation used by Fei
-
-//     // Post-collision moments.
-//     Array<T,D::q> GHcoll;
-
-//     // Collision in the Hermite moment space
-//     // Order 2
-// /*    GHcoll[M200] = (1.-omega1) * GH[M200] + omega1 * GHeq[M200] ;
-//     GHcoll[M020] = (1.-omega1) * GH[M020] + omega1 * GHeq[M020] ;
-//     GHcoll[M002] = (1.-omega1) * GH[M002] + omega1 * GHeq[M002] ;*/
-//     GHcoll[M200] = GH[M200] - omegaPlus  * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
-//     GHcoll[M020] = GH[M020] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaPlus  * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
-//     GHcoll[M002] = GH[M002] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaPlus  * (GH[M002]-GHeq[M002]) ;
-    
-//     GHcoll[M110] = (1.-omega2) * GH[M110] + omega2 * GHeq[M110] ;
-//     GHcoll[M101] = (1.-omega2) * GH[M101] + omega2 * GHeq[M101] ;
-//     GHcoll[M011] = (1.-omega2) * GH[M011] + omega2 * GHeq[M011] ;
-
-//     // Order 3
-//     T GHorM210 = (1.-omega3) * (GH[M210] + GH[M012]) + omega3 * (GHeq[M210] + GHeq[M012]);
-//     T GHorM201 = (1.-omega3) * (GH[M201] + GH[M021]) + omega3 * (GHeq[M201] + GHeq[M021]);
-//     T GHorM120 = (1.-omega3) * (GH[M120] + GH[M102]) + omega3 * (GHeq[M120] + GHeq[M102]);
-//     T GHorM012 = (1.-omega3) * (GH[M012] - GH[M210]) + omega3 * (GHeq[M012] - GHeq[M210]);
-//     T GHorM021 = (1.-omega3) * (GH[M021] - GH[M201]) + omega3 * (GHeq[M021] - GHeq[M201]);
-//     T GHorM102 = (1.-omega3) * (GH[M102] - GH[M120]) + omega3 * (GHeq[M102] - GHeq[M120]);
-
-//     // Order 4
-//     GHcoll[M220] = (1.-omega4) * GH[M220] + omega4 * GHeq[M220] ;
-//     GHcoll[M202] = (1.-omega4) * GH[M202] + omega4 * GHeq[M202] ;
-//     GHcoll[M022] = (1.-omega4) * GH[M022] + omega4 * GHeq[M022] ;
-
-//     // Compute post collision populations from RM
-//     cell[F000] = (rho / 3.) *(1. -(3./2.)*(GHcoll[M200] + GHcoll[M020] + GHcoll[M002])+(9./4.)* (GHcoll[M220] + GHcoll[M202] + GHcoll[M022]));
-
-//     cell[FP00] = (rho / 18.)*(1. + 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) - 9.*GHorM120 - (9./4.)* (2.*GHcoll[M220] + 2.*GHcoll[M202] - GHcoll[M022]));
-//     cell[FM00] = (rho / 18.)*(1. - 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) + 9.*GHorM120 - (9./4.)* (2.*GHcoll[M220] + 2.*GHcoll[M202] - GHcoll[M022]));
-//     cell[F0P0] = (rho / 18.)*(1. + 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) - 9.*GHorM210 - (9./4.)* (2.*GHcoll[M220] + 2.*GHcoll[M022] - GHcoll[M202]));
-//     cell[F0M0] = (rho / 18.)*(1. - 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) + 9.*GHorM210 - (9./4.)* (2.*GHcoll[M220] + 2.*GHcoll[M022] - GHcoll[M202]));
-//     cell[F00P] = (rho / 18.)*(1. + 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) - 9.*GHorM201 - (9./4.)* (2.*GHcoll[M202] + 2.*GHcoll[M022] - GHcoll[M220]));
-//     cell[F00M] = (rho / 18.)*(1. - 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) + 9.*GHorM201 - (9./4.)* (2.*GHcoll[M202] + 2.*GHcoll[M022] - GHcoll[M220]));
-
-//     cell[FPP0] = (rho / 36.)*(1. + 3.* (+ u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] + (9./2.)*( GHorM210 + GHorM120 - GHorM102 - GHorM012) + (9./2.)*( 2.*GHcoll[M220]-GHcoll[M202]-GHcoll[M022]));
-//     cell[FMP0] = (rho / 36.)*(1. + 3.* (- u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] + (9./2.)*( GHorM210 - GHorM120 + GHorM102 - GHorM012) + (9./2.)*( 2.*GHcoll[M220]-GHcoll[M202]-GHcoll[M022]));
-//     cell[FPM0] = (rho / 36.)*(1. + 3.* (+ u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] + (9./2.)*(-GHorM210 + GHorM120 - GHorM102 + GHorM012) + (9./2.)*( 2.*GHcoll[M220]-GHcoll[M202]-GHcoll[M022]));
-//     cell[FMM0] = (rho / 36.)*(1. + 3.* (- u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] + (9./2.)*(-GHorM210 - GHorM120 + GHorM102 + GHorM012) + (9./2.)*( 2.*GHcoll[M220]-GHcoll[M202]-GHcoll[M022]));
-//     cell[FP0P] = (rho / 36.)*(1. + 3.* (+ u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] + (9./2.)*( GHorM201 + GHorM102 + GHorM120 - GHorM021) + (9./2.)*( 2.*GHcoll[M202]-GHcoll[M220]-GHcoll[M022]));
-//     cell[FM0P] = (rho / 36.)*(1. + 3.* (- u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] + (9./2.)*( GHorM201 - GHorM102 - GHorM120 - GHorM021) + (9./2.)*( 2.*GHcoll[M202]-GHcoll[M220]-GHcoll[M022]));
-//     cell[FP0M] = (rho / 36.)*(1. + 3.* (+ u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] + (9./2.)*(-GHorM201 + GHorM102 + GHorM120 + GHorM021) + (9./2.)*( 2.*GHcoll[M202]-GHcoll[M220]-GHcoll[M022]));
-//     cell[FM0M] = (rho / 36.)*(1. + 3.* (- u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] + (9./2.)*(-GHorM201 - GHorM102 - GHorM120 + GHorM021) + (9./2.)*( 2.*GHcoll[M202]-GHcoll[M220]-GHcoll[M022]));
-//     cell[F0PP] = (rho / 36.)*(1. + 3.* (+ u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] + (9./2.)*( GHorM021 + GHorM012 + GHorM210 + GHorM201) + (9./2.)*( 2.*GHcoll[M022]-GHcoll[M220]-GHcoll[M202]));
-//     cell[F0MP] = (rho / 36.)*(1. + 3.* (- u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] + (9./2.)*( GHorM021 - GHorM012 - GHorM210 + GHorM201) + (9./2.)*( 2.*GHcoll[M022]-GHcoll[M220]-GHcoll[M202]));
-//     cell[F0PM] = (rho / 36.)*(1. + 3.* (+ u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] + (9./2.)*(-GHorM021 + GHorM012 + GHorM210 - GHorM201) + (9./2.)*( 2.*GHcoll[M022]-GHcoll[M220]-GHcoll[M202]));
-//     cell[F0MM] = (rho / 36.)*(1. + 3.* (- u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] + (9./2.)*(-GHorM021 - GHorM012 - GHorM210 - GHorM201) + (9./2.)*( 2.*GHcoll[M022]-GHcoll[M220]-GHcoll[M202]));
-
-//     for (int i = 0; i<19; ++i) {
-//         cell[i] -= D::t[i];
-//     }
-
-// };
-
-// /////////// 3 ortho + Only 4 ortho with 2 ///////////
-// static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
-//                       Array<T, D::q> const& GH,    // Hermite moments
-//                       Array<T, D::q> const& GHeq,  // Equilibrium moments (Hermite)
-//                       Array<T, D::numRelaxationTimes> const& omega)
-// {
-//     T omega1 = omega[0];
-//     T omega2 = omega[1];
-//     T omega3 = omega[2];
-//     T omega4 = omega[3];
-
-//     T omegaBulk = omega1;
-//     T omegaPlus  = (omegaBulk + 2.*omega1)/3.; // Notation used by Fei
-//     T omegaMinus = (omegaBulk -    omega1)/3.; // Notation used by Fei
-
-//     // Post-collision moments.
-//     Array<T,D::q> GHcoll;
-
-//     // Collision in the Hermite moment space
-//     // Order 2
-// /*    GHcoll[M200] = (1.-omega1) * GH[M200] + omega1 * GHeq[M200] ;
-//     GHcoll[M020] = (1.-omega1) * GH[M020] + omega1 * GHeq[M020] ;
-//     GHcoll[M002] = (1.-omega1) * GH[M002] + omega1 * GHeq[M002] ;*/
-//     GHcoll[M200] = GH[M200] - omegaPlus  * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
-//     GHcoll[M020] = GH[M020] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaPlus  * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
-//     GHcoll[M002] = GH[M002] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaPlus  * (GH[M002]-GHeq[M002]) ;
-    
-//     GHcoll[M110] = (1.-omega2) * GH[M110] + omega2 * GHeq[M110] ;
-//     GHcoll[M101] = (1.-omega2) * GH[M101] + omega2 * GHeq[M101] ;
-//     GHcoll[M011] = (1.-omega2) * GH[M011] + omega2 * GHeq[M011] ;
-
-//     // Order 3 
-//     T GHorM210 = (1.-omega3) * (GH[M210] + GH[M012]) + omega3 * (GHeq[M210] + GHeq[M012]);
-//     T GHorM201 = (1.-omega3) * (GH[M201] + GH[M021]) + omega3 * (GHeq[M201] + GHeq[M021]);
-//     T GHorM120 = (1.-omega3) * (GH[M120] + GH[M102]) + omega3 * (GHeq[M120] + GHeq[M102]);
-//     T GHorM012 = (1.-omega3) * (GH[M012] - GH[M210]) + omega3 * (GHeq[M012] - GHeq[M210]);
-//     T GHorM021 = (1.-omega3) * (GH[M021] - GH[M201]) + omega3 * (GHeq[M021] - GHeq[M201]);
-//     T GHorM102 = (1.-omega3) * (GH[M102] - GH[M120]) + omega3 * (GHeq[M102] - GHeq[M120]);
-//     // 4 ortho with 2
-//     T GH4o2_220 = (GH[M220] + (1./6.)*GH[M002]); 
-//     T GH4o2_202 = (GH[M202] + (1./6.)*GH[M020]); 
-//     T GH4o2_022 = (GH[M022] + (1./6.)*GH[M200]); 
-//     T GH4o2eq_220 = (GHeq[M220] + (1./6.)*GHeq[M002]);  
-//     T GH4o2eq_202 = (GHeq[M202] + (1./6.)*GHeq[M020]);  
-//     T GH4o2eq_022 = (GHeq[M022] + (1./6.)*GHeq[M200]);  
-//     // 4 ortho with 4
-//     T GH_220 = GH4o2_220;
-//     T GH_202 = GH4o2_202 + (2./7.)*GH_220;
-//     T GH_022 = GH4o2_022 + (2./7.)*GH_220 + (2./5.)*GH_202;
-//     T GHeq_220 = GH4o2eq_220;
-//     T GHeq_202 = GH4o2eq_202 + (2./7.)*GHeq_220;
-//     T GHeq_022 = GH4o2eq_022 + (2./7.)*GHeq_220 + (2./5.)*GHeq_202;
-
-//     // Order 4
-//     T GHor220 = (1.-omega4) * GH_220 + omega4 * GHeq_220;  
-//     T GHor202 = (1.-omega4) * GH_202 + omega4 * GHeq_202;  
-//     T GHor022 = (1.-omega4) * GH_022 + omega4 * GHeq_022;  
-
-//     // Compute post collision populations from RM
-//     cell[F000] = (rho / 3.) *(1. -(3./2.)*(GHcoll[M200] + GHcoll[M020] + GHcoll[M002])+(9./8.)* (GHor220 + GHor202 + GHor022));
-
-//     cell[FP00] = (rho / 18.)*(1. + 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) - 9.*GHorM120 -(9./8.)* (5.*GHor220 + 5.*GHor202 - 4.*GHor022));
-//     cell[FM00] = (rho / 18.)*(1. - 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) + 9.*GHorM120 -(9./8.)* (5.*GHor220 + 5.*GHor202 - 4.*GHor022));
-//     cell[F0P0] = (rho / 18.)*(1. + 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) - 9.*GHorM210 -(9./8.)* (5.*GHor220 + 5.*GHor022 - 4.*GHor202));
-//     cell[F0M0] = (rho / 18.)*(1. - 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) + 9.*GHorM210 -(9./8.)* (5.*GHor220 + 5.*GHor022 - 4.*GHor202));
-//     cell[F00P] = (rho / 18.)*(1. + 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) - 9.*GHorM201 -(9./8.)* (5.*GHor202 + 5.*GHor022 - 4.*GHor220));
-//     cell[F00M] = (rho / 18.)*(1. - 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) + 9.*GHorM201 -(9./8.)* (5.*GHor202 + 5.*GHor022 - 4.*GHor220));
-
-//     cell[FPP0] = (rho / 36.)*(1. + 3.* (+ u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] + 3.*( GHorM210 + GHorM120 - GHorM102 - GHorM012) + (9./8.)*( 7.*GHor220-2.*GHor202-2.*GHor022));
-//     cell[FMP0] = (rho / 36.)*(1. + 3.* (- u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] + 3.*( GHorM210 - GHorM120 + GHorM102 - GHorM012) + (9./8.)*( 7.*GHor220-2.*GHor202-2.*GHor022));
-//     cell[FPM0] = (rho / 36.)*(1. + 3.* (+ u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] + 3.*(-GHorM210 + GHorM120 - GHorM102 + GHorM012) + (9./8.)*( 7.*GHor220-2.*GHor202-2.*GHor022));
-//     cell[FMM0] = (rho / 36.)*(1. + 3.* (- u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] + 3.*(-GHorM210 - GHorM120 + GHorM102 + GHorM012) + (9./8.)*( 7.*GHor220-2.*GHor202-2.*GHor022));
-//     cell[FP0P] = (rho / 36.)*(1. + 3.* (+ u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] + 3.*( GHorM201 + GHorM102 + GHorM120 - GHorM021) + (9./8.)*( 7.*GHor202-2.*GHor220-2.*GHor022));
-//     cell[FM0P] = (rho / 36.)*(1. + 3.* (- u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] + 3.*( GHorM201 - GHorM102 - GHorM120 - GHorM021) + (9./8.)*( 7.*GHor202-2.*GHor220-2.*GHor022));
-//     cell[FP0M] = (rho / 36.)*(1. + 3.* (+ u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] + 3.*(-GHorM201 + GHorM102 + GHorM120 + GHorM021) + (9./8.)*( 7.*GHor202-2.*GHor220-2.*GHor022));
-//     cell[FM0M] = (rho / 36.)*(1. + 3.* (- u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] + 3.*(-GHorM201 - GHorM102 - GHorM120 + GHorM021) + (9./8.)*( 7.*GHor202-2.*GHor220-2.*GHor022));
-//     cell[F0PP] = (rho / 36.)*(1. + 3.* (+ u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] + 3.*( GHorM021 + GHorM012 + GHorM210 + GHorM201) + (9./8.)*( 7.*GHor022-2.*GHor220-2.*GHor202));
-//     cell[F0MP] = (rho / 36.)*(1. + 3.* (- u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] + 3.*( GHorM021 - GHorM012 - GHorM210 + GHorM201) + (9./8.)*( 7.*GHor022-2.*GHor220-2.*GHor202));
-//     cell[F0PM] = (rho / 36.)*(1. + 3.* (+ u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] + 3.*(-GHorM021 + GHorM012 + GHorM210 - GHorM201) + (9./8.)*( 7.*GHor022-2.*GHor220-2.*GHor202));
-//     cell[F0MM] = (rho / 36.)*(1. + 3.* (- u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] + 3.*(-GHorM021 - GHorM012 - GHorM210 - GHorM201) + (9./8.)*( 7.*GHor022-2.*GHor220-2.*GHor202));
-
-//     for (int i = 0; i<19; ++i) {
-//         cell[i] -= D::t[i];
-//     }
-
-// };
-
-// /////////// Only 4 ortho (order 2 + order 4) ///////////
-// static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
-//                       Array<T, D::q> const& GH,    // Hermite moments
-//                       Array<T, D::q> const& GHeq,  // Equilibrium moments (Hermite)
-//                       Array<T, D::numRelaxationTimes> const& omega)
-// {
-//     T omega1 = omega[0];
-//     T omega2 = omega[1];
-//     T omega3 = omega[2];
-//     T omega4 = omega[3];
-
-//     T omegaBulk = omega1;
-//     T omegaPlus  = (omegaBulk + 2.*omega1)/3.; // Notation used by Fei
-//     T omegaMinus = (omegaBulk -    omega1)/3.; // Notation used by Fei
-
-//     // Post-collision moments.
-//     Array<T,D::q> GHcoll;
-
-//     // Collision in the Hermite moment space
-//     // Order 2
-// /*    GHcoll[M200] = (1.-omega1) * GH[M200] + omega1 * GHeq[M200] ;
-//     GHcoll[M020] = (1.-omega1) * GH[M020] + omega1 * GHeq[M020] ;
-//     GHcoll[M002] = (1.-omega1) * GH[M002] + omega1 * GHeq[M002] ;*/
-//     GHcoll[M200] = GH[M200] - omegaPlus  * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
-//     GHcoll[M020] = GH[M020] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaPlus  * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
-//     GHcoll[M002] = GH[M002] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaPlus  * (GH[M002]-GHeq[M002]) ;
-    
-//     GHcoll[M110] = (1.-omega2) * GH[M110] + omega2 * GHeq[M110] ;
-//     GHcoll[M101] = (1.-omega2) * GH[M101] + omega2 * GHeq[M101] ;
-//     GHcoll[M011] = (1.-omega2) * GH[M011] + omega2 * GHeq[M011] ;
-
-//     // Order 3 
-//     GHcoll[M210] = (1.-omega3) * GH[M210] + omega3 * GHeq[M210]; 
-//     GHcoll[M201] = (1.-omega3) * GH[M201] + omega3 * GHeq[M201]; 
-//     GHcoll[M021] = (1.-omega3) * GH[M021] + omega3 * GHeq[M021]; 
-//     GHcoll[M120] = (1.-omega3) * GH[M120] + omega3 * GHeq[M120]; 
-//     GHcoll[M102] = (1.-omega3) * GH[M102] + omega3 * GHeq[M102]; 
-//     GHcoll[M012] = (1.-omega3) * GH[M012] + omega3 * GHeq[M012]; 
-//     // 4 ortho with 2
-//     T GH4o2_220 = (GH[M220] + (1./6.)*GH[M002]); 
-//     T GH4o2_202 = (GH[M202] + (1./6.)*GH[M020]); 
-//     T GH4o2_022 = (GH[M022] + (1./6.)*GH[M200]); 
-//     T GH4o2eq_220 = (GHeq[M220] + (1./6.)*GHeq[M002]);  
-//     T GH4o2eq_202 = (GHeq[M202] + (1./6.)*GHeq[M020]);  
-//     T GH4o2eq_022 = (GHeq[M022] + (1./6.)*GHeq[M200]);  
-//     // 4 ortho with 4
-//     T GH_220 = GH4o2_220;
-//     T GH_202 = GH4o2_202 + (2./7.)*GH_220;
-//     T GH_022 = GH4o2_022 + (2./7.)*GH_220 + (2./5.)*GH_202;
-//     T GHeq_220 = GH4o2eq_220;
-//     T GHeq_202 = GH4o2eq_202 + (2./7.)*GHeq_220;
-//     T GHeq_022 = GH4o2eq_022 + (2./7.)*GHeq_220 + (2./5.)*GHeq_202;
-//     // Order 4
-//     T GHor220 = (1.-omega4) * GH_220 + omega4 * GHeq_220;  
-//     T GHor202 = (1.-omega4) * GH_202 + omega4 * GHeq_202;  
-//     T GHor022 = (1.-omega4) * GH_022 + omega4 * GHeq_022;  
-
-//     // Compute post collision populations from RM
-//     cell[F000] = (rho / 3.) *(1. -(3./2.)*(GHcoll[M200] + GHcoll[M020] + GHcoll[M002]) + (9./7.)*GHor220 + (9./5.)*GHor202 + 3.*GHor022);
-
-//     cell[FP00] = (rho / 18.)*(1. + 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) -(9./2.)*(GHcoll[M120] + GHcoll[M102]) - (45./7.)*GHor220 - 9.*GHor202);
-//     cell[FM00] = (rho / 18.)*(1. - 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) +(9./2.)*(GHcoll[M120] + GHcoll[M102]) - (45./7.)*GHor220 - 9.*GHor202);
-//     cell[F0P0] = (rho / 18.)*(1. + 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) -(9./2.)*(GHcoll[M210] + GHcoll[M012]) - (45./7.)*GHor220 + (18./5.)*GHor202 - 9.*GHor022);
-//     cell[F0M0] = (rho / 18.)*(1. - 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) +(9./2.)*(GHcoll[M210] + GHcoll[M012]) - (45./7.)*GHor220 + (18./5.)*GHor202 - 9.*GHor022);
-//     cell[F00P] = (rho / 18.)*(1. + 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) -(9./2.)*(GHcoll[M201] + GHcoll[M021]) + (36./7.)*GHor220 - (27./5.)*GHor202 - 9.*GHor022);
-//     cell[F00M] = (rho / 18.)*(1. - 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) +(9./2.)*(GHcoll[M201] + GHcoll[M021]) + (36./7.)*GHor220 - (27./5.)*GHor202 - 9.*GHor022);
-
-//     cell[FPP0] = (rho / 36.)*(1. + 3.* (+ u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] +(9./2.)*( 2.*GHcoll[M210] +  2.*GHcoll[M120] - GHcoll[M102] - GHcoll[M012]) + 9.*GHor220);
-//     cell[FMP0] = (rho / 36.)*(1. + 3.* (- u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] +(9./2.)*( 2.*GHcoll[M210]- 2.*GHcoll[M120] + GHcoll[M102] - GHcoll[M012]) + 9.*GHor220);
-//     cell[FPM0] = (rho / 36.)*(1. + 3.* (+ u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] +(9./2.)*(-2.*GHcoll[M210] +  2.*GHcoll[M120] - GHcoll[M102] + GHcoll[M012]) + 9.*GHor220);
-//     cell[FMM0] = (rho / 36.)*(1. + 3.* (- u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] +(9./2.)*(-2.*GHcoll[M210]- 2.*GHcoll[M120] + GHcoll[M102] + GHcoll[M012]) + 9.*GHor220);
-//     cell[FP0P] = (rho / 36.)*(1. + 3.* (+ u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] +(9./2.)*( 2.*GHcoll[M201] +  2.*GHcoll[M102] - GHcoll[M120] - GHcoll[M021]) - (18./7.)*GHor220 + 9.*GHor202);
-//     cell[FM0P] = (rho / 36.)*(1. + 3.* (- u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] +(9./2.)*( 2.*GHcoll[M201]- 2.*GHcoll[M102] + GHcoll[M120] - GHcoll[M021]) - (18./7.)*GHor220 + 9.*GHor202);
-//     cell[FP0M] = (rho / 36.)*(1. + 3.* (+ u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] +(9./2.)*(-2.*GHcoll[M201] +  2.*GHcoll[M102] - GHcoll[M120] + GHcoll[M021]) - (18./7.)*GHor220 + 9.*GHor202);
-//     cell[FM0M] = (rho / 36.)*(1. + 3.* (- u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] +(9./2.)*(-2.*GHcoll[M201]- 2.*GHcoll[M102] + GHcoll[M120] + GHcoll[M021]) - (18./7.)*GHor220 + 9.*GHor202);
-//     cell[F0PP] = (rho / 36.)*(1. + 3.* (+ u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] +(9./2.)*( 2.*GHcoll[M021] +  2.*GHcoll[M012] - GHcoll[M210] - GHcoll[M201]) - (18./7.)*GHor220 - (18./5.)*GHor202 + 9.*GHor022);
-//     cell[F0MP] = (rho / 36.)*(1. + 3.* (- u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] +(9./2.)*( 2.*GHcoll[M021]- 2.*GHcoll[M012] + GHcoll[M210] - GHcoll[M201]) - (18./7.)*GHor220 - (18./5.)*GHor202 + 9.*GHor022);
-//     cell[F0PM] = (rho / 36.)*(1. + 3.* (+ u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] +(9./2.)*(-2.*GHcoll[M021] +  2.*GHcoll[M012] - GHcoll[M210] + GHcoll[M201]) - (18./7.)*GHor220 - (18./5.)*GHor202 + 9.*GHor022);
-//     cell[F0MM] = (rho / 36.)*(1. + 3.* (- u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] +(9./2.)*(-2.*GHcoll[M021]- 2.*GHcoll[M012] + GHcoll[M210] + GHcoll[M201]) - (18./7.)*GHor220 - (18./5.)*GHor202 + 9.*GHor022);
-
-//     for (int i = 0; i<19; ++i) {
-//         cell[i] -= D::t[i];
-//     }
-
-// };
-
 
 /////////// Full Ortho ///////////
 static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
@@ -5647,10 +5027,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> GHcoll;
 
     // Collision in the Hermite moment space
-    // Order 2
-/*    GHcoll[M200] = (1.-omega1) * GH[M200] + omega1 * GHeq[M200] ;
-    GHcoll[M020] = (1.-omega1) * GH[M020] + omega1 * GHeq[M020] ;
-    GHcoll[M002] = (1.-omega1) * GH[M002] + omega1 * GHeq[M002] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     GHcoll[M200] = GH[M200] - omegaPlus  * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
     GHcoll[M020] = GH[M020] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaPlus  * (GH[M020]-GHeq[M020]) - omegaMinus * (GH[M002]-GHeq[M002]) ;
     GHcoll[M002] = GH[M002] - omegaMinus * (GH[M200]-GHeq[M200]) - omegaMinus * (GH[M020]-GHeq[M020]) - omegaPlus  * (GH[M002]-GHeq[M002]) ;
@@ -5659,55 +5036,6 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     GHcoll[M101] = (1.-omega2) * GH[M101] + omega2 * GHeq[M101] ;
     GHcoll[M011] = (1.-omega2) * GH[M011] + omega2 * GHeq[M011] ;
 
-/*    // Order 3 
-    T GHorM210 = (1.-omega3) * (GH[M210] + GH[M012]) + omega3 * (GHeq[M210] + GHeq[M012]);  
-    T GHorM201 = (1.-omega3) * (GH[M201] + GH[M021]) + omega3 * (GHeq[M201] + GHeq[M021]);  
-    T GHorM120 = (1.-omega3) * (GH[M120] + GH[M102]) + omega3 * (GHeq[M120] + GHeq[M102]);  
-    T GHorM012 = (1.-omega3) * (GH[M012] - GH[M210]) + omega3 * (GHeq[M012] - GHeq[M210]);  
-    T GHorM021 = (1.-omega3) * (GH[M021] - GH[M201]) + omega3 * (GHeq[M021] - GHeq[M201]);  
-    T GHorM102 = (1.-omega3) * (GH[M102] - GH[M120]) + omega3 * (GHeq[M102] - GHeq[M120]);  
-    // 4 ortho with 2
-    T GH4o2_220 = (GH[M220] + (1./6.)*GH[M002]); 
-    T GH4o2_202 = (GH[M202] + (1./6.)*GH[M020]); 
-    T GH4o2_022 = (GH[M022] + (1./6.)*GH[M200]); 
-    T GH4o2eq_220 = (GHeq[M220] + (1./6.)*GHeq[M002]);  
-    T GH4o2eq_202 = (GHeq[M202] + (1./6.)*GHeq[M020]);  
-    T GH4o2eq_022 = (GHeq[M022] + (1./6.)*GHeq[M200]);  
-    // 4 ortho with 4
-    T GH_220 = GH4o2_220;
-    T GH_202 = GH4o2_202 + (2./7.)*GH_220;
-    T GH_022 = GH4o2_022 + (2./7.)*GH_220 + (2./5.)*GH_202;
-    T GHeq_220 = GH4o2eq_220;
-    T GHeq_202 = GH4o2eq_202 + (2./7.)*GHeq_220;
-    T GHeq_022 = GH4o2eq_022 + (2./7.)*GHeq_220 + (2./5.)*GHeq_202;
-    // Order 4
-    T GHor220 = (1.-omega4) * GH_220 + omega4 * GHeq_220;  
-    T GHor202 = (1.-omega4) * GH_202 + omega4 * GHeq_202;  
-    T GHor022 = (1.-omega4) * GH_022 + omega4 * GHeq_022;  
-
-    // Compute post collision populations from RM
-    cell[F000] = (rho / 3.) *(1. -(3./2.)*(GHcoll[M200] + GHcoll[M020] + GHcoll[M002])+ (9./7.)*GHor220 + (9./5.)*GHor202 + 3.*GHor022);
-
-    cell[FP00] = (rho / 18.)*(1. + 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) - 9.*GHorM120 - (45./7.)*GHor220 - 9.*GHor202 );
-    cell[FM00] = (rho / 18.)*(1. - 3.*u[0] + (3./2.)* (2.*GHcoll[M200]-GHcoll[M020]-GHcoll[M002]) + 9.*GHorM120 - (45./7.)*GHor220 - 9.*GHor202 );
-    cell[F0P0] = (rho / 18.)*(1. + 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) - 9.*GHorM210 - (45./7.)*GHor220 + (18./5.)*GHor202 - 9.*GHor022 );
-    cell[F0M0] = (rho / 18.)*(1. - 3.*u[1] + (3./2.)* (2.*GHcoll[M020]-GHcoll[M200]-GHcoll[M002]) + 9.*GHorM210 - (45./7.)*GHor220 + (18./5.)*GHor202 - 9.*GHor022 );
-    cell[F00P] = (rho / 18.)*(1. + 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) - 9.*GHorM201 + (36./7.)*GHor220 - (27./5.)*GHor202 - 9.*GHor022 );
-    cell[F00M] = (rho / 18.)*(1. - 3.*u[2] + (3./2.)* (2.*GHcoll[M002]-GHcoll[M200]-GHcoll[M020]) + 9.*GHorM201 + (36./7.)*GHor220 - (27./5.)*GHor202 - 9.*GHor022 );
-
-    cell[FPP0] = (rho / 36.)*(1. + 3.* (+ u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] + (9./2.)*( GHorM210 + GHorM120 - GHorM102 - GHorM012) + 9.*GHor220 );
-    cell[FMP0] = (rho / 36.)*(1. + 3.* (- u[0] + u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] + (9./2.)*( GHorM210 - GHorM120 + GHorM102 - GHorM012) + 9.*GHor220 );
-    cell[FPM0] = (rho / 36.)*(1. + 3.* (+ u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) -9.*GHcoll[M110] + (9./2.)*(-GHorM210 + GHorM120 - GHorM102 + GHorM012) + 9.*GHor220 );
-    cell[FMM0] = (rho / 36.)*(1. + 3.* (- u[0] - u[1]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M020] - GHcoll[M002]) +9.*GHcoll[M110] + (9./2.)*(-GHorM210 - GHorM120 + GHorM102 + GHorM012) + 9.*GHor220 );
-    cell[FP0P] = (rho / 36.)*(1. + 3.* (+ u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] + (9./2.)*( GHorM201 + GHorM102 + GHorM120 - GHorM021) - (18./7.)*GHor220 + 9.*GHor202 );
-    cell[FM0P] = (rho / 36.)*(1. + 3.* (- u[0] + u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] + (9./2.)*( GHorM201 - GHorM102 - GHorM120 - GHorM021) - (18./7.)*GHor220 + 9.*GHor202 );
-    cell[FP0M] = (rho / 36.)*(1. + 3.* (+ u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) -9.*GHcoll[M101] + (9./2.)*(-GHorM201 + GHorM102 + GHorM120 + GHorM021) - (18./7.)*GHor220 + 9.*GHor202 );
-    cell[FM0M] = (rho / 36.)*(1. + 3.* (- u[0] - u[2]) +(3./2.)*(2.*GHcoll[M200] + 2.*GHcoll[M002] - GHcoll[M020]) +9.*GHcoll[M101] + (9./2.)*(-GHorM201 - GHorM102 - GHorM120 + GHorM021) - (18./7.)*GHor220 + 9.*GHor202 );
-    cell[F0PP] = (rho / 36.)*(1. + 3.* (+ u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] + (9./2.)*( GHorM021 + GHorM012 + GHorM210 + GHorM201) - (18./7.)*GHor220 - (18./5.)*GHor202 + 9.*GHor022 );
-    cell[F0MP] = (rho / 36.)*(1. + 3.* (- u[1] + u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] + (9./2.)*( GHorM021 - GHorM012 - GHorM210 + GHorM201) - (18./7.)*GHor220 - (18./5.)*GHor202 + 9.*GHor022 );
-    cell[F0PM] = (rho / 36.)*(1. + 3.* (+ u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) -9.*GHcoll[M011] + (9./2.)*(-GHorM021 + GHorM012 + GHorM210 - GHorM201) - (18./7.)*GHor220 - (18./5.)*GHor202 + 9.*GHor022 );
-    cell[F0MM] = (rho / 36.)*(1. + 3.* (- u[1] - u[2]) +(3./2.)*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] + (9./2.)*(-GHorM021 - GHorM012 - GHorM210 - GHorM201) - (18./7.)*GHor220 - (18./5.)*GHor202 + 9.*GHor022 );
-*/
     // Orthogonalization
     // Order 3 
     T GHeq_M210 = GHeq[M210] + GHeq[M012];
@@ -5960,6 +5288,10 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega3 = omega[2];
     T omega4 = omega[3];
 
+    T omegaBulk = omega1;
+    T omegaPlus  = (omegaBulk + 2.*omega1)/3.; // Notation used by Fei
+    T omegaMinus = (omegaBulk -    omega1)/3.; // Notation used by Fei
+
     T cs4 = D::cs2 * D::cs2;
 
     // Post-collision and Nonequilibrium moments.
@@ -5990,10 +5322,10 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     RRneq[M022] = u[2]*u[2]*RRneq[M020] + u[1]*u[1]*RRneq[M002] + 4.*u[1]*u[2]*RRneq[M011];
 
     // Collision in the Hermite moment space
-    // Order 2
-    RRcoll[M200] = (1.-omega1) * RRneq[M200] + RReq[M200];
-    RRcoll[M020] = (1.-omega1) * RRneq[M020] + RReq[M020];
-    RRcoll[M002] = (1.-omega1) * RRneq[M002] + RReq[M002];
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
+    RRcoll[M200] = RR[M200] - omegaPlus  * RRneq[M200] - omegaMinus * RRneq[M020] - omegaMinus * RRneq[M002] ;
+    RRcoll[M020] = RR[M020] - omegaMinus * RRneq[M200] - omegaPlus  * RRneq[M020] - omegaMinus * RRneq[M002] ;
+    RRcoll[M002] = RR[M002] - omegaMinus * RRneq[M200] - omegaMinus * RRneq[M020] - omegaPlus  * RRneq[M002] ;
     
     RRcoll[M110] = (1.-omega2) * RRneq[M110] + RReq[M110];
     RRcoll[M101] = (1.-omega2) * RRneq[M101] + RReq[M101];

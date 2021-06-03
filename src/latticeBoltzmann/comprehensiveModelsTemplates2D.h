@@ -220,9 +220,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     // Post-collision moments.
     Array<T,D::q> RMcoll;
 
-    // Order 2
-/*    RMcoll[M20] = (1.-omega1) * RM[M20] + omega1 * RMeq[M20] ;
-    RMcoll[M02] = (1.-omega1) * RM[M02] + omega1 * RMeq[M02] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     RMcoll[M20] = RM[M20] - omegaPlus  * (RM[M20]-RMeq[M20]) - omegaMinus * (RM[M02]-RMeq[M02]);
     RMcoll[M02] = RM[M02] - omegaMinus * (RM[M20]-RMeq[M20]) - omegaPlus  * (RM[M02]-RMeq[M02]);    
 
@@ -429,9 +427,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the Hermite moment space
-    // Order 2
-/*    HMcoll[M20] = (1.-omega1) * HM[M20] + omega1 * HMeq[M20] ;
-    HMcoll[M02] = (1.-omega1) * HM[M02] + omega1 * HMeq[M02] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     HMcoll[M20] = HM[M20] - omegaPlus  * (HM[M20]-HMeq[M20]) - omegaMinus * (HM[M02]-HMeq[M02]);
     HMcoll[M02] = HM[M02] - omegaMinus * (HM[M20]-HMeq[M20]) - omegaPlus  * (HM[M02]-HMeq[M02]);    
     
@@ -662,9 +658,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the central moment space
-    // Order 2
-/*    CMcoll[M20] = (1.-omega1) * CM[M20] + omega1 * CMeq[M20] ;
-    CMcoll[M02] = (1.-omega1) * CM[M02] + omega1 * CMeq[M02] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     CMcoll[M20] = CM[M20] - omegaPlus  * (CM[M20]-CMeq[M20]) - omegaMinus * (CM[M02]-CMeq[M02]);
     CMcoll[M02] = CM[M02] - omegaMinus * (CM[M20]-CMeq[M20]) - omegaPlus  * (CM[M02]-CMeq[M02]);    
     
@@ -923,10 +917,8 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> HMcoll;
     Array<T,D::q> RMcoll;
 
-    // Collision in the Hermite moment space
-    // Order 2
-/*    CHMcoll[M20] = (1.-omega1) * CHM[M20] + omega1 * CHMeq[M20] ;
-    CHMcoll[M02] = (1.-omega1) * CHM[M02] + omega1 * CHMeq[M02] ;*/
+    // Collision in the central Hermite moment space
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     CHMcoll[M20] = CHM[M20] - omegaPlus  * (CHM[M20]-CHMeq[M20]) - omegaMinus * (CHM[M02]-CHMeq[M02]);
     CHMcoll[M02] = CHM[M02] - omegaMinus * (CHM[M20]-CHMeq[M20]) - omegaPlus  * (CHM[M02]-CHMeq[M02]);    
     
@@ -1196,9 +1188,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the cumulant space
-    // Order 2
-/*    Kcoll[M20] = (1.-omega1) * K[M20] + omega1 * Keq[M20] ;
-    Kcoll[M02] = (1.-omega1) * K[M02] + omega1 * Keq[M02] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     Kcoll[M20] = K[M20] - omegaPlus  * (K[M20]-Keq[M20]) - omegaMinus * (K[M02]-Keq[M02]);
     Kcoll[M02] = K[M02] - omegaMinus * (K[M20]-Keq[M20]) - omegaPlus  * (K[M02]-Keq[M02]);    
     
@@ -1414,9 +1404,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> GHcoll;
 
     // Collision in the Hermite moment space
-    // Order 2
-/*    GHcoll[M20] = (1.-omega1) * GH[M20] + omega1 * GHeq[M20] ;
-    GHcoll[M02] = (1.-omega1) * GH[M02] + omega1 * GHeq[M02] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     GHcoll[M20] = GH[M20] - omegaPlus  * (GH[M20]-GHeq[M20]) - omegaMinus * (GH[M02]-GHeq[M02]);
     GHcoll[M02] = GH[M02] - omegaMinus * (GH[M20]-GHeq[M20]) - omegaPlus  * (GH[M02]-GHeq[M02]);    
     
@@ -1607,9 +1595,7 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 
     // Collision in the Hermite moment space
-    // Order 2
-/*    RRcoll[M20] = (1.-omega1) * RR[M20] + omega1 * RReq[M20] ;
-    RRcoll[M02] = (1.-omega1) * RR[M02] + omega1 * RReq[M02] ;*/
+    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
     RRcoll[M20] = RR[M20] - omegaPlus  * RRneq[M20] - omegaMinus * RRneq[M02];
     RRcoll[M02] = RR[M02] - omegaMinus * RRneq[M20] - omegaPlus  * RRneq[M02]; 
 
@@ -1654,8 +1640,6 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     }
 
 };
-
-
 
 }; // struct comprehensiveDynamicsTemplatesImpl<T, descriptors::D2Q9DescriptorBase<T> >
 
