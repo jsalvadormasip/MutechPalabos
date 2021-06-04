@@ -37,7 +37,7 @@
 
 
 #include "palabos2D.h"
-#include "palabos2D.hh"    // include full template code
+#include "palabos2D.hh"          // include full template code
 #include "utility_dsl2d_param.h" // code for parameters and log file
 #include <vector>
 #include <cmath>
@@ -195,7 +195,7 @@ int main(int argc, char* argv[]) {
         allOmega[1] = param.omega;     // relaxation of M11 
         allOmega[2] = param.omega3;    // relaxation of M21 and M12
         allOmega[3] = param.omega4;    // relaxation of M22
-        allOmega[4] = param.omegaBulk; // relaxation of bulk moments (M20 + M02)
+        allOmega[4] = param.omegaBulk; // relaxation of bulk moment (M20 + M02)
     } else {
         pcout << "Error: lattice does not exist." << std::endl;
         exit(-1);
@@ -263,7 +263,7 @@ int main(int argc, char* argv[]) {
             pcout << "Catastrophic error: energy has increased or is NaN!" << std::endl;
             writeGif(lattice, iT);
             writeVTK(lattice, param, iT);
-            return 1;
+            return 0;
         }
     }
     /// Close stats file

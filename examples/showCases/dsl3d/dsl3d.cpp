@@ -36,7 +36,7 @@
  */
 
 #include "palabos3D.h"
-#include "palabos3D.hh"   // include full template code
+#include "palabos3D.hh"          // include full template code
 #include "utility_dsl3d_param.h" // code for parameters and log file
 #include <vector>
 #include <cmath>
@@ -52,7 +52,7 @@ using namespace std;
 typedef double T;
 //////// Lattice (Make sure it matches "lbm" in the .xml file!)
 #define DESCRIPTOR D3Q27Descriptor
-//#define DESCRIPTOR D3Q19Descriptor
+// #define DESCRIPTOR D3Q19Descriptor
 
 //////// Select the collision model from data in the .xml file.
 template<typename T, template<typename U> class Descriptor>
@@ -205,7 +205,7 @@ int main(int argc, char* argv[]) {
         allOmega[1] = param.omega;     // relaxation of M110 and cyclic permutations
         allOmega[2] = param.omega3;    // relaxation of M210 and cyclic permutations
         allOmega[3] = param.omega4;    // relaxation of M220 and cyclic permutations
-        allOmega[4] = param.omegaBulk; // relaxation of bulk moments (M200 + M020 + M002)
+        allOmega[4] = param.omegaBulk; // relaxation of bulk moment (M200 + M020 + M002)
     } else if (param.lbm == "D3Q27"){
         allOmega[0] = param.omega;     // relaxation of M200 and cyclic permutations
         allOmega[1] = param.omega;     // relaxation of M110 and cyclic permutations
@@ -215,7 +215,7 @@ int main(int argc, char* argv[]) {
         allOmega[5] = param.omega4;    // relaxation of M211 and cyclic permutations
         allOmega[6] = param.omega5;    // relaxation of M221 and cyclic permutations
         allOmega[7] = param.omega6;    // relaxation of M222 and cyclic permutations
-        allOmega[8] = param.omegaBulk; // relaxation of bulk moments (M200 + M020 + M002)
+        allOmega[8] = param.omegaBulk; // relaxation of bulk moment (M200 + M020 + M002)
     } else {
         pcout << "Error: lbm name does not exist." << std::endl;
         exit(-1);
@@ -283,7 +283,7 @@ int main(int argc, char* argv[]) {
             pcout << "Catastrophic error: energy has increased or is NaN!" << std::endl;
             writeVTK(lattice, param, iT);
             writeGif(lattice, param, iT);
-            return 1;
+            return 0;
         }
     }
     /// Close stats file

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <lattice>
-<!-- Valocity discretizazion -->
+<!-- Velocity discretizazion -->
     <lbm> D2Q9 </lbm>
 <!-- Dynamics used for the simulation -->
     <dynName> BGK_Ma2 </dynName>
