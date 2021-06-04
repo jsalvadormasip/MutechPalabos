@@ -38,7 +38,7 @@
  * Coreixas et al. 'Comprehensive comparison of collision models in the 
  * lattice Boltzmann framework: Theoretical investigations', PRE, 2019.
  * 
- * Stability domains and preliminary accuracy comprisons are available in
+ * Stability domains and preliminary accuracy comparisons are available in
  * Coreixas et al. 'Impact of collision models on the physical properties 
  * and the stability of lattice Boltzmann methods', PTRSA, 2020.
  */
