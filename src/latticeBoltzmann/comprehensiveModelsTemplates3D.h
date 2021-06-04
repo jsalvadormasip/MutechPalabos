@@ -101,7 +101,7 @@ enum {
 //     Array<T, D::q> f;
 //     for (int i = 0; i<27; ++i) {
 //         RM[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     for (int i = 0; i<27; ++i) {
@@ -153,7 +153,7 @@ enum {
 
 //     Array<T, D::q> f;
 //     for (int i = 0; i<27; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     // Order 0
@@ -198,7 +198,7 @@ enum {
 static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& rho) {
     Array<T, D::q> f;
     for (int i = 0; i<27; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
     }
 
     T A1 = f[FMMM] + f[FMMP] + f[FMPM] + f[FMPP];
@@ -463,7 +463,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[FMMM] =  0.25*rho * (-RMcoll[M111]                                              - RMcoll[M221] - RMcoll[M212] - RMcoll[M122])+ cell[FPPP];
 
     for (int i = 0; i<27; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 };
 
@@ -479,7 +479,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     Array<T, D::q> f;
 //     for (int i = 0; i<27; ++i) {
 //         HM[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     for (int i = 0; i<27; ++i) {
@@ -537,7 +537,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 //     Array<T, D::q> f;
 //     for (int i = 0; i<27; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     T a1 = 1./3. ;// D::cs2
@@ -594,7 +594,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& rho) {
     Array<T, D::q> f;
     for (int i = 0; i<27; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
     }
 
     T A1 = f[FMMM] + f[FMMP] + f[FMPM] + f[FMPP];
@@ -915,7 +915,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[FMMM] =  0.25*rho * (-RMcoll[M111]                                              - RMcoll[M221] - RMcoll[M212] - RMcoll[M122])+ cell[FPPP];
 
     for (int i = 0; i<27; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -930,7 +930,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 //     Array<T, D::q> f;
 //     for (int i = 0; i<27; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //         CM[i] = 0.;
 //     }
 
@@ -992,7 +992,7 @@ static void CMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CM, T& r
 
     Array<T, D::q> f;
     for (int i = 0; i<27; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
         CM[i] = 0.;
     }
     T A1 = f[FMMM] + f[FMMP] + f[FMPM] + f[FMPP];
@@ -1334,7 +1334,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[FMMM] =  0.25*rho * (-RMcoll[M111]                                              - RMcoll[M221] - RMcoll[M212] - RMcoll[M122])+ cell[FPPP];
 
     for (int i = 0; i<27; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -1349,7 +1349,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 //     Array<T, D::q> f;
 //     for (int i = 0; i<27; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //         CHM[i] = 0.;
 //     }
 
@@ -1419,7 +1419,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T& rho, Array<T,D::d>& u) {
     Array<T, D::q> f;
     for (int i = 0; i<27; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
         CHM[i] = 0.;
     }
     T A1 = f[FMMM] + f[FMMP] + f[FMPM] + f[FMPP];
@@ -1821,7 +1821,7 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[FMMM] =  0.25*rho * (-RMcoll[M111]                                              - RMcoll[M221] - RMcoll[M212] - RMcoll[M122])+ cell[FPPP];
 
     for (int i = 0; i<27; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -1837,7 +1837,7 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     Array<T, D::q> f;
 //     Array<T,D::q> CM;
 //     for (int i = 0; i<27; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //         CM[i] = 0.;
 //     }
 
@@ -1934,7 +1934,7 @@ static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho
 
     Array<T, D::q> f;
     for (int i = 0; i<27; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
         K[i] = 0.;
     }
     T A1 = f[FMMM] + f[FMMP] + f[FMPM] + f[FMPP];
@@ -2325,7 +2325,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[FMMM] =  0.25*rho * (-RMcoll[M111]                                              - RMcoll[M221] - RMcoll[M212] - RMcoll[M122])+ cell[FPPP];
 
     for (int i = 0; i<27; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -2342,7 +2342,7 @@ static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& r
     Array<T, D::q> f;
     for (int i = 0; i<27; ++i) {
         GH[i] = 0.;
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
     }
 
     T Hxx = 0.;
@@ -2408,7 +2408,7 @@ static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& r
 static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& rho) {
     Array<T, D::q> f;
     for (int i = 0; i<27; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
     }
 
     T A1 = f[FMMM] + f[FMMP] + f[FMPM] + f[FMPP];
@@ -2696,7 +2696,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[FMMM] = (rho / 216.) * (1. - 3.*u[0] - 3.*u[1] - 3.*u[2] + 3.*GHcoll[M200] + 3.*GHcoll[M020] + 3.*GHcoll[M002] + 9.*GHcoll[M110] + 9.*GHcoll[M101] + 9.*GHcoll[M011] - 9.*GHcoll[M210] - 9.*GHcoll[M201] - 9.*GHcoll[M021] - 9.*GHcoll[M120] - 9.*GHcoll[M102] - 9.*GHcoll[M012] - 27.*GHcoll[M111] + 9.*GHcoll[M220] + 9.*GHcoll[M202] + 9.*GHcoll[M022] + 27.*GHcoll[M211] + 27.*GHcoll[M121] + 27.*GHcoll[M112] - 27.*GHcoll[M221] - 27.*GHcoll[M212] - 27.*GHcoll[M122] + 27.*GHcoll[M222]);
 
     for (int i = 0; i<27; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -2713,7 +2713,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     Array<T, D::q> f;
 //     for (int i = 0; i<27; ++i) {
 //         RR[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     T Hxx = 0.;
@@ -2754,7 +2754,7 @@ static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& r
     Array<T, D::q> f;
     for (int i = 0; i<27; ++i) {
         RR[i] = 0.;
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
     }
 
     T X_M1 = f[FM00] + f[FMM0] + f[FMP0] + f[FM0M] + f[FM0P] + f[FMMM] + f[FMMP] + f[FMPM] + f[FMPP];
@@ -3068,7 +3068,7 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[FMMM] =  0.25*rho * (-RMcoll[M111]                                              - RMcoll[M221] - RMcoll[M212] - RMcoll[M122])+ cell[FPPP];
 
     for (int i = 0; i<27; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 };
 
@@ -3144,7 +3144,7 @@ enum {
 //     Array<T, D::q> f;
 //     for (int i = 0; i<19; ++i) {
 //         RM[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     for (int i = 0; i<19; ++i) {
@@ -3186,7 +3186,7 @@ enum {
 
 //     Array<T, D::q> f;
 //     for (int i = 0; i<19; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     // Order 0
@@ -3223,7 +3223,7 @@ enum {
 static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& rho) {
     Array<T, D::q> f;
     for (int i = 0; i<19; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
     }
     T X_M1 = f[FM00] + f[FMM0] + f[FMP0] + f[FM0M] + f[FM0P];
     T X_P1 = f[FP00] + f[FPP0] + f[FPM0] + f[FP0P] + f[FP0M];
@@ -3390,7 +3390,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[F0MM] =  0.5*rho * (              - RMcoll[M021] - RMcoll[M012])+ cell[F0PP];
 
     for (int i = 0; i<19; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 };
 
@@ -3406,7 +3406,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     Array<T, D::q> f;
 //     for (int i = 0; i<19; ++i) {
 //         HM[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     for (int i = 0; i<19; ++i) {
@@ -3451,7 +3451,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 //     Array<T, D::q> f;
 //     for (int i = 0; i<19; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     T a1 = 1./3. ;
@@ -3494,7 +3494,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& rho) {
     Array<T, D::q> f;
     for (int i = 0; i<19; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
     }
     T X_M1 = f[FM00] + f[FMM0] + f[FMP0] + f[FM0M] + f[FM0P];
     T X_P1 = f[FP00] + f[FPP0] + f[FPM0] + f[FP0P] + f[FP0M];
@@ -3724,7 +3724,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[F0MM] =  0.5*rho * (              - RMcoll[M021] - RMcoll[M012])+ cell[F0PP];
 
     for (int i = 0; i<19; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -3739,7 +3739,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 //     Array<T, D::q> f;
 //     for (int i = 0; i<19; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //         CM[i] = 0.;
 //     }
 
@@ -3801,7 +3801,7 @@ static void CMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CM, T& r
 
     Array<T, D::q> f;
     for (int i = 0; i<19; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
         CM[i] = 0.;
     }
     T X_M1 = f[FM00] + f[FMM0] + f[FMP0] + f[FM0M] + f[FM0P];
@@ -4044,7 +4044,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[F0MM] =  0.5*rho * (              - RMcoll[M021] - RMcoll[M012])+ cell[F0PP];
 
     for (int i = 0; i<19; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -4059,7 +4059,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 //     Array<T, D::q> f;
 //     for (int i = 0; i<19; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //         CHM[i] = 0.;
 //     }
 
@@ -4127,7 +4127,7 @@ static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T&
 
     Array<T, D::q> f;
     for (int i = 0; i<19; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
         CHM[i] = 0.;
     }
     T X_M1 = f[FM00] + f[FMM0] + f[FMP0] + f[FM0M] + f[FM0P];
@@ -4404,7 +4404,7 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[F0MM] =  0.5*rho * (              - RMcoll[M021] - RMcoll[M012])+ cell[F0PP];
 
     for (int i = 0; i<19; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -4419,7 +4419,7 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     Array<T, D::q> f;
 //     Array<T,D::q> CM;
 //     for (int i = 0; i<19; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //         CM[i] = 0.;
 //     }
 //     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8] + f[9] + f[10] + f[11] + f[12] + f[13] + f[14] + f[15] + f[16] + f[17] + f[18];
@@ -4501,7 +4501,7 @@ static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho
 
     Array<T, D::q> f;
     for (int i = 0; i<19; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
         K[i] = 0.;
     }
     T X_M1 = f[FM00] + f[FMM0] + f[FMP0] + f[FM0M] + f[FM0P];
@@ -4769,7 +4769,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[F0MM] =  0.5*rho * (              - RMcoll[M021] - RMcoll[M012])+ cell[F0PP];
 
     for (int i = 0; i<19; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -4785,7 +4785,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     Array<T, D::q> f;
 //     for (int i = 0; i<19; ++i) {
 //         GH[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     for (int i = 0; i<19; ++i) {
@@ -4830,7 +4830,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 //     Array<T, D::q> f;
 //     for (int i = 0; i<19; ++i) {
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     T a1 = 1./3. ;
@@ -4873,7 +4873,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& rho) {
     Array<T, D::q> f;
     for (int i = 0; i<19; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
     }
     T X_M1 = f[FM00] + f[FMM0] + f[FMP0] + f[FM0M] + f[FM0P];
     T X_P1 = f[FP00] + f[FPP0] + f[FPM0] + f[FP0P] + f[FP0M];
@@ -5108,7 +5108,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[F0MM] = (rho * D::t[F0MM]) * (1. + 3.* (- u[1] - u[2]) +1.5*(2.*GHcoll[M020] + 2.*GHcoll[M002] - GHcoll[M200]) +9.*GHcoll[M011] + 4.5*(-GHcoll[M021] - GHcoll[M012] - GHcoll[M210] - GHcoll[M201]) - (18./7.)*GHcoll[M220] - (18./5.)*GHcoll[M202] + 9.*GHcoll[M022] );
 
     for (int i = 0; i<19; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
@@ -5124,7 +5124,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     Array<T, D::q> f;
 //     for (int i = 0; i<19; ++i) {
 //         RR[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
+//         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
 //     }
 
 //     T Hxx = 0.;
@@ -5166,7 +5166,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& rho) {
     Array<T, D::q> f;
     for (int i = 0; i<19; ++i) {
-        f[i] = cell[i] + D::t[i];
+        f[i] = cell[i] + D::SkordosFactor() * D::t[i];
     }
     T X_M1 = f[FM00] + f[FMM0] + f[FMP0] + f[FM0M] + f[FM0P];
     T X_P1 = f[FP00] + f[FPP0] + f[FPM0] + f[FP0P] + f[FP0M];
@@ -5393,7 +5393,7 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     cell[F0MM] =  0.5*rho * (              - RMcoll[M021] - RMcoll[M012])+ cell[F0PP];
 
     for (int i = 0; i<19; ++i) {
-        cell[i] -= D::t[i];
+        cell[i] -= D::SkordosFactor() * D::t[i];
     }
 
 };
