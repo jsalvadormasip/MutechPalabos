@@ -1,21 +1,34 @@
 /* This file is part of the Palabos library.
-* Copyright (C) 2009 Jonas Latt
-* E-mail contact: jonas@lbmethod.org
-* The most recent release of Palabos can be downloaded at 
-* <http://www.lbmethod.org/palabos/>
-*
-* The library Palabos is free software: you can redistribute it and/or
-* modify it under the terms of the GNU General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
-*
-* The library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * The Palabos softare is developed since 2011 by FlowKit-Numeca Group Sarl
+ * (Switzerland) and the University of Geneva (Switzerland), which jointly
+ * own the IP rights for most of the code base. Since October 2019, the
+ * Palabos project is maintained by the University of Geneva and accepts
+ * source code contributions from the community.
+ * 
+ * Contact:
+ * Jonas Latt
+ * Computer Science Department
+ * University of Geneva
+ * 7 Route de Drize
+ * 1227 Carouge, Switzerland
+ * jonas.latt@unige.ch
+ *
+ * The most recent release of Palabos can be downloaded at 
+ * <https://palabos.unige.ch/>
+ *
+ * The library Palabos is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * The library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /* This file was written by Christophe Coreixas and Jonas Latt for the
@@ -136,10 +149,10 @@ void writeGif(MultiBlockLattice2D<T,DESCRIPTOR>& lattice, plint iter)
     const plint imSize = 600;
 
     ImageWriter<T> imageWriter("leeloo");
-    imageWriter.writeScaledGif(createFileName("u", iter, 6),
+    imageWriter.writeScaledGif(createFileName("vorticity", iter, 6),
                             *computeVorticity(*computeVelocity(lattice)), imSize, imSize);
 }
-/// Write the full velocity and the velocity-norm into a VTK file.
+/// Output data into a VTK file.
 void writeVTK(MultiBlockLattice2D<T,DESCRIPTOR>& lattice,
               Param<T> &param, plint iter)
 {

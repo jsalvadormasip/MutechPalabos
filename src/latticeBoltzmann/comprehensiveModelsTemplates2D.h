@@ -33,9 +33,14 @@
 
 /** \file
  * 2D specialization of dynamicsTemplates functions.
+ * 
  * Theoretical background about these collision models can be found in
  * Coreixas et al. 'Comprehensive comparison of collision models in the 
  * lattice Boltzmann framework: Theoretical investigations', PRE, 2019.
+ * 
+ * Stability domains and preliminary accuracy comprisons are available in
+ * Coreixas et al. 'Impact of collision models on the physical properties 
+ * and the stability of lattice Boltzmann methods', PTRSA, 2020.
  */
 
 #ifndef COMPREHENSIVE_MODELS_TEMPLATES_2D_H
@@ -110,7 +115,7 @@ enum {
 //     }
 // };
 
-// Optimized way to compute RMs
+// Optimized way to compute RMs based on Palabos ordering of discrete velocities
 static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& rho) {
 
     Array<T, D::q> f;
@@ -213,6 +218,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+
     T omegaBulk = omega[4];
     T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
     T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei  
@@ -220,7 +226,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     // Post-collision moments.
     Array<T,D::q> RMcoll;
 
-    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
+    // Order 2 (non-diagonal collision so that we can easily modify the bulk viscosity)
     RMcoll[M20] = RM[M20] - omegaPlus  * (RM[M20]-RMeq[M20]) - omegaMinus * (RM[M02]-RMeq[M02]);
     RMcoll[M02] = RM[M02] - omegaMinus * (RM[M20]-RMeq[M20]) - omegaPlus  * (RM[M02]-RMeq[M02]);    
 
@@ -300,7 +306,7 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     }
 // };
 
-// Optimized way to compute HMs
+// Optimized way to compute HMs based on Palabos ordering of discrete velocities
 static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& rho) {
 
     Array<T, D::q> f;
@@ -416,6 +422,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+
     T omegaBulk = omega[4];
     T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
     T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
@@ -427,7 +434,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the Hermite moment space
-    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
+    // Order 2 (non-diagonal collision so that we can easily modify the bulk viscosity)
     HMcoll[M20] = HM[M20] - omegaPlus  * (HM[M20]-HMeq[M20]) - omegaMinus * (HM[M02]-HMeq[M02]);
     HMcoll[M02] = HM[M02] - omegaMinus * (HM[M20]-HMeq[M20]) - omegaPlus  * (HM[M02]-HMeq[M02]);    
     
@@ -524,7 +531,7 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     }
 // }
 
-// Optimized way to compute CMs
+// Optimized way to compute CMs based on Palabos ordering of discrete velocities
 static void CMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CM, T& rho, Array<T,D::d>& u) {
 
     Array<T, D::q> f;
@@ -646,6 +653,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+
     T omegaBulk = omega[4];
     T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
     T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
@@ -658,7 +666,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the central moment space
-    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
+    // Order 2 (non-diagonal collision so that we can easily modify the bulk viscosity)
     CMcoll[M20] = CM[M20] - omegaPlus  * (CM[M20]-CMeq[M20]) - omegaMinus * (CM[M02]-CMeq[M02]);
     CMcoll[M02] = CM[M02] - omegaMinus * (CM[M20]-CMeq[M20]) - omegaPlus  * (CM[M02]-CMeq[M02]);    
     
@@ -760,7 +768,7 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     }
 // }
 
-// Optimized way to compute CHMs
+// Optimized way to compute CHs based on Palabos ordering of discrete velocities
 static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T& rho, Array<T,D::d>& u) {
 
     Array<T, D::q> f;
@@ -904,6 +912,7 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+
     T omegaBulk = omega[4];
     T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
     T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
@@ -918,7 +927,7 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the central Hermite moment space
-    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
+    // Order 2 (non-diagonal collision so that we can easily modify the bulk viscosity)
     CHMcoll[M20] = CHM[M20] - omegaPlus  * (CHM[M20]-CHMeq[M20]) - omegaMinus * (CHM[M02]-CHMeq[M02]);
     CHMcoll[M02] = CHM[M02] - omegaMinus * (CHM[M20]-CHMeq[M20]) - omegaPlus  * (CHM[M02]-CHMeq[M02]);    
     
@@ -1040,7 +1049,7 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     K[M22] = CM[M22] - CM[M20]*CM[M02] - 2.*CM[M11]*CM[M11];
 // }
 
-// Optimized way to compute Ks
+// Optimized way to compute Kcs based on Palabos ordering of discrete velocities
 static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho, Array<T,D::d>& u) {
 
     Array<T, D::q> f;
@@ -1175,6 +1184,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+
     T omegaBulk = omega[4];
     T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
     T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
@@ -1188,7 +1198,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> RMcoll;
 
     // Collision in the cumulant space
-    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
+    // Order 2 (non-diagonal collision so that we can easily modify the bulk viscosity)
     Kcoll[M20] = K[M20] - omegaPlus  * (K[M20]-Keq[M20]) - omegaMinus * (K[M02]-Keq[M02]);
     Kcoll[M02] = K[M02] - omegaMinus * (K[M20]-Keq[M20]) - omegaPlus  * (K[M02]-Keq[M02]);    
     
@@ -1292,7 +1302,7 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     }
 // };
 
-// Optimized way to compute GHs
+// Optimized way to compute GHs based on Palabos ordering of discrete velocities
 static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& rho) {
 
     Array<T, D::q> f;
@@ -1396,6 +1406,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+
     T omegaBulk = omega[4];
     T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
     T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
@@ -1404,7 +1415,7 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     Array<T,D::q> GHcoll;
 
     // Collision in the Hermite moment space
-    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
+    // Order 2 (non-diagonal collision so that we can easily modify the bulk viscosity)
     GHcoll[M20] = GH[M20] - omegaPlus  * (GH[M20]-GHeq[M20]) - omegaMinus * (GH[M02]-GHeq[M02]);
     GHcoll[M02] = GH[M02] - omegaMinus * (GH[M20]-GHeq[M20]) - omegaPlus  * (GH[M02]-GHeq[M02]);    
     
@@ -1482,7 +1493,8 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 //     }
 // };
 
-// Optimized way to compute RRs (we only need 2nd-order RRs)
+// Optimized way to compute RRs based on Palabos ordering of discrete velocities
+// (we only need up to second order RRs since high-order ones are computed recursively)
 static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& rho) {
 
     Array<T, D::q> f;
@@ -1574,6 +1586,7 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
     T omega2 = omega[1];
     T omega3 = omega[2];
     T omega4 = omega[3];
+
     T omegaBulk = omega[4];
     T omegaPlus  = (omegaBulk + omega1)/2.; // Notation used by Fei
     T omegaMinus = (omegaBulk - omega1)/2.; // Notation used by Fei
@@ -1595,7 +1608,7 @@ static void RRcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 
 
     // Collision in the Hermite moment space
-    // Order 2 (non-diagonal so that we can easily modify the bulk viscosity)
+    // Order 2 (non-diagonal collision so that we can easily modify the bulk viscosity)
     RRcoll[M20] = RR[M20] - omegaPlus  * RRneq[M20] - omegaMinus * RRneq[M02];
     RRcoll[M02] = RR[M02] - omegaMinus * RRneq[M20] - omegaPlus  * RRneq[M02]; 
 
