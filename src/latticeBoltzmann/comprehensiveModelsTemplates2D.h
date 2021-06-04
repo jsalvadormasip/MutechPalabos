@@ -78,50 +78,52 @@ enum {
     M22 = 8,
 };
 
-// // General way to compute RMs
-// static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& rho) {
-
-//     Array<T, D::q> f;
-//     for (int i = 0; i<D::q; ++i) {
-//         RM[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
-//     }
-
-//     for (int i = 0; i<D::q; ++i) {
-//         // Order 0
-//         RM[M00] += f[i];
-
-//         // Order 1
-//         RM[M10] += D::c[i][0] * f[i];
-//         RM[M01] += D::c[i][1] * f[i];
-
-//         // Order 2
-//         RM[M20] += D::c[i][0] * D::c[i][0] * f[i];
-//         RM[M02] += D::c[i][1] * D::c[i][1] * f[i];
-//         RM[M11] += D::c[i][0] * D::c[i][1] * f[i];
-
-//         // Order 3
-//         RM[M21] += D::c[i][0] * D::c[i][0] * D::c[i][1] * f[i];
-//         RM[M12] += D::c[i][0] * D::c[i][1] * D::c[i][1] * f[i];
-
-//         // Order 4
-//         RM[M22] += D::c[i][0] * D::c[i][0] * D::c[i][1] * D::c[i][1] * f[i];
-//     }
-
-//     rho = RM[M00];
-//     T invRho = 1. / rho;
-//     for (int i = 0; i<D::q; ++i) {
-//         RM[i] *= invRho;
-//     }
-// };
+/**
+ * // General way to compute RMs
+ * static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& rho) {
+ * 
+ *     Array<T, D::q> f;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+ *         RM[i] = 0.;
+ *     }
+ * 
+ *     for (int i = 0; i<D::q; ++i) {
+ *         // Order 0
+ *         RM[M00] += f[i];
+ * 
+ *         // Order 1
+ *         RM[M10] += D::c[i][0] * f[i];
+ *         RM[M01] += D::c[i][1] * f[i];
+ * 
+ *         // Order 2
+ *         RM[M20] += D::c[i][0] * D::c[i][0] * f[i];
+ *         RM[M02] += D::c[i][1] * D::c[i][1] * f[i];
+ *         RM[M11] += D::c[i][0] * D::c[i][1] * f[i];
+ * 
+ *         // Order 3
+ *         RM[M21] += D::c[i][0] * D::c[i][0] * D::c[i][1] * f[i];
+ *         RM[M12] += D::c[i][0] * D::c[i][1] * D::c[i][1] * f[i];
+ * 
+ *         // Order 4
+ *         RM[M22] += D::c[i][0] * D::c[i][0] * D::c[i][1] * D::c[i][1] * f[i];
+ *     }
+ * 
+ *     rho = RM[M00];
+ *     T invRho = 1. / rho;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         RM[i] *= invRho;
+ *     }
+ * };
+ */
 
 // Optimized way to compute RMs based on Palabos ordering of discrete velocities
 static void RMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RM, T& rho) {
 
     Array<T, D::q> f;
     for (int i = 0; i<D::q; ++i) {
-        RM[i] = 0.;
         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+        RM[i] = 0.;
     }
 
     double X_M1 = f[1] + f[2] + f[3];
@@ -261,58 +263,59 @@ static void RMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 // Hermite Moments Formalism (Equilibrium is computed through raw moments formalism) //
 ///////////////////////////////////////////////////////////////////////////////////////
 
-
-// // General way to compute HMs
-// static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& rho) {
-
-//     Array<T, D::q> f;
-//     for (int i = 0; i<D::q; ++i) {
-//         HM[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
-//     }
-
-//     T Hxx = 0.;
-//     T Hyy = 0.;
-
-//     for (int i = 0; i<D::q; ++i) {
-
-//         Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
-//         Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
-
-//         // Order 0
-//         HM[M00] += f[i];
-
-//         // Order 1
-//         HM[M10] += D::c[i][0] * f[i];
-//         HM[M01] += D::c[i][1] * f[i];
-
-//         // Order 2
-//         HM[M20] += Hxx * f[i];
-//         HM[M02] += Hyy * f[i];
-//         HM[M11] += D::c[i][0] * D::c[i][1] * f[i];
-
-//         // Order 3
-//         HM[M21] += Hxx * D::c[i][1] * f[i];
-//         HM[M12] += D::c[i][0] * Hyy * f[i];
-
-//         // Order 4
-//         HM[M22] += Hxx * Hyy * f[i];
-//     }
-
-//     rho = HM[M00];
-//     T invRho = 1. / rho;
-//     for (int i = 0; i<D::q; ++i) {
-//         HM[i] *= invRho;
-//     }
-// };
+/**
+ * // General way to compute HMs
+ * static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& rho) {
+ * 
+ *     Array<T, D::q> f;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+ *         HM[i] = 0.;
+ *     }
+ * 
+ *     T Hxx = 0.;
+ *     T Hyy = 0.;
+ * 
+ *     for (int i = 0; i<D::q; ++i) {
+ * 
+ *         Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
+ *         Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
+ * 
+ *         // Order 0
+ *         HM[M00] += f[i];
+ * 
+ *         // Order 1
+ *         HM[M10] += D::c[i][0] * f[i];
+ *         HM[M01] += D::c[i][1] * f[i];
+ * 
+ *         // Order 2
+ *         HM[M20] += Hxx * f[i];
+ *         HM[M02] += Hyy * f[i];
+ *         HM[M11] += D::c[i][0] * D::c[i][1] * f[i];
+ * 
+ *         // Order 3
+ *         HM[M21] += Hxx * D::c[i][1] * f[i];
+ *         HM[M12] += D::c[i][0] * Hyy * f[i];
+ * 
+ *         // Order 4
+ *         HM[M22] += Hxx * Hyy * f[i];
+ *     }
+ * 
+ *     rho = HM[M00];
+ *     T invRho = 1. / rho;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         HM[i] *= invRho;
+ *     }
+ * };
+ */
 
 // Optimized way to compute HMs based on Palabos ordering of discrete velocities
 static void HMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& HM, T& rho) {
 
     Array<T, D::q> f;
     for (int i = 0; i<D::q; ++i) {
-        HM[i] = 0.;
         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+        HM[i] = 0.;
     }
 
     double X_M1 = f[1] + f[2] + f[3];
@@ -483,61 +486,62 @@ static void HMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 // Central Moments Formalism (Equilibrium is computed through raw moments formalism) //
 ///////////////////////////////////////////////////////////////////////////////////////
 
-
-// // General way to compute CMs (computations of velocity components are based on Palabos ordering of discrete velocities !)
-// static void CMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CM, T& rho, Array<T,D::d>& u) {
-
-//     Array<T, D::q> f;
-//     for (int i = 0; i<D::q; ++i) {
-//         f[i] = cell[i] + D::t[i];
-//         CM[i] = 0.;
-//     }
-
-//     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
-//     CM[M00] = 1.0;
-//     T invRho = 1./rho;
-
-//     u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
-//     u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
-
-//     T cMux = 0.;
-//     T cMuy = 0.;
-
-//     for (int i = 0; i<D::q; ++i) {
-
-//         cMux = D::c[i][0]- u[0];
-//         cMuy = D::c[i][1]- u[1];
-
-//         // Order 1
-//         CM[M10] += cMux * f[i];
-//         CM[M01] += cMuy * f[i];
-
-//         // Order 2
-//         CM[M20] += cMux * cMux * f[i];
-//         CM[M02] += cMuy * cMuy * f[i];
-//         CM[M11] += cMux * cMuy * f[i];
-
-
-//         // Order 3
-//         CM[M21] += cMux * cMux * cMuy * f[i];
-//         CM[M12] += cMux * cMuy * cMuy * f[i];
-
-//         // Order 4
-//         CM[M22] += cMux * cMux * cMuy * cMuy * f[i];
-//     }
-
-//     for (int i = 1; i<D::q; ++i) {
-//         CM[i] *= invRho;
-//     }
-// }
+/**
+ * // General way to compute CMs (computations of velocity components are based on Palabos ordering of discrete velocities !)
+ * static void CMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CM, T& rho, Array<T,D::d>& u) {
+ * 
+ *     Array<T, D::q> f;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+ *         CM[i] = 0.;
+ *     }
+ * 
+ *     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
+ *     CM[M00] = 1.0;
+ *     T invRho = 1./rho;
+ * 
+ *     u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
+ *     u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
+ * 
+ *     T cMux = 0.;
+ *     T cMuy = 0.;
+ * 
+ *     for (int i = 0; i<D::q; ++i) {
+ * 
+ *         cMux = D::c[i][0]- u[0];
+ *         cMuy = D::c[i][1]- u[1];
+ * 
+ *         // Order 1
+ *         CM[M10] += cMux * f[i];
+ *         CM[M01] += cMuy * f[i];
+ * 
+ *         // Order 2
+ *         CM[M20] += cMux * cMux * f[i];
+ *         CM[M02] += cMuy * cMuy * f[i];
+ *         CM[M11] += cMux * cMuy * f[i];
+ * 
+ * 
+ *         // Order 3
+ *         CM[M21] += cMux * cMux * cMuy * f[i];
+ *         CM[M12] += cMux * cMuy * cMuy * f[i];
+ * 
+ *         // Order 4
+ *         CM[M22] += cMux * cMux * cMuy * cMuy * f[i];
+ *     }
+ * 
+ *     for (int i = 1; i<D::q; ++i) {
+ *         CM[i] *= invRho;
+ *     }
+ * };
+ */
 
 // Optimized way to compute CMs based on Palabos ordering of discrete velocities
 static void CMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CM, T& rho, Array<T,D::d>& u) {
 
     Array<T, D::q> f;
     for (int i = 0; i<D::q; ++i) {
-        CM[i] = 0.;
         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+        CM[i] = 0.;
     }
 
     double X_M1 = f[1] + f[2] + f[3];
@@ -714,67 +718,68 @@ static void CMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Central Hermite Moments Formalism (Equilibrium is computed through raw moments formalism) //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-
-// // General way to compute CHMs (computations of velocity components are based on Palabos ordering of discrete velocities !)
-// static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T& rho, Array<T,D::d>& u) {
-
-//     Array<T, D::q> f;
-//     for (int i = 0; i<D::q; ++i) {
-//         f[i] = cell[i] + D::t[i];
-//         CHM[i] = 0.;
-//     }
-
-//     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
-//     CHM[M00] = 1.0;
-//     T invRho = 1./rho;
-//     u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
-//     u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
-
-//     T cMux = 0.;
-//     T cMuy = 0.;
-//     T Hxx = 0.;
-//     T Hyy = 0.;
-
-//     for (int i = 0; i<D::q; ++i) {
-
-//         cMux = D::c[i][0] - u[0];
-//         cMuy = D::c[i][1] - u[1];
-
-//         Hxx = cMux * cMux - D::cs2;
-//         Hyy = cMuy * cMuy - D::cs2;
-
-//         // // Order 0
-//         // CHM[M000] += f[i];
-
-//         // Order 1
-//         CHM[M10] += cMux * f[i];
-//         CHM[M01] += cMuy * f[i];
-
-//         // Order 2
-//         CHM[M20] += Hxx * f[i];
-//         CHM[M02] += Hyy * f[i];
-//         CHM[M11] += cMux * cMuy * f[i];
-
-//         // Order 3
-//         CHM[M21] += Hxx * cMuy * f[i];
-//         CHM[M12] += cMux * Hyy * f[i];
-
-//         // Order 4
-//         CHM[M22] += Hxx * Hyy * f[i];
-//     }
-
-//     for (int i = 1; i<D::q; ++i) {
-//         CHM[i] *= invRho;
-//     }
-// }
+/**
+ * // General way to compute CHMs (computations of velocity components are based on Palabos ordering of discrete velocities !)
+ * static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T& rho, Array<T,D::d>& u) {
+ * 
+ *     Array<T, D::q> f;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+ *         CHM[i] = 0.;
+ *     }
+ * 
+ *     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
+ *     CHM[M00] = 1.0;
+ *     T invRho = 1./rho;
+ *     u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
+ *     u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
+ * 
+ *     T cMux = 0.;
+ *     T cMuy = 0.;
+ *     T Hxx = 0.;
+ *     T Hyy = 0.;
+ * 
+ *     for (int i = 0; i<D::q; ++i) {
+ * 
+ *         cMux = D::c[i][0] - u[0];
+ *         cMuy = D::c[i][1] - u[1];
+ * 
+ *         Hxx = cMux * cMux - D::cs2;
+ *         Hyy = cMuy * cMuy - D::cs2;
+ * 
+ *         // // Order 0
+ *         // CHM[M000] += f[i];
+ * 
+ *         // Order 1
+ *         CHM[M10] += cMux * f[i];
+ *         CHM[M01] += cMuy * f[i];
+ * 
+ *         // Order 2
+ *         CHM[M20] += Hxx * f[i];
+ *         CHM[M02] += Hyy * f[i];
+ *         CHM[M11] += cMux * cMuy * f[i];
+ * 
+ *         // Order 3
+ *         CHM[M21] += Hxx * cMuy * f[i];
+ *         CHM[M12] += cMux * Hyy * f[i];
+ * 
+ *         // Order 4
+ *         CHM[M22] += Hxx * Hyy * f[i];
+ *     }
+ * 
+ *     for (int i = 1; i<D::q; ++i) {
+ *         CHM[i] *= invRho;
+ *     }
+ * };
+ */
 
 // Optimized way to compute CHs based on Palabos ordering of discrete velocities
 static void CHMcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& CHM, T& rho, Array<T,D::d>& u) {
 
     Array<T, D::q> f;
     for (int i = 0; i<D::q; ++i) {
-        CHM[i] = 0.;
         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+        CHM[i] = 0.;
     }
 
     double X_M1 = f[1] + f[2] + f[3];
@@ -986,76 +991,77 @@ static void CHMcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 // Cumulant Formalism (Equilibrium is computed through raw moments formalism) //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-// // General way to compute Ks (computations of velocity components are based on Palabos ordering of discrete velocities !)
-// static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho, Array<T,D::d>& u) {
-
-//     Array<T, D::q> f;
-//     Array<T,D::q> CM;
-//     for (int i = 0; i<D::q; ++i) {
-//         f[i] = cell[i] + D::t[i];
-//         CM[i] = 0.;
-//     }
-
-//     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
-//     CM[M00] = 1.0;
-//     T invRho = 1./rho;
-//     u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
-//     u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
-
-//     T cMux = 0.;
-//     T cMuy = 0.;
-
-//     // Computation of central moments in a first time
-//     for (int i = 0; i<D::q; ++i) {
-
-//         cMux = D::c[i][0]- u[0];
-//         cMuy = D::c[i][1]- u[1];
-
-//         // // Order 0
-//         // CM[M000] += f[i]; 
-
-//         // Order 1
-//         CM[M10] += cMux * f[i]; 
-//         CM[M01] += cMuy * f[i]; 
-
-//         // Order 2
-//         CM[M20] += cMux * cMux * f[i];
-//         CM[M02] += cMuy * cMuy * f[i];
-//         CM[M11] += cMux * cMuy * f[i];
-
-//         // Order 3
-//         CM[M21] += cMux * cMux * cMuy * f[i];
-//         CM[M12] += cMux * cMuy * cMuy * f[i];
-
-//         // Order 4
-//         CM[M22] += cMux * cMux * cMuy * cMuy * f[i];
-//     }
-
-//     // Normalize before the computation of cumulants !
-//     for (int i = 1; i<D::q; ++i) {
-//         CM[i] *= invRho;
-//     }
-
-//     // Computation of cumulants through central moments
-//     K[M00] = CM[M00];
-//     K[M10] = CM[M10] + u[0];
-//     K[M01] = CM[M01] + u[1];
-//     K[M20] = CM[M20];
-//     K[M02] = CM[M02];
-//     K[M11] = CM[M11];
-//     K[M21] = CM[M21];
-//     K[M12] = CM[M12];
-//     K[M22] = CM[M22] - CM[M20]*CM[M02] - 2.*CM[M11]*CM[M11];
-// }
+/**
+ * // General way to compute Ks (computations of velocity components are based on Palabos ordering of discrete velocities !)
+ * static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho, Array<T,D::d>& u) {
+ * 
+ *     Array<T, D::q> f;
+ *     Array<T,D::q> CM;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+ *         CM[i] = 0.;
+ *     }
+ * 
+ *     rho = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8];
+ *     CM[M00] = 1.0;
+ *     T invRho = 1./rho;
+ *     u[0] = invRho * ( - f[1] - f[2] - f[3] + f[5] + f[6] + f[7]);
+ *     u[1] = invRho * (   f[1] - f[3] - f[4] - f[5] + f[7] + f[8]);
+ * 
+ *     T cMux = 0.;
+ *     T cMuy = 0.;
+ * 
+ *     // Computation of central moments in a first time
+ *     for (int i = 0; i<D::q; ++i) {
+ * 
+ *         cMux = D::c[i][0]- u[0];
+ *         cMuy = D::c[i][1]- u[1];
+ * 
+ *         // // Order 0
+ *         // CM[M000] += f[i]; 
+ * 
+ *         // Order 1
+ *         CM[M10] += cMux * f[i]; 
+ *         CM[M01] += cMuy * f[i]; 
+ * 
+ *         // Order 2
+ *         CM[M20] += cMux * cMux * f[i];
+ *         CM[M02] += cMuy * cMuy * f[i];
+ *         CM[M11] += cMux * cMuy * f[i];
+ * 
+ *         // Order 3
+ *         CM[M21] += cMux * cMux * cMuy * f[i];
+ *         CM[M12] += cMux * cMuy * cMuy * f[i];
+ * 
+ *         // Order 4
+ *         CM[M22] += cMux * cMux * cMuy * cMuy * f[i];
+ *     }
+ * 
+ *     // Normalize before the computation of cumulants !
+ *     for (int i = 1; i<D::q; ++i) {
+ *         CM[i] *= invRho;
+ *     }
+ * 
+ *     // Computation of cumulants through central moments
+ *     K[M00] = CM[M00];
+ *     K[M10] = CM[M10] + u[0];
+ *     K[M01] = CM[M01] + u[1];
+ *     K[M20] = CM[M20];
+ *     K[M02] = CM[M02];
+ *     K[M11] = CM[M11];
+ *     K[M21] = CM[M21];
+ *     K[M12] = CM[M12];
+ *     K[M22] = CM[M22] - CM[M20]*CM[M02] - 2.*CM[M11]*CM[M11];
+ * };
+ */
 
 // Optimized way to compute Kcs based on Palabos ordering of discrete velocities
 static void KcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& K, T& rho, Array<T,D::d>& u) {
 
     Array<T, D::q> f;
     for (int i = 0; i<D::q; ++i) {
-        K[i] = 0.;
         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+        K[i] = 0.;
     }
 
     double X_M1 = f[1] + f[2] + f[3];
@@ -1257,58 +1263,59 @@ static void Kcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 // Gauss-Hermite Formalism (Equilibrium is computed through the GH formalism) //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-// // General way to compute GHs
-// static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& rho) {
-
-//     Array<T, D::q> f;
-//     for (int i = 0; i<D::q; ++i) {
-//         GH[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
-//     }
-
-//     T Hxx = 0.;
-//     T Hyy = 0.;
-
-//     for (int i = 0; i<D::q; ++i) {
-
-//         Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
-//         Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
-
-//         // Order 0
-//         GH[M00] += f[i];
-
-//         // Order 1
-//         GH[M10] += D::c[i][0] * f[i];
-//         GH[M01] += D::c[i][1] * f[i];
-
-//         // Order 2
-//         GH[M20] += Hxx * f[i];
-//         GH[M02] += Hyy * f[i];
-//         GH[M11] += D::c[i][0] * D::c[i][1] * f[i];
-
-//         // Order 3
-//         GH[M21] += Hxx * D::c[i][1] * f[i];
-//         GH[M12] += D::c[i][0] * Hyy * f[i];
-
-//         // Order 4
-//         GH[M22] += Hxx * Hyy * f[i];
-//     }
-
-//     rho = GH[M00];
-//     T invRho = 1. / rho;
-//     for (int i = 0; i<D::q; ++i) {
-//         GH[i] *= invRho;
-//     }
-// };
+/**
+ * // General way to compute GHs
+ * static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& rho) {
+ * 
+ *     Array<T, D::q> f;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+ *         GH[i] = 0.;
+ *     }
+ * 
+ *     T Hxx = 0.;
+ *     T Hyy = 0.;
+ * 
+ *     for (int i = 0; i<D::q; ++i) {
+ * 
+ *         Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
+ *         Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
+ * 
+ *         // Order 0
+ *         GH[M00] += f[i];
+ * 
+ *         // Order 1
+ *         GH[M10] += D::c[i][0] * f[i];
+ *         GH[M01] += D::c[i][1] * f[i];
+ * 
+ *         // Order 2
+ *         GH[M20] += Hxx * f[i];
+ *         GH[M02] += Hyy * f[i];
+ *         GH[M11] += D::c[i][0] * D::c[i][1] * f[i];
+ * 
+ *         // Order 3
+ *         GH[M21] += Hxx * D::c[i][1] * f[i];
+ *         GH[M12] += D::c[i][0] * Hyy * f[i];
+ * 
+ *         // Order 4
+ *         GH[M22] += Hxx * Hyy * f[i];
+ *     }
+ * 
+ *     rho = GH[M00];
+ *     T invRho = 1. / rho;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         GH[i] *= invRho;
+ *     }
+ * };
+ */
 
 // Optimized way to compute GHs based on Palabos ordering of discrete velocities
 static void GHcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& GH, T& rho) {
 
     Array<T, D::q> f;
     for (int i = 0; i<D::q; ++i) {
-        GH[i] = 0.;
         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+        GH[i] = 0.;
     }
 
     double X_M1 = f[1] + f[2] + f[3];
@@ -1455,43 +1462,44 @@ static void GHcollide(Array<T,D::q>& cell, T rho, Array<T,D::d> const& u,
 // Recursive Regularization (RR) approach based on Gauss-Hermite formulation //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-// // General way to compute RRs (we only need 2nd-order RRs)
-// static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& rho) {
-
-//     Array<T, D::q> f;
-//     for (int i = 0; i<D::q; ++i) {
-//         RR[i] = 0.;
-//         f[i] = cell[i] + D::t[i];
-//     }
-
-//     T Hxx = 0.;
-//     T Hyy = 0.;
-
-//     for (int i = 0; i<D::q; ++i) {
-
-//         Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
-//         Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
-
-//         // Order 0
-//         RR[M00] += f[i];
-
-//         // Order 1
-//         RR[M10] += D::c[i][0] * f[i];
-//         RR[M01] += D::c[i][1] * f[i];
-
-//         // Order 2
-//         RR[M20] += Hxx * f[i];
-//         RR[M02] += Hyy * f[i];
-//         RR[M11] += D::c[i][0] * D::c[i][1] * f[i];
-//     }
-
-//     rho = RR[M00];
-//     T invRho = 1. / rho;
-//     for (int i = 0; i<D::q; ++i) {
-//         RR[i] *= invRho;
-//     }
-// };
+/**
+ * // General way to compute RRs (we only need 2nd-order RRs)
+ * static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& rho) {
+ * 
+ *     Array<T, D::q> f;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+ *         RR[i] = 0.;
+ *     }
+ * 
+ *     T Hxx = 0.;
+ *     T Hyy = 0.;
+ * 
+ *     for (int i = 0; i<D::q; ++i) {
+ * 
+ *         Hxx = D::c[i][0] * D::c[i][0] - D::cs2;
+ *         Hyy = D::c[i][1] * D::c[i][1] - D::cs2;
+ * 
+ *         // Order 0
+ *         RR[M00] += f[i];
+ * 
+ *         // Order 1
+ *         RR[M10] += D::c[i][0] * f[i];
+ *         RR[M01] += D::c[i][1] * f[i];
+ * 
+ *         // Order 2
+ *         RR[M20] += Hxx * f[i];
+ *         RR[M02] += Hyy * f[i];
+ *         RR[M11] += D::c[i][0] * D::c[i][1] * f[i];
+ *     }
+ * 
+ *     rho = RR[M00];
+ *     T invRho = 1. / rho;
+ *     for (int i = 0; i<D::q; ++i) {
+ *         RR[i] *= invRho;
+ *     }
+ * };
+ */
 
 // Optimized way to compute RRs based on Palabos ordering of discrete velocities
 // (we only need up to second order RRs since high-order ones are computed recursively)
@@ -1499,8 +1507,8 @@ static void RRcomputeMoments(Array<T,D::q> const& cell, Array<T, D::q>& RR, T& r
 
     Array<T, D::q> f;
     for (int i = 0; i<D::q; ++i) {
-        RR[i] = 0.;
         f[i] = cell[i] + D::SkordosFactor() * D::t[i];
+        RR[i] = 0.;
     }
 
     double X_M1 = f[1] + f[2] + f[3];
