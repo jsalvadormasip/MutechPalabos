@@ -82,8 +82,7 @@ void setupInletAndBulk( MultiBlockLattice2D<T,DESCRIPTOR>& lattice,
 }
 
 void copyUnknownOnOutlet( MultiBlockLattice2D<T,DESCRIPTOR>& lattice,
-                          IncomprFlowParam<T> const& parameters,
-                          OnLatticeBoundaryCondition2D<T,DESCRIPTOR>& boundaryCondition )
+                          IncomprFlowParam<T> const& parameters )
 {
     const plint nx = parameters.getNx();
     const plint ny = parameters.getNy();
@@ -137,9 +136,13 @@ int main(int argc, char* argv[]) {
             1.         // ly 
     );
     const T logT     = (T)0.02;
+#ifndef PLB_REGRESSION
     const T imSave   = (T)0.1;
     const T vtkSave  = (T)3.;
     const T maxT     = (T)10.1;
+#else
+    const T maxT     = (T)0.5;
+#endif
 
     writeLogFile(parameters, "Poiseuille flow");
 
@@ -155,7 +158,7 @@ int main(int argc, char* argv[]) {
 
     defineCylinderGeometry(lattice, parameters);
     setupInletAndBulk(lattice, parameters, *boundaryCondition);
-    //copyUnknownOnOutlet(lattice, parameters, *boundaryCondition);
+    //copyUnknownOnOutlet(lattice, parameters);
     velocityNeumannOutlet(lattice, parameters, *boundaryCondition);
     lattice.initialize();
 
@@ -175,6 +178,7 @@ int main(int argc, char* argv[]) {
                   << getStoredAverageDensity<T>(lattice) << endl;
         }
 
+#ifndef PLB_REGRESSION
         if (iT%parameters.nStep(imSave)==0) {
             pcout << "Saving Gif ..." << endl;
             writeGifs(lattice, iT);
@@ -184,6 +188,7 @@ int main(int argc, char* argv[]) {
             pcout << "Saving VTK file ..." << endl;
             writeVTK(lattice, parameters, iT);
         }
+#endif
 
         // Lattice Boltzmann iteration step.
         lattice.collideAndStream();
