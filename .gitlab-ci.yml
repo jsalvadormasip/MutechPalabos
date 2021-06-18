@@ -147,6 +147,7 @@ debug_clang_parallel:
 
 debug_gcc_serial:
     stage: build_cmake
+    image: $DOCKER_BASE_IMG
     before_script:
         - mkdir -p ccache
         - export CCACHE_BASEDIR=${PWD}
@@ -162,6 +163,7 @@ debug_gcc_serial:
         
 debug_gcc_parallel:
     stage: build_cmake
+    image: $DOCKER_BASE_IMG
     before_script:
         - mkdir -p ccache
         - export CCACHE_BASEDIR=${PWD}
