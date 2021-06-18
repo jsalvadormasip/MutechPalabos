@@ -8,3 +8,4 @@ RUN apt update
 RUN apt dist-upgrade -y
 
 RUN apt install -y g++ clang ccache cmake python3 make libopenmpi-dev libhdf5-dev libhdf5-mpi-dev doxygen && update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+RUN apt install -y imagemagick
