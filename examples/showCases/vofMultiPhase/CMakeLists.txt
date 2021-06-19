@@ -20,7 +20,7 @@ if(BUILD_TESTING)
     add_custom_target(${PROJECT_NAME}_test
         ALL
         DEPENDS ${PROJECT_NAME}
-        COMMAND ${PROJECT_NAME} tmp 1.e-5 100 80.0 40 1.e-3 101 > test/output.dat
+        COMMAND ${PROJECT_NAME} tmp 1.e-5 100 80.0 40 1.e-3 101 | tee test/output.dat
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
         SOURCES ./${EXECUTABLE_NAME}.cpp
