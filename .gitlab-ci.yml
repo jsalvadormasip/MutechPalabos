@@ -52,7 +52,7 @@ test:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Test
-        - cmake --build . -j4
+        - cmake --build .
         - cmake --build . -- test
 
 ## Test compilation with CMake, everything in examples & utility directory
