@@ -30,7 +30,7 @@ endif()
 
 if (BUILD_TESTING)
     enable_testing()
-    add_test(NAME test
+    add_test(NAME ${CMAKE_CURRENT_SOURCE_DIR}_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
              COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
 endif()
@@ -150,25 +150,5 @@ target_link_libraries(${EXECUTABLE_NAME} palabos)
 if(ENABLE_MPI)
     target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
 endif()
-
-if(BUILD_TESTING)
-    add_custom_target(${PROJECT_NAME}_test
-        ALL
-        DEPENDS ${PROJECT_NAME}
-        COMMAND ${PROJECT_NAME} | tee test/output.dat
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
-        SOURCES ./${EXECUTABLE_NAME}.cpp
-    )
-endif()
-
-
-if (BUILD_TESTING)
-    enable_testing()
-    add_test(NAME test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
-endif()
-
 
 

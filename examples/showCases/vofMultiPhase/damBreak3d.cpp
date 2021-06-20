@@ -230,9 +230,10 @@ int main(int argc, char **argv)
     setToFunction(fields.flag, fields.flag.getBoundingBox().enlarge(-1), initialFluidFlags);
     
     fields.defaultInitialize();
-
+#ifndef PLB_REGRESSION
     pcout << "Time spent for setting up lattices: "
           << global::timer("initialization").stop() << std::endl;
+#endif
     T lastIterationTime = T();
 
     for (plint iT = 0; iT <= maxIter; ++iT) {
@@ -243,7 +244,9 @@ int main(int argc, char **argv)
         if (iT % getStatisticsIter==0) {
             pcout << std::endl;
             pcout << "ITERATION = " << iT << std::endl;
+#ifndef PLB_REGRESSION
             pcout << "Time of last iteration is " << lastIterationTime << " seconds" << std::endl;
+#endif
             writeStatistics(fields);
             sum_of_mass_matrix = fields.lattice.getInternalStatistics().getSum(0);
             pcout << "Sum of mass matrix: " << sum_of_mass_matrix << std::endl;

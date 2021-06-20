@@ -30,7 +30,7 @@ endif()
 
 if (BUILD_TESTING)
     enable_testing()
-    add_test(NAME test
+    add_test(NAME ${CMAKE_CURRENT_SOURCE_DIR}_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
              COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
 endif()

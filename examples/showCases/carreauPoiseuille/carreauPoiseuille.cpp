@@ -422,7 +422,9 @@ int main(int argc, char *argv[])
     util::ValueTracer<T> converge(uMax,Nref,1.0e-4);
 
     T tIni = global::timer("simTime").stop();
+#ifndef PLB_REGRESSION
     pcout << "time elapsed for iniGeometry:" << tIni << endl;
+#endif
     global::timer("simTime").start();
 
     plint iT = 0;

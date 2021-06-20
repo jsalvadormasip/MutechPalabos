@@ -6,10 +6,8 @@ relaxation time= 0.500048
 omega= 1.99981
 kinematic viscosity physical units = 1e-05
 kinematic viscosity lattice units= 1.6e-05
-Time spent for setting up lattices: 0.145645
 
 ITERATION = 0
-Time of last iteration is 0 seconds
  -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
 Average Mass: 0.200954
 Average Density: 1
@@ -21,7 +19,6 @@ Total mass: 0
 Interface cells: 0
 
 ITERATION = 20
-Time of last iteration is 0.118765653 seconds
  -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
 Average Mass: 0.200954457364
 Average Density: 1.00272008676
@@ -33,7 +30,6 @@ Total mass: 41477
 Interface cells: 2698
 
 ITERATION = 40
-Time of last iteration is 0.117030641 seconds
  -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
 Average Mass: 0.200954457364
 Average Density: 1.01058484871
@@ -45,7 +41,6 @@ Total mass: 41477
 Interface cells: 2736
 
 ITERATION = 60
-Time of last iteration is 0.118724813 seconds
  -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
 Average Mass: 0.200954457364
 Average Density: 1.01775954813
@@ -57,7 +52,6 @@ Total mass: 41477
 Interface cells: 2906
 
 ITERATION = 80
-Time of last iteration is 0.117218977 seconds
  -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
 Average Mass: 0.200954457364
 Average Density: 1.01792030218
@@ -69,7 +63,6 @@ Total mass: 41477
 Interface cells: 2860
 
 ITERATION = 100
-Time of last iteration is 0.1176138 seconds
  -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- 
 Average Mass: 0.200954457364
 Average Density: 1.01397913961

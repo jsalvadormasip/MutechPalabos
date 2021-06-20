@@ -304,7 +304,9 @@ int main(int argc, char *argv[])
             nsLattice, adLattice, processorLevel );
     
     T tIni = global::timer("simTime").stop();
+#ifndef PLB_REGRESSION
     pcout << "time elapsed for rayleighBenardSetup:" << tIni << endl;
+#endif
     global::timer("simTime").start();
     
 #ifndef PLB_REGRESSION
