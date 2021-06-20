@@ -1,0 +1,6 @@
+# Ignore all
+*
+
+# Except ref and gitignore
+!ref.dat
+!.gitignore
