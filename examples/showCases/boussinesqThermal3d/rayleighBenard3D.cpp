@@ -394,5 +394,8 @@ int main(int argc, char *argv[])
     pcout << "total iterations: " << iT << endl;
     pcout << "Msus: " << nx100*ny100*nz100*(T)iT/totalTime << endl;
 #endif
+
+    delete nsBoundaryCondition;
+    delete adBoundaryCondition;
 }
 

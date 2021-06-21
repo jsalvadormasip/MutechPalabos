@@ -319,4 +319,10 @@ int main(int argc, char* argv[]) {
     }
     
     delete boundaryCondition;
+    for (auto dyn : old_dynamics) {
+        delete dyn;
+    }
+    for (auto dyn : new_dynamics) {
+        delete dyn;
+    }
 }

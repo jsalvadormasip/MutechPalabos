@@ -258,5 +258,6 @@ int main(int argc, char *argv[])
     }
     
     pcout << "For N = " << N << ", Error = " << computeRMSerror ( lattice,parameters,alpha,iT) << endl;
+    delete boundaryCondition;
 }
 

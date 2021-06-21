@@ -221,6 +221,7 @@ int main(int argc, char **argv)
     FreeSurfaceFields3D<T,DESCRIPTOR> fields( blockStructure, dynamics->clone(), rhoEmpty,
                                               surfaceTensionLB, contactAngle, externalForce );
     //integrateProcessingFunctional(new ShortenBounceBack3D<T,DESCRIPTOR>, fields.lattice.getBoundingBox(), fields.freeSurfaceArgs, 0);
+    delete dynamics;
 
     // Set all outer-wall cells to "wall" (here, bulk-cells are also set to "wall", but it
     // doesn't matter, because they are overwritten on the next line).

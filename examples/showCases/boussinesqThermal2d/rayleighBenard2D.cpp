@@ -391,4 +391,7 @@ int main(int argc, char *argv[])
 #endif
     pcout << "N=" << resolution << endl;
     pcout << "total iterations: " << iT << endl;
+
+    delete nsBoundaryCondition;
+    delete adBoundaryCondition;
 }
