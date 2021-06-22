@@ -661,25 +661,25 @@ std::unique_ptr<MultiGridScalarField2D<T> > computeSymmetricTensorTrace(MultiGri
 /* *************** Vorticity from Velocity field *********************** */
 
 template<typename T>
-void computeVorticity(MultiGridTensorField2D<T,2>& velocity, MultiGridScalarField2D<T>& vorticity, Box2D domain);
+void computeVorticity(MultiGridTensorField2D<T,2>& velocity, MultiGridTensorField2D<T,2>& vorticity, Box2D domain);
 
 template<typename T>
-std::unique_ptr<MultiGridScalarField2D<T> > computeVorticity(MultiGridTensorField2D<T,2>& velocity, Box2D domain);
+std::unique_ptr<MultiGridTensorField2D<T,2> > computeVorticity(MultiGridTensorField2D<T,2>& velocity, Box2D domain);
 
 template<typename T>
-std::unique_ptr<MultiGridScalarField2D<T> > computeVorticity(MultiGridTensorField2D<T,2>& velocity);
+std::unique_ptr<MultiGridTensorField2D<T,2> > computeVorticity(MultiGridTensorField2D<T,2>& velocity);
 
 
 /* *************** Vorticity, witout boundary treatment, from Velocity field  */
 
 template<typename T>
-void computeBulkVorticity(MultiGridTensorField2D<T,2>& velocity, MultiGridScalarField2D<T>& vorticity, Box2D domain);
+void computeBulkVorticity(MultiGridTensorField2D<T,2>& velocity, MultiGridTensorField2D<T,2>& vorticity, Box2D domain);
 
 template<typename T>
-std::unique_ptr<MultiGridScalarField2D<T> > computeBulkVorticity(MultiGridTensorField2D<T,2>& velocity, Box2D domain);
+std::unique_ptr<MultiGridTensorField2D<T,2> > computeBulkVorticity(MultiGridTensorField2D<T,2>& velocity, Box2D domain);
 
 template<typename T>
-std::unique_ptr<MultiGridScalarField2D<T> > computeBulkVorticity(MultiGridTensorField2D<T,2>& velocity);
+std::unique_ptr<MultiGridTensorField2D<T,2> > computeBulkVorticity(MultiGridTensorField2D<T,2>& velocity);
 
 
 /* *************** Strain rate from Velocity field ********************* */

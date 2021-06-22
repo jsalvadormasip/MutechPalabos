@@ -108,10 +108,13 @@ struct Box3D {
         switch ( dir ) {
             case 0:
               return Box3D(x0-nCells, x1+nCells, y0, y1, z0, z1);
+              break;
             case 1:
               return Box3D(x0, x1, y0-nCells, y1+nCells, z0, z1);
+              break;
             case 2:
               return Box3D(x0, x1, y0, y1, z0-nCells, z1+nCells);
+              break;
             default:
               PLB_ASSERT(false && "The direction must be 0, 1, or 2");
               break;
@@ -124,10 +127,13 @@ struct Box3D {
         switch ( dir ) {
             case 0:
               return Box3D(x0-nCells[0], x1+nCells[1], y0, y1, z0, z1);
+              break;
             case 1:
               return Box3D(x0, x1, y0-nCells[0], y1+nCells[1], z0, z1);
+              break;
             case 2:
               return Box3D(x0, x1, y0, y1, z0-nCells[0], z1+nCells[1]);
+              break;
             default:
               PLB_ASSERT(false && "The direction must be 0, 1, or 2");
               break;
@@ -147,10 +153,13 @@ struct Box3D {
         switch ( dir ) {
             case 0:
               return Box3D(x0, x1, y0-nCells, y1+nCells, z0-nCells, z1+nCells);
+              break;
             case 1:
               return Box3D(x0-nCells, x1+nCells, y0, y1, z0-nCells, z1+nCells);
+              break;
             case 2:
               return Box3D(x0-nCells, x1+nCells, y0-nCells, y1+nCells, z0, z1);
+              break;
             default:
               PLB_ASSERT(false && "The direction must be 0, 1, or 2");
               break;
@@ -163,10 +172,13 @@ struct Box3D {
         switch ( dir ) {
             case 0:
               return Box3D(x0, x1, y0-nCellsOne[0], y1+nCellsOne[1], z0-nCellsTwo[0], z1+nCellsTwo[1]);
+              break;
             case 1:
               return Box3D(x0-nCellsTwo[0], x1+nCellsTwo[1], y0, y1, z0-nCellsOne[0], z1+nCellsOne[1]);
+              break;
             case 2:
               return Box3D(x0-nCellsOne[0], x1+nCellsOne[1], y0-nCellsTwo[0], y1+nCellsTwo[1], z0, z1);
+              break;
             default:
               PLB_ASSERT(false && "The direction must be 0, 1, or 2");
               break;
@@ -462,7 +474,7 @@ inline bool intersect(Box3D const& box, DotList3D const& dotlist, DotList3D& int
 }
 
 /// Except the domain of box "toExcept" form the domain of box "originalBox"
-/** The result consists of three boxes, which are added to the vector "result"
+/** The result consists of up to six boxes, which are added to the vector "result"
  */
 inline void except(Box3D const& originalBox, Box3D const& toExcept, std::vector<Box3D>& result)
 {
