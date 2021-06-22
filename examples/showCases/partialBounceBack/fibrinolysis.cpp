@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
     plint clotEndZ = clotBeginZ + countClotZLength()-1;
     simParam.clotEndZ = double(clotEndZ)/double(simParam.nz);
 
-    Clot clot = *(new Clot(*lattice, clotBeginZ, clotEndZ));
+    Clot clot(*lattice, clotBeginZ, clotEndZ);
 
     if(simParam.usesParticles)
     {
@@ -294,8 +294,9 @@ int main(int argc, char* argv[])
         T t = iter*simParam.dt;
         
         // constant inlet density
-        if (t==0)
-            *simParam.rhoWK_t_in = simParam.DeltaP/simParam.C_P * DESCRIPTOR<T>::invCs2 + 1;
+        if (t==0) {
+            simParam.rhoWK_t_in = simParam.DeltaP/simParam.C_P * DESCRIPTOR<T>::invCs2 + 1;
+        }
 
     /******* BCs set ******/
 
@@ -454,7 +455,7 @@ int main(int argc, char* argv[])
         Box3D outlet(0,simParam.nx-1, 0,simParam.ny-1, simParam.nz-1,simParam.nz-1);
         applyProcessingFunctional(new MyFluidPressureOutlet3D<T,DESCRIPTOR,2,1>(), outlet, *lattice);
         Box3D inlet(0,simParam.nx-1, 0,simParam.ny-1, 0,0);
-        applyProcessingFunctional(new FluidPressureInlet3D<T,DESCRIPTOR,2,-1>(*simParam.rhoWK_t_in), inlet, *lattice);
+        applyProcessingFunctional(new FluidPressureInlet3D<T,DESCRIPTOR,2,-1>(simParam.rhoWK_t_in), inlet, *lattice);
         
         
     }
@@ -462,6 +463,10 @@ int main(int argc, char* argv[])
     statFile.close();
     partStatFile.close();
     flowFile.close();
+
+    delete particles;
+    delete lattice;
+
 
     return 0;
 }
