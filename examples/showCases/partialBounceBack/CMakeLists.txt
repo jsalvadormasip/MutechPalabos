@@ -19,10 +19,11 @@ if(ENABLE_MPI)
 endif()
 
 if(BUILD_TESTING)
+    set(PROCESS_SUBSTITUTION \"<\ <\(tee\ test/output.dat \)\ >\ >\(tee\ test/output.dat\)\")
     add_custom_target(${PROJECT_NAME}_test
         ALL
         DEPENDS ${PROJECT_NAME}
-        COMMAND ${PROJECT_NAME} | tee test/output.dat
+        COMMAND ${PROJECT_NAME} ${PROCESS_SUBSTITUTION}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
         SOURCES ./${EXECUTABLE_NAME}.cpp
