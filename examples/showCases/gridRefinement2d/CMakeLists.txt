@@ -17,7 +17,6 @@ if(ENABLE_MPI)
 endif()
 
 if(BUILD_TESTING)
-    set(PROCESS_SUBSTITUTION \"<\ <\(tee\ test/output.dat \)\ >\ >\(tee\ test/output.dat\)\")
     add_custom_target(${PROJECT_NAME}_test
         ALL
         DEPENDS ${PROJECT_NAME}
