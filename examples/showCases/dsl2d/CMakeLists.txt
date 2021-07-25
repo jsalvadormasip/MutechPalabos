@@ -27,7 +27,6 @@ if(BUILD_TESTING)
     )
 endif()
 
-
 if (BUILD_TESTING)
     enable_testing()
     add_test(NAME ${CMAKE_CURRENT_SOURCE_DIR}_test
