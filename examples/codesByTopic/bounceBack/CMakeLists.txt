@@ -21,11 +21,10 @@ message(${CMAKE_CURRENT_SOURCE_DIR})
 
 if(BUILD_TESTING)
     set(PROCESS_SUBSTITUTION \"<\ <\(tee\ test/output.dat \)\ >\ >\(tee\ test/output.dat\)\")
-    set(PROCESS_SUBSTITUTION \"<\ <\(tee\ test/output.dat \)\ >\ >\(tee\ test/output.dat\)\")
     add_custom_target(${PROJECT_NAME}_test
         ALL
         DEPENDS ${PROJECT_NAME}
-        COMMAND ${PROJECT_NAME} ${PROCESS_SUBSTITUTION}
+        COMMAND "LSAN_OPTIONS=suppressions=/home/orestis/git/palabos/MyAsan.supp" ./${PROJECT_NAME} ${PROCESS_SUBSTITUTION}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
         SOURCES ./${EXECUTABLE_NAME}.cpp
