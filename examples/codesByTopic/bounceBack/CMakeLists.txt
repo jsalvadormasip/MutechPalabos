@@ -17,7 +17,6 @@ target_link_libraries(${PROJECT_NAME} palabos)
 if(ENABLE_MPI)
     target_link_libraries(${PROJECT_NAME} ${MPI_CXX_LIBRARIES})
 endif()
-message(${CMAKE_CURRENT_SOURCE_DIR})
 
 if(BUILD_TESTING)
     add_custom_target(${PROJECT_NAME}_test
@@ -45,8 +44,6 @@ return()
 
 ###############################################################################
 endif()
-
-cmake_minimum_required(VERSION 2.8.12)
 
 cmake_minimum_required(VERSION 2.8.12)
 
