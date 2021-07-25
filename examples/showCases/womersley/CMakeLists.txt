@@ -21,7 +21,7 @@ if(BUILD_TESTING)
     add_custom_target(${PROJECT_NAME}_test
         ALL
         DEPENDS ${PROJECT_NAME}
-        COMMAND "LSAN_OPTIONS=suppressions=/home/orestis/git/palabos/MyAsan.supp" ./${PROJECT_NAME} 10${PROCESS_SUBSTITUTION}
+        COMMAND "LSAN_OPTIONS=suppressions=${LSAN_SUPPRESSION_FILE}" ./${PROJECT_NAME} 10${PROCESS_SUBSTITUTION}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
         SOURCES ./${EXECUTABLE_NAME}.cpp

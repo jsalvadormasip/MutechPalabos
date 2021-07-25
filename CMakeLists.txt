@@ -23,6 +23,7 @@ message("Generated with config types: ${CMAKE_CONFIGURATION_TYPES}")
 message(${CMAKE_BUILD_TYPE})
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Test")
+    set(LSAN_SUPPRESSION_FILE "${PROJECT_SOURCE_DIR}/LAsan.supp")
     set(BUILD_TESTING ON)
     enable_testing()
 endif()
