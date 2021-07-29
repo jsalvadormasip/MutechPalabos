@@ -432,7 +432,8 @@ std::unique_ptr<MultiBlockLattice3D<T,DESCRIPTOR> > run (
         writeSurfaceVTK (
                 boundary,
                 *computeSurfaceForce( boundary, voxelizedDomain, *lattice, model->velIsJ(), dynamicMesh ),
-                scalarNames, vectorNames, "surface_"+util::val2str(level)+".vtk", dynamicMesh, 0,
+                scalarNames, vectorNames, 
+                FileName("surface_" + util::val2str(level) + ".vtk").defaultPath(global::directories().getOutputDir()), dynamicMesh, 0,
                 scalarFactor, vectorFactor );
     }
 
