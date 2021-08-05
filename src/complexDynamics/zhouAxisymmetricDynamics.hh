@@ -1,0 +1,234 @@
+/* This file is part of the Palabos library.
+ *
+ * Copyright (C) 2011-2017 FlowKit Sarl
+ * Route d'Oron 2
+ * 1010 Lausanne, Switzerland
+ * E-mail contact: contact@flowkit.com
+ *
+ * The most recent release of Palabos can be downloaded at
+ * <http://www.palabos.org/>
+ *
+ * The library Palabos is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * The library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/** \file
+ * A collection of dynamics classes (e.g. BGK) with which a Cell object
+ * can be instantiated -- generic implementation.
+ */
+#ifndef ZHOU_AXISYMMETRIC_DYNAMICS_HH
+#define ZHOU_AXISYMMETRIC_DYNAMICS_HH
+
+#include "basicDynamics/isoThermalDynamics.h"
+#include "core/cell.h"
+#include "core/dynamicsIdentifiers.h"
+#include "core/latticeStatistics.h"
+
+namespace plb {
+
+// ============== Zhou (2011) Axisymmetric dynamics ====================== //
+
+template<typename T, template<typename U> class Descriptor>
+int zhouAxisymmetricDynamics<T,Descriptor>::id =
+    meta::registerGeneralDynamics<T,Descriptor,zhouAxisymmetricDynamics<T,Descriptor> >("Zhou_Axisymmetric_Dynamics");
+
+template<typename T, template<typename U> class Descriptor>
+zhouAxisymmetricDynamics<T,Descriptor>::zhouAxisymmetricDynamics(Dynamics<T,Descriptor>* baseDynamics_)
+    : CompositeDynamics<T,Descriptor>(baseDynamics_, false)  // false is for automaticPrepareCollision.
+{ }
+
+template<typename T, template<typename U> class Descriptor>
+zhouAxisymmetricDynamics<T,Descriptor>::zhouAxisymmetricDynamics(HierarchicUnserializer& unserializer)
+    : CompositeDynamics<T,Descriptor>(0, false)
+{
+    this->unserialize(unserializer);
+}
+
+template<typename T, template<typename U> class Descriptor>
+void zhouAxisymmetricDynamics<T,Descriptor>::collide(Cell<T,Descriptor>& cell, BlockStatistics& statistics)
+{
+
+    Array<T,Descriptor<T>::numPop> h1;         /// h1
+    Array<T,Descriptor<T>::numPop> h2;         /// h2
+
+    T rhoBar;
+    Array<T,Descriptor<T>::d> j;
+
+    if(absoluteR != 0) { // h1 & h2 have a non-zero value only if r != 0
+        Array<T,Descriptor<T>::q>& f = cell.getRawPopulations();
+        momentTemplates<T,Descriptor>::get_rhoBar_j(cell, rhoBar, j);
+        T rho = Descriptor<T>::fullRho(rhoBar);
+        T invRho = Descriptor<T>::invRho(rhoBar);
+        const T jSqr = VectorTemplateImpl<T,Descriptor<T>::d>::normSqr(j);
+        Array<T,Descriptor<T>::d> u;
+        u = j*invRho; // u(0) = u_x and u(1) = u_r
+
+        for (plint iPop=0; iPop < Descriptor<T>::q; ++iPop) {
+            h1[iPop] = -Descriptor<T>::t[iPop] * j[1] / (T) absoluteR; // Zhou 2011
+        }
+
+
+        Array<T,Descriptor<T>::q> fNeq;
+        T tau = 1.0/this->getOmega();
+        T nu = (2.0 * tau - 1.0) / 6.0;
+            for (plint iPop=0; iPop < Descriptor<T>::q; ++iPop) {
+        fNeq[iPop] = f[iPop] - dynamicsTemplatesImpl<T,Descriptor<T> >::bgk_ma2_equilibrium (
+                iPop, rhoBar, invRho, j, jSqr );
+        h2[iPop] = - (2*tau-1) / (2*tau*(T)absoluteR) * Descriptor<T>::c[iPop][1] * fNeq[iPop]
+                + (T) 1.0 / (T) 6.0 * rho * (
+                        Descriptor<T>::c[iPop][0] * (-u[0]*u[1]/(T) absoluteR) +
+                        Descriptor<T>::c[iPop][1] * (-u[1]*u[1]/(T) absoluteR - 2*nu*u[1]/util::sqr((T)absoluteR))
+                        );
+        }
+    }
+
+    this->getBaseDynamics().collide(cell, statistics);
+    for (plint iPop=0; iPop<Descriptor<T>::q; ++iPop) {
+        cell[iPop] += h1[iPop] + h2[iPop];
+    }
+
+    momentTemplates<T,Descriptor >::get_rhoBar_j(cell, rhoBar, j);
+    T invRho = Descriptor<T>::invRho(rhoBar);
+    T uSqr = VectorTemplateImpl<T,Descriptor<T>::d>::normSqr(j)*invRho*invRho;
+    if (cell.takesStatistics()) {
+        gatherStatistics(statistics, rhoBar, uSqr);
+    }
+}
+
+template<typename T, template<typename U> class Descriptor>
+void zhouAxisymmetricDynamics<T,Descriptor>::collideExternal (
+        Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& statistics )
+{
+    static const T epsilon = 1.e4 * std::numeric_limits<T>::epsilon();
+    int sigmaPos = Descriptor<T>::ExternalField::sigmaBeginsAt;
+    int rhoBarPos = Descriptor<T>::ExternalField::rhoBarBeginsAt;
+    int uPos = Descriptor<T>::ExternalField::uBeginsAt;
+    T sigma = *cell.getExternal(sigmaPos);
+    T rhoBarF = *cell.getExternal(rhoBarPos);
+    Array<T,Descriptor<T>::d> uF;
+    uF.from_cArray(cell.getExternal(uPos));
+
+    if (sigma<epsilon) {
+        this->getBaseDynamics().collideExternal(cell, rhoBar, j, thetaBar, statistics);
+    }
+    else {
+        T jSqr = normSqr(j);
+        Array<T,Descriptor<T>::q> fEq;
+        this->getBaseDynamics().computeEquilibria(fEq, rhoBar, j, jSqr);
+
+        Array<T,Descriptor<T>::d> jF = Descriptor<T>::fullRho(rhoBarF)*uF;
+        T jFsqr = normSqr(jF);
+        Array<T,Descriptor<T>::q> fEqF;
+        this->getBaseDynamics().computeEquilibria(fEqF, rhoBarF, jF, jFsqr);
+
+        this->getBaseDynamics().collideExternal(cell, rhoBar, j, thetaBar, statistics);
+
+        for (plint iPop=0; iPop<Descriptor<T>::q; ++iPop) {
+            cell[iPop] -= sigma*(fEq[iPop] - fEqF[iPop]);
+        }
+    }
+}
+
+template<typename T, template<typename U> class Descriptor>
+void zhouAxisymmetricDynamics<T,Descriptor>::recompose (
+        Cell<T,Descriptor>& cell, std::vector<T> const& rawData, plint order ) const
+{
+    PLB_PRECONDITION( (plint)rawData.size() == this->getBaseDynamics().numDecomposedVariables(order) );
+
+    if (order==0) {
+        recomposeOrder0(cell, rawData);
+    }
+    else {
+        recomposeOrder1(cell, rawData);
+    }
+}
+
+template<typename T, template<typename U> class Descriptor>
+void zhouAxisymmetricDynamics<T,Descriptor>::recomposeOrder0 (
+        Cell<T,Descriptor>& cell, std::vector<T> const& rawData ) const
+{
+    T rhoBar = rawData[0];
+    Array<T,Descriptor<T>::d> j;
+    j.from_cArray(&rawData[1]);
+    T jSqr = VectorTemplate<T,Descriptor>::normSqr(j);
+
+    Array<T,Descriptor<T>::q> fEq;
+    this->getBaseDynamics().computeEquilibria(fEq,  rhoBar, j, jSqr);
+
+    for (plint iPop=0; iPop<Descriptor<T>::q; ++iPop) {
+        cell[iPop] = fEq[iPop] + rawData[1+Descriptor<T>::d+iPop];
+    }
+}
+
+template<typename T, template<typename U> class Descriptor>
+void zhouAxisymmetricDynamics<T,Descriptor>::recomposeOrder1 (
+        Cell<T,Descriptor>& cell, std::vector<T> const& rawData ) const
+{
+    T rhoBar;
+    Array<T,Descriptor<T>::d> j;
+    Array<T,SymmetricTensor<T,Descriptor>::n> PiNeq;
+
+    rhoBar = rawData[0];
+    j.from_cArray(&rawData[1]);
+    T jSqr = VectorTemplate<T,Descriptor>::normSqr(j);
+    PiNeq.from_cArray(&rawData[1+Descriptor<T>::d]);
+
+    this->getBaseDynamics().regularize(cell,rhoBar,j,jSqr,PiNeq);
+}
+
+template<typename T, template<typename U> class Descriptor>
+void zhouAxisymmetricDynamics<T,Descriptor>::prepareCollision(Cell<T,Descriptor>& cell)
+{ }
+
+template<typename T, template<typename U> class Descriptor>
+int zhouAxisymmetricDynamics<T,Descriptor>::getId() const {
+    return id;
+}
+
+template<typename T, template<typename U> class Descriptor>
+void zhouAxisymmetricDynamics<T,Descriptor>::setAbsoluteR(plint absoluteR_) {
+    absoluteR = absoluteR_;
+}
+
+/********************************* GetAbsoluteRFunctional ******************/
+template<typename T, template<typename U> class Descriptor>
+const int GetAbsoluteRFunctional<T,Descriptor>::staticId =
+        meta::registerProcessor2D < GetAbsoluteRFunctional<T, Descriptor>,
+                T, Descriptor> (std::string("GetAbsoluteRFunctional"));
+
+template<typename T, template<typename U> class Descriptor>
+void GetAbsoluteRFunctional<T,Descriptor>::process (
+        Box2D domain, BlockLattice2D<T,Descriptor>& lattice )
+{
+    Dot2D absoluteOffset = lattice.getLocation();
+    
+    for (plint iX=domain.x0; iX<=domain.x1; ++iX) {
+        for (plint iY=domain.y0; iY<=domain.y1; ++iY) {
+            zhouAxisymmetricDynamics<T,Descriptor>& dynamics = dynamic_cast<zhouAxisymmetricDynamics<T,Descriptor>&>(lattice.get(iX,iY).getDynamics());
+            dynamics.setAbsoluteR(iY + absoluteOffset.y);
+        }
+    }
+}
+
+template<typename T, template<typename U> class Descriptor>
+GetAbsoluteRFunctional<T,Descriptor>*
+GetAbsoluteRFunctional<T,Descriptor>::clone() const
+{
+    return new GetAbsoluteRFunctional<T,Descriptor>(*this);
+}
+
+
+}  // namespace plb
+
+#endif  // ZHOU_AXISYMMETRIC_DYNAMICS_HH
+

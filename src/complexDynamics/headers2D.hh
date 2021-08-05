@@ -49,4 +49,5 @@
 #include "complexDynamics/asinariModel.hh"
 #include "complexDynamics/wavePropagation.hh"
 #include "complexDynamics/kbcDynamics.hh"
+#include "complexDynamics/zhouAxisymmetricDynamics.hh"
 

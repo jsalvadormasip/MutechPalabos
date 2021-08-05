@@ -54,4 +54,5 @@
 #include "complexDynamics/asinariModel.h"
 #include "complexDynamics/wavePropagation.h"
 #include "complexDynamics/kbcDynamics.h"
+#include "complexDynamics/zhouAxisymmetricDynamics.h"
 
