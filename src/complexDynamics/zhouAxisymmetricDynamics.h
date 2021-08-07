@@ -48,15 +48,13 @@ public:
         return new zhouAxisymmetricDynamics<T,Descriptor>(*this);
     }
     virtual void prepareCollision(Cell<T,Descriptor>& cell);
-        /// Return a unique ID for this class.
-
-    /// Recompose from moment representation to population representation.
-    virtual void recompose(Cell<T,Descriptor>& cell, std::vector<T> const& rawData, plint order) const;
-    virtual void recomposeOrder0(Cell<T,Descriptor>& cell, std::vector<T> const& rawData) const;
-    virtual void recomposeOrder1(Cell<T,Descriptor>& cell, std::vector<T> const& rawData) const;
-
+    
+    /// Return a unique ID for this class.
     virtual int getId() const;
-    // friend void GetAbsoluteRFunctional::process(Box2D domain, BlockLattice2D<T,Descriptor>& lattice);
+    /// Serialize the dynamics object.
+    virtual void serialize(HierarchicSerializer& serializer) const;
+    /// Un-Serialize the dynamics object.
+    virtual void unserialize(HierarchicUnserializer& unserializer);
     void setAbsoluteR(plint absoluteR_);
 
 private:

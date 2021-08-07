@@ -33,6 +33,7 @@
 #include "core/cell.h"
 #include "core/dynamicsIdentifiers.h"
 #include "core/latticeStatistics.h"
+#include "core/hierarchicSerializer.h"
 
 namespace plb {
 
@@ -77,7 +78,6 @@ void zhouAxisymmetricDynamics<T,Descriptor>::collide(Cell<T,Descriptor>& cell, B
             h1[iPop] = -Descriptor<T>::t[iPop] * j[1] / (T) absoluteR; // Zhou 2011
         }
 
-
         Array<T,Descriptor<T>::q> fNeq;
         T tau = 1.0/this->getOmega();
         T nu = (2.0 * tau - 1.0) / 6.0;
@@ -109,81 +109,41 @@ template<typename T, template<typename U> class Descriptor>
 void zhouAxisymmetricDynamics<T,Descriptor>::collideExternal (
         Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& statistics )
 {
-    static const T epsilon = 1.e4 * std::numeric_limits<T>::epsilon();
-    int sigmaPos = Descriptor<T>::ExternalField::sigmaBeginsAt;
-    int rhoBarPos = Descriptor<T>::ExternalField::rhoBarBeginsAt;
-    int uPos = Descriptor<T>::ExternalField::uBeginsAt;
-    T sigma = *cell.getExternal(sigmaPos);
-    T rhoBarF = *cell.getExternal(rhoBarPos);
-    Array<T,Descriptor<T>::d> uF;
-    uF.from_cArray(cell.getExternal(uPos));
 
-    if (sigma<epsilon) {
-        this->getBaseDynamics().collideExternal(cell, rhoBar, j, thetaBar, statistics);
-    }
-    else {
-        T jSqr = normSqr(j);
-        Array<T,Descriptor<T>::q> fEq;
-        this->getBaseDynamics().computeEquilibria(fEq, rhoBar, j, jSqr);
+    Array<T,Descriptor<T>::numPop> h1;         /// h1
+    Array<T,Descriptor<T>::numPop> h2;         /// h2
 
-        Array<T,Descriptor<T>::d> jF = Descriptor<T>::fullRho(rhoBarF)*uF;
-        T jFsqr = normSqr(jF);
-        Array<T,Descriptor<T>::q> fEqF;
-        this->getBaseDynamics().computeEquilibria(fEqF, rhoBarF, jF, jFsqr);
+    if(absoluteR != 0) { // h1 & h2 have a non-zero value only if r != 0
+        Array<T,Descriptor<T>::q>& f = cell.getRawPopulations();
+        T rho = Descriptor<T>::fullRho(rhoBar);
+        T invRho = Descriptor<T>::invRho(rhoBar);
+        const T jSqr = VectorTemplateImpl<T,Descriptor<T>::d>::normSqr(j);
+        Array<T,Descriptor<T>::d> u;
+        u = j*invRho; // u(0) = u_x and u(1) = u_r
 
-        this->getBaseDynamics().collideExternal(cell, rhoBar, j, thetaBar, statistics);
+        for (plint iPop=0; iPop < Descriptor<T>::q; ++iPop) {
+            h1[iPop] = -Descriptor<T>::t[iPop] * j[1] / (T) absoluteR; // Zhou 2011
+        }
 
-        for (plint iPop=0; iPop<Descriptor<T>::q; ++iPop) {
-            cell[iPop] -= sigma*(fEq[iPop] - fEqF[iPop]);
+
+        Array<T,Descriptor<T>::q> fNeq;
+        T tau = 1.0/this->getOmega();
+        T nu = (2.0 * tau - 1.0) / 6.0;
+            for (plint iPop=0; iPop < Descriptor<T>::q; ++iPop) {
+        fNeq[iPop] = f[iPop] - dynamicsTemplatesImpl<T,Descriptor<T> >::bgk_ma2_equilibrium (
+                iPop, rhoBar, invRho, j, jSqr );
+        h2[iPop] = - (2*tau-1) / (2*tau*(T)absoluteR) * Descriptor<T>::c[iPop][1] * fNeq[iPop]
+                + (T) 1.0 / (T) 6.0 * rho * (
+                        Descriptor<T>::c[iPop][0] * (-u[0]*u[1]/(T) absoluteR) +
+                        Descriptor<T>::c[iPop][1] * (-u[1]*u[1]/(T) absoluteR - 2*nu*u[1]/util::sqr((T)absoluteR))
+                        );
         }
     }
-}
 
-template<typename T, template<typename U> class Descriptor>
-void zhouAxisymmetricDynamics<T,Descriptor>::recompose (
-        Cell<T,Descriptor>& cell, std::vector<T> const& rawData, plint order ) const
-{
-    PLB_PRECONDITION( (plint)rawData.size() == this->getBaseDynamics().numDecomposedVariables(order) );
-
-    if (order==0) {
-        recomposeOrder0(cell, rawData);
-    }
-    else {
-        recomposeOrder1(cell, rawData);
-    }
-}
-
-template<typename T, template<typename U> class Descriptor>
-void zhouAxisymmetricDynamics<T,Descriptor>::recomposeOrder0 (
-        Cell<T,Descriptor>& cell, std::vector<T> const& rawData ) const
-{
-    T rhoBar = rawData[0];
-    Array<T,Descriptor<T>::d> j;
-    j.from_cArray(&rawData[1]);
-    T jSqr = VectorTemplate<T,Descriptor>::normSqr(j);
-
-    Array<T,Descriptor<T>::q> fEq;
-    this->getBaseDynamics().computeEquilibria(fEq,  rhoBar, j, jSqr);
-
+    this->getBaseDynamics().collideExternal(cell, rhoBar, j, thetaBar, statistics);
     for (plint iPop=0; iPop<Descriptor<T>::q; ++iPop) {
-        cell[iPop] = fEq[iPop] + rawData[1+Descriptor<T>::d+iPop];
+        cell[iPop] += h1[iPop] + h2[iPop];
     }
-}
-
-template<typename T, template<typename U> class Descriptor>
-void zhouAxisymmetricDynamics<T,Descriptor>::recomposeOrder1 (
-        Cell<T,Descriptor>& cell, std::vector<T> const& rawData ) const
-{
-    T rhoBar;
-    Array<T,Descriptor<T>::d> j;
-    Array<T,SymmetricTensor<T,Descriptor>::n> PiNeq;
-
-    rhoBar = rawData[0];
-    j.from_cArray(&rawData[1]);
-    T jSqr = VectorTemplate<T,Descriptor>::normSqr(j);
-    PiNeq.from_cArray(&rawData[1+Descriptor<T>::d]);
-
-    this->getBaseDynamics().regularize(cell,rhoBar,j,jSqr,PiNeq);
 }
 
 template<typename T, template<typename U> class Descriptor>
@@ -193,6 +153,20 @@ void zhouAxisymmetricDynamics<T,Descriptor>::prepareCollision(Cell<T,Descriptor>
 template<typename T, template<typename U> class Descriptor>
 int zhouAxisymmetricDynamics<T,Descriptor>::getId() const {
     return id;
+}
+
+template<typename T, template<typename U> class Descriptor>
+void zhouAxisymmetricDynamics<T,Descriptor>::serialize(HierarchicSerializer& serializer) const
+{
+    CompositeDynamics<T,Descriptor>::serialize(serializer);
+    serializer.addValue<plint>(absoluteR);
+}
+
+template<typename T, template<typename U> class Descriptor>
+void zhouAxisymmetricDynamics<T,Descriptor>::unserialize(HierarchicUnserializer& unserializer)
+{
+    CompositeDynamics<T,Descriptor>::unserialize(unserializer);
+    unserializer.readValue<plint>(absoluteR);
 }
 
 template<typename T, template<typename U> class Descriptor>
