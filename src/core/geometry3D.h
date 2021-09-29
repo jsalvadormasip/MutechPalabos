@@ -108,13 +108,10 @@ struct Box3D {
         switch ( dir ) {
             case 0:
               return Box3D(x0-nCells, x1+nCells, y0, y1, z0, z1);
-              break;
             case 1:
               return Box3D(x0, x1, y0-nCells, y1+nCells, z0, z1);
-              break;
             case 2:
               return Box3D(x0, x1, y0, y1, z0-nCells, z1+nCells);
-              break;
             default:
               PLB_ASSERT(false && "The direction must be 0, 1, or 2");
               break;
@@ -127,13 +124,10 @@ struct Box3D {
         switch ( dir ) {
             case 0:
               return Box3D(x0-nCells[0], x1+nCells[1], y0, y1, z0, z1);
-              break;
             case 1:
               return Box3D(x0, x1, y0-nCells[0], y1+nCells[1], z0, z1);
-              break;
             case 2:
               return Box3D(x0, x1, y0, y1, z0-nCells[0], z1+nCells[1]);
-              break;
             default:
               PLB_ASSERT(false && "The direction must be 0, 1, or 2");
               break;
@@ -153,13 +147,10 @@ struct Box3D {
         switch ( dir ) {
             case 0:
               return Box3D(x0, x1, y0-nCells, y1+nCells, z0-nCells, z1+nCells);
-              break;
             case 1:
               return Box3D(x0-nCells, x1+nCells, y0, y1, z0-nCells, z1+nCells);
-              break;
             case 2:
               return Box3D(x0-nCells, x1+nCells, y0-nCells, y1+nCells, z0, z1);
-              break;
             default:
               PLB_ASSERT(false && "The direction must be 0, 1, or 2");
               break;
@@ -172,13 +163,10 @@ struct Box3D {
         switch ( dir ) {
             case 0:
               return Box3D(x0, x1, y0-nCellsOne[0], y1+nCellsOne[1], z0-nCellsTwo[0], z1+nCellsTwo[1]);
-              break;
             case 1:
               return Box3D(x0-nCellsTwo[0], x1+nCellsTwo[1], y0, y1, z0-nCellsOne[0], z1+nCellsOne[1]);
-              break;
             case 2:
               return Box3D(x0-nCellsOne[0], x1+nCellsOne[1], y0-nCellsTwo[0], y1+nCellsTwo[1], z0, z1);
-              break;
             default:
               PLB_ASSERT(false && "The direction must be 0, 1, or 2");
               break;

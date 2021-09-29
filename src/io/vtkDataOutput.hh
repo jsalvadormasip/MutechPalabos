@@ -202,7 +202,6 @@ void VtkImageOutput2D<T>::writeHeader(Box2D boundingBox_) {
                         boundingBox_.y0,boundingBox_.y1,0,0);
     if (headerWritten) {
         PLB_PRECONDITION(boundingBox == boundingBox3D);
-        PLB_PRECONDITION(boundingBox == boundingBox3D);
     }
     else {
         boundingBox = boundingBox3D;
