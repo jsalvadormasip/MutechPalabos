@@ -132,6 +132,13 @@ private:
 
 /// Same as the InjectRandomPointParticlesFunctional2D but using a parallel pseudo random
 ///   number generator (PPRNG) for correctness and reproducibility.
+/// The rationale for the seed having a pointer type is the following. The only way to
+///   control the random number generator is through the seed value. Imagine that this
+///   data processor needs to be integrated and executed at every iteration with a
+///   different seed each time, the value of which is controlled by the caller. A nice
+///   way to achieve this is by passing the address of a variable (which is "external" to
+///   the data processor) so the caller can change its value as they wish. This is why the
+///   "seed" member of this class has a pointer type.
 template <typename T, template <typename U> class Descriptor>
 class InjectRandomPointParticlesFunctionalPPRNG2D : public BoxProcessingFunctional2D {
 public:
@@ -175,6 +182,13 @@ private:
 
 /// Same as the AnalyticalInjectRandomParticlesFunctional2D but using a parallel pseudo random
 ///   number generator (PPRNG) for correctness and reproducibility.
+/// The rationale for the seed having a pointer type is the following. The only way to
+///   control the random number generator is through the seed value. Imagine that this
+///   data processor needs to be integrated and executed at every iteration with a
+///   different seed each time, the value of which is controlled by the caller. A nice
+///   way to achieve this is by passing the address of a variable (which is "external" to
+///   the data processor) so the caller can change its value as they wish. This is why the
+///   "seed" member of this class has a pointer type.
 template <typename T, template <typename U> class Descriptor, class DomainFunctional>
 class AnalyticalInjectRandomParticlesFunctionalPPRNG2D : public BoxProcessingFunctional2D {
 public:

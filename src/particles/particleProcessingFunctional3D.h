@@ -153,6 +153,13 @@ private:
 
 /// Same as the InjectRandomParticlesFunctional3D but using a parallel pseudo random
 ///   number generator (PPRNG) for correctness and reproducibility.
+/// The rationale for the seed having a pointer type is the following. The only way to
+///   control the random number generator is through the seed value. Imagine that this
+///   data processor needs to be integrated and executed at every iteration with a
+///   different seed each time, the value of which is controlled by the caller. A nice
+///   way to achieve this is by passing the address of a variable (which is "external" to
+///   the data processor) so the caller can change its value as they wish. This is why the
+///   "seed" member of this class has a pointer type.
 template <typename T, template <typename U> class Descriptor>
 class InjectRandomParticlesFunctionalPPRNG3D : public BoxProcessingFunctional3D {
 public:
@@ -202,6 +209,13 @@ private:
 
 /// Same as the MaskedInjectRandomParticlesFunctional3D but using a parallel pseudo random
 ///   number generator (PPRNG) for correctness and reproducibility.
+/// The rationale for the seed having a pointer type is the following. The only way to
+///   control the random number generator is through the seed value. Imagine that this
+///   data processor needs to be integrated and executed at every iteration with a
+///   different seed each time, the value of which is controlled by the caller. A nice
+///   way to achieve this is by passing the address of a variable (which is "external" to
+///   the data processor) so the caller can change its value as they wish. This is why the
+///   "seed" member of this class has a pointer type.
 template <typename T, template <typename U> class Descriptor>
 class MaskedInjectRandomParticlesFunctionalPPRNG3D : public BoxProcessingFunctional3D {
 public:
@@ -248,6 +262,13 @@ private:
 
 /// Same as the N_MaskedInjectRandomParticlesFunctional3D but using a parallel pseudo random
 ///   number generator (PPRNG) for correctness and reproducibility.
+/// The rationale for the seed having a pointer type is the following. The only way to
+///   control the random number generator is through the seed value. Imagine that this
+///   data processor needs to be integrated and executed at every iteration with a
+///   different seed each time, the value of which is controlled by the caller. A nice
+///   way to achieve this is by passing the address of a variable (which is "external" to
+///   the data processor) so the caller can change its value as they wish. This is why the
+///   "seed" member of this class has a pointer type.
 template <typename T, template <typename U> class Descriptor>
 class N_MaskedInjectRandomParticlesFunctionalPPRNG3D : public BoxProcessingFunctional3D {
 public:
@@ -297,6 +318,13 @@ private:
 
 /// Same as the AnalyticalInjectRandomParticlesFunctional3D but using a parallel pseudo random
 ///   number generator (PPRNG) for correctness and reproducibility.
+/// The rationale for the seed having a pointer type is the following. The only way to
+///   control the random number generator is through the seed value. Imagine that this
+///   data processor needs to be integrated and executed at every iteration with a
+///   different seed each time, the value of which is controlled by the caller. A nice
+///   way to achieve this is by passing the address of a variable (which is "external" to
+///   the data processor) so the caller can change its value as they wish. This is why the
+///   "seed" member of this class has a pointer type.
 template <typename T, template <typename U> class Descriptor, class DomainFunctional>
 class AnalyticalInjectRandomParticlesFunctionalPPRNG3D : public BoxProcessingFunctional3D {
 public:
@@ -350,6 +378,13 @@ private:
 
 /// Same as the MaskedAnalyticalInjectRandomParticlesFunctional3D but using a parallel pseudo random
 ///   number generator (PPRNG) for correctness and reproducibility.
+/// The rationale for the seed having a pointer type is the following. The only way to
+///   control the random number generator is through the seed value. Imagine that this
+///   data processor needs to be integrated and executed at every iteration with a
+///   different seed each time, the value of which is controlled by the caller. A nice
+///   way to achieve this is by passing the address of a variable (which is "external" to
+///   the data processor) so the caller can change its value as they wish. This is why the
+///   "seed" member of this class has a pointer type.
 template <typename T, template <typename U> class Descriptor, class DomainFunctional>
 class MaskedAnalyticalInjectRandomParticlesFunctionalPPRNG3D : public BoxProcessingFunctional3D {
 public:
