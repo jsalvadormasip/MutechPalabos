@@ -8,11 +8,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+* Added use of sitmo PRNG to make coherent parallel random number generation.
+* Various MultiGrid refinement data analysis functionals.
+
 ### Removed
 
 ### Changed
 
 ### Fixed
+
+* Bugs in 2D multi grid refinement.
 
 ## [2.3.0]
 
