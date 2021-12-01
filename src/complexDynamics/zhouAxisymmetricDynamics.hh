@@ -23,7 +23,8 @@
 */
 
 /** \file
- * A collection of dynamics classes (e.g. BGK) with which a Cell object
+ * Axisymmetric LBM dynamics, refering to 
+ * Zhou, J. G., 2011, “Axisymmetric Lattice Boltzmann Method Revised,” Physical review E, 84(3), p. 036704.
  * can be instantiated -- generic implementation.
  */
 #ifndef ZHOU_AXISYMMETRIC_DYNAMICS_HH
@@ -61,6 +62,8 @@ void zhouAxisymmetricDynamics<T,Descriptor>::collide(Cell<T,Descriptor>& cell, B
 
     Array<T,Descriptor<T>::numPop> h1;         /// h1
     Array<T,Descriptor<T>::numPop> h2;         /// h2
+    h1.resetToZero();
+    h2.resetToZero();
 
     T rhoBar;
     Array<T,Descriptor<T>::d> j;
@@ -81,14 +84,25 @@ void zhouAxisymmetricDynamics<T,Descriptor>::collide(Cell<T,Descriptor>& cell, B
         Array<T,Descriptor<T>::q> fNeq;
         T tau = 1.0/this->getOmega();
         T nu = (2.0 * tau - 1.0) / 6.0;
-            for (plint iPop=0; iPop < Descriptor<T>::q; ++iPop) {
-        fNeq[iPop] = f[iPop] - dynamicsTemplatesImpl<T,Descriptor<T> >::bgk_ma2_equilibrium (
-                iPop, rhoBar, invRho, j, jSqr );
-        h2[iPop] = - (2*tau-1) / (2*tau*(T)absoluteR) * Descriptor<T>::c[iPop][1] * fNeq[iPop]
-                + (T) 1.0 / (T) 6.0 * rho * (
-                        Descriptor<T>::c[iPop][0] * (-u[0]*u[1]/(T) absoluteR) +
-                        Descriptor<T>::c[iPop][1] * (-u[1]*u[1]/(T) absoluteR - 2*nu*u[1]/util::sqr((T)absoluteR))
-                        );
+        for (plint iPop=0; iPop < Descriptor<T>::q; ++iPop) {
+            fNeq[iPop] = f[iPop] - dynamicsTemplatesImpl<T,Descriptor<T> >::bgk_ma2_equilibrium (
+                    iPop, rhoBar, invRho, j, jSqr );
+            h2[iPop] = - (2*tau-1) / (2*tau*(T)absoluteR) * Descriptor<T>::c[iPop][1] * fNeq[iPop]
+                    + (T) 1.0 / (T) 6.0 * rho * (
+                            Descriptor<T>::c[iPop][0] * (-u[0]*u[1]/(T) absoluteR) +
+                            Descriptor<T>::c[iPop][1] * (-u[1]*u[1]/(T) absoluteR - 2*nu*u[1]/util::sqr((T)absoluteR))
+                            );
+        }
+    }
+    else { // Specular boundary condition for r = 0;
+        Array<int,Descriptor<T>::q> reflection; reflection[0] = -1; reflection[1] = 1;
+        for (plint iPop = 3; iPop <= 5; iPop++) { // populations at southwest, south, southeast
+            Array<int,Descriptor<T>::d> v; 
+            v[0] = -Descriptor<T>::c[indexTemplates::opposite<Descriptor<T> >(iPop)][0]; 
+            v[1] = Descriptor<T>::c[indexTemplates::opposite<Descriptor<T> >(iPop)][1];
+            plint jPop = indexTemplates::findVelocity<Descriptor<T> >(v);
+            PLB_ASSERT(jPop != Descriptor<T>::q);
+            cell[jPop] = cell[iPop];
         }
     }
 
@@ -112,6 +126,8 @@ void zhouAxisymmetricDynamics<T,Descriptor>::collideExternal (
 
     Array<T,Descriptor<T>::numPop> h1;         /// h1
     Array<T,Descriptor<T>::numPop> h2;         /// h2
+    h1.resetToZero();
+    h2.resetToZero();
 
     if(absoluteR != 0) { // h1 & h2 have a non-zero value only if r != 0
         Array<T,Descriptor<T>::q>& f = cell.getRawPopulations();
@@ -125,18 +141,28 @@ void zhouAxisymmetricDynamics<T,Descriptor>::collideExternal (
             h1[iPop] = -Descriptor<T>::t[iPop] * j[1] / (T) absoluteR; // Zhou 2011
         }
 
-
         Array<T,Descriptor<T>::q> fNeq;
         T tau = 1.0/this->getOmega();
         T nu = (2.0 * tau - 1.0) / 6.0;
-            for (plint iPop=0; iPop < Descriptor<T>::q; ++iPop) {
-        fNeq[iPop] = f[iPop] - dynamicsTemplatesImpl<T,Descriptor<T> >::bgk_ma2_equilibrium (
-                iPop, rhoBar, invRho, j, jSqr );
-        h2[iPop] = - (2*tau-1) / (2*tau*(T)absoluteR) * Descriptor<T>::c[iPop][1] * fNeq[iPop]
-                + (T) 1.0 / (T) 6.0 * rho * (
-                        Descriptor<T>::c[iPop][0] * (-u[0]*u[1]/(T) absoluteR) +
-                        Descriptor<T>::c[iPop][1] * (-u[1]*u[1]/(T) absoluteR - 2*nu*u[1]/util::sqr((T)absoluteR))
-                        );
+        for (plint iPop=0; iPop < Descriptor<T>::q; ++iPop) {
+            fNeq[iPop] = f[iPop] - dynamicsTemplatesImpl<T,Descriptor<T> >::bgk_ma2_equilibrium (
+                    iPop, rhoBar, invRho, j, jSqr );
+            h2[iPop] = - (2*tau-1) / (2*tau*(T)absoluteR) * Descriptor<T>::c[iPop][1] * fNeq[iPop]
+                    + (T) 1.0 / (T) 6.0 * rho * (
+                            Descriptor<T>::c[iPop][0] * (-u[0]*u[1]/(T) absoluteR) +
+                            Descriptor<T>::c[iPop][1] * (-u[1]*u[1]/(T) absoluteR - 2*nu*u[1]/util::sqr((T)absoluteR))
+                            );
+        }
+    }
+    else { // Specular boundary condition for r = 0;
+        Array<int,Descriptor<T>::q> reflection; reflection[0] = -1; reflection[1] = 1;
+        for (plint iPop = 3; iPop <= 5; iPop++) {
+            Array<int,Descriptor<T>::d> v; 
+            v[0] = -Descriptor<T>::c[indexTemplates::opposite<Descriptor<T> >(iPop)][0]; 
+            v[1] = Descriptor<T>::c[indexTemplates::opposite<Descriptor<T> >(iPop)][1];
+            plint jPop = indexTemplates::findVelocity<Descriptor<T> >(v);
+            PLB_ASSERT(jPop != Descriptor<T>::q);
+            cell[jPop] = cell[iPop];
         }
     }
 

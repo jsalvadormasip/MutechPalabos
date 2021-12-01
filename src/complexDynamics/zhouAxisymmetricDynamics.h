@@ -23,7 +23,8 @@
 */
 
 /** \file
- * A collection of dynamics classes (e.g. BGK) with which a Cell object
+ * Axisymmetric LBM dynamics, refering to 
+ * Zhou, J. G., 2011, “Axisymmetric Lattice Boltzmann Method Revised,” Physical review E, 84(3), p. 036704.
  * can be instantiated -- header file.
  */
 #ifndef ZHOU_AXISYMMETRIC_DYNAMICS_H
