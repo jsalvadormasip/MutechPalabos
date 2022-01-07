@@ -5,7 +5,7 @@ if [ "$1" == "-n" ]; then
     find examples src -type d \( -path '*build*' \) -prune -false \
         -o -name '*.cpp' -o -name '*.h' -o -name '*.hh' | xargs clang-format -n -Werror
 
-elif [ "$1" == "-r" ]; then
+elif [ "$1" == "-i" ]; then
 # We only include src, examples directories
 # We don't want to add external libs
 # Also we remove the build directories
@@ -15,5 +15,5 @@ elif [ "$1" == "-r" ]; then
     find examples src -type d \( -path '*build*' \) -prune -false \
         -o -name '*.cpp' -o -name '*.h' -o -name '*.hh' | xargs clang-format -i
 else
-    echo "An option is mandatory: can be -n for dry run or -r for replace."
+    echo "An option is mandatory: can be -n for dry run or -i for in place."
 fi
