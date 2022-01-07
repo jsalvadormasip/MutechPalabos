@@ -7,5 +7,6 @@ ENV TZ=Europe/Zurich
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt update && apt dist-upgrade -y
 
-RUN apt install -y g++ clang ccache cmake python3 make libopenmpi-dev libhdf5-dev libhdf5-mpi-dev doxygen && update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+RUN apt install -y g++ clang clang-format-12 ccache cmake python3 make libopenmpi-dev libhdf5-dev libhdf5-mpi-dev doxygen && update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 RUN apt install -y imagemagick
+RUN ln -s /usr/bin/clang-format-12 /usr/bin/clang-format

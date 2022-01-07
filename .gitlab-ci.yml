@@ -19,6 +19,7 @@ cache:
 
 stages:
     - prepare_docker
+    - check_format
     - build_cmake
     - regression_tests
     - deploy
@@ -36,6 +37,15 @@ build_base_docker_img:
     - cd docker
     - docker build --tag $DOCKER_BASE_IMG .
     - docker push $DOCKER_BASE_IMG
+
+format:
+    stage: check_format
+    image: $DOCKER_BASE_IMG
+
+    script:
+        - pwd
+        - clang-format -version
+        - ./run-clang-format.sh -n
 
 ## Regression tests
 test:
