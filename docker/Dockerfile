@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 LABEL Description="Palabos Docker image, based on ubuntu:latest " maintainer="orestis.malaspinas@hesge.ch" Version="0.1"
 
-RUN sed -i'' 's/archive.ubuntu.com/us.archive.ubuntu.com/' /etc/apt/sources.list 
+# RUN sed -i'' 's/archive.ubuntu.com/us.archive.ubuntu.com/' /etc/apt/sources.list 
 ENV TZ=Europe/Zurich
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt update && apt dist-upgrade -y
