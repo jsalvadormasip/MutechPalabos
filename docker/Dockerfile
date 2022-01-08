@@ -1,4 +1,4 @@
-FROM ubuntu:devel
+FROM ubuntu:impish
 
 LABEL Description="Palabos Docker image, based on ubuntu:latest " maintainer="orestis.malaspinas@hesge.ch" Version="0.1"
 
