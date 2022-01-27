@@ -1413,17 +1413,6 @@ void MpiManager::iRecv<unsigned long>(
 {
     if (ok) {
         MPI_Irecv(
-            static_cast<void *>(buf), count, MPI_LONG_LONG, source, tag, getGlobalCommunicator(),
-            request);
-    }
-}
-
-template <>
-void MpiManager::iRecv<unsigned long>(
-    unsigned long *buf, int count, int source, MPI_Request *request, int tag)
-{
-    if (ok) {
-        MPI_Irecv(
             static_cast<void *>(buf), count, MPI_UNSIGNED_LONG, source, tag,
             getGlobalCommunicator(), request);
     }
