@@ -19,6 +19,7 @@ cache:
 
 stages:
     - prepare_docker
+    - check_format
     - build_cmake
     - regression_tests
     - deploy
@@ -36,6 +37,15 @@ build_base_docker_img:
     - cd docker
     - docker build --tag $DOCKER_BASE_IMG .
     - docker push $DOCKER_BASE_IMG
+
+format:
+    stage: check_format
+    image: $DOCKER_BASE_IMG
+
+    script:
+        - pwd
+        - clang-format -version
+        - ./run-clang-format.sh -n
 
 ## Regression tests
 test:
@@ -70,7 +80,7 @@ release_clang_serial:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
-        - cmake --build . -j4
+        - cmake --build . 
 
 release_clang_parallel:
     stage: build_cmake
@@ -86,7 +96,7 @@ release_clang_parallel:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
-        - cmake --build . -j4
+        - cmake --build . 
 
 release_gcc_serial:
     stage: build_cmake
@@ -102,7 +112,7 @@ release_gcc_serial:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
-        - cmake --build . -j4
+        - cmake --build . 
         
 release_gcc_parallel:
     stage: build_cmake
@@ -119,7 +129,7 @@ release_gcc_parallel:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
-        - cmake --build . -j4
+        - cmake --build . 
 
 debug_clang_serial:
     stage: build_cmake
@@ -135,7 +145,7 @@ debug_clang_serial:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
-        - cmake --build . -j4
+        - cmake --build . 
 
 debug_clang_parallel:
     stage: build_cmake
@@ -151,7 +161,7 @@ debug_clang_parallel:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
-        - cmake --build . -j4
+        - cmake --build . 
 
 debug_gcc_serial:
     stage: build_cmake
@@ -167,7 +177,7 @@ debug_gcc_serial:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
-        - cmake --build . -j4
+        - cmake --build . 
         
 debug_gcc_parallel:
     stage: build_cmake
@@ -183,7 +193,7 @@ debug_gcc_parallel:
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
-        - cmake --build . -j4
+        - cmake --build . 
         
 pages:
     stage: deploy
