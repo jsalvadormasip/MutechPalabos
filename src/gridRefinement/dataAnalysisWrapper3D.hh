@@ -245,9 +245,9 @@ std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, Descriptor<T>::d> > computeV
     // levelOfDomain, crop);
 }
 
-template<typename T>
-std::unique_ptr<MultiLevelTensorFieldForOutput3D<T,3> >
-    computeVelocity(MultiLevelTensorField3D<T,3>& velocities, Box3D domain, plint levelOfDomain, bool crop)
+template <typename T>
+std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVelocity(
+    MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain, bool crop)
 {
     return exportForOutput(velocities, domain, levelOfDomain, crop);
 }
@@ -969,86 +969,90 @@ std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVorticity(
     return outputVorticity;
 }
 
-template<typename T>
-std::unique_ptr<MultiLevelTensorFieldForOutput3D<T,3> > computeVorticity(
-    MultiLevelTensorField3D<T,3>& vorticities, Box3D domain, plint levelOfDomain, bool crop, plint tmp)
+template <typename T>
+std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVorticity(
+    MultiLevelTensorField3D<T, 3> &vorticities, Box3D domain, plint levelOfDomain, bool crop,
+    plint tmp)
 {
-    std::unique_ptr<MultiLevelTensorFieldForOutput3D<T,3> > outputVorticity
-        = generateMultiLevelTensorFieldForOutput3D<T,3>(vorticities.getOgs(), domain, levelOfDomain, crop);
+    std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > outputVorticity =
+        generateMultiLevelTensorFieldForOutput3D<T, 3>(
+            vorticities.getOgs(), domain, levelOfDomain, crop);
 
-    copy<T,3>(vorticities, *outputVorticity, domain, levelOfDomain);
+    copy<T, 3>(vorticities, *outputVorticity, domain, levelOfDomain);
 
     return outputVorticity;
 }
 
 /* *************** Strain Rate from Velocity field ********************* */
 
-template<typename T>
-std::unique_ptr<MultiLevelTensorField3D<T,SymmetricTensorImpl<T,3>::n> >
-    computeStrainRate(MultiLevelTensorField3D<T,3>& velocities, Box3D domain, plint levelOfDomain)
+template <typename T>
+std::unique_ptr<MultiLevelTensorField3D<T, SymmetricTensorImpl<T, 3>::n> > computeStrainRate(
+    MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain)
 {
-    std::unique_ptr<MultiLevelTensorField3D<T,SymmetricTensorImpl<T,3>::n> > S =
-            generateMultiLevelTensorField3D<T,SymmetricTensorImpl<T,3>::n>(velocities.getOgs(), domain, levelOfDomain);
+    std::unique_ptr<MultiLevelTensorField3D<T, SymmetricTensorImpl<T, 3>::n> > S =
+        generateMultiLevelTensorField3D<T, SymmetricTensorImpl<T, 3>::n>(
+            velocities.getOgs(), domain, levelOfDomain);
 
-    applyProcessingFunctional (
-            new BoxStrainRateFunctional3D<T,3>(), domain, levelOfDomain,
-            velocities, *S, 1 );
+    applyProcessingFunctional(
+        new BoxStrainRateFunctional3D<T, 3>(), domain, levelOfDomain, velocities, *S, 1);
 
     return S;
 }
 
-template<typename T>
-std::unique_ptr<MultiLevelTensorFieldForOutput3D<T,SymmetricTensorImpl<T,3>::n> >
-    computeStrainRate(MultiLevelTensorField3D<T,3>& velocities, Box3D domain, plint levelOfDomain, bool crop)
+template <typename T>
+std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, SymmetricTensorImpl<T, 3>::n> >
+    computeStrainRate(
+        MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain, bool crop)
 {
-    std::unique_ptr<MultiLevelTensorField3D<T,SymmetricTensorImpl<T,3>::n> > S =
-            computeStrainRate(velocities, domain, levelOfDomain);
+    std::unique_ptr<MultiLevelTensorField3D<T, SymmetricTensorImpl<T, 3>::n> > S =
+        computeStrainRate(velocities, domain, levelOfDomain);
 
-    std::unique_ptr<MultiLevelTensorFieldForOutput3D<T,SymmetricTensorImpl<T,3>::n> > outputS
-            = generateMultiLevelTensorFieldForOutput3D<T,SymmetricTensorImpl<T,3>::n>(velocities.getOgs(), domain, levelOfDomain, crop);
+    std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, SymmetricTensorImpl<T, 3>::n> > outputS =
+        generateMultiLevelTensorFieldForOutput3D<T, SymmetricTensorImpl<T, 3>::n>(
+            velocities.getOgs(), domain, levelOfDomain, crop);
 
-    copy<T,SymmetricTensorImpl<T,3>::n>(*S, *outputS, domain, levelOfDomain);
+    copy<T, SymmetricTensorImpl<T, 3>::n>(*S, *outputS, domain, levelOfDomain);
 
     return outputS;
 }
 
-
 /* *************** Q-criterion from vorticity and strain rate fields ******************** */
 
-template<typename T>
-std::unique_ptr<MultiLevelScalarField3D<T> >
-    computeQcriterion(MultiLevelTensorField3D<T,3>& vorticity, MultiLevelTensorField3D<T,6>& S,
-                  Box3D domain, plint levelOfDomain)
+template <typename T>
+std::unique_ptr<MultiLevelScalarField3D<T> > computeQcriterion(
+    MultiLevelTensorField3D<T, 3> &vorticity, MultiLevelTensorField3D<T, 6> &S, Box3D domain,
+    plint levelOfDomain)
 {
     std::unique_ptr<MultiLevelScalarField3D<T> > qCriterion =
-            generateMultiLevelScalarField3D<T>(vorticity.getOgs(), domain, levelOfDomain);
+        generateMultiLevelScalarField3D<T>(vorticity.getOgs(), domain, levelOfDomain);
 
     std::vector<MultiLevel3D *> fields;
     fields.push_back(&vorticity);
     fields.push_back(&S);
     fields.push_back(&*qCriterion);
-    applyProcessingFunctional (
-            new BoxQcriterionFunctional3D<T>(), domain, levelOfDomain,
-            fields, vorticity.getNumLevels() );
+    applyProcessingFunctional(
+        new BoxQcriterionFunctional3D<T>(), domain, levelOfDomain, fields,
+        vorticity.getNumLevels());
 
     return qCriterion;
 }
 
-template<typename T>
-std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> >
-    computeQcriterion(MultiLevelTensorField3D<T,3>& vorticity, MultiLevelTensorField3D<T,6>& S,
-                  Box3D domain, plint levelOfDomain, bool crop)
+template <typename T>
+std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > computeQcriterion(
+    MultiLevelTensorField3D<T, 3> &vorticity, MultiLevelTensorField3D<T, 6> &S, Box3D domain,
+    plint levelOfDomain, bool crop)
 {
-    std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > outputQCriterion
-            = generateMultiLevelScalarFieldForOutput3D<T>(vorticity.getOgs(), domain, levelOfDomain, crop);
+    std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > outputQCriterion =
+        generateMultiLevelScalarFieldForOutput3D<T>(
+            vorticity.getOgs(), domain, levelOfDomain, crop);
 
     std::vector<MultiLevel3D *> fields;
     fields.push_back(&vorticity);
     fields.push_back(&S);
     fields.push_back(&*outputQCriterion);
-    applyProcessingFunctional (
-            new BoxQcriterionFunctional3D<T>(), domain, levelOfDomain,
-            fields, vorticity.getNumLevels() );
+    applyProcessingFunctional(
+        new BoxQcriterionFunctional3D<T>(), domain, levelOfDomain, fields,
+        vorticity.getNumLevels());
 
     return outputQCriterion;
 }
@@ -1056,40 +1060,39 @@ std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> >
 /* *************** lambda2-criterion from vorticity and strain rate fields ******************** */
 #ifndef PLB_BGP
 #ifdef PLB_USE_EIGEN
-template<typename T>
-std::unique_ptr<MultiLevelScalarField3D<T> >
-    computeLambda2(MultiLevelTensorField3D<T,3>& vorticity, MultiLevelTensorField3D<T,6>& S,
-               Box3D domain, plint levelOfDomain)
+template <typename T>
+std::unique_ptr<MultiLevelScalarField3D<T> > computeLambda2(
+    MultiLevelTensorField3D<T, 3> &vorticity, MultiLevelTensorField3D<T, 6> &S, Box3D domain,
+    plint levelOfDomain)
 {
     std::unique_ptr<MultiLevelScalarField3D<T> > lambda2 =
-            generateMultiLevelScalarField3D<T>(vorticity.getOgs(), domain, levelOfDomain);
+        generateMultiLevelScalarField3D<T>(vorticity.getOgs(), domain, levelOfDomain);
 
     std::vector<MultiLevel3D *> fields;
     fields.push_back(&vorticity);
     fields.push_back(&S);
     fields.push_back(&*lambda2);
-    applyProcessingFunctional (
-            new BoxLambda2Functional3D<T>(), domain, levelOfDomain,
-            fields, vorticity.getNumLevels() );
+    applyProcessingFunctional(
+        new BoxLambda2Functional3D<T>(), domain, levelOfDomain, fields, vorticity.getNumLevels());
 
     return lambda2;
 }
 
-template<typename T>
-std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> >
-    computeLambda2(MultiLevelTensorField3D<T,3>& vorticity, MultiLevelTensorField3D<T,6>& S,
-               Box3D domain, plint levelOfDomain, bool crop)
+template <typename T>
+std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > computeLambda2(
+    MultiLevelTensorField3D<T, 3> &vorticity, MultiLevelTensorField3D<T, 6> &S, Box3D domain,
+    plint levelOfDomain, bool crop)
 {
-    std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > outputLambda2
-            = generateMultiLevelScalarFieldForOutput3D<T>(vorticity.getOgs(), domain, levelOfDomain, crop);
+    std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > outputLambda2 =
+        generateMultiLevelScalarFieldForOutput3D<T>(
+            vorticity.getOgs(), domain, levelOfDomain, crop);
 
     std::vector<MultiLevel3D *> fields;
     fields.push_back(&vorticity);
     fields.push_back(&S);
     fields.push_back(&*outputLambda2);
-    applyProcessingFunctional (
-            new BoxLambda2Functional3D<T>(), domain, levelOfDomain,
-            fields, vorticity.getNumLevels() );
+    applyProcessingFunctional(
+        new BoxLambda2Functional3D<T>(), domain, levelOfDomain, fields, vorticity.getNumLevels());
 
     return outputLambda2;
 }
