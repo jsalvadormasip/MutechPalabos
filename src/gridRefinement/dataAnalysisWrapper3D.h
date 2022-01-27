@@ -156,6 +156,10 @@ std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, Descriptor<T>::d> > computeV
     MultiLevelCoupling3D<T, Descriptor, Engine> &lattices, Box3D domain, plint levelOfDomain,
     bool crop);
 
+template <typename T>
+std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVelocity(
+    MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain, bool crop);
+
 /* *************** Kinematic Eddy Viscosity ****************************************** */
 
 template <
@@ -492,6 +496,50 @@ std::unique_ptr<MultiLevelTensorField3D<T, 3> > computeVorticity(
 template <typename T>
 std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVorticity(
     const MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain, bool crop);
+
+template <typename T>
+std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVorticity(
+    const MultiLevelTensorField3D<T, 3> &vorticities, Box3D domain, plint levelOfDomain, bool crop,
+    plint tmp);
+
+/* *************** Strain Rate from Velocity field ********************* */
+
+template <typename T>
+std::unique_ptr<MultiLevelTensorField3D<T, SymmetricTensorImpl<T, 3>::n> > computeStrainRate(
+    const MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain);
+
+template <typename T>
+std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, SymmetricTensorImpl<T, 3>::n> >
+    computeStrainRate(
+        const MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain,
+        bool crop);
+
+/* *************** Q-criterion from vorticity and strain rate fields ******************** */
+
+template <typename T>
+std::unique_ptr<MultiLevelScalarField3D<T> > computeQcriterion(
+    const MultiLevelTensorField3D<T, 3> &vorticity, const MultiLevelTensorField3D<T, 6> &S,
+    Box3D domain, plint levelOfDomain);
+
+template <typename T>
+std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > computeQcriterion(
+    const MultiLevelTensorField3D<T, 3> &vorticity, const MultiLevelTensorField3D<T, 6> &S,
+    Box3D domain, plint levelOfDomain, bool crop);
+
+/* *************** lambda2-criterion from vorticity and strain rate fields ******************** */
+#ifndef PLB_BGP
+#ifdef PLB_USE_EIGEN
+template <typename T>
+std::unique_ptr<MultiLevelScalarField3D<T> > computeLambda2(
+    const MultiLevelTensorField3D<T, 3> &vorticity, const MultiLevelTensorField3D<T, 6> &S,
+    Box3D domain, plint levelOfDomain);
+
+template <typename T>
+std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > computeLambda2(
+    const MultiLevelTensorField3D<T, 3> &vorticity, const MultiLevelTensorField3D<T, 6> &S,
+    Box3D domain, plint levelOfDomain, bool crop);
+#endif
+#endif
 
 }  // namespace plb
 
