@@ -35,35 +35,35 @@ stages:
 
 # Build and test stages are using a docker image containing package
 # needed to build and run a Palabos application.
-build_base_docker_img:
-  stage: prepare_docker
-  image: docker:latest
-  services:
-     - docker:dind
-  script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker image pull $DOCKER_BASE_IMG || true
-    - cd docker
-    - docker build --tag $DOCKER_BASE_IMG .
-    - docker push $DOCKER_BASE_IMG
+# build_base_docker_img:
+#   stage: prepare_docker
+#   image: docker:latest
+#   services:
+#      - docker:dind
+#   script:
+#     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#     - docker image pull $DOCKER_BASE_IMG || true
+#     - cd docker
+#     - docker build --tag $DOCKER_BASE_IMG .
+#     - docker push $DOCKER_BASE_IMG
 
-## Regression tests
-test:
-    stage: regression_tests
-    image: $DOCKER_BASE_IMG
-    before_script:
-        - mkdir -p ${CCACHE_TEST}
-        - export CCACHE_BASEDIR=${PWD}
-        - export CCACHE_DIR=${PWD}/${CCACHE_TEST}
-        - ccache --set-config=compression=true
-        - ccache --set-config=max_size=1000M
+# ## Regression tests
+# test:
+#     stage: regression_tests
+#     image: $DOCKER_BASE_IMG
+#     before_script:
+#         - mkdir -p ${CCACHE_TEST}
+#         - export CCACHE_BASEDIR=${PWD}
+#         - export CCACHE_DIR=${PWD}/${CCACHE_TEST}
+#         - ccache --set-config=compression=true
+#         - ccache --set-config=max_size=1000M
 
-    script: 
-        - pwd
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Test
-        - cmake --build .
-        - cmake --build . -- test
+#     script: 
+#         - pwd
+#         - cd build
+#         - cmake .. -DCMAKE_BUILD_TYPE=Test
+#         - cmake --build .
+#         - cmake --build . -- test
 
 ## Test compilation with CMake, everything in examples & utility directory
 release_clang_serial:
