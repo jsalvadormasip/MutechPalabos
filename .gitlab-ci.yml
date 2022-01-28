@@ -7,15 +7,15 @@ cache:
     untracked: true
     key: "$CI_PROJECT_ID"
     paths:
-        - ${PWD}/ccache_test/
-        - ${PWD}/ccache_release_clang_serial/
-        - ${PWD}/ccache_release_clang_parallel/
-        - ${PWD}/ccache_release_gcc_serial/
-        - ${PWD}/ccache_release_gcc_parallel/
-        - ${PWD}/ccache_debug_clang_serial/
-        - ${PWD}/ccache_debug_clang_parallel/
-        - ${PWD}/ccache_debug_gcc_serial/
-        - ${PWD}/ccache_debug_gcc_parallel/
+        - ${PWD}/ccache_$CI_COMMIT_REF_NAME_test/
+        - ${PWD}/ccache_$CI_COMMIT_REF_NAME_release_clang_serial/
+        - ${PWD}/ccache_$CI_COMMIT_REF_NAME_release_clang_parallel/
+        - ${PWD}/ccache_$CI_COMMIT_REF_NAME_release_gcc_serial/
+        - ${PWD}/ccache_$CI_COMMIT_REF_NAME_release_gcc_parallel/
+        - ${PWD}/ccache_$CI_COMMIT_REF_NAME_debug_clang_serial/
+        - ${PWD}/ccache_$CI_COMMIT_REF_NAME_debug_clang_parallel/
+        - ${PWD}/ccache_$CI_COMMIT_REF_NAME_debug_gcc_serial/
+        - ${PWD}/ccache_$CI_COMMIT_REF_NAME_debug_gcc_parallel/
 
 stages:
     - prepare_docker
