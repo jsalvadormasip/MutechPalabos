@@ -77,6 +77,8 @@ release_clang_serial:
         - ccache --set-config=max_size=1000M
     
     script: 
+        - echo ${CI_COMMIT_REF_NAME}
+        - echo ${CI_COMMIT_BRANCH}
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
