@@ -2,30 +2,30 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   DOCKER_TLS_CERTDIR: "/certs"
   DOCKER_BASE_IMG: $CI_REGISTRY_IMAGE/plb-base-img:latest
-  CCACHE_TEST: ccache_${CI_COMMIT_REF_NAME}_test/
-  CCACHE_REL_CLANG_SER: ccache_${CI_COMMIT_REF_NAME}_rel_clang_ser/
-  CCACHE_REL_CLANG_PAR: ccache_${CI_COMMIT_REF_NAME}_rel_clang_par/
-  CCACHE_REL_GCC_SER: ccache_${CI_COMMIT_REF_NAME}_rel_gcc_ser/
-  CCACHE_REL_GCC_PAR: ccache_${CI_COMMIT_REF_NAME}_rel_gcc_par/
-  CCACHE_DEB_CLANG_SER: ccache_${CI_COMMIT_REF_NAME}_deb_clang_ser/
-  CCACHE_DEB_CLANG_PAR: ccache_${CI_COMMIT_REF_NAME}_deb_clang_par/
-  CCACHE_DEB_GCC_SER: ccache_${CI_COMMIT_REF_NAME}_deb_gcc_ser/
-  CCACHE_DEB_GCC_PAR: ccache_${CI_COMMIT_REF_NAME}_deb_gcc_par/
+  # CCACHE_TEST: ccache_${CI_COMMIT_REF_NAME}_test/
+  # CCACHE_REL_CLANG_SER: ccache_${CI_COMMIT_REF_NAME}_rel_clang_ser/
+  # CCACHE_REL_CLANG_PAR: ccache_${CI_COMMIT_REF_NAME}_rel_clang_par/
+  # CCACHE_REL_GCC_SER: ccache_${CI_COMMIT_REF_NAME}_rel_gcc_ser/
+  # CCACHE_REL_GCC_PAR: ccache_${CI_COMMIT_REF_NAME}_rel_gcc_par/
+  # CCACHE_DEB_CLANG_SER: ccache_${CI_COMMIT_REF_NAME}_deb_clang_ser/
+  # CCACHE_DEB_CLANG_PAR: ccache_${CI_COMMIT_REF_NAME}_deb_clang_par/
+  # CCACHE_DEB_GCC_SER: ccache_${CI_COMMIT_REF_NAME}_deb_gcc_ser/
+  # CCACHE_DEB_GCC_PAR: ccache_${CI_COMMIT_REF_NAME}_deb_gcc_par/
 
 
-cache:
-    untracked: true
-    key: "$CI_PROJECT_ID"
-    paths:
-        - ${PWD}/${CCACHE_TEST}
-        - ${PWD}/${CCACHE_REL_CLANG_SER}
-        - ${PWD}/${CCACHE_REL_CLANG_PAR}
-        - ${PWD}/${CCACHE_REL_GCC_SER}
-        - ${PWD}/${CCACHE_REL_GCC_PAR}
-        - ${PWD}/${CCACHE_DEB_CLANG_SER}
-        - ${PWD}/${CCACHE_DEB_CLANG_PAR}
-        - ${PWD}/${CCACHE_DEB_GCC_SER}
-        - ${PWD}/${CCACHE_DEB_GCC_PAR}
+# cache:
+  #   untracked: true
+  #   key: "$CI_PROJECT_ID"
+  #   paths:
+  #       - ${PWD}/${CCACHE_TEST}
+  #       - ${PWD}/${CCACHE_REL_CLANG_SER}
+  #       - ${PWD}/${CCACHE_REL_CLANG_PAR}
+  #       - ${PWD}/${CCACHE_REL_GCC_SER}
+  #       - ${PWD}/${CCACHE_REL_GCC_PAR}
+  #       - ${PWD}/${CCACHE_DEB_CLANG_SER}
+  #       - ${PWD}/${CCACHE_DEB_CLANG_PAR}
+  #       - ${PWD}/${CCACHE_DEB_GCC_SER}
+  #       - ${PWD}/${CCACHE_DEB_GCC_PAR}
 
 stages:
     - prepare_docker
