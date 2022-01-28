@@ -7,15 +7,15 @@ cache:
     untracked: true
     key: "$CI_PROJECT_ID"
     paths:
-        - ${PWD}/ccache_$(CI_COMMIT_REF_NAME)_test/
-        - ${PWD}/ccache_$(CI_COMMIT_REF_NAME)_release_clang_serial/
-        - ${PWD}/ccache_$(CI_COMMIT_REF_NAME)_release_clang_parallel/
-        - ${PWD}/ccache_$(CI_COMMIT_REF_NAME)_release_gcc_serial/
-        - ${PWD}/ccache_$(CI_COMMIT_REF_NAME)_release_gcc_parallel/
-        - ${PWD}/ccache_$(CI_COMMIT_REF_NAME)_debug_clang_serial/
-        - ${PWD}/ccache_$(CI_COMMIT_REF_NAME)_debug_clang_parallel/
-        - ${PWD}/ccache_$(CI_COMMIT_REF_NAME)_debug_gcc_serial/
-        - ${PWD}/ccache_$(CI_COMMIT_REF_NAME)_debug_gcc_parallel/
+        - ${PWD}/ccache_($CI_COMMIT_REF_NAME)_test/
+        - ${PWD}/ccache_($CI_COMMIT_REF_NAME)_release_clang_serial/
+        - ${PWD}/ccache_($CI_COMMIT_REF_NAME)_release_clang_parallel/
+        - ${PWD}/ccache_($CI_COMMIT_REF_NAME)_release_gcc_serial/
+        - ${PWD}/ccache_($CI_COMMIT_REF_NAME)_release_gcc_parallel/
+        - ${PWD}/ccache_($CI_COMMIT_REF_NAME)_debug_clang_serial/
+        - ${PWD}/ccache_($CI_COMMIT_REF_NAME)_debug_clang_parallel/
+        - ${PWD}/ccache_($CI_COMMIT_REF_NAME)_debug_gcc_serial/
+        - ${PWD}/ccache_($CI_COMMIT_REF_NAME)_debug_gcc_parallel/
 
 stages:
     - prepare_docker
@@ -47,6 +47,7 @@ test:
         - export CCACHE_DIR=${PWD}/ccache_test
         - ccache --set-config=compression=true
         - ccache --set-config=max_size=1000M
+        - echo $CCACHE_BASEDIR
 
     script: 
         - pwd
