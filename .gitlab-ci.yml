@@ -28,24 +28,24 @@ cache:
         - ${PWD}/${CCACHE_DEB_GCC_PAR}
 
 stages:
-    # - prepare_docker
+    - prepare_docker
     - build_cmake
     # - regression_tests
     # - deploy
 
 # Build and test stages are using a docker image containing package
 # needed to build and run a Palabos application.
-# build_base_docker_img:
-#   stage: prepare_docker
-#   image: docker:latest
-#   services:
-#      - docker:dind
-#   script:
-#     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-#     - docker image pull $DOCKER_BASE_IMG || true
-#     - cd docker
-#     - docker build --tag $DOCKER_BASE_IMG .
-#     - docker push $DOCKER_BASE_IMG
+build_base_docker_img:
+  stage: prepare_docker
+  image: docker:latest
+  services:
+     - docker:dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker image pull $DOCKER_BASE_IMG || true
+    - cd docker
+    - docker build --tag $DOCKER_BASE_IMG .
+    - docker push $DOCKER_BASE_IMG
 
 # ## Regression tests
 # test:
