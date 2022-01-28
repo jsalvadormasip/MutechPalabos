@@ -28,10 +28,10 @@ cache:
         - ${PWD}/${CCACHE_DEB_GCC_PAR}
 
 stages:
-    - prepare_docker
+    # - prepare_docker
     - build_cmake
-    - regression_tests
-    - deploy
+    # - regression_tests
+    # - deploy
 
 # Build and test stages are using a docker image containing package
 # needed to build and run a Palabos application.
@@ -77,137 +77,137 @@ release_clang_serial:
         - ccache --set-config=max_size=1000M
     
     script: 
-        - echo ${CI_COMMIT_REF_NAME}
-        - echo ${CI_COMMIT_BRANCH}
+        - echo $CI_COMMIT_REF_NAME
+        - echo $CI_COMMIT_BRANCH
         - pwd
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
         - cmake --build . -j4
 
-release_clang_parallel:
-    stage: build_cmake
-    image: $DOCKER_BASE_IMG
-    before_script:
-        - mkdir -p ${CCACHE_REL_CLANG_PAR}
-        - export CCACHE_BASEDIR=${PWD}
-        - export CCACHE_DIR=${PWD}/${CCACHE_REL_CLANG_PAR}
-        - ccache --set-config=compression=true
-        - ccache --set-config=max_size=1000M
+# release_clang_parallel:
+#     stage: build_cmake
+#     image: $DOCKER_BASE_IMG
+#     before_script:
+#         - mkdir -p ${CCACHE_REL_CLANG_PAR}
+#         - export CCACHE_BASEDIR=${PWD}
+#         - export CCACHE_DIR=${PWD}/${CCACHE_REL_CLANG_PAR}
+#         - ccache --set-config=compression=true
+#         - ccache --set-config=max_size=1000M
     
-    script: 
-        - pwd
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
-        - cmake --build . -j4
+#     script: 
+#         - pwd
+#         - cd build
+#         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
+#         - cmake --build . -j4
 
-release_gcc_serial:
-    stage: build_cmake
-    image: $DOCKER_BASE_IMG
-    before_script:
-        - mkdir -p ${CCACHE_REL_GCC_SER}
-        - export CCACHE_BASEDIR=${PWD}
-        - export CCACHE_DIR=${PWD}/${CCACHE_REL_GCC_SER}
-        - ccache --set-config=compression=true
-        - ccache --set-config=max_size=1000M
+# release_gcc_serial:
+#     stage: build_cmake
+#     image: $DOCKER_BASE_IMG
+#     before_script:
+#         - mkdir -p ${CCACHE_REL_GCC_SER}
+#         - export CCACHE_BASEDIR=${PWD}
+#         - export CCACHE_DIR=${PWD}/${CCACHE_REL_GCC_SER}
+#         - ccache --set-config=compression=true
+#         - ccache --set-config=max_size=1000M
     
-    script: 
-        - pwd
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
-        - cmake --build . -j4
+#     script: 
+#         - pwd
+#         - cd build
+#         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
+#         - cmake --build . -j4
         
-release_gcc_parallel:
-    stage: build_cmake
-    image: $DOCKER_BASE_IMG
-    before_script:
-        - mkdir -p ${CCACHE_REL_GCC_PAR}
-        - export CCACHE_BASEDIR=${PWD}
-        - export CCACHE_DIR=${PWD}/${CCACHE_REL_GCC_PAR}
-        - ccache --set-config=compression=true
-        - ccache --set-config=max_size=1000M
+# release_gcc_parallel:
+#     stage: build_cmake
+#     image: $DOCKER_BASE_IMG
+#     before_script:
+#         - mkdir -p ${CCACHE_REL_GCC_PAR}
+#         - export CCACHE_BASEDIR=${PWD}
+#         - export CCACHE_DIR=${PWD}/${CCACHE_REL_GCC_PAR}
+#         - ccache --set-config=compression=true
+#         - ccache --set-config=max_size=1000M
 
     
-    script: 
-        - pwd
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
-        - cmake --build . -j4
+#     script: 
+#         - pwd
+#         - cd build
+#         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
+#         - cmake --build . -j4
 
-debug_clang_serial:
-    stage: build_cmake
-    image: $DOCKER_BASE_IMG
-    before_script:
-        - mkdir -p ${CCACHE_DEB_CLANG_SER}
-        - export CCACHE_BASEDIR=${PWD}
-        - export CCACHE_DIR=${PWD}/${CCACHE_DEB_CLANG_SER}
-        - ccache --set-config=compression=true
-        - ccache --set-config=max_size=1000M
+# debug_clang_serial:
+#     stage: build_cmake
+#     image: $DOCKER_BASE_IMG
+#     before_script:
+#         - mkdir -p ${CCACHE_DEB_CLANG_SER}
+#         - export CCACHE_BASEDIR=${PWD}
+#         - export CCACHE_DIR=${PWD}/${CCACHE_DEB_CLANG_SER}
+#         - ccache --set-config=compression=true
+#         - ccache --set-config=max_size=1000M
     
-    script: 
-        - pwd
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
-        - cmake --build . -j4
+#     script: 
+#         - pwd
+#         - cd build
+#         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
+#         - cmake --build . -j4
 
-debug_clang_parallel:
-    stage: build_cmake
-    image: $DOCKER_BASE_IMG
-    before_script:
-        - mkdir -p ${CCACHE_DEB_CLANG_PAR}
-        - export CCACHE_BASEDIR=${PWD}
-        - export CCACHE_DIR=${PWD}/${CCACHE_DEB_CLANG_PAR}
-        - ccache --set-config=compression=true
-        - ccache --set-config=max_size=1000M
+# debug_clang_parallel:
+#     stage: build_cmake
+#     image: $DOCKER_BASE_IMG
+#     before_script:
+#         - mkdir -p ${CCACHE_DEB_CLANG_PAR}
+#         - export CCACHE_BASEDIR=${PWD}
+#         - export CCACHE_DIR=${PWD}/${CCACHE_DEB_CLANG_PAR}
+#         - ccache --set-config=compression=true
+#         - ccache --set-config=max_size=1000M
 
-    script: 
-        - pwd
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
-        - cmake --build . -j4
+#     script: 
+#         - pwd
+#         - cd build
+#         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
+#         - cmake --build . -j4
 
-debug_gcc_serial:
-    stage: build_cmake
-    image: $DOCKER_BASE_IMG
-    before_script:
-        - mkdir -p ${CCACHE_DEB_GCC_SER}
-        - export CCACHE_BASEDIR=${PWD}
-        - export CCACHE_DIR=${PWD}/${CCACHE_DEB_GCC_SER}
-        - ccache --set-config=compression=true
-        - ccache --set-config=max_size=1000M
+# debug_gcc_serial:
+#     stage: build_cmake
+#     image: $DOCKER_BASE_IMG
+#     before_script:
+#         - mkdir -p ${CCACHE_DEB_GCC_SER}
+#         - export CCACHE_BASEDIR=${PWD}
+#         - export CCACHE_DIR=${PWD}/${CCACHE_DEB_GCC_SER}
+#         - ccache --set-config=compression=true
+#         - ccache --set-config=max_size=1000M
 
-    script: 
-        - pwd
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
-        - cmake --build . -j4
+#     script: 
+#         - pwd
+#         - cd build
+#         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
+#         - cmake --build . -j4
         
-debug_gcc_parallel:
-    stage: build_cmake
-    image: $DOCKER_BASE_IMG
-    before_script:
-        - mkdir -p ${CCACHE_DEB_GCC_PAR}
-        - export CCACHE_BASEDIR=${PWD}
-        - export CCACHE_DIR=${PWD}/${CCACHE_DEB_GCC_PAR}
-        - ccache --set-config=compression=true
-        - ccache --set-config=max_size=1000M
+# debug_gcc_parallel:
+#     stage: build_cmake
+#     image: $DOCKER_BASE_IMG
+#     before_script:
+#         - mkdir -p ${CCACHE_DEB_GCC_PAR}
+#         - export CCACHE_BASEDIR=${PWD}
+#         - export CCACHE_DIR=${PWD}/${CCACHE_DEB_GCC_PAR}
+#         - ccache --set-config=compression=true
+#         - ccache --set-config=max_size=1000M
 
-    script: 
-        - pwd
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
-        - cmake --build . -j4
+#     script: 
+#         - pwd
+#         - cd build
+#         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
+#         - cmake --build . -j4
         
-pages:
-    stage: deploy
-    image: $DOCKER_BASE_IMG
-    script:
-        - pwd
-        - mkdir -p public/docs
-        - doxygen Doxyfile
-    artifacts:
-        paths:
-        - public
-    only:
-        - master
+# pages:
+#     stage: deploy
+#     image: $DOCKER_BASE_IMG
+#     script:
+#         - pwd
+#         - mkdir -p public/docs
+#         - doxygen Doxyfile
+#     artifacts:
+#         paths:
+#         - public
+#     only:
+#         - master
 
 
