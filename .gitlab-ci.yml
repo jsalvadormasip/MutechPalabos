@@ -69,20 +69,20 @@ build_base_docker_img:
 release_clang_serial:
     stage: build_cmake
     image: $DOCKER_BASE_IMG
-    before_script:
-        - mkdir -p ${CCACHE_REL_CLANG_SER}
-        - export CCACHE_BASEDIR=${PWD}
-        - export CCACHE_DIR=${PWD}/${CCACHE_REL_CLANG_SER}
-        - ccache --set-config=compression=true
-        - ccache --set-config=max_size=1000M
+    # before_script:
+    #     - mkdir -p ${CCACHE_REL_CLANG_SER}
+    #     - export CCACHE_BASEDIR=${PWD}
+    #     - export CCACHE_DIR=${PWD}/${CCACHE_REL_CLANG_SER}
+    #     - ccache --set-config=compression=true
+    #     - ccache --set-config=max_size=1000M
     
     script: 
         - echo $CI_COMMIT_REF_NAME
         - echo $CI_COMMIT_BRANCH
-        - pwd
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
-        - cmake --build . -j4
+        # - pwd
+        # - cd build
+        # - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
+        # - cmake --build . -j4
 
 # release_clang_parallel:
 #     stage: build_cmake
