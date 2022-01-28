@@ -52,6 +52,7 @@ char const *NativeType<char>::getName()
 template <>
 char const *NativeType<unsigned char>::getName()
 {
+    static const char name[] = "unsigned-char";
     return name;
 }
 
