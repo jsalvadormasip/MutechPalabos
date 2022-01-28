@@ -50,7 +50,6 @@
 #include "palabos2D.h"
 #include "palabos2D.hh"
 
->>>>>>> upstream/59-add-clang-format-in-ci
 using namespace plb;
 typedef double T;
 typedef unsigned int unsignedType;
