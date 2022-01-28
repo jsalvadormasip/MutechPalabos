@@ -79,6 +79,7 @@ release_clang_serial:
     script: 
         - echo $CI_COMMIT_REF_NAME
         - echo $CI_COMMIT_BRANCH
+        - echo "$CI_JOB_STAGE"
         # - pwd
         # - cd build
         # - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
