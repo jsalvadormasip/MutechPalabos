@@ -160,10 +160,6 @@ template <typename T>
 std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVelocity(
     MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain, bool crop);
 
-template <typename T>
-std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVelocity(
-    MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain, bool crop);
-
 /* *************** Kinematic Eddy Viscosity ****************************************** */
 
 template <

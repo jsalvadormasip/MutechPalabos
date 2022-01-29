@@ -955,39 +955,6 @@ void MpiManager::receive<unsigned int>(unsigned int *buf, int count, int source,
 }
 
 template <>
-void MpiManager::receive<unsigned char>(unsigned char *buf, int count, int source, int tag)
-{
-    if (!ok)
-        return;
-    MPI_Status status;
-    MPI_Recv(
-        static_cast<void *>(buf), count, MPI_UNSIGNED_CHAR, source, tag, getGlobalCommunicator(),
-        &status);
-}
-
-template <>
-void MpiManager::receive<unsigned short>(unsigned short *buf, int count, int source, int tag)
-{
-    if (!ok)
-        return;
-    MPI_Status status;
-    MPI_Recv(
-        static_cast<void *>(buf), count, MPI_UNSIGNED_SHORT, source, tag, getGlobalCommunicator(),
-        &status);
-}
-
-template <>
-void MpiManager::receive<unsigned int>(unsigned int *buf, int count, int source, int tag)
-{
-    if (!ok)
-        return;
-    MPI_Status status;
-    MPI_Recv(
-        static_cast<void *>(buf), count, MPI_UNSIGNED, source, tag, getGlobalCommunicator(),
-        &status);
-}
-
-template <>
 void MpiManager::receive<unsigned long>(unsigned long *buf, int count, int source, int tag)
 {
     if (!ok)
