@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
         copyConvert<unsignedType, bool>(*evaluate(checkFlag1, flagField));
 
     pcout << flagField << std::endl;
+    pcout << *boolFlag1 << std::endl;
 
     // Write images to show that only where the Flag1 was set, the evaluate returns true
     ImageWriter<unsignedType> imageWriter("leeloo.map");
