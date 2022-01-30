@@ -96,6 +96,8 @@ int main(int argc, char *argv[])
     std::unique_ptr<MultiScalarField2D<bool>> boolFlag1 =
         copyConvert<unsignedType, bool>(*evaluate(checkFlag1, flagField));
 
+    pcout << flagField << std::endl;
+
     // Write images to show that only where the Flag1 was set, the evaluate returns true
     ImageWriter<unsignedType> imageWriter("leeloo.map");
     imageWriter.writeScaledGif("flagField", flagField, 1000, 1000);
