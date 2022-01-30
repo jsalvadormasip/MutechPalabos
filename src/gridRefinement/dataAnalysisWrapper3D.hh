@@ -1060,6 +1060,7 @@ std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > computeQcriterion(
 /* *************** lambda2-criterion from vorticity and strain rate fields ******************** */
 #ifndef PLB_BGP
 #ifdef PLB_USE_EIGEN
+
 template <typename T>
 std::unique_ptr<MultiLevelScalarField3D<T> > computeLambda2(
     MultiLevelTensorField3D<T, 3> &vorticity, MultiLevelTensorField3D<T, 6> &S, Box3D domain,
