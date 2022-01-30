@@ -498,6 +498,7 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
 
     BoxProcessingFunctional3D_L<T, Descriptor> *functional =
         BoundaryManager::template getTemperatureBoundaryProcessor<direction, orientation>(domain);
+
     if (functional) {
         integrateProcessingFunctional(functional, domain, lattice);
     }
