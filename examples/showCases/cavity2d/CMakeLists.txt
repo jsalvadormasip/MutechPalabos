@@ -43,10 +43,10 @@ if (BUILD_TESTING)
              COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
     add_test(NAME ${CMAKE_CURRENT_SOURCE_DIR}_test_mpi
              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-             COMMAND ARGS="--rerun-failed --output-on-failure" diff ref.dat output_mpi.dat))
+             COMMAND ARGS="--rerun-failed --output-on-failure" diff ref.dat output_mpi.dat)
 endif()
 
-###############################################################################
+################################2###############################################
 
 # This returns when you compile Palabos and all the examples (root CMakeLists.txt)
 return()
