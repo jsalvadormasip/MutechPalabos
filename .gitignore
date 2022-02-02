@@ -6,3 +6,5 @@
 *.pyc
 *.os
 *.exe
+.vscode
+.ccls-cache
