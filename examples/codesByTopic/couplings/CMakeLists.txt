@@ -45,7 +45,7 @@ if (BUILD_TESTING)
              COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
     add_test(NAME ${CMAKE_CURRENT_SOURCE_DIR}_test_mpi
              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output_mpi.dat)
+             ARGS="--rerun-failed --output-on-failure" COMMAND diff ref.dat output_mpi.dat)
 endif()
 
 ###############################################################################
