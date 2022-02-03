@@ -75,7 +75,7 @@ test:
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Test
         - cmake --build .
-        - cmake --build . -- test
+        - cmake --build . -- test "ARGS=--rerun-failed --output-on-failure"
 
 ## Test compilation with CMake, everything in examples & utility directory
 release_clang_serial:
