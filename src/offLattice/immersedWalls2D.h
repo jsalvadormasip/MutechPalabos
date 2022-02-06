@@ -110,7 +110,6 @@ inline InamuroDeltaFunction2D<T> const& inamuroDeltaFunction2D() {
 template<typename T>
 struct ImmersedWallData2D : public ContainerBlockData
 {
-    Array<T,2> offset; // To convert vertices from local to absolute units.
     std::vector< Array<T,2> > vertices;
     std::vector<T> areas;
     std::vector< Array<T,2> > normals;
