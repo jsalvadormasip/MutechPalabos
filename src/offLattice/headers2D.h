@@ -35,6 +35,5 @@
  * Groups all the include files for the 2D off-lattice directory.
  */
 
-#include "offLattice/makeSparse2D.h"
 #include "offLattice/immersedWalls2D.h"
-
+#include "offLattice/makeSparse2D.h"

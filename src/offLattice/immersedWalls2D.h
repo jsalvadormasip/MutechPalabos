@@ -5,7 +5,7 @@
  * own the IP rights for most of the code base. Since October 2019, the
  * Palabos project is maintained by the University of Geneva and accepts
  * source code contributions from the community.
- * 
+ *
  * Contact:
  * Jonas Latt
  * Computer Science Department
@@ -14,7 +14,7 @@
  * 1227 Carouge, Switzerland
  * jonas.latt@unige.ch
  *
- * The most recent release of Palabos can be downloaded at 
+ * The most recent release of Palabos can be downloaded at
  * <https://palabos.unige.ch/>
  *
  * The library Palabos is free software: you can redistribute it and/or
@@ -29,20 +29,19 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
+ */
 
 #ifndef IMMERSED_WALLS_2D_H
 #define IMMERSED_WALLS_2D_H
 
-#include "core/globalDefs.h"
-#include "core/array.h"
-#include "atomicBlock/dataProcessingFunctional2D.h"
-#include "atomicBlock/dataField2D.h"
-#include "multiBlock/multiBlockGenerator2D.h"
-#include "dataProcessors/dataAnalysisWrapper2D.h"
-
 #include <memory>
+
+#include "atomicBlock/dataField2D.h"
+#include "atomicBlock/dataProcessingFunctional2D.h"
+#include "core/array.h"
+#include "core/globalDefs.h"
+#include "dataProcessors/dataAnalysisWrapper2D.h"
+#include "multiBlock/multiBlockGenerator2D.h"
 
 namespace plb {
 
@@ -50,73 +49,76 @@ namespace plb {
 
 /* ******** InamuroDeltaFunction2D ************************************ */
 
-template<typename T>
+template <typename T>
 class InamuroDeltaFunction2D {
 public:
-    InamuroDeltaFunction2D(int N_)
-        : N(N_),
-          dx(4./(T)N),
-          invDx(1./dx)
+    InamuroDeltaFunction2D(int N_) : N(N_), dx(4. / (T)N), invDx(1. / dx)
     {
         sampleFunction();
     }
-    T rawValue(T r) const {
+    T rawValue(T r) const
+    {
         T rabs = std::fabs(r);
-        T rsqr = r*r;
-        if (rabs<1.) {
-            return 0.125*(3.-2.*rabs+std::sqrt(1.+4.*rabs-4.*rsqr));
-        }
-        else if (rabs<2.) {
-            return 0.125*(5.-2.*rabs-std::sqrt(-7.+12.*rabs-4.*rsqr));
-        }
-        else {
+        T rsqr = r * r;
+        if (rabs < 1.) {
+            return 0.125 * (3. - 2. * rabs + std::sqrt(1. + 4. * rabs - 4. * rsqr));
+        } else if (rabs < 2.) {
+            return 0.125 * (5. - 2. * rabs - std::sqrt(-7. + 12. * rabs - 4. * rsqr));
+        } else {
             return 0.;
         }
     }
-    T w(T r) const {
-        int position = (int)((r+2.0)*invDx+0.5);
-        if (position<=0) {
+    T w(T r) const
+    {
+        int position = (int)((r + 2.0) * invDx + 0.5);
+        if (position <= 0) {
             return 0.;
         }
-        if (position>=N) {
+        if (position >= N) {
             return 0.;
         }
         return samples[position];
     }
-    T W(Array<T,2> const& r) const {
-        return w(r[0])*w(r[1]);
+    T W(Array<T, 2> const &r) const
+    {
+        return w(r[0]) * w(r[1]);
     }
+
 private:
-    void sampleFunction() {
-        samples.resize(N+1);
-        for(int i=0; i<=N; ++i) {
-            samples[i] = rawValue(-2.+dx*i);
+    void sampleFunction()
+    {
+        samples.resize(N + 1);
+        for (int i = 0; i <= N; ++i) {
+            samples[i] = rawValue(-2. + dx * i);
         }
     }
+
 private:
     int N;
     T dx, invDx;
     std::vector<T> samples;
 };
 
-template<typename T>
-inline InamuroDeltaFunction2D<T> const& inamuroDeltaFunction2D() {
+template <typename T>
+inline InamuroDeltaFunction2D<T> const &inamuroDeltaFunction2D()
+{
     static InamuroDeltaFunction2D<T> deltaFunction(1000);
     return deltaFunction;
 }
 
 /* ******** ImmersedWallData2D ************************************ */
 
-template<typename T>
-struct ImmersedWallData2D : public ContainerBlockData
-{
-    std::vector< Array<T,2> > vertices;
+template <typename T>
+struct ImmersedWallData2D : public ContainerBlockData {
+    std::vector<Array<T, 2> > vertices;
     std::vector<T> areas;
-    std::vector< Array<T,2> > normals;
-    std::vector< Array<T,2> > g;
-    std::vector<int> flags; // Flag for each vertex used to distinguish between vertices for conditional reduction operations.
+    std::vector<Array<T, 2> > normals;
+    std::vector<Array<T, 2> > g;
+    std::vector<int> flags;  // Flag for each vertex used to distinguish between vertices for
+                             // conditional reduction operations.
     std::vector<pluint> globalVertexIds;
-    virtual ImmersedWallData2D<T>* clone() const {
+    virtual ImmersedWallData2D<T> *clone() const
+    {
         return new ImmersedWallData2D<T>(*this);
     }
 };
@@ -125,10 +127,11 @@ struct ImmersedWallData2D : public ContainerBlockData
 
 /* ******** Utility functions ************************************ */
 
-template<typename T>
-inline bool closedOpenContained(Array<T,2> const& x, Box2D const& box) {
-    return x[0]>=(box.x0-0.5) && x[0]<(box.x1+0.5) &&
-           x[1]>=(box.y0-0.5) && x[1]<(box.y1+0.5);
+template <typename T>
+inline bool closedOpenContained(Array<T, 2> const &x, Box2D const &box)
+{
+    return x[0] >= (box.x0 - 0.5) && x[0] < (box.x1 + 0.5) && x[1] >= (box.y0 - 0.5)
+           && x[1] < (box.y1 + 0.5);
     // in order to count correctly the particles, a 0.5 must be added
 }
 
@@ -138,35 +141,33 @@ inline bool closedOpenContained(Array<T,2> const& x, Box2D const& box) {
 
 /* ******** InamuroIteration2D ************************************ */
 
-template<typename T, class VelFunction>
-class InamuroIteration2D : public BoxProcessingFunctional2D
-{
+template <typename T, class VelFunction>
+class InamuroIteration2D : public BoxProcessingFunctional2D {
 public:
     InamuroIteration2D(VelFunction velFunction_, T tau_, bool incompressibleModel_);
-    virtual void processGenericBlocks(Box2D domain, std::vector<AtomicBlock2D*> fields);
-    virtual InamuroIteration2D<T,VelFunction>* clone() const;
-    virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
+    virtual void processGenericBlocks(Box2D domain, std::vector<AtomicBlock2D *> fields);
+    virtual InamuroIteration2D<T, VelFunction> *clone() const;
+    virtual void getTypeOfModification(std::vector<modif::ModifT> &modified) const;
     virtual BlockDomain::DomainT appliesTo() const;
+
 private:
     VelFunction velFunction;
     T tau;
     bool incompressibleModel;
 };
 
-template<typename T, class VelFunction>
-void inamuroIteration (
-    VelFunction velFunction,
-    MultiScalarField2D<T>& rhoBar,
-    MultiTensorField2D<T,2>& j,
-    MultiContainerBlock2D& container, T tau,
-    bool incompressibleModel )
+template <typename T, class VelFunction>
+void inamuroIteration(
+    VelFunction velFunction, MultiScalarField2D<T> &rhoBar, MultiTensorField2D<T, 2> &j,
+    MultiContainerBlock2D &container, T tau, bool incompressibleModel)
 {
-    std::vector<MultiBlock2D*> args;
+    std::vector<MultiBlock2D *> args;
     args.push_back(&rhoBar);
     args.push_back(&j);
     args.push_back(&container);
-    applyProcessingFunctional (
-        new InamuroIteration2D<T,VelFunction>(velFunction, tau, incompressibleModel), rhoBar.getBoundingBox(), args );
+    applyProcessingFunctional(
+        new InamuroIteration2D<T, VelFunction>(velFunction, tau, incompressibleModel),
+        rhoBar.getBoundingBox(), args);
 }
 
 /* ******** IndexedInamuroIteration2D ************************************ */
@@ -174,37 +175,34 @@ void inamuroIteration (
 // This is the same as InamuroIteration2D, with the difference that
 // the VelFunction accepts as argument a global vertex index instead of
 // a 2D position in space.
-template<typename T, class VelFunction>
-class IndexedInamuroIteration2D : public BoxProcessingFunctional2D
-{
- public:
-  IndexedInamuroIteration2D(VelFunction velFunction_, T tau_, bool incompressibleModel_);
-  virtual void processGenericBlocks(Box2D domain, std::vector<AtomicBlock2D*> fields);
-  virtual IndexedInamuroIteration2D<T,VelFunction>* clone() const;
-  virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
-  virtual BlockDomain::DomainT appliesTo() const;
- private:
-  VelFunction velFunction;
-  T tau;
-  bool incompressibleModel;
+template <typename T, class VelFunction>
+class IndexedInamuroIteration2D : public BoxProcessingFunctional2D {
+public:
+    IndexedInamuroIteration2D(VelFunction velFunction_, T tau_, bool incompressibleModel_);
+    virtual void processGenericBlocks(Box2D domain, std::vector<AtomicBlock2D *> fields);
+    virtual IndexedInamuroIteration2D<T, VelFunction> *clone() const;
+    virtual void getTypeOfModification(std::vector<modif::ModifT> &modified) const;
+    virtual BlockDomain::DomainT appliesTo() const;
+
+private:
+    VelFunction velFunction;
+    T tau;
+    bool incompressibleModel;
 };
 
-template<typename T, class VelFunction>
-void indexedInamuroIteration (
-    VelFunction velFunction,
-    MultiScalarField2D<T>& rhoBar,
-    MultiTensorField2D<T,2>& j,
-    MultiContainerBlock2D& container, T tau,
-    bool incompressibleModel )
+template <typename T, class VelFunction>
+void indexedInamuroIteration(
+    VelFunction velFunction, MultiScalarField2D<T> &rhoBar, MultiTensorField2D<T, 2> &j,
+    MultiContainerBlock2D &container, T tau, bool incompressibleModel)
 {
-  std::vector<MultiBlock2D*> args;
-  args.push_back(&rhoBar);
-  args.push_back(&j);
-  args.push_back(&container);
-  applyProcessingFunctional (
-      new IndexedInamuroIteration2D<T,VelFunction>(velFunction, tau, incompressibleModel), rhoBar.getBoundingBox(), args );
+    std::vector<MultiBlock2D *> args;
+    args.push_back(&rhoBar);
+    args.push_back(&j);
+    args.push_back(&container);
+    applyProcessingFunctional(
+        new IndexedInamuroIteration2D<T, VelFunction>(velFunction, tau, incompressibleModel),
+        rhoBar.getBoundingBox(), args);
 }
-
 
 /* ******** IndexedImmersedBoundaryIteration2D ************************************ */
 /* ******** ConstVelInamuroIteration2D ************************************ */
@@ -212,45 +210,46 @@ void indexedInamuroIteration (
 
 /* ******** InstantiateImmersedWallData2D ************************************ */
 
-template<typename T>
-class InstantiateImmersedWallData2D : public BoxProcessingFunctional2D
-{
+template <typename T>
+class InstantiateImmersedWallData2D : public BoxProcessingFunctional2D {
 public:
-    InstantiateImmersedWallData2D (
-            std::vector< Array<T,2> > const& vertices_,
-            std::vector<T> const& areas_,
-            std::vector< Array<T,2> > const& normals_);
-    virtual void processGenericBlocks(Box2D domain, std::vector<AtomicBlock2D*> fields);
-    virtual InstantiateImmersedWallData2D<T>* clone() const;
-    virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
+    InstantiateImmersedWallData2D(
+        std::vector<Array<T, 2> > const &vertices_, std::vector<T> const &areas_,
+        std::vector<Array<T, 2> > const &normals_);
+    virtual void processGenericBlocks(Box2D domain, std::vector<AtomicBlock2D *> fields);
+    virtual InstantiateImmersedWallData2D<T> *clone() const;
+    virtual void getTypeOfModification(std::vector<modif::ModifT> &modified) const;
     virtual BlockDomain::DomainT appliesTo() const;
+
 private:
-    std::vector< Array<T,2> > const& vertices;
-    std::vector<T> const& areas;
-    std::vector< Array<T,2> > const& normals;
+    std::vector<Array<T, 2> > const &vertices;
+    std::vector<T> const &areas;
+    std::vector<Array<T, 2> > const &normals;
 };
 
-template<typename T>
-void instantiateImmersedWallData (
-            std::vector< Array<T,2> > const& vertices, std::vector<T> const& areas,
-            MultiContainerBlock2D& container )
-{ 
-    static std::vector< Array<T,2> > dummyNormals;
-    std::vector<MultiBlock2D*> args;
+template <typename T>
+void instantiateImmersedWallData(
+    std::vector<Array<T, 2> > const &vertices, std::vector<T> const &areas,
+    MultiContainerBlock2D &container)
+{
+    static std::vector<Array<T, 2> > dummyNormals;
+    std::vector<MultiBlock2D *> args;
     args.push_back(&container);
-    applyProcessingFunctional (
-            new InstantiateImmersedWallData2D<T>(vertices,areas,dummyNormals), container.getBoundingBox(), args );
+    applyProcessingFunctional(
+        new InstantiateImmersedWallData2D<T>(vertices, areas, dummyNormals),
+        container.getBoundingBox(), args);
 }
 
-template<typename T>
-void instantiateImmersedWallData (
-            std::vector< Array<T,2> > const& vertices, std::vector<T> const& areas,
-            std::vector< Array<T,2> > const& normals, MultiContainerBlock2D& container )
-{ 
-    std::vector<MultiBlock2D*> args;
+template <typename T>
+void instantiateImmersedWallData(
+    std::vector<Array<T, 2> > const &vertices, std::vector<T> const &areas,
+    std::vector<Array<T, 2> > const &normals, MultiContainerBlock2D &container)
+{
+    std::vector<MultiBlock2D *> args;
     args.push_back(&container);
-    applyProcessingFunctional (
-            new InstantiateImmersedWallData2D<T>(vertices,areas,normals), container.getBoundingBox(), args );
+    applyProcessingFunctional(
+        new InstantiateImmersedWallData2D<T>(vertices, areas, normals), container.getBoundingBox(),
+        args);
 }
 
 /* ******** InstantiateImmersedWallDataWithTagging2D ************************************ */
@@ -266,8 +265,6 @@ void instantiateImmersedWallData (
 /* ******** TwoPhaseIndexedInamuroIteration3D ************************************ */
 /* ******** TwoPhaseConstVelInamuroIteration3D ************************************ */
 
-
 }  // namespace plb
 
 #endif  // IMMERSED_WALLS_2D_H
-
