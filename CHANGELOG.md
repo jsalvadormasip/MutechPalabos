@@ -8,11 +8,43 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+* Using sitmo for PRNG generation to have parallel PRNG concistency.
+* Data processors for 2D mutlri grid and multi block lattices.
+
+### Removed
+
+* Removed the use of `rand()` and `plbRandom()`.
+
+### Changed
+
+* Changed regression testing to account for sitmo PRNG:
+* Changed 2D VTK to accept Box2D.
+
+### Fixed
+
+* Bugs in 2D multi grid refinement.
+
+## [2.3.0]
+
+### Added
+
+* Added example of a 3D flow past a cylinder in a rectangular channel.
+* Added example of 3D porous media with partial bounce back.
+* Added partial bounce back boundary condition.
+* Added 3D collision models: Raw (RM), Hermite (HM), Central (CM), Central Hermite (CHM) and Cumulant (K),  Gauss-Hermite formalism (GH), weighted version of populations in the HM formalism,  Regularized approaches: standard (REG-HM) and recursive (SRT-RR).
+* Added dsl2d and dsl3d examples.
+
 ### Removed
 
 ### Changed
 
+* Made TRTdynamics more consistent with original paper.
+* Added a parameter to modify the bulk viscosity for 2D and 3D formulations of the RM, HM, CM, CHM, GH collision models.
+
 ### Fixed
+
+* Fixed error in the He forcing scheme implementation.
+* Fixed minor error in CI causing an exmaple not to be compiled.
 
 ## [2.2.1]
 
@@ -20,10 +52,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 * The D2Q9 version of collision models: Raw (RM), Hermite (HM), Central (CM), Central Hermite (CHM) and Cumulant (K),  Gauss-Hermite formalism (GH), weighted version of populations in the HM formalism,  Regularized approaches: standard (REG-HM) and recursive (SRT-RR).
 * Added test case: `isothermCoVo2D`
+* Added interface to use magic parameter in TRTdynamics.
 
 ### Removed
 
 ### Changed
+
+* Renames sMinus to omegaMinus for consistency in the notations in TRTdynamics.
 
 ### Fixed
 

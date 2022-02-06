@@ -19,7 +19,7 @@ Otherwise it is close to impossible for us to try to figure out what is happenin
 Contributions to Palabos are accepted by community members who prove sufficient programming skills, familiarity with the Palabos source code, and level of maturity with respect to the proposed numerical or physical models.
 
 Before contributing to Palabos, make sure to be familiar with the programming 
-guidelines listed in the User's Guide (see [here](https://palabos.unige.ch/palabos-documentation/)). Also, before jumping into a large development project, it is good practice to interact with the core developers and the community on the forum, to identify if the development project answers a need in the community and is aligned with the general development goals of Palabos.
+guidelines listed in the User's Guide (see [here](https://palabos.unige.ch/get-started/palabos-documentation/)). Also, before jumping into a large development project, it is good practice to interact with the core developers and the community on the forum, to identify if the development project answers a need in the community and is aligned with the general development goals of Palabos.
 
 In order to contribute to Palabos you must create a fork of the project (click on
 the fork button, see [here](https://docs.gitlab.com/ee/workflow/forking_workflow.html#creating-a-fork) for more info).
@@ -41,6 +41,22 @@ a new show case.
 When you think your contributions are ready to be added to Palabos, you should create
 a `merge request` (see [here](https://docs.gitlab.com/ee/gitlab-basics/add-merge-request.html) for how to 
 create one). In your `merge request` briefly summarize what your additions are and highlight the particularly important ones.
+
+## Continuous integration
+
+To facilitate merge request we have been setting non-regression tests for most of the examples in Palabos. These Continuous 
+Integration (CI) tests are run with
+a gitlab runner. If possible set your own runner (it's not possible for us to provide you with one runner unfortunately) for the 
+Palabos project. See the [appropriate documentation](https://docs.gitlab.com/runner/install/) to do so. This would make the 
+maintainers life much simpler by haveing the CI perform the tests on your branch directly.
+
+## Code formatting
+
+In order to have an uniform code formatting we are using a custom 
+`clang-format` configuration file that can be found at the root of the project 
+and which is named `.clang-format`. A `bash` script named `run-clang-format.sh` 
+can help you format your code in place. Note that the continuous integration 
+will fail if you have not formatted your code before making your merge request.
 
 ## Feature requests
 
