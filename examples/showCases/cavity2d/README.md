@@ -25,13 +25,13 @@ This section contains a shorted version of the [derivation](#derivation) and [di
 The distribution function $`f(\textbf{r},\textbf{u},t)`$ specifies the probability that a particle with velocity $`\textbf{u}`$ is found at position $`\textbf{r}`$ at time $`t`$. In the continuum the time evolution of the distribution function $`f`$ is given by
 
 ```math
-\biggl(\frac{\partial}{\partial t} + \textbf{c}\cdot \frac{\partial}{\partial \textbf{r}} + \frac{\textbf{F}}{m}\cdot \frac{\partial}{\partial\textbf{c}}\biggr)  f(\textbf{r},\textbf{c},t) = 0
+\biggl(\frac{\partial}{\partial t} + \textbf{c}\cdot \frac{\partial}{\partial \textbf{r}} + \frac{\textbf{F}}{m}\cdot \frac{\partial}{\partial\textbf{c}}\biggr) f(\textbf{r},\textbf{c},t) = 0
 ```
 
 where $`\textbf{F}`$ is an external force acting on a particle with mass $`m`$. This equation does not describe any collisions of particles or interactions with their neighborhood. Therefore, a collision operator $`\mathcal{C}`$ is introduced. This leads to
 
 ```math
-\biggl(\frac{\partial}{\partial t} + \textbf{c}\cdot \frac{\partial}{\partial \textbf{r}} + \frac{\textbf{F}}{m}\cdot \frac{\partial}{\partial\textbf{c}}\biggr)  f(\textbf{r},\textbf{c},t) = \mathcal{C}[f].
+\biggl(\frac{\partial}{\partial t} + \textbf{c}\cdot \frac{\partial}{\partial \textbf{r}} + \frac{\textbf{F}}{m}\cdot \frac{\partial}{\partial\textbf{c}}\biggr) f(\textbf{r},\textbf{c},t) = \mathcal{C}[f].
 ```
 
 The local equilibrium of the fluid is given by the Maxwell distribution function
@@ -46,27 +46,27 @@ where $`\rho`$ is the density, $`\textbf{u}`$ is the mean velocity, $`T`$ is the
 f = f^{eq} + f^{neq}.
 ```
 
-As a result we can approximate the collision operator $`\mathcal{C}`$ by using a linear operator $`\mathcal{C_L}`$. It simplifies into $`\mathcal{C}[f] = \mathcal{C_L}f^{neq}`$. The most commonly used linear operator is the [BGK-operator](https://journals.aps.org/pr/abstract/10.1103/PhysRev.94.511). It is given by
+As a result, we can approximate the collision operator $`\mathcal{C}`$ by using a linear operator $`\mathcal{C_L}`$. It simplifies into $`\mathcal{C}[f] = \mathcal{C_L}f^{neq}`$. The most commonly used linear operator is the [BGK-operator](https://journals.aps.org/pr/abstract/10.1103/PhysRev.94.511). It is given by
 
 ```math
-\mathcal{C}_{BGK}f^{neq} = -\frac{1}{\nu} f^{neq}.
+\mathcal{C}_{BGK}f^{neq} = -\omega f^{neq}.
 ```
 
-The operator assumes that during the time interval $`dt`$ some part of the the particles dependent on $`\nu`$ relaxes towards the equilibrium.
+The operator assumes that during the time interval $`dt`$ some part of the particles dependent on $`\omega`$ relaxes towards the equilibrium.
 
 ### Discretization
 
 Assuming there is no external force ($`\text{F}\equiv 0`$) and using the BGK-operator, the Boltzmann equation can be written as
 
 ```math
-\frac{\partial}{\partial t}f + \textbf{c}\cdot\frac{\partial}{\partial\textbf{r}}f = -\frac{1}{\nu}(f-f^{eq}).
+\frac{\partial}{\partial t}f + \textbf{c}\cdot\frac{\partial}{\partial\textbf{r}}f = -\omega(f-f^{eq}).
 ```
 
-The velocity space can be discretized by using the Hermite-expansion of the distribution function and Gaussian-quadrature.
+The velocity space can be discretized by using the Hermite expansion of the distribution function and Gaussian-quadrature.
 For each discrete velocity $`\textbf{c}_i`$ the equation transforms into
 
 ```math
-\frac{\partial}{\partial t}f_i +\textbf{c}_i\cdot\frac{\partial}{\partial\textbf{r}}f_i = -\frac{1}{\nu}(f_i-f_i^{eq})
+\frac{\partial}{\partial t}f_i +\textbf{c}_i\cdot\frac{\partial}{\partial\textbf{r}}f_i = -\omega(f_i-f_i^{eq})
 ```
 
 where $`f_i`$ is only dependent on space and time. The Maxwell-distribution function can be discretized to
@@ -85,34 +85,34 @@ The associated basis vectors $`\textbf{c}_i`$ are dimensionless and given by the
 ```math
  C = \left( \begin{array}{rrrrrrrrrrrrrrrrrrrr}
 0 & -1 & -1 & -1 & 0 & 1& 1 & 1 & 0\\
-0 & 1 & 0 & -1 & -1 &  -1 & 0 & 1 & 1                                                  
+0 & 1 & 0 & -1 & -1 & -1 & 0 & 1 & 1 
 \end{array}\right)
 ```
 
 The weights are given by
 ```math
 \begin{aligned}
-\omega_i&=\frac{4}{9}  &\text{	for } \textbf{c}_i^2 &= 0, \\
-\omega_i &= \frac{1}{9} & \text{	for } \textbf{c}_i^2 &= 1, \\
-\omega_i  &= \frac{1}{36}  &\text{	for } \textbf{c}_i^2 &= 2.
+\omega_i&=\frac{4}{9} &\text{ for } \textbf{c}_i^2 &= 0, \\
+\omega_i &= \frac{1}{9} & \text{ for } \textbf{c}_i^2 &= 1, \\
+\omega_i &= \frac{1}{36} &\text{ for } \textbf{c}_i^2 &= 2.
 \end{aligned}
 ```
 
 There exist more complicated models for 3D e.g the D3Q15 or D3Q19 models. Discretization according to space and time leads to the lattice Boltzmann equation
 
 ```math
-f_i( \textbf{r} + dt\textbf{c}_i, t + dt) = f_i( \textbf{r}, t) - \frac{1}{\nu}\bigl(f_i( \textbf{r}, t) + f_i^{eq}( \textbf{r}, t)\bigr).
+f_i( \textbf{r} + dt\textbf{c}_i, t + dt) = f_i( \textbf{r}, t) - \omega\bigl(f_i( \textbf{r}, t) + f_i^{eq}( \textbf{r}, t)\bigr).
 ```
 
-The lattice Boltzmann equation is typically divided in two steps:
+The lattice Boltzmann equation is typically divided into two steps:
 
 * In the collision step new particle density values are computed: 
 
 ```math
-f_i(\textbf{r}, t + dt) = f_i(\textbf{r}, t) - \frac{1}{\nu}\bigl(f_i(\textbf{r}, t) - f_i^{eq}(\textbf{r}, t)\bigr)
+f_i(\textbf{r}, t + dt) = f_i(\textbf{r}, t) - \omega\bigl(f_i(\textbf{r}, t) - f_i^{eq}(\textbf{r}, t)\bigr)
 ```
 
-* In the stream step the new values are send two neighbour cells: 
+* In the streaming step the new values are sent to neighbour cells: 
 
 ```math
  f_i(\textbf{r} + dt\textbf{c}_i, t + dt) = f_i(\textbf{r}, t + dt)
@@ -122,15 +122,17 @@ f_i(\textbf{r}, t + dt) = f_i(\textbf{r}, t) - \frac{1}{\nu}\bigl(f_i(\textbf{r}
 
 ### Boundary conditions
 
-There exists two types of boundary conditions:
+In general, there exist two types of boundary conditions:
 
 * Dirchilet conditions which set the velocity $`\textbf{u}=(u_x,u_y)`$ on the boundary
 
 * Neumann conditions which set the velocity rate $`\frac{\partial}{\partial\textbf{n}}\textbf{u}`$ with the boundary normal vector $`\textbf{n}`$
 
+Note that this example only uses Dirichlet boundary conditions.
+
 ### Lid driven cavity
 
-Studied by [Ghia et. al.](http://www.msaidi.ir/upload/Ghia1982.pdf)  back in 1982, the two-dimensional lid driven cavity example became very popular to measure performance and accuracy of numerical flow simulations. The domain consists of an open cavity. While the top lid is driven with a velocity $`\textbf{u}=(U, 0)`$, the velocities on all the other boundaries are set to $`\textbf{u}= (0,0)`$.
+Studied by [Ghia et. al.](http://www.msaidi.ir/upload/Ghia1982.pdf) back in 1982, the two-dimensional lid driven cavity example became very popular to measure performance and accuracy of numerical flow simulations. The domain consists of an open cavity. While the top lid is driven with a velocity $`\textbf{u}=(U, 0)`$, the velocities on all the other boundaries are set to $`\textbf{u}= (0,0)`$.
 
 ![Lid driven cavity in 2D](figs/cavity2d.svg)
 
@@ -140,40 +142,81 @@ Depending on the [Reynolds number](https://en.wikipedia.org/wiki/Reynolds_number
 
 ## Implementation
 
-This section describes how the lid driven cavity example is coded in Palabos, by connecting the theory from the [previous paragraph](#theory) to the naming scheme of Palabos.
-The simulation domain/lattice is created with an instance of the `MultiBlockLattice2D` class. The arguments include the dynamic model, in this case, the BGK collision model (`BGKdynamics()`). It is also important to specify the model descriptor, in this case, the `D2Q9Descriptor`. (line 125-127)
+This section describes how the lid driven cavity example is coded in Palabos, by connecting the theory from the [previous paragraph](#theory) to the naming scheme of Palabos. At first, there is to mention, that this code structure is parallel by default and can run on any multi-processor machine.<br>
+The simulation domain/lattice is created with an instance of the `MultiBlockLattice2D` class. The arguments include the dynamic model, in this case, the BGK collision model (`BGKdynamics()`). It is also important to specify the model descriptor, in this case, the `D2Q9Descriptor` (line 125-127). Note that `Nx` and `Ny` are the number of cells in $`x`$ and $`y`$ direction and thus the size of the simulation domain. 
 
-```python
+```cpp
 MultiBlockLattice2D<T, DESCRIPTOR> lattice(
-    parameters.getNx(), parameters.getNy(),
-    new BGKdynamics<T, DESCRIPTOR>(parameters.getOmega()));
+ parameters.getNx(), parameters.getNy(),
+ new BGKdynamics<T, DESCRIPTOR>(parameters.getOmega()));
 ```
 
-The boundary condition instance is created with the `OnLatticeBoundaryCondition2D` class. In this example, finite-difference regularized boundary conditions are installed with `createInterpBoundaryCondition2D` ([Skordos boundary condition](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.48.4823)), which increase the accuracy on straight walls. (line 129-131)
+The boundary condition instance is created with the `OnLatticeBoundaryCondition2D` class. In this example, finite-difference regularized boundary conditions are installed with `createInterpBoundaryCondition2D` ([Skordos boundary condition](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.48.4823)), which increase the accuracy on straight walls (line 129-131).
 
-```python
+```cpp
 OnLatticeBoundaryCondition2D<T, DESCRIPTOR> *
-    // boundaryCondition = createLocalBoundaryCondition2D<T,DESCRIPTOR>();
-    boundaryCondition = createInterpBoundaryCondition2D<T, DESCRIPTOR>();
+ // boundaryCondition = createLocalBoundaryCondition2D<T,DESCRIPTOR>();
+ boundaryCondition = createInterpBoundaryCondition2D<T, DESCRIPTOR>();
 ```
 
-In the method `cavitySetup` (line 58-76) the lattice is then initialized. First, the boundary condition type is set on the on-lattice boundary via the method `setVelocityConditionOnBlockBoundaries()` to a Dirichlet boundary condition. Then, a constant velocity is set on the boundaries (`setBoundaryVelocity()`), and the cells are initialized with constant density and velocity by the method `initializeAtEquilibrium()`. Note that `Box2D` objects are used to handle simulation subdomains.<br />
-The next simulation step in the main method (line 101-177) is a for-loop over the timesteps in which the `collideAndStream()` (line 161)  method is used on the lattice once every iteration. Inside this method happens the entire computation i.e the collision in each cell and then the propagation of newly computed values to neighbor cells.
-Before calling `collideAndStream()` the current velocity is stored in two output files at certain time steps. In `writeGif()` (line 78-89) the method `writeScaledGif()` is used to store the computed velocity norm (`computeVelocityNorm()`) in a .gif image. In the other method (`writeVTK` line 91-99), the class `ParallelVtkImageOutput2D` is used to generate a .vtk file that allows to store the velocity and velocity norm (`computeVelocity()`, `computeVelocityNorm()`).
+In the method `cavitySetup` (line 58-76) the lattice is then initialized. First, the boundary condition type is set on the on-lattice boundary via the method `setVelocityConditionOnBlockBoundaries()` to a Dirichlet boundary condition. Then, a constant velocity is set on the boundaries (`setBoundaryVelocity()`), and the cells are initialized with constant density and velocity by the method `initializeAtEquilibrium()`. To set the velocity $`U`$ at the top, a `Box2D` object is used to handle the subdomain (line 71). The other boundaries are initialized with velocity zero (line 67).
 
-```python
+```cpp
+setBoundaryVelocity(lattice, lattice.getBoundingBox(), Array<T, 2>((T)0., (T)0.));
+
+T u = parameters.getLatticeU();
+setBoundaryVelocity(lattice, Box2D(1, nx - 2, ny - 1, ny - 1), Array<T, 2>(u, (T)0.));
+
+```
+
+The next simulation step in the main method (line 101-177) is a for-loop over the timesteps in which the `collideAndStream()` (line 161) method is used on the lattice once every iteration. Inside this method happens the entire computation i.e the collision in each cell and then the propagation of newly computed values to neighbor cells.
+Before calling `collideAndStream()` the current velocity is stored in two output files at certain time steps. <br>
+In `writeGif()` (line 78-89) the method `writeScaledGif()` is used to store the computed velocity norm (`computeVelocityNorm()`) in a .gif image. 
+
+```cpp
+template <class BlockLatticeT>
+void writeGif(BlockLatticeT &lattice, plint iter)
+{
+ const plint imSize = 600;
+
+ ImageWriter<T> imageWriter("leeloo");
+ imageWriter.writeScaledGif(
+ createFileName("uNorm", iter, 6), *computeVelocityNorm(lattice), imSize, imSize);
+ imageWriter.writeScaledGif(
+ createFileName("logUnorm", iter, 6),
+ *computeLog(*add((T)1.e-8, *computeVelocityNorm(lattice))), imSize, imSize);
+}
+
+```
+
+In the other method (`writeVTK` line 91-99), the class `ParallelVtkImageOutput2D` is used to generate a .vti file that allows to store the velocity and velocity norm (`computeVelocity()`, `computeVelocityNorm()`). With the help of the `IncomprFlowParam<T> const &parameters` instance the method obtains the cell width `dx` and time step size `dt` to convert the velocity to the macro system. 
+
+```cpp
 template <class BlockLatticeT>
 void writeVTK(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, plint iter)
 {
-    T dx = parameters.getDeltaX();
-    T dt = parameters.getDeltaT();
-    VtkImageOutput2D<T> vtkOut(createFileName("vtk", iter, 6), dx);
-    vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx / dt);
-    vtkOut.writeData<2, float>(*computeVelocity(lattice), "velocity", dx / dt);
+ T dx = parameters.getDeltaX();
+ T dt = parameters.getDeltaT();
+ VtkImageOutput2D<T> vtkOut(createFileName("vtk", iter, 6), dx);
+ vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx / dt);
+ vtkOut.writeData<2, float>(*computeVelocity(lattice), "velocity", dx / dt);
 }
 ```
 
 After the computation step, the average quantities are printed with the help of the methods `getStoredAverageEnergy()` and `getStoredAverageDensity()` (line 164 and 165). With `global::timer()` (line 172) the computation time is measured.
+Every 1280 iteration steps the an output is printed to the console:
+
+```bash
+step 0; t=0; av energy=3.81587645e-07; av rho=1
+Time spent during previous iteration: 0
+step 1280; t=0.1; av energy=1.143114423e-06; av rho=0.9999958713
+Time spent during previous iteration: 0.000588
+Saving Gif ...
+
+Saving VTK file ...
+```
+
+It shows the current iteration step, the current time step, the average energy, and density as well as the previous iteration time. Note that only every 2560 iteration steps a .gif file and only every 12800 iteration steps a .vti file is written.
 
 ## Result
 
