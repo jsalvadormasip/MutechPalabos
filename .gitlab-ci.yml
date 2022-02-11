@@ -81,7 +81,7 @@ test:
         - cmake --build . -- test "ARGS=--rerun-failed --output-on-failure"
 
 ## Parallel regression tests
-test:
+parallel_test:
     stage: parallel_regression_tests
     image: $DOCKER_BASE_IMG
     before_script:
