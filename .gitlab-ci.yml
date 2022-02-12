@@ -33,9 +33,9 @@ cache:
 
 stages:
     - prepare_docker
-    - check_format
-    - build_cmake
-    - regression_tests
+    # - check_format
+    # - build_cmake
+    # - regression_tests
     - parallel_regression_tests
     - deploy
 
