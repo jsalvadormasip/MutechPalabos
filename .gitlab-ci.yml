@@ -100,8 +100,6 @@ parallel_test:
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=TestMpi
         - cmake --build .
-        - cat examples/showCases/cavity2d/test/ref.dat
-        - cat examples/showCases/cavity2d/test/output_mpi.dat
         - cmake --build . -- test "ARGS=--rerun-failed --output-on-failure"
 
 ## Test compilation with CMake, everything in examples & utility directory
