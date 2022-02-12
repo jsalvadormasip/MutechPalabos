@@ -16,7 +16,7 @@ variables:
 
 
 cache:
-    untracked: true
+    untracked: false
     key: "$CI_PROJECT_ID"
     paths:
         - ${PWD}/${CCACHE_BASE}
@@ -32,12 +32,12 @@ cache:
         - ${PWD}/${CCACHE_BASE}/${CCACHE_DEB_GCC_PAR}
 
 stages:
-    - prepare_docker
-    - check_format
-    - build_cmake
-    - regression_tests
+    # - prepare_docker
+    # - check_format
+    # - build_cmake
+    # - regression_tests
     - parallel_regression_tests
-    - deploy
+    # - deploy
 
 # Build and test stages are using a docker image containing package
 # needed to build and run a Palabos application.
@@ -96,6 +96,8 @@ parallel_test:
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=TestMpi
         - cmake --build .
+        - cat examples/showCases/cavity2d/test/ref.dat
+        - cat examples/showCases/cavity2d/test/output_mpi.dat
         - cmake --build . -- test "ARGS=--rerun-failed --output-on-failure"
 
 ## Test compilation with CMake, everything in examples & utility directory
