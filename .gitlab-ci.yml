@@ -32,12 +32,12 @@ cache:
         - ${PWD}/${CCACHE_BASE}/${CCACHE_DEB_GCC_PAR}
 
 stages:
-    # - prepare_docker
-    # - check_format
-    # - build_cmake
-    # - regression_tests
+    - prepare_docker
+    - check_format
+    - build_cmake
+    - regression_tests
     - parallel_regression_tests
-    # - deploy
+    - deploy
 
 # Build and test stages are using a docker image containing package
 # needed to build and run a Palabos application.
