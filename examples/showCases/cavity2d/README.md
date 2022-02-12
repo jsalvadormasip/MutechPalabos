@@ -151,7 +151,7 @@ MultiBlockLattice2D<T, DESCRIPTOR> lattice(
  new BGKdynamics<T, DESCRIPTOR>(parameters.getOmega()));
 ```
 
-The boundary condition instance is created with the `OnLatticeBoundaryCondition2D` class. In this example, finite-difference regularized boundary conditions are installed with `createInterpBoundaryCondition2D` ([Skordos boundary condition](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.48.4823)), which increase the accuracy on straight walls (line 129-131).
+The boundary condition instance is created with the `OnLatticeBoundaryCondition2D` class. In this example, finite-difference regularized boundary conditions are installed with `createInterpBoundaryCondition2D` ([Skordos boundary condition](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.48.4823)), which increase the accuracy on straight walls (line 131). Note that one can change the boundary conditions to local, by commenting `createInterpBoundaryCondition2D` and uncommenting `createLocalBoundaryCondition2D` (line 130).
 
 ```cpp
 OnLatticeBoundaryCondition2D<T, DESCRIPTOR> *
