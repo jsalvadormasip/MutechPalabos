@@ -85,7 +85,7 @@ parallel_test:
     stage: parallel_regression_tests
     image: $DOCKER_BASE_IMG
     before_script:
-        - mkdir -p ${CCACHE_TEST}
+        - mkdir -p ${CCACHE_TESTMPI}
         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_TESTMPI}
         - ccache --set-config=compression=true
