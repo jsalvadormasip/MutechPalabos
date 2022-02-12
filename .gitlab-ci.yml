@@ -31,17 +31,13 @@ cache:
         - ${PWD}/${CCACHE_BASE}/${CCACHE_DEB_GCC_SER}
         - ${PWD}/${CCACHE_BASE}/${CCACHE_DEB_GCC_PAR}
 
-# stages:
-#     - prepare_docker
-#     - check_format
-#     - build_cmake
-#     - regression_tests
-#     - parallel_regression_tests
-#     - deploy
-
 stages:
     - prepare_docker
+    - check_format
+    - build_cmake
+    - regression_tests
     - parallel_regression_tests
+    - deploy
 
 # Build and test stages are using a docker image containing package
 # needed to build and run a Palabos application.
@@ -57,32 +53,32 @@ build_base_docker_img:
     - docker build --tag $DOCKER_BASE_IMG .
     - docker push $DOCKER_BASE_IMG
 
-# format:
-#     stage: check_format
-#     image: $DOCKER_BASE_IMG
-#
-#     script:
-#         - pwd
-#         - clang-format -version
-#         - ./run-clang-format.sh -n
+format:
+    stage: check_format
+    image: $DOCKER_BASE_IMG
 
-# ## Regression tests
-# test:
-#     stage: regression_tests
-#     image: $DOCKER_BASE_IMG
-#     before_script:
-#         - mkdir -p ${CCACHE_TEST}
-#         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
-#         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_TEST}
-#         - ccache --set-config=compression=true
-#         - ccache --set-config=max_size=1000M
-#
-#     script: 
-#         - pwd
-#         - cd build
-#         - cmake .. -DCMAKE_BUILD_TYPE=Test
-#         - cmake --build .
-#         - cmake --build . -- test "ARGS=--rerun-failed --output-on-failure"
+    script:
+        - pwd
+        - clang-format -version
+        - ./run-clang-format.sh -n
+
+## Regression tests
+test:
+    stage: regression_tests
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ${CCACHE_TEST}
+        - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
+        - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_TEST}
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=1000M
+
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Test
+        - cmake --build .
+        - cmake --build . -- test "ARGS=--rerun-failed --output-on-failure"
 
 ## Parallel regression tests
 parallel_test:
@@ -102,147 +98,147 @@ parallel_test:
         - cmake --build .
         - cmake --build . -- test "ARGS=--rerun-failed --output-on-failure"
 
-# ## Test compilation with CMake, everything in examples & utility directory
-# release_clang_serial:
-#     stage: build_cmake
-#     image: $DOCKER_BASE_IMG
-#     before_script:
-#         - mkdir -p ${CCACHE_REL_CLANG_SER}
-#         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
-#         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_REL_CLANG_SER}
-#         - ccache --set-config=compression=true
-#         - ccache --set-config=max_size=1000M
-#     
-#     script: 
-#         - pwd
-#         - cd build
-#         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
-#         - cmake --build . 
-#
-# release_clang_parallel:
-#     stage: build_cmake
-#     image: $DOCKER_BASE_IMG
-#     before_script:
-#         - mkdir -p ${CCACHE_REL_CLANG_PAR}
-#         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
-#         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_REL_CLANG_PAR}
-#         - ccache --set-config=compression=true
-#         - ccache --set-config=max_size=1000M
-#     
-#     script: 
-#         - pwd
-#         - cd build
-#         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
-#         - cmake --build . 
-#
-# release_gcc_serial:
-#     stage: build_cmake
-#     image: $DOCKER_BASE_IMG
-#     before_script:
-#         - mkdir -p ${CCACHE_REL_GCC_SER}
-#         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
-#         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_REL_GCC_SER}
-#         - ccache --set-config=compression=true
-#         - ccache --set-config=max_size=1000M
-#     
-#     script: 
-#         - pwd
-#         - cd build
-#         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
-#         - cmake --build . 
-#         
-# release_gcc_parallel:
-#     stage: build_cmake
-#     image: $DOCKER_BASE_IMG
-#     before_script:
-#         - mkdir -p ${CCACHE_REL_GCC_PAR}
-#         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
-#         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_REL_GCC_PAR}
-#         - ccache --set-config=compression=true
-#         - ccache --set-config=max_size=1000M
-#
-#     
-#     script: 
-#         - pwd
-#         - cd build
-#         - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
-#         - cmake --build . 
-#
-# debug_clang_serial:
-#     stage: build_cmake
-#     image: $DOCKER_BASE_IMG
-#     before_script:
-#         - mkdir -p ${CCACHE_DEB_CLANG_SER}
-#         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
-#         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_DEB_CLANG_SER}
-#         - ccache --set-config=compression=true
-#         - ccache --set-config=max_size=1000M
-#     
-#     script: 
-#         - pwd
-#         - cd build
-#         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
-#         - cmake --build . 
-#
-# debug_clang_parallel:
-#     stage: build_cmake
-#     image: $DOCKER_BASE_IMG
-#     before_script:
-#         - mkdir -p ${CCACHE_DEB_CLANG_PAR}
-#         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
-#         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_DEB_CLANG_PAR}
-#         - ccache --set-config=compression=true
-#         - ccache --set-config=max_size=1000M
-#
-#     script: 
-#         - pwd
-#         - cd build
-#         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
-#         - cmake --build . 
-#
-# debug_gcc_serial:
-#     stage: build_cmake
-#     image: $DOCKER_BASE_IMG
-#     before_script:
-#         - mkdir -p ${CCACHE_DEB_GCC_SER}
-#         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
-#         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_DEB_GCC_SER}
-#         - ccache --set-config=compression=true
-#         - ccache --set-config=max_size=1000M
-#
-#     script: 
-#         - pwd
-#         - cd build
-#         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
-#         - cmake --build . 
-#         
-# debug_gcc_parallel:
-#     stage: build_cmake
-#     image: $DOCKER_BASE_IMG
-#     before_script:
-#         - mkdir -p ${CCACHE_DEB_GCC_PAR}
-#         - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
-#         - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_DEB_GCC_PAR}
-#         - ccache --set-config=compression=true
-#         - ccache --set-config=max_size=1000M
-#
-#     script: 
-#         - pwd
-#         - cd build
-#         - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
-#         - cmake --build . 
-#         
-# pages:
-#     stage: deploy
-#     image: $DOCKER_BASE_IMG
-#     script:
-#         - pwd
-#         - mkdir -p public/docs
-#         - doxygen Doxyfile
-#     artifacts:
-#         paths:
-#         - public
-#     only:
-#         - master
-#
-#
+## Test compilation with CMake, everything in examples & utility directory
+release_clang_serial:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ${CCACHE_REL_CLANG_SER}
+        - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
+        - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_REL_CLANG_SER}
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=1000M
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
+        - cmake --build . 
+
+release_clang_parallel:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ${CCACHE_REL_CLANG_PAR}
+        - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
+        - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_REL_CLANG_PAR}
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=1000M
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
+        - cmake --build . 
+
+release_gcc_serial:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ${CCACHE_REL_GCC_SER}
+        - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
+        - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_REL_GCC_SER}
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=1000M
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
+        - cmake --build . 
+        
+release_gcc_parallel:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ${CCACHE_REL_GCC_PAR}
+        - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
+        - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_REL_GCC_PAR}
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=1000M
+
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
+        - cmake --build . 
+
+debug_clang_serial:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ${CCACHE_DEB_CLANG_SER}
+        - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
+        - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_DEB_CLANG_SER}
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=1000M
+    
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=OFF
+        - cmake --build . 
+
+debug_clang_parallel:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ${CCACHE_DEB_CLANG_PAR}
+        - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
+        - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_DEB_CLANG_PAR}
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=1000M
+
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DENABLE_MPI=ON
+        - cmake --build . 
+
+debug_gcc_serial:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ${CCACHE_DEB_GCC_SER}
+        - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
+        - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_DEB_GCC_SER}
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=1000M
+
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=OFF
+        - cmake --build . 
+        
+debug_gcc_parallel:
+    stage: build_cmake
+    image: $DOCKER_BASE_IMG
+    before_script:
+        - mkdir -p ${CCACHE_DEB_GCC_PAR}
+        - export CCACHE_BASEDIR=${PWD}/${CCACHE_BASE}
+        - export CCACHE_DIR=${PWD}/${CCACHE_BASE}/${CCACHE_DEB_GCC_PAR}
+        - ccache --set-config=compression=true
+        - ccache --set-config=max_size=1000M
+
+    script: 
+        - pwd
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++ -DENABLE_MPI=ON
+        - cmake --build . 
+        
+pages:
+    stage: deploy
+    image: $DOCKER_BASE_IMG
+    script:
+        - pwd
+        - mkdir -p public/docs
+        - doxygen Doxyfile
+    artifacts:
+        paths:
+        - public
+    only:
+        - master
+
+
