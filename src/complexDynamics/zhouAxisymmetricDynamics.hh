@@ -97,14 +97,14 @@ void ZhouAxisymmetricDynamics<T,Descriptor>::collide(Cell<T,Descriptor>& cell, B
         }
     }
     else { // Specular boundary condition for r = 0;
-        Array<int,Descriptor<T>::q> reflection; reflection[0] = -1; reflection[1] = 1;
-        for (plint iPop = 3; iPop <= 5; iPop++) { // populations at southwest, south, southeast
-            Array<int,Descriptor<T>::d> v; 
-            v[0] = -Descriptor<T>::c[indexTemplates::opposite<Descriptor<T> >(iPop)][0]; 
-            v[1] = Descriptor<T>::c[indexTemplates::opposite<Descriptor<T> >(iPop)][1];
-            plint jPop = indexTemplates::findVelocity<Descriptor<T> >(v);
+        std::vector<plint> const& outgoingIndices
+            = indexTemplates::subIndex<Descriptor<T>, 1, -1>();
+        plint iPop = 0, jPop = 0;
+        for (plint i = 0; i < outgoingIndices.size(); ++i) { // populations at southwest, south, southeast
+            iPop = outgoingIndices[i];
+            jPop = indexTemplates::specularReflection<Descriptor<T>, 1>(iPop);
             PLB_ASSERT(jPop != Descriptor<T>::q);
-            cell[jPop] = cell[iPop];
+            cell[jPop] = cell[outgoingIndices[i]];
         }
     }
 
@@ -157,14 +157,14 @@ void ZhouAxisymmetricDynamics<T,Descriptor>::collideExternal (
         }
     }
     else { // Specular boundary condition for r = 0;
-        Array<int,Descriptor<T>::q> reflection; reflection[0] = -1; reflection[1] = 1;
-        for (plint iPop = 3; iPop <= 5; iPop++) {
-            Array<int,Descriptor<T>::d> v; 
-            v[0] = -Descriptor<T>::c[indexTemplates::opposite<Descriptor<T> >(iPop)][0]; 
-            v[1] = Descriptor<T>::c[indexTemplates::opposite<Descriptor<T> >(iPop)][1];
-            plint jPop = indexTemplates::findVelocity<Descriptor<T> >(v);
+        std::vector<plint> const& outgoingIndices
+            = indexTemplates::subIndex<Descriptor<T>, 1, -1>();
+        plint iPop = 0, jPop = 0;
+        for (plint i = 0; i < outgoingIndices.size(); ++i) { // populations at southwest, south, southeast
+            iPop = outgoingIndices[i];
+            jPop = indexTemplates::specularReflection<Descriptor<T>, 1>(iPop);
             PLB_ASSERT(jPop != Descriptor<T>::q);
-            cell[jPop] = cell[iPop];
+            cell[jPop] = cell[outgoingIndices[i]];
         }
     }
 
