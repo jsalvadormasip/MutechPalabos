@@ -41,208 +41,207 @@ namespace plb {
 // ============== Zhou (2011) Axisymmetric dynamics ====================== //
 
 template <typename T, template <typename U> class Descriptor>
-int ZhouAxisymmetricDynamics<T, Descriptor>::id = meta::registerGeneralDynamics<
-    T, Descriptor, ZhouAxisymmetricDynamics<T, Descriptor>>(
-    "Zhou_Axisymmetric_Dynamics");
+int ZhouAxisymmetricDynamics<T, Descriptor>::id =
+    meta::registerGeneralDynamics<T, Descriptor, ZhouAxisymmetricDynamics<T, Descriptor>>(
+        "Zhou_Axisymmetric_Dynamics");
 
 template <typename T, template <typename U> class Descriptor>
 ZhouAxisymmetricDynamics<T, Descriptor>::ZhouAxisymmetricDynamics(
-    Dynamics<T, Descriptor> *baseDynamics_)
-    : CompositeDynamics<T, Descriptor>(
-          baseDynamics_, false) // false is for automaticPrepareCollision.
+    Dynamics<T, Descriptor> *baseDynamics_) :
+    CompositeDynamics<T, Descriptor>(
+        baseDynamics_, false)  // false is for automaticPrepareCollision.
 {
-  PLB_ASSERT(Descriptor<T>::d == 2);
+    PLB_ASSERT(Descriptor<T>::d == 2);
 }
 
 template <typename T, template <typename U> class Descriptor>
 ZhouAxisymmetricDynamics<T, Descriptor>::ZhouAxisymmetricDynamics(
-    HierarchicUnserializer &unserializer)
-    : CompositeDynamics<T, Descriptor>(0, false) {
-  this->unserialize(unserializer);
+    HierarchicUnserializer &unserializer) :
+    CompositeDynamics<T, Descriptor>(0, false)
+{
+    this->unserialize(unserializer);
 }
 
 template <typename T, template <typename U> class Descriptor>
 void ZhouAxisymmetricDynamics<T, Descriptor>::collide(
-    Cell<T, Descriptor> &cell, BlockStatistics &statistics) {
+    Cell<T, Descriptor> &cell, BlockStatistics &statistics)
+{
+    Array<T, Descriptor<T>::numPop> h1;  /// h1
+    Array<T, Descriptor<T>::numPop> h2;  /// h2
+    h1.resetToZero();
+    h2.resetToZero();
 
-  Array<T, Descriptor<T>::numPop> h1; /// h1
-  Array<T, Descriptor<T>::numPop> h2; /// h2
-  h1.resetToZero();
-  h2.resetToZero();
+    T rhoBar;
+    Array<T, Descriptor<T>::d> j;
 
-  T rhoBar;
-  Array<T, Descriptor<T>::d> j;
+    if (absoluteR != 0) {  // h1 & h2 have a non-zero value only if r != 0
+        Array<T, Descriptor<T>::q> &f = cell.getRawPopulations();
+        momentTemplates<T, Descriptor>::get_rhoBar_j(cell, rhoBar, j);
+        T rho = Descriptor<T>::fullRho(rhoBar);
+        T invRho = Descriptor<T>::invRho(rhoBar);
+        const T jSqr = VectorTemplateImpl<T, Descriptor<T>::d>::normSqr(j);
+        Array<T, Descriptor<T>::d> u;
+        u = j * invRho;  // u(0) = u_x and u(1) = u_r
 
-  if (absoluteR != 0) { // h1 & h2 have a non-zero value only if r != 0
-    Array<T, Descriptor<T>::q> &f = cell.getRawPopulations();
+        for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
+            h1[iPop] = -Descriptor<T>::t[iPop] * j[1] / (T)absoluteR;  // Zhou 2011
+        }
+
+        Array<T, Descriptor<T>::q> fNeq;
+        T tau = 1.0 / this->getOmega();
+        T nu = (2.0 * tau - 1.0) / 6.0;
+        for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
+            fNeq[iPop] = f[iPop]
+                         - dynamicsTemplatesImpl<T, Descriptor<T>>::bgk_ma2_equilibrium(
+                             iPop, rhoBar, invRho, j, jSqr);
+            h2[iPop] =
+                -(2 * tau - 1) / (2 * tau * (T)absoluteR) * Descriptor<T>::c[iPop][1] * fNeq[iPop]
+                + (T)1.0 / (T)6.0 * rho
+                      * (Descriptor<T>::c[iPop][0] * (-u[0] * u[1] / (T)absoluteR)
+                         + Descriptor<T>::c[iPop][1]
+                               * (-u[1] * u[1] / (T)absoluteR
+                                  - 2 * nu * u[1] / util::sqr((T)absoluteR)));
+        }
+    } else {  // Specular boundary condition for r = 0;
+        std::vector<plint> const &outgoingIndices =
+            indexTemplates::subIndex<Descriptor<T>, 1, -1>();
+        plint iPop = 0, jPop = 0;
+        for (plint i = 0; i < outgoingIndices.size(); ++i)
+        {  // populations at southwest, south, southeast
+            iPop = outgoingIndices[i];
+            jPop = indexTemplates::specularReflection<Descriptor<T>, 1>(iPop);
+            PLB_ASSERT(jPop != Descriptor<T>::q);
+            cell[jPop] = cell[outgoingIndices[i]];
+        }
+    }
+
+    this->getBaseDynamics().collide(cell, statistics);
+    for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
+        cell[iPop] += h1[iPop] + h2[iPop];
+    }
+
     momentTemplates<T, Descriptor>::get_rhoBar_j(cell, rhoBar, j);
-    T rho = Descriptor<T>::fullRho(rhoBar);
     T invRho = Descriptor<T>::invRho(rhoBar);
-    const T jSqr = VectorTemplateImpl<T, Descriptor<T>::d>::normSqr(j);
-    Array<T, Descriptor<T>::d> u;
-    u = j * invRho; // u(0) = u_x and u(1) = u_r
-
-    for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
-      h1[iPop] = -Descriptor<T>::t[iPop] * j[1] / (T)absoluteR; // Zhou 2011
+    T uSqr = VectorTemplateImpl<T, Descriptor<T>::d>::normSqr(j) * invRho * invRho;
+    if (cell.takesStatistics()) {
+        gatherStatistics(statistics, rhoBar, uSqr);
     }
-
-    Array<T, Descriptor<T>::q> fNeq;
-    T tau = 1.0 / this->getOmega();
-    T nu = (2.0 * tau - 1.0) / 6.0;
-    for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
-      fNeq[iPop] = f[iPop] -
-                   dynamicsTemplatesImpl<T, Descriptor<T>>::bgk_ma2_equilibrium(
-                       iPop, rhoBar, invRho, j, jSqr);
-      h2[iPop] =
-          -(2 * tau - 1) / (2 * tau * (T)absoluteR) *
-              Descriptor<T>::c[iPop][1] * fNeq[iPop] +
-          (T)1.0 / (T)6.0 * rho *
-              (Descriptor<T>::c[iPop][0] * (-u[0] * u[1] / (T)absoluteR) +
-               Descriptor<T>::c[iPop][1] *
-                   (-u[1] * u[1] / (T)absoluteR -
-                    2 * nu * u[1] / util::sqr((T)absoluteR)));
-    }
-  } else { // Specular boundary condition for r = 0;
-    std::vector<plint> const &outgoingIndices =
-        indexTemplates::subIndex<Descriptor<T>, 1, -1>();
-    plint iPop = 0, jPop = 0;
-    for (plint i = 0; i < outgoingIndices.size();
-         ++i) { // populations at southwest, south, southeast
-      iPop = outgoingIndices[i];
-      jPop = indexTemplates::specularReflection<Descriptor<T>, 1>(iPop);
-      PLB_ASSERT(jPop != Descriptor<T>::q);
-      cell[jPop] = cell[outgoingIndices[i]];
-    }
-  }
-
-  this->getBaseDynamics().collide(cell, statistics);
-  for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
-    cell[iPop] += h1[iPop] + h2[iPop];
-  }
-
-  momentTemplates<T, Descriptor>::get_rhoBar_j(cell, rhoBar, j);
-  T invRho = Descriptor<T>::invRho(rhoBar);
-  T uSqr =
-      VectorTemplateImpl<T, Descriptor<T>::d>::normSqr(j) * invRho * invRho;
-  if (cell.takesStatistics()) {
-    gatherStatistics(statistics, rhoBar, uSqr);
-  }
 }
 
 template <typename T, template <typename U> class Descriptor>
 void ZhouAxisymmetricDynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
-    T thetaBar, BlockStatistics &statistics) {
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, T thetaBar,
+    BlockStatistics &statistics)
+{
+    Array<T, Descriptor<T>::numPop> h1;  /// h1
+    Array<T, Descriptor<T>::numPop> h2;  /// h2
+    h1.resetToZero();
+    h2.resetToZero();
 
-  Array<T, Descriptor<T>::numPop> h1; /// h1
-  Array<T, Descriptor<T>::numPop> h2; /// h2
-  h1.resetToZero();
-  h2.resetToZero();
+    if (absoluteR != 0) {  // h1 & h2 have a non-zero value only if r != 0
+        Array<T, Descriptor<T>::q> &f = cell.getRawPopulations();
+        T rho = Descriptor<T>::fullRho(rhoBar);
+        T invRho = Descriptor<T>::invRho(rhoBar);
+        const T jSqr = VectorTemplateImpl<T, Descriptor<T>::d>::normSqr(j);
+        Array<T, Descriptor<T>::d> u;
+        u = j * invRho;  // u(0) = u_x and u(1) = u_r
 
-  if (absoluteR != 0) { // h1 & h2 have a non-zero value only if r != 0
-    Array<T, Descriptor<T>::q> &f = cell.getRawPopulations();
-    T rho = Descriptor<T>::fullRho(rhoBar);
-    T invRho = Descriptor<T>::invRho(rhoBar);
-    const T jSqr = VectorTemplateImpl<T, Descriptor<T>::d>::normSqr(j);
-    Array<T, Descriptor<T>::d> u;
-    u = j * invRho; // u(0) = u_x and u(1) = u_r
+        for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
+            h1[iPop] = -Descriptor<T>::t[iPop] * j[1] / (T)absoluteR;  // Zhou 2011
+        }
 
+        Array<T, Descriptor<T>::q> fNeq;
+        T tau = 1.0 / this->getOmega();
+        T nu = (2.0 * tau - 1.0) / 6.0;
+        for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
+            fNeq[iPop] = f[iPop]
+                         - dynamicsTemplatesImpl<T, Descriptor<T>>::bgk_ma2_equilibrium(
+                             iPop, rhoBar, invRho, j, jSqr);
+            h2[iPop] =
+                -(2 * tau - 1) / (2 * tau * (T)absoluteR) * Descriptor<T>::c[iPop][1] * fNeq[iPop]
+                + (T)1.0 / (T)6.0 * rho
+                      * (Descriptor<T>::c[iPop][0] * (-u[0] * u[1] / (T)absoluteR)
+                         + Descriptor<T>::c[iPop][1]
+                               * (-u[1] * u[1] / (T)absoluteR
+                                  - 2 * nu * u[1] / util::sqr((T)absoluteR)));
+        }
+    } else {  // Specular boundary condition for r = 0;
+        std::vector<plint> const &outgoingIndices =
+            indexTemplates::subIndex<Descriptor<T>, 1, -1>();
+        plint iPop = 0, jPop = 0;
+        for (plint i = 0; i < outgoingIndices.size(); ++i)
+        {  // populations at southwest, south, southeast
+            iPop = outgoingIndices[i];
+            jPop = indexTemplates::specularReflection<Descriptor<T>, 1>(iPop);
+            PLB_ASSERT(jPop != Descriptor<T>::q);
+            cell[jPop] = cell[outgoingIndices[i]];
+        }
+    }
+
+    this->getBaseDynamics().collideExternal(cell, rhoBar, j, thetaBar, statistics);
     for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
-      h1[iPop] = -Descriptor<T>::t[iPop] * j[1] / (T)absoluteR; // Zhou 2011
+        cell[iPop] += h1[iPop] + h2[iPop];
     }
-
-    Array<T, Descriptor<T>::q> fNeq;
-    T tau = 1.0 / this->getOmega();
-    T nu = (2.0 * tau - 1.0) / 6.0;
-    for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
-      fNeq[iPop] = f[iPop] -
-                   dynamicsTemplatesImpl<T, Descriptor<T>>::bgk_ma2_equilibrium(
-                       iPop, rhoBar, invRho, j, jSqr);
-      h2[iPop] =
-          -(2 * tau - 1) / (2 * tau * (T)absoluteR) *
-              Descriptor<T>::c[iPop][1] * fNeq[iPop] +
-          (T)1.0 / (T)6.0 * rho *
-              (Descriptor<T>::c[iPop][0] * (-u[0] * u[1] / (T)absoluteR) +
-               Descriptor<T>::c[iPop][1] *
-                   (-u[1] * u[1] / (T)absoluteR -
-                    2 * nu * u[1] / util::sqr((T)absoluteR)));
-    }
-  } else { // Specular boundary condition for r = 0;
-    std::vector<plint> const &outgoingIndices =
-        indexTemplates::subIndex<Descriptor<T>, 1, -1>();
-    plint iPop = 0, jPop = 0;
-    for (plint i = 0; i < outgoingIndices.size();
-         ++i) { // populations at southwest, south, southeast
-      iPop = outgoingIndices[i];
-      jPop = indexTemplates::specularReflection<Descriptor<T>, 1>(iPop);
-      PLB_ASSERT(jPop != Descriptor<T>::q);
-      cell[jPop] = cell[outgoingIndices[i]];
-    }
-  }
-
-  this->getBaseDynamics().collideExternal(cell, rhoBar, j, thetaBar,
-                                          statistics);
-  for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
-    cell[iPop] += h1[iPop] + h2[iPop];
-  }
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ZhouAxisymmetricDynamics<T, Descriptor>::prepareCollision(
-    Cell<T, Descriptor> &cell) {}
+void ZhouAxisymmetricDynamics<T, Descriptor>::prepareCollision(Cell<T, Descriptor> &cell)
+{ }
 
 template <typename T, template <typename U> class Descriptor>
-int ZhouAxisymmetricDynamics<T, Descriptor>::getId() const {
-  return id;
+int ZhouAxisymmetricDynamics<T, Descriptor>::getId() const
+{
+    return id;
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ZhouAxisymmetricDynamics<T, Descriptor>::serialize(
-    HierarchicSerializer &serializer) const {
-  CompositeDynamics<T, Descriptor>::serialize(serializer);
-  serializer.addValue<plint>(absoluteR);
+void ZhouAxisymmetricDynamics<T, Descriptor>::serialize(HierarchicSerializer &serializer) const
+{
+    CompositeDynamics<T, Descriptor>::serialize(serializer);
+    serializer.addValue<plint>(absoluteR);
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ZhouAxisymmetricDynamics<T, Descriptor>::unserialize(
-    HierarchicUnserializer &unserializer) {
-  CompositeDynamics<T, Descriptor>::unserialize(unserializer);
-  unserializer.readValue<plint>(absoluteR);
+void ZhouAxisymmetricDynamics<T, Descriptor>::unserialize(HierarchicUnserializer &unserializer)
+{
+    CompositeDynamics<T, Descriptor>::unserialize(unserializer);
+    unserializer.readValue<plint>(absoluteR);
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ZhouAxisymmetricDynamics<T, Descriptor>::setAbsoluteR(plint absoluteR_) {
-  absoluteR = absoluteR_;
+void ZhouAxisymmetricDynamics<T, Descriptor>::setAbsoluteR(plint absoluteR_)
+{
+    absoluteR = absoluteR_;
 }
 
 /********************************* GetAbsoluteRFunctional ******************/
 template <typename T, template <typename U> class Descriptor>
 const int GetAbsoluteRFunctional<T, Descriptor>::staticId =
-    meta::registerProcessor2D<GetAbsoluteRFunctional<T, Descriptor>, T,
-                              Descriptor>(
+    meta::registerProcessor2D<GetAbsoluteRFunctional<T, Descriptor>, T, Descriptor>(
         std::string("GetAbsoluteRFunctional"));
 
 template <typename T, template <typename U> class Descriptor>
 void GetAbsoluteRFunctional<T, Descriptor>::process(
-    Box2D domain, BlockLattice2D<T, Descriptor> &lattice) {
-  Dot2D absoluteOffset = lattice.getLocation();
+    Box2D domain, BlockLattice2D<T, Descriptor> &lattice)
+{
+    Dot2D absoluteOffset = lattice.getLocation();
 
-  for (plint iX = domain.x0; iX <= domain.x1; ++iX) {
-    for (plint iY = domain.y0; iY <= domain.y1; ++iY) {
-      ZhouAxisymmetricDynamics<T, Descriptor> &dynamics =
-          dynamic_cast<ZhouAxisymmetricDynamics<T, Descriptor> &>(
-              lattice.get(iX, iY).getDynamics());
-      dynamics.setAbsoluteR(iY + absoluteOffset.y);
+    for (plint iX = domain.x0; iX <= domain.x1; ++iX) {
+        for (plint iY = domain.y0; iY <= domain.y1; ++iY) {
+            ZhouAxisymmetricDynamics<T, Descriptor> &dynamics =
+                dynamic_cast<ZhouAxisymmetricDynamics<T, Descriptor> &>(
+                    lattice.get(iX, iY).getDynamics());
+            dynamics.setAbsoluteR(iY + absoluteOffset.y);
+        }
     }
-  }
 }
 
 template <typename T, template <typename U> class Descriptor>
-GetAbsoluteRFunctional<T, Descriptor> *
-GetAbsoluteRFunctional<T, Descriptor>::clone() const {
-  return new GetAbsoluteRFunctional<T, Descriptor>(*this);
+GetAbsoluteRFunctional<T, Descriptor> *GetAbsoluteRFunctional<T, Descriptor>::clone() const
+{
+    return new GetAbsoluteRFunctional<T, Descriptor>(*this);
 }
 
-} // namespace plb
+}  // namespace plb
 
-#endif // ZHOU_AXISYMMETRIC_DYNAMICS_HH
+#endif  // ZHOU_AXISYMMETRIC_DYNAMICS_HH

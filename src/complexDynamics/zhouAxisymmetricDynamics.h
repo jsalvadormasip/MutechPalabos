@@ -39,46 +39,49 @@ namespace plb {
 template <typename T, template <typename U> class Descriptor>
 class ZhouAxisymmetricDynamics : public CompositeDynamics<T, Descriptor> {
 public:
-  ZhouAxisymmetricDynamics(Dynamics<T, Descriptor> *baseDynamics_);
-  ZhouAxisymmetricDynamics(HierarchicUnserializer &unserializer);
-  virtual void collide(Cell<T, Descriptor> &cell, BlockStatistics &statistics_);
-  virtual void collideExternal(Cell<T, Descriptor> &cell, T rhoBar,
-                               Array<T, Descriptor<T>::d> const &j, T thetaBar,
-                               BlockStatistics &stat);
-  virtual ZhouAxisymmetricDynamics<T, Descriptor> *clone() const {
-    return new ZhouAxisymmetricDynamics<T, Descriptor>(*this);
-  }
-  virtual void prepareCollision(Cell<T, Descriptor> &cell);
+    ZhouAxisymmetricDynamics(Dynamics<T, Descriptor> *baseDynamics_);
+    ZhouAxisymmetricDynamics(HierarchicUnserializer &unserializer);
+    virtual void collide(Cell<T, Descriptor> &cell, BlockStatistics &statistics_);
+    virtual void collideExternal(
+        Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, T thetaBar,
+        BlockStatistics &stat);
+    virtual ZhouAxisymmetricDynamics<T, Descriptor> *clone() const
+    {
+        return new ZhouAxisymmetricDynamics<T, Descriptor>(*this);
+    }
+    virtual void prepareCollision(Cell<T, Descriptor> &cell);
 
-  /// Return a unique ID for this class.
-  virtual int getId() const;
-  /// Serialize the dynamics object.
-  virtual void serialize(HierarchicSerializer &serializer) const;
-  /// Un-Serialize the dynamics object.
-  virtual void unserialize(HierarchicUnserializer &unserializer);
-  void setAbsoluteR(plint absoluteR_);
+    /// Return a unique ID for this class.
+    virtual int getId() const;
+    /// Serialize the dynamics object.
+    virtual void serialize(HierarchicSerializer &serializer) const;
+    /// Un-Serialize the dynamics object.
+    virtual void unserialize(HierarchicUnserializer &unserializer);
+    void setAbsoluteR(plint absoluteR_);
 
 private:
-  static int id;
-  plint absoluteR;
+    static int id;
+    plint absoluteR;
 };
 
 template <typename T, template <typename U> class Descriptor>
-class GetAbsoluteRFunctional
-    : public BoxProcessingFunctional2D_L<T, Descriptor> {
+class GetAbsoluteRFunctional : public BoxProcessingFunctional2D_L<T, Descriptor> {
 public:
-  virtual void process(Box2D domain, BlockLattice2D<T, Descriptor> &lattice);
-  virtual GetAbsoluteRFunctional<T, Descriptor> *clone() const;
-  virtual int getStaticId() const { return staticId; }
-  virtual void
-  getTypeOfModification(std::vector<modif::ModifT> &modified) const {
-    modified[0] = modif::dynamicVariables;
-  }
+    virtual void process(Box2D domain, BlockLattice2D<T, Descriptor> &lattice);
+    virtual GetAbsoluteRFunctional<T, Descriptor> *clone() const;
+    virtual int getStaticId() const
+    {
+        return staticId;
+    }
+    virtual void getTypeOfModification(std::vector<modif::ModifT> &modified) const
+    {
+        modified[0] = modif::dynamicVariables;
+    }
 
 private:
-  static const int staticId;
+    static const int staticId;
 };
 
-} // namespace plb
+}  // namespace plb
 
-#endif // ZHOU_AXISYMMETRIC_DYNAMICS_H
+#endif  // ZHOU_AXISYMMETRIC_DYNAMICS_H

@@ -46,13 +46,14 @@
  *cavity2d.
  **/
 
-#include "palabos2D.h"
-#include "palabos2D.hh"
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <vector>
+
+#include "palabos2D.h"
+#include "palabos2D.hh"
 
 using namespace plb;
 using namespace plb::descriptors;
@@ -62,235 +63,239 @@ typedef double T;
 #define DESCRIPTOR D2Q9Descriptor
 
 /// Velocity on the parabolic Poiseuille profile
-T poiseuilleVelocity(plint iY, IncomprFlowParam<T> const &parameters) {
-  T r = (T)iY / ((T)parameters.getNy() - 1.0);
-  return parameters.getLatticeU() * (1.0 - r * r);
+T poiseuilleVelocity(plint iY, IncomprFlowParam<T> const &parameters)
+{
+    T r = (T)iY / ((T)parameters.getNy() - 1.0);
+    return parameters.getLatticeU() * (1.0 - r * r);
 }
 
 /// Linearly decreasing pressure profile
-T poiseuillePressure(plint iX, IncomprFlowParam<T> const &parameters) {
-  T L = parameters.getNx() - 1;
-  T R = parameters.getNy() - 1;
-  return 4. * parameters.getLatticeNu() * parameters.getLatticeU() / (R * R) *
-         (L / (T)2 - (T)iX);
+T poiseuillePressure(plint iX, IncomprFlowParam<T> const &parameters)
+{
+    T L = parameters.getNx() - 1;
+    T R = parameters.getNy() - 1;
+    return 4. * parameters.getLatticeNu() * parameters.getLatticeU() / (R * R) * (L / (T)2 - (T)iX);
 }
 
 /// Convert pressure to density according to ideal gas law
-T poiseuilleDensity(plint iX, IncomprFlowParam<T> const &parameters) {
-  return poiseuillePressure(iX, parameters) * DESCRIPTOR<T>::invCs2 + (T)1;
+T poiseuilleDensity(plint iX, IncomprFlowParam<T> const &parameters)
+{
+    return poiseuillePressure(iX, parameters) * DESCRIPTOR<T>::invCs2 + (T)1;
 }
 
 /// A functional, used to initialize the velocity for the boundary conditions
-template <typename T> class PoiseuilleVelocity {
+template <typename T>
+class PoiseuilleVelocity {
 public:
-  PoiseuilleVelocity(IncomprFlowParam<T> parameters_)
-      : parameters(parameters_) {}
-  void operator()(plint iX, plint iY, Array<T, 2> &u) const {
-    u[0] = poiseuilleVelocity(iY, parameters);
-    u[1] = T();
-  }
+    PoiseuilleVelocity(IncomprFlowParam<T> parameters_) : parameters(parameters_) { }
+    void operator()(plint iX, plint iY, Array<T, 2> &u) const
+    {
+        u[0] = poiseuilleVelocity(iY, parameters);
+        u[1] = T();
+    }
 
 private:
-  IncomprFlowParam<T> parameters;
+    IncomprFlowParam<T> parameters;
 };
 
 /// A functional, used to initialize the density for the boundary conditions
-template <typename T> class PoiseuilleDensity {
+template <typename T>
+class PoiseuilleDensity {
 public:
-  PoiseuilleDensity(IncomprFlowParam<T> parameters_)
-      : parameters(parameters_) {}
-  T operator()(plint iX, plint iY) const {
-    return poiseuilleDensity(iX, parameters);
-  }
+    PoiseuilleDensity(IncomprFlowParam<T> parameters_) : parameters(parameters_) { }
+    T operator()(plint iX, plint iY) const
+    {
+        return poiseuilleDensity(iX, parameters);
+    }
 
 private:
-  IncomprFlowParam<T> parameters;
+    IncomprFlowParam<T> parameters;
 };
 
 /// A functional, used to create an initial condition for with zero velocity,
 ///   and linearly decreasing pressure.
-template <typename T> class PoiseuilleDensityAndZeroVelocity {
+template <typename T>
+class PoiseuilleDensityAndZeroVelocity {
 public:
-  PoiseuilleDensityAndZeroVelocity(IncomprFlowParam<T> parameters_)
-      : parameters(parameters_) {}
-  void operator()(plint iX, plint iY, T &rho, Array<T, 2> &u) const {
-    rho = poiseuilleDensity(iX, parameters);
-    u[0] = T();
-    u[1] = T();
-  }
+    PoiseuilleDensityAndZeroVelocity(IncomprFlowParam<T> parameters_) : parameters(parameters_) { }
+    void operator()(plint iX, plint iY, T &rho, Array<T, 2> &u) const
+    {
+        rho = poiseuilleDensity(iX, parameters);
+        u[0] = T();
+        u[1] = T();
+    }
 
 private:
-  IncomprFlowParam<T> parameters;
+    IncomprFlowParam<T> parameters;
 };
 
 enum InletOutletT { pressure, velocity };
 
 void channelSetup(
-    MultiBlockLattice2D<T, DESCRIPTOR> &lattice,
-    IncomprFlowParam<T> const &parameters,
-    OnLatticeBoundaryCondition2D<T, DESCRIPTOR> &boundaryCondition,
-    InletOutletT inletOutlet) {
-  const plint nx = parameters.getNx();
-  const plint ny = parameters.getNy();
+    MultiBlockLattice2D<T, DESCRIPTOR> &lattice, IncomprFlowParam<T> const &parameters,
+    OnLatticeBoundaryCondition2D<T, DESCRIPTOR> &boundaryCondition, InletOutletT inletOutlet)
+{
+    const plint nx = parameters.getNx();
+    const plint ny = parameters.getNy();
 
-  // Note: The following approach illustrated here works only with boun-
-  //   daries which are located on the outmost cells of the lattice. For
-  //   boundaries inside the lattice, you need to use the version of
-  //   "setVelocityConditionOnBlockBoundaries" which takes two Box2D
-  //   arguments.
+    // Note: The following approach illustrated here works only with boun-
+    //   daries which are located on the outmost cells of the lattice. For
+    //   boundaries inside the lattice, you need to use the version of
+    //   "setVelocityConditionOnBlockBoundaries" which takes two Box2D
+    //   arguments.
 
-  // Neumann boundary condition on bottom wall is set for a "reasonable"
-  // macroscopic variable along the center line.
-  boundaryCondition.setVelocityConditionOnBlockBoundaries(
-      lattice, Box2D(0, nx - 1, 0, 0), boundary::neumann);
-  // Velocity boundary condition on top wall.
-  boundaryCondition.setVelocityConditionOnBlockBoundaries(
-      lattice, Box2D(0, nx - 1, ny - 1, ny - 1));
-
-  // Pressure resp. velocity boundary condition on the inlet and outlet.
-  if (inletOutlet == pressure) {
-    // Note: pressure boundary conditions are currently implemented
-    //   only for edges of the boundary, and not for corner nodes.
-    boundaryCondition.setPressureConditionOnBlockBoundaries(
-        lattice, Box2D(0, 0, 1, ny - 2));
-    boundaryCondition.setPressureConditionOnBlockBoundaries(
-        lattice, Box2D(nx - 1, nx - 1, 1, ny - 2));
-  } else {
+    // Neumann boundary condition on bottom wall is set for a "reasonable"
+    // macroscopic variable along the center line.
     boundaryCondition.setVelocityConditionOnBlockBoundaries(
-        lattice, Box2D(0, 0, 0, ny - 2));
+        lattice, Box2D(0, nx - 1, 0, 0), boundary::neumann);
+    // Velocity boundary condition on top wall.
     boundaryCondition.setVelocityConditionOnBlockBoundaries(
-        lattice, Box2D(nx - 1, nx - 1, 0, ny - 2));
-  }
+        lattice, Box2D(0, nx - 1, ny - 1, ny - 1));
 
-  // Define the value of the imposed density on all nodes which have previously
-  // been
-  //   defined to be pressure boundary nodes.
-  setBoundaryDensity(lattice, lattice.getBoundingBox(),
-                     PoiseuilleDensity<T>(parameters));
-  // Define the value of the imposed velocity on all nodes which have previously
-  // been
-  //   defined to be velocity boundary nodes.
-  setBoundaryVelocity(lattice, lattice.getBoundingBox(),
-                      PoiseuilleVelocity<T>(parameters));
-  // Initialize all cells at an equilibrium distribution, with a velocity and
-  // density
-  //   value of the analytical Poiseuille solution.
-  initializeAtEquilibrium(lattice, lattice.getBoundingBox(),
-                          PoiseuilleDensityAndZeroVelocity<T>(parameters));
+    // Pressure resp. velocity boundary condition on the inlet and outlet.
+    if (inletOutlet == pressure) {
+        // Note: pressure boundary conditions are currently implemented
+        //   only for edges of the boundary, and not for corner nodes.
+        boundaryCondition.setPressureConditionOnBlockBoundaries(lattice, Box2D(0, 0, 1, ny - 2));
+        boundaryCondition.setPressureConditionOnBlockBoundaries(
+            lattice, Box2D(nx - 1, nx - 1, 1, ny - 2));
+    } else {
+        boundaryCondition.setVelocityConditionOnBlockBoundaries(lattice, Box2D(0, 0, 0, ny - 2));
+        boundaryCondition.setVelocityConditionOnBlockBoundaries(
+            lattice, Box2D(nx - 1, nx - 1, 0, ny - 2));
+    }
 
-  // Call initialize to get the lattice ready for the simulation.
-  lattice.initialize();
+    // Define the value of the imposed density on all nodes which have previously
+    // been
+    //   defined to be pressure boundary nodes.
+    setBoundaryDensity(lattice, lattice.getBoundingBox(), PoiseuilleDensity<T>(parameters));
+    // Define the value of the imposed velocity on all nodes which have previously
+    // been
+    //   defined to be velocity boundary nodes.
+    setBoundaryVelocity(lattice, lattice.getBoundingBox(), PoiseuilleVelocity<T>(parameters));
+    // Initialize all cells at an equilibrium distribution, with a velocity and
+    // density
+    //   value of the analytical Poiseuille solution.
+    initializeAtEquilibrium(
+        lattice, lattice.getBoundingBox(), PoiseuilleDensityAndZeroVelocity<T>(parameters));
+
+    // Call initialize to get the lattice ready for the simulation.
+    lattice.initialize();
 }
 
 /// Produce a GIF snapshot of the velocity-norm.
-void writeGif(MultiBlockLattice2D<T, DESCRIPTOR> &lattice, plint iter) {
-  const plint imSize = 600;
+void writeGif(MultiBlockLattice2D<T, DESCRIPTOR> &lattice, plint iter)
+{
+    const plint imSize = 600;
 
-  ImageWriter<T> imageWriter("leeloo");
-  imageWriter.writeScaledGif(createFileName("u", iter, 6),
-                             *computeVelocityNorm(lattice), imSize, imSize);
+    ImageWriter<T> imageWriter("leeloo");
+    imageWriter.writeScaledGif(
+        createFileName("u", iter, 6), *computeVelocityNorm(lattice), imSize, imSize);
 }
 
 /// Write the full velocity and the velocity-norm into a VTK file.
-void writeVTK(MultiBlockLattice2D<T, DESCRIPTOR> &lattice,
-              IncomprFlowParam<T> const &parameters, plint iter) {
-  T dx = parameters.getDeltaX();
-  T dt = parameters.getDeltaT();
-  VtkImageOutput2D<T> vtkOut(createFileName("vtk", iter, 6), dx);
-  vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm",
-                          dx / dt);
-  vtkOut.writeData<2, float>(*computeVelocity(lattice), "velocity", dx / dt);
+void writeVTK(
+    MultiBlockLattice2D<T, DESCRIPTOR> &lattice, IncomprFlowParam<T> const &parameters, plint iter)
+{
+    T dx = parameters.getDeltaX();
+    T dt = parameters.getDeltaT();
+    VtkImageOutput2D<T> vtkOut(createFileName("vtk", iter, 6), dx);
+    vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx / dt);
+    vtkOut.writeData<2, float>(*computeVelocity(lattice), "velocity", dx / dt);
 }
 
-T computeRMSerror(MultiBlockLattice2D<T, DESCRIPTOR> &lattice,
-                  IncomprFlowParam<T> const &parameters) {
-  MultiTensorField2D<T, 2> analyticalVelocity(lattice);
-  setToFunction(analyticalVelocity, analyticalVelocity.getBoundingBox(),
-                PoiseuilleVelocity<T>(parameters));
-  MultiTensorField2D<T, 2> numericalVelocity(lattice);
-  computeVelocity(lattice, numericalVelocity, lattice.getBoundingBox());
+T computeRMSerror(
+    MultiBlockLattice2D<T, DESCRIPTOR> &lattice, IncomprFlowParam<T> const &parameters)
+{
+    MultiTensorField2D<T, 2> analyticalVelocity(lattice);
+    setToFunction(
+        analyticalVelocity, analyticalVelocity.getBoundingBox(), PoiseuilleVelocity<T>(parameters));
+    MultiTensorField2D<T, 2> numericalVelocity(lattice);
+    computeVelocity(lattice, numericalVelocity, lattice.getBoundingBox());
 
-  // Divide by lattice velocity to normalize the error
-  return 1. / parameters.getLatticeU() *
-         // Compute RMS difference between analytical and numerical solution
-         std::sqrt(computeAverage(*computeNormSqr(
-             *subtract(analyticalVelocity, numericalVelocity))));
+    // Divide by lattice velocity to normalize the error
+    return 1. / parameters.getLatticeU() *
+           // Compute RMS difference between analytical and numerical solution
+           std::sqrt(
+               computeAverage(*computeNormSqr(*subtract(analyticalVelocity, numericalVelocity))));
 }
 
-int main(int argc, char *argv[]) {
-  plbInit(&argc, &argv);
+int main(int argc, char *argv[])
+{
+    plbInit(&argc, &argv);
 
-  global::directories().setOutputDir("./tmp/");
+    global::directories().setOutputDir("./tmp/");
 
-  IncomprFlowParam<T> parameters((T)2e-2, // uMax
-                                 (T)5.,   // Re
-                                 60,      // N
-                                 3.,      // lx
-                                 1.       // ly
-  );
-  const T logT = (T)0.1;
+    IncomprFlowParam<T> parameters(
+        (T)2e-2,  // uMax
+        (T)5.,    // Re
+        60,       // N
+        3.,       // lx
+        1.        // ly
+    );
+    const T logT = (T)0.1;
 #ifndef PLB_REGRESSION
-  const T imSave = (T)0.5;
-  const T vtkSave = (T)2.;
-  const T maxT = (T)15.1;
+    const T imSave = (T)0.5;
+    const T vtkSave = (T)2.;
+    const T maxT = (T)15.1;
 #else
-  const T maxT = 1.01;
+    const T maxT = 1.01;
 #endif
-  // Change this variable to "pressure" if you prefer a pressure boundary
-  //   condition with Poiseuille profile for the inlet and the outlet.
-  const InletOutletT inletOutlet = velocity;
+    // Change this variable to "pressure" if you prefer a pressure boundary
+    //   condition with Poiseuille profile for the inlet and the outlet.
+    const InletOutletT inletOutlet = velocity;
 
-  writeLogFile(parameters, "Poiseuille flow");
+    writeLogFile(parameters, "Poiseuille flow");
 
-  MultiBlockLattice2D<T, DESCRIPTOR> lattice(
-      parameters.getNx(), parameters.getNy(),
-      new ZhouAxisymmetricDynamics<T, DESCRIPTOR>( // necessary steps for
-                                                   // axisymmetric LBM
-          (new BGKdynamics<T, DESCRIPTOR>(parameters.getOmega()))));
-  // necessary steps for axisymmetric LBM as each dynamics need a different "r"
-  // could have defined a different descriptor with an extra field though.
-  defineDynamics(lattice, lattice.getBoundingBox(),
-                 new ZhouAxisymmetricDynamics<T, DESCRIPTOR>(
-                     new BGKdynamics<T, DESCRIPTOR>(parameters.getOmega())));
+    MultiBlockLattice2D<T, DESCRIPTOR> lattice(
+        parameters.getNx(), parameters.getNy(),
+        new ZhouAxisymmetricDynamics<T, DESCRIPTOR>(  // necessary steps for
+                                                      // axisymmetric LBM
+            (new BGKdynamics<T, DESCRIPTOR>(parameters.getOmega()))));
+    // necessary steps for axisymmetric LBM as each dynamics need a different "r"
+    // could have defined a different descriptor with an extra field though.
+    defineDynamics(
+        lattice, lattice.getBoundingBox(),
+        new ZhouAxisymmetricDynamics<T, DESCRIPTOR>(
+            new BGKdynamics<T, DESCRIPTOR>(parameters.getOmega())));
 
-  // a functional to acquire "r" for each single cell, a necessary step for
-  // axisymmetric LBM
-  applyProcessingFunctional(new GetAbsoluteRFunctional<T, DESCRIPTOR>,
-                            lattice.getBoundingBox(), lattice);
+    // a functional to acquire "r" for each single cell, a necessary step for
+    // axisymmetric LBM
+    applyProcessingFunctional(
+        new GetAbsoluteRFunctional<T, DESCRIPTOR>, lattice.getBoundingBox(), lattice);
 
-  lattice.periodicity().toggle(0, true);
+    lattice.periodicity().toggle(0, true);
 
-  OnLatticeBoundaryCondition2D<T, DESCRIPTOR> *boundaryCondition =
-      createLocalBoundaryCondition2D<T, DESCRIPTOR>();
+    OnLatticeBoundaryCondition2D<T, DESCRIPTOR> *boundaryCondition =
+        createLocalBoundaryCondition2D<T, DESCRIPTOR>();
 
-  channelSetup(lattice, parameters, *boundaryCondition, inletOutlet);
+    channelSetup(lattice, parameters, *boundaryCondition, inletOutlet);
 
-  // Main loop over time iterations.
-  for (plint iT = 0; iT * parameters.getDeltaT() < maxT; ++iT) {
+    // Main loop over time iterations.
+    for (plint iT = 0; iT * parameters.getDeltaT() < maxT; ++iT) {
 #ifndef PLB_REGRESSION
-    if (iT % parameters.nStep(imSave) == 0) {
-      pcout << "Saving Gif ..." << endl;
-      writeGif(lattice, iT);
-    }
+        if (iT % parameters.nStep(imSave) == 0) {
+            pcout << "Saving Gif ..." << endl;
+            writeGif(lattice, iT);
+        }
 
-    if (iT % parameters.nStep(vtkSave) == 0 && iT > 0) {
-      pcout << "Saving VTK file ..." << endl;
-      writeVTK(lattice, parameters, iT);
-    }
+        if (iT % parameters.nStep(vtkSave) == 0 && iT > 0) {
+            pcout << "Saving VTK file ..." << endl;
+            writeVTK(lattice, parameters, iT);
+        }
 #endif
 
-    if (iT % parameters.nStep(logT) == 0) {
-      pcout << "step " << iT << "; t=" << iT * parameters.getDeltaT()
-            << "; RMS error=" << computeRMSerror(lattice, parameters);
-      Array<T, 2> uCenter;
-      lattice.get(parameters.getNx() / 2, 0).computeVelocity(uCenter);
-      pcout << "; center velocity=" << uCenter[0] / parameters.getLatticeU()
-            << endl;
+        if (iT % parameters.nStep(logT) == 0) {
+            pcout << "step " << iT << "; t=" << iT * parameters.getDeltaT()
+                  << "; RMS error=" << computeRMSerror(lattice, parameters);
+            Array<T, 2> uCenter;
+            lattice.get(parameters.getNx() / 2, 0).computeVelocity(uCenter);
+            pcout << "; center velocity=" << uCenter[0] / parameters.getLatticeU() << endl;
+        }
+
+        // Lattice Boltzmann iteration step.
+        lattice.collideAndStream();
     }
 
-    // Lattice Boltzmann iteration step.
-    lattice.collideAndStream();
-  }
-
-  delete boundaryCondition;
+    delete boundaryCondition;
 }
