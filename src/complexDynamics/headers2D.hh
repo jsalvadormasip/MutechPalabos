@@ -49,9 +49,6 @@
 #include "complexDynamics/trtDynamics.hh"
 #include "complexDynamics/variableOmegaDynamics.hh"
 #include "complexDynamics/wavePropagation.hh"
-<<<<<<< HEAD
 #include "complexDynamics/kbcDynamics.hh"
 #include "complexDynamics/zhouAxisymmetricDynamics.hh"
 
-=======
->>>>>>> master
