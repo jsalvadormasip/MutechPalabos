@@ -41,23 +41,23 @@ namespace plb {
 // ============== Zhou (2011) Axisymmetric dynamics ====================== //
 
 template<typename T, template<typename U> class Descriptor>
-int zhouAxisymmetricDynamics<T,Descriptor>::id =
-    meta::registerGeneralDynamics<T,Descriptor,zhouAxisymmetricDynamics<T,Descriptor> >("Zhou_Axisymmetric_Dynamics");
+int ZhouAxisymmetricDynamics<T,Descriptor>::id =
+    meta::registerGeneralDynamics<T,Descriptor,ZhouAxisymmetricDynamics<T,Descriptor> >("Zhou_Axisymmetric_Dynamics");
 
 template<typename T, template<typename U> class Descriptor>
-zhouAxisymmetricDynamics<T,Descriptor>::zhouAxisymmetricDynamics(Dynamics<T,Descriptor>* baseDynamics_)
+ZhouAxisymmetricDynamics<T,Descriptor>::ZhouAxisymmetricDynamics(Dynamics<T,Descriptor>* baseDynamics_)
     : CompositeDynamics<T,Descriptor>(baseDynamics_, false)  // false is for automaticPrepareCollision.
 { }
 
 template<typename T, template<typename U> class Descriptor>
-zhouAxisymmetricDynamics<T,Descriptor>::zhouAxisymmetricDynamics(HierarchicUnserializer& unserializer)
+ZhouAxisymmetricDynamics<T,Descriptor>::ZhouAxisymmetricDynamics(HierarchicUnserializer& unserializer)
     : CompositeDynamics<T,Descriptor>(0, false)
 {
     this->unserialize(unserializer);
 }
 
 template<typename T, template<typename U> class Descriptor>
-void zhouAxisymmetricDynamics<T,Descriptor>::collide(Cell<T,Descriptor>& cell, BlockStatistics& statistics)
+void ZhouAxisymmetricDynamics<T,Descriptor>::collide(Cell<T,Descriptor>& cell, BlockStatistics& statistics)
 {
 
     Array<T,Descriptor<T>::numPop> h1;         /// h1
@@ -120,7 +120,7 @@ void zhouAxisymmetricDynamics<T,Descriptor>::collide(Cell<T,Descriptor>& cell, B
 }
 
 template<typename T, template<typename U> class Descriptor>
-void zhouAxisymmetricDynamics<T,Descriptor>::collideExternal (
+void ZhouAxisymmetricDynamics<T,Descriptor>::collideExternal (
         Cell<T,Descriptor>& cell, T rhoBar, Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& statistics )
 {
 
@@ -173,30 +173,30 @@ void zhouAxisymmetricDynamics<T,Descriptor>::collideExternal (
 }
 
 template<typename T, template<typename U> class Descriptor>
-void zhouAxisymmetricDynamics<T,Descriptor>::prepareCollision(Cell<T,Descriptor>& cell)
+void ZhouAxisymmetricDynamics<T,Descriptor>::prepareCollision(Cell<T,Descriptor>& cell)
 { }
 
 template<typename T, template<typename U> class Descriptor>
-int zhouAxisymmetricDynamics<T,Descriptor>::getId() const {
+int ZhouAxisymmetricDynamics<T,Descriptor>::getId() const {
     return id;
 }
 
 template<typename T, template<typename U> class Descriptor>
-void zhouAxisymmetricDynamics<T,Descriptor>::serialize(HierarchicSerializer& serializer) const
+void ZhouAxisymmetricDynamics<T,Descriptor>::serialize(HierarchicSerializer& serializer) const
 {
     CompositeDynamics<T,Descriptor>::serialize(serializer);
     serializer.addValue<plint>(absoluteR);
 }
 
 template<typename T, template<typename U> class Descriptor>
-void zhouAxisymmetricDynamics<T,Descriptor>::unserialize(HierarchicUnserializer& unserializer)
+void ZhouAxisymmetricDynamics<T,Descriptor>::unserialize(HierarchicUnserializer& unserializer)
 {
     CompositeDynamics<T,Descriptor>::unserialize(unserializer);
     unserializer.readValue<plint>(absoluteR);
 }
 
 template<typename T, template<typename U> class Descriptor>
-void zhouAxisymmetricDynamics<T,Descriptor>::setAbsoluteR(plint absoluteR_) {
+void ZhouAxisymmetricDynamics<T,Descriptor>::setAbsoluteR(plint absoluteR_) {
     absoluteR = absoluteR_;
 }
 
@@ -214,7 +214,7 @@ void GetAbsoluteRFunctional<T,Descriptor>::process (
     
     for (plint iX=domain.x0; iX<=domain.x1; ++iX) {
         for (plint iY=domain.y0; iY<=domain.y1; ++iY) {
-            zhouAxisymmetricDynamics<T,Descriptor>& dynamics = dynamic_cast<zhouAxisymmetricDynamics<T,Descriptor>&>(lattice.get(iX,iY).getDynamics());
+            ZhouAxisymmetricDynamics<T,Descriptor>& dynamics = dynamic_cast<ZhouAxisymmetricDynamics<T,Descriptor>&>(lattice.get(iX,iY).getDynamics());
             dynamics.setAbsoluteR(iY + absoluteOffset.y);
         }
     }

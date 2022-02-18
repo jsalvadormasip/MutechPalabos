@@ -250,12 +250,12 @@ int main(int argc, char* argv[]) {
 
     MultiBlockLattice2D<T, DESCRIPTOR> lattice (
             parameters.getNx(), parameters.getNy(),
-            new zhouAxisymmetricDynamics<T,DESCRIPTOR>( // necessary steps for axisymmetric LBM
+            new ZhouAxisymmetricDynamics<T,DESCRIPTOR>( // necessary steps for axisymmetric LBM
                 (new BGKdynamics<T,DESCRIPTOR>(parameters.getOmega()) )));
     // necessary steps for axisymmetric LBM as each dynamics need a different "r"
     // could have defined a different descriptor with an extra field though.
     defineDynamics(lattice, lattice.getBoundingBox(),
-                   new zhouAxisymmetricDynamics<T,DESCRIPTOR>( 
+                   new ZhouAxisymmetricDynamics<T,DESCRIPTOR>( 
                            new BGKdynamics<T,DESCRIPTOR>(parameters.getOmega())));
     
     // a functional to acquire "r" for each single cell, a necessary step for axisymmetric LBM

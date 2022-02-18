@@ -38,15 +38,15 @@ namespace plb {
 
 /// This class implements the Axisymmetric boundary condition by Zhou (2011)
 template<typename T, template<typename U> class Descriptor>
-class zhouAxisymmetricDynamics : public CompositeDynamics<T,Descriptor> {
+class ZhouAxisymmetricDynamics : public CompositeDynamics<T,Descriptor> {
 public:
-    zhouAxisymmetricDynamics(Dynamics<T,Descriptor>* baseDynamics_);
-    zhouAxisymmetricDynamics(HierarchicUnserializer& unserializer);
+    ZhouAxisymmetricDynamics(Dynamics<T,Descriptor>* baseDynamics_);
+    ZhouAxisymmetricDynamics(HierarchicUnserializer& unserializer);
     virtual void collide(Cell<T,Descriptor>& cell, BlockStatistics& statistics_);
     virtual void collideExternal(Cell<T,Descriptor>& cell, T rhoBar,
                          Array<T,Descriptor<T>::d> const& j, T thetaBar, BlockStatistics& stat);
-    virtual zhouAxisymmetricDynamics<T,Descriptor>* clone() const {
-        return new zhouAxisymmetricDynamics<T,Descriptor>(*this);
+    virtual ZhouAxisymmetricDynamics<T,Descriptor>* clone() const {
+        return new ZhouAxisymmetricDynamics<T,Descriptor>(*this);
     }
     virtual void prepareCollision(Cell<T,Descriptor>& cell);
     
