@@ -47,7 +47,9 @@ int ZhouAxisymmetricDynamics<T,Descriptor>::id =
 template<typename T, template<typename U> class Descriptor>
 ZhouAxisymmetricDynamics<T,Descriptor>::ZhouAxisymmetricDynamics(Dynamics<T,Descriptor>* baseDynamics_)
     : CompositeDynamics<T,Descriptor>(baseDynamics_, false)  // false is for automaticPrepareCollision.
-{ }
+{
+    PLB_ASSERT(Descriptor<T>::d == 2);
+}
 
 template<typename T, template<typename U> class Descriptor>
 ZhouAxisymmetricDynamics<T,Descriptor>::ZhouAxisymmetricDynamics(HierarchicUnserializer& unserializer)
