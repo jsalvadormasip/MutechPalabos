@@ -31,10 +31,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <random>
-#include <algorithm>
-
 #include "dataProcessors/metaStuffWrapper3D.h"
+
+#include <algorithm>
+#include <random>
 
 #include "atomicBlock/dataProcessingFunctional3D.h"
 #include "atomicBlock/dataProcessingFunctional3D.hh"
