@@ -41,6 +41,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(palabosTutorial)
 enable_language(CXX)
 
+set(EXECUTABLE_NAME "tutorial_1_1")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -117,25 +118,10 @@ add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 
 ###############################################################################
 
-add_executable(tutorial_1_1 "./tutorial_1_1.cpp")
-add_executable(tutorial_1_2 "./tutorial_1_2.cpp")
-add_executable(tutorial_1_4 "./tutorial_1_4.cpp")
-add_executable(tutorial_1_5 "./tutorial_1_5.cpp")
-add_executable(tutorial_1_6 "./tutorial_1_6.cpp")
-add_executable(tutorial_1_7 "./tutorial_1_7.cpp")
+add_executable(${EXECUTABLE_NAME} "./${EXECUTABLE_NAME}.cpp")
 
 # Link with the following libraries
-target_link_libraries(tutorial_1_1 palabos)
-target_link_libraries(tutorial_1_2 palabos)
-target_link_libraries(tutorial_1_4 palabos)
-target_link_libraries(tutorial_1_5 palabos)
-target_link_libraries(tutorial_1_6 palabos)
-target_link_libraries(tutorial_1_7 palabos)
+target_link_libraries(${EXECUTABLE_NAME} palabos)
 if(ENABLE_MPI)
-    target_link_libraries(tutorial_1_1 ${MPI_CXX_LIBRARIES})
-    target_link_libraries(tutorial_1_2 ${MPI_CXX_LIBRARIES})
-    target_link_libraries(tutorial_1_4 ${MPI_CXX_LIBRARIES})
-    target_link_libraries(tutorial_1_5 ${MPI_CXX_LIBRARIES})
-    target_link_libraries(tutorial_1_6 ${MPI_CXX_LIBRARIES})
-    target_link_libraries(tutorial_1_7 ${MPI_CXX_LIBRARIES})
+    target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
 endif()
