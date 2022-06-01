@@ -419,7 +419,7 @@ void MultiBlock2D::resetFlags()
     }
 }
 
-void MultiBlock2D::getDynamicsDict(Box2D domain, std::map<std::string, int> &dict)
+void MultiBlock2D::getDynamicsDict([[maybe_unused]] Box2D domain, std::map<std::string, int> &dict)
 {
     return dict.clear();
 }

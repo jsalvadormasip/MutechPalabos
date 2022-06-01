@@ -437,7 +437,7 @@ void MultiBlock3D::resetFlags()
     }
 }
 
-void MultiBlock3D::getDynamicsDict(Box3D domain, std::map<std::string, int> &dict)
+void MultiBlock3D::getDynamicsDict([[maybe_unused]] Box3D domain, std::map<std::string, int> &dict)
 {
     return dict.clear();
 }
