@@ -174,8 +174,8 @@ void Dynamics<T, Descriptor>::unserialize(HierarchicUnserializer &unserializer)
 
 template <typename T, template <typename U> class Descriptor>
 void Dynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
-    BlockStatistics &stat)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T thetaBar, BlockStatistics &stat)
 {
     T oldRhoBar;
     Array<T, Descriptor<T>::d> oldJ;
@@ -256,7 +256,8 @@ void Dynamics<T, Descriptor>::setExternalField(
  *  of tracking boundary nodes explicitly.
  **/
 template <typename T, template <typename U> class Descriptor>
-void Dynamics<T, Descriptor>::defineDensity([[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T density)
+void Dynamics<T, Descriptor>::defineDensity(
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T density)
 { }
 
 /** This method does nothing by default, unless overloaded in
@@ -269,7 +270,8 @@ void Dynamics<T, Descriptor>::defineDensity([[maybe_unused]] Cell<T, Descriptor>
  **/
 template <typename T, template <typename U> class Descriptor>
 void Dynamics<T, Descriptor>::defineVelocity(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] Array<T, Descriptor<T>::d> const &u)
+    [[maybe_unused]] Cell<T, Descriptor> &cell,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &u)
 { }
 
 /** This method does nothing by default, unless overloaded in
@@ -281,7 +283,8 @@ void Dynamics<T, Descriptor>::defineVelocity(
  *  of tracking boundary nodes explicitly.
  **/
 template <typename T, template <typename U> class Descriptor>
-void Dynamics<T, Descriptor>::defineTemperature([[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T temperature)
+void Dynamics<T, Descriptor>::defineTemperature(
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T temperature)
 { }
 
 /** This method does nothing by default, unless overloaded in
@@ -294,7 +297,8 @@ void Dynamics<T, Descriptor>::defineTemperature([[maybe_unused]] Cell<T, Descrip
  **/
 template <typename T, template <typename U> class Descriptor>
 void Dynamics<T, Descriptor>::defineHeatFlux(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] Array<T, Descriptor<T>::d> const &q)
+    [[maybe_unused]] Cell<T, Descriptor> &cell,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &q)
 { }
 
 /** This method does nothing by default, unless overloaded in
@@ -307,7 +311,8 @@ void Dynamics<T, Descriptor>::defineHeatFlux(
  **/
 template <typename T, template <typename U> class Descriptor>
 void Dynamics<T, Descriptor>::definePiNeq(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq)
+    [[maybe_unused]] Cell<T, Descriptor> &cell,
+    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq)
 { }
 
 /** This method does nothing by default, unless overloaded in
@@ -320,7 +325,8 @@ void Dynamics<T, Descriptor>::definePiNeq(
  **/
 template <typename T, template <typename U> class Descriptor>
 void Dynamics<T, Descriptor>::defineMoment(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] plint momentId, [[maybe_unused]] T const *value)
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] plint momentId,
+    [[maybe_unused]] T const *value)
 { }
 
 /* *************** Class BasicBulkDynamics *************************** */
@@ -351,7 +357,8 @@ void BasicBulkDynamics<T, Descriptor>::computeVelocity(
 /** Defaults to 1.
  */
 template <typename T, template <typename U> class Descriptor>
-T BasicBulkDynamics<T, Descriptor>::computeTemperature([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T BasicBulkDynamics<T, Descriptor>::computeTemperature(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return (T)1;
 }
@@ -360,7 +367,8 @@ T BasicBulkDynamics<T, Descriptor>::computeTemperature([[maybe_unused]] Cell<T, 
  */
 template <typename T, template <typename U> class Descriptor>
 void BasicBulkDynamics<T, Descriptor>::computePiNeq(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
 {
     PiNeq.resetToZero();
 }
@@ -369,7 +377,8 @@ void BasicBulkDynamics<T, Descriptor>::computePiNeq(
  */
 template <typename T, template <typename U> class Descriptor>
 void BasicBulkDynamics<T, Descriptor>::computeShearStress(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
 {
     stress.resetToZero();
 }
@@ -385,7 +394,8 @@ void BasicBulkDynamics<T, Descriptor>::computeHeatFlux(
 
 template <typename T, template <typename U> class Descriptor>
 void BasicBulkDynamics<T, Descriptor>::computeMoment(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId, [[maybe_unused]] T *moment) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId,
+    [[maybe_unused]] T *moment) const
 {
     PLB_PRECONDITION(false);
 }
@@ -1546,26 +1556,32 @@ void NoDynamics<T, Descriptor>::unserialize(HierarchicUnserializer &unserializer
 }
 
 template <typename T, template <typename U> class Descriptor>
-void NoDynamics<T, Descriptor>::collide([[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] BlockStatistics &statistics)
+void NoDynamics<T, Descriptor>::collide(
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] BlockStatistics &statistics)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void NoDynamics<T, Descriptor>::collideExternal(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
     [[maybe_unused]] BlockStatistics &stat)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 T NoDynamics<T, Descriptor>::computeEquilibrium(
-    [[maybe_unused]] plint iPop, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr, [[maybe_unused]] T thetaBar) const
+    [[maybe_unused]] plint iPop, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     return T();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void NoDynamics<T, Descriptor>::regularize(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
-    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq, [[maybe_unused]] T thetaBar) const
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq,
+    [[maybe_unused]] T thetaBar) const
 { }
 
 template <typename T, template <typename U> class Descriptor>
@@ -1588,21 +1604,24 @@ void NoDynamics<T, Descriptor>::computeVelocity(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T NoDynamics<T, Descriptor>::computeTemperature([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T NoDynamics<T, Descriptor>::computeTemperature(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return T();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void NoDynamics<T, Descriptor>::computePiNeq(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
 {
     PiNeq.resetToZero();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void NoDynamics<T, Descriptor>::computeShearStress(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
 {
     stress.resetToZero();
 }
@@ -1616,7 +1635,8 @@ void NoDynamics<T, Descriptor>::computeHeatFlux(
 
 template <typename T, template <typename U> class Descriptor>
 void NoDynamics<T, Descriptor>::computeMoment(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId, [[maybe_unused]] T *moment) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId,
+    [[maybe_unused]] T *moment) const
 { }
 
 template <typename T, template <typename U> class Descriptor>
@@ -1637,7 +1657,8 @@ T NoDynamics<T, Descriptor>::computeRhoBar([[maybe_unused]] Cell<T, Descriptor> 
 
 template <typename T, template <typename U> class Descriptor>
 void NoDynamics<T, Descriptor>::computeRhoBarJ(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar, Array<T, Descriptor<T>::d> &j) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar,
+    Array<T, Descriptor<T>::d> &j) const
 {
     rhoBar = (T)1 - Descriptor<T>::SkordosFactor();
     j.resetToZero();
@@ -1681,7 +1702,9 @@ void NoDynamics<T, Descriptor>::recompose(
 }
 
 template <typename T, template <typename U> class Descriptor>
-void NoDynamics<T, Descriptor>::rescale([[maybe_unused]] std::vector<T> &rawData, [[maybe_unused]] T xDxInv, [[maybe_unused]] T xDt, [[maybe_unused]] plint order) const
+void NoDynamics<T, Descriptor>::rescale(
+    [[maybe_unused]] std::vector<T> &rawData, [[maybe_unused]] T xDxInv, [[maybe_unused]] T xDt,
+    [[maybe_unused]] plint order) const
 { }
 
 template <typename T, template <typename U> class Descriptor>

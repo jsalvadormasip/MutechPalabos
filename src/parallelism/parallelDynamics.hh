@@ -81,8 +81,8 @@ T ParallelDynamics<T, Descriptor>::computeEquilibrium(
 
 template <typename T, template <typename U> class Descriptor>
 void ParallelDynamics<T, Descriptor>::regularize(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr,
-    Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq, T thetaBar) const
+    [[maybe_unused]] Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    T jSqr, Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq, T thetaBar) const
 {
     for (pluint iCell = 0; iCell < baseCells.size(); ++iCell) {
         baseCells[iCell]->regularize(rhoBar, j, jSqr, PiNeq, thetaBar);
@@ -90,7 +90,8 @@ void ParallelDynamics<T, Descriptor>::regularize(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T ParallelDynamics<T, Descriptor>::computeDensity([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ParallelDynamics<T, Descriptor>::computeDensity(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T rho = T();
     if (hasBulkCell) {
@@ -101,7 +102,8 @@ T ParallelDynamics<T, Descriptor>::computeDensity([[maybe_unused]] Cell<T, Descr
 }
 
 template <typename T, template <typename U> class Descriptor>
-T ParallelDynamics<T, Descriptor>::computePressure([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ParallelDynamics<T, Descriptor>::computePressure(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T p = T();
     if (hasBulkCell) {
@@ -122,7 +124,8 @@ void ParallelDynamics<T, Descriptor>::computeVelocity(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T ParallelDynamics<T, Descriptor>::computeTemperature([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ParallelDynamics<T, Descriptor>::computeTemperature(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T theta = T();
     if (hasBulkCell) {
@@ -134,7 +137,8 @@ T ParallelDynamics<T, Descriptor>::computeTemperature([[maybe_unused]] Cell<T, D
 
 template <typename T, template <typename U> class Descriptor>
 void ParallelDynamics<T, Descriptor>::computePiNeq(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
 {
     if (hasBulkCell) {
         baseCells[0]->getDynamics().computePiNeq(*baseCells[0], PiNeq);
@@ -144,7 +148,8 @@ void ParallelDynamics<T, Descriptor>::computePiNeq(
 
 template <typename T, template <typename U> class Descriptor>
 void ParallelDynamics<T, Descriptor>::computeShearStress(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
 {
     if (hasBulkCell) {
         baseCells[0]->getDynamics().computeShearStress(*baseCells[0], stress);
@@ -164,7 +169,8 @@ void ParallelDynamics<T, Descriptor>::computeHeatFlux(
 
 template <typename T, template <typename U> class Descriptor>
 void ParallelDynamics<T, Descriptor>::computeMoment(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId, [[maybe_unused]] T *moment) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId,
+    [[maybe_unused]] T *moment) const
 {
     // Cannot transfer generic moment through MPI,
     // because the type size is unknown
@@ -290,7 +296,8 @@ void ParallelDynamics<T, Descriptor>::setExternalField(
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ParallelDynamics<T, Descriptor>::defineDensity([[maybe_unused]] Cell<T, Descriptor> &cell, T rho)
+void ParallelDynamics<T, Descriptor>::defineDensity(
+    [[maybe_unused]] Cell<T, Descriptor> &cell, T rho)
 {
     for (pluint iCell = 0; iCell < baseCells.size(); ++iCell) {
         baseCells[iCell]->defineDensity(rho);
@@ -307,7 +314,8 @@ void ParallelDynamics<T, Descriptor>::defineVelocity(
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ParallelDynamics<T, Descriptor>::defineTemperature([[maybe_unused]] Cell<T, Descriptor> &cell, T temperature)
+void ParallelDynamics<T, Descriptor>::defineTemperature(
+    [[maybe_unused]] Cell<T, Descriptor> &cell, T temperature)
 {
     for (pluint iCell = 0; iCell < baseCells.size(); ++iCell) {
         baseCells[iCell]->defineTemperature(temperature);
@@ -325,7 +333,8 @@ void ParallelDynamics<T, Descriptor>::defineHeatFlux(
 
 template <typename T, template <typename U> class Descriptor>
 void ParallelDynamics<T, Descriptor>::definePiNeq(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq)
+    [[maybe_unused]] Cell<T, Descriptor> &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq)
 {
     for (pluint iCell = 0; iCell < baseCells.size(); ++iCell) {
         baseCells[iCell]->definePiNeq(PiNeq);
@@ -342,7 +351,8 @@ void ParallelDynamics<T, Descriptor>::defineMoment(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T ParallelDynamics<T, Descriptor>::computeRhoBar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ParallelDynamics<T, Descriptor>::computeRhoBar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T rhoBar = T();
     if (hasBulkCell) {
@@ -354,7 +364,8 @@ T ParallelDynamics<T, Descriptor>::computeRhoBar([[maybe_unused]] Cell<T, Descri
 
 template <typename T, template <typename U> class Descriptor>
 void ParallelDynamics<T, Descriptor>::computeRhoBarJ(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar, Array<T, Descriptor<T>::d> &j) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar,
+    Array<T, Descriptor<T>::d> &j) const
 {
     if (hasBulkCell) {
         baseCells[0]->getDynamics().computeRhoBarJ(*baseCells[0], rhoBar, j);
@@ -377,7 +388,8 @@ void ParallelDynamics<T, Descriptor>::computeRhoBarJPiNeq(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T ParallelDynamics<T, Descriptor>::computeEbar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ParallelDynamics<T, Descriptor>::computeEbar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T eBar = T();
     if (hasBulkCell) {
@@ -420,12 +432,15 @@ T ConstParallelDynamics<T, Descriptor>::computeEquilibrium(
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::regularize(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
-    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq, [[maybe_unused]] T thetaBar) const
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq,
+    [[maybe_unused]] T thetaBar) const
 { }
 
 template <typename T, template <typename U> class Descriptor>
-T ConstParallelDynamics<T, Descriptor>::computeDensity([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ConstParallelDynamics<T, Descriptor>::computeDensity(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T rho = T();
     if (hasBulkCell) {
@@ -436,7 +451,8 @@ T ConstParallelDynamics<T, Descriptor>::computeDensity([[maybe_unused]] Cell<T, 
 }
 
 template <typename T, template <typename U> class Descriptor>
-T ConstParallelDynamics<T, Descriptor>::computePressure([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ConstParallelDynamics<T, Descriptor>::computePressure(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T p = T();
     if (hasBulkCell) {
@@ -457,7 +473,8 @@ void ConstParallelDynamics<T, Descriptor>::computeVelocity(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T ConstParallelDynamics<T, Descriptor>::computeTemperature([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ConstParallelDynamics<T, Descriptor>::computeTemperature(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T theta = T();
     if (hasBulkCell) {
@@ -469,7 +486,8 @@ T ConstParallelDynamics<T, Descriptor>::computeTemperature([[maybe_unused]] Cell
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::computePiNeq(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
 {
     if (hasBulkCell) {
         baseCells[0]->getDynamics().computePiNeq(*baseCells[0], PiNeq);
@@ -479,7 +497,8 @@ void ConstParallelDynamics<T, Descriptor>::computePiNeq(
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::computeShearStress(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
 {
     if (hasBulkCell) {
         baseCells[0]->getDynamics().computeShearStress(*baseCells[0], stress);
@@ -499,7 +518,8 @@ void ConstParallelDynamics<T, Descriptor>::computeHeatFlux(
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::computeMoment(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId, [[maybe_unused]] T *moment) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId,
+    [[maybe_unused]] T *moment) const
 {
     // Cannot transfer generic moment through MPI,
     // because the type size is unknown
@@ -533,7 +553,8 @@ T ConstParallelDynamics<T, Descriptor>::getParameter(plint whichParameter) const
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ConstParallelDynamics<T, Descriptor>::setParameter([[maybe_unused]] plint whichParameter, [[maybe_unused]] T value)
+void ConstParallelDynamics<T, Descriptor>::setParameter(
+    [[maybe_unused]] plint whichParameter, [[maybe_unused]] T value)
 { }
 
 template <typename T, template <typename U> class Descriptor>
@@ -600,21 +621,25 @@ void ConstParallelDynamics<T, Descriptor>::getExternalField(
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::setPopulations(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] Array<T, Descriptor<T>::q> const &f)
+    [[maybe_unused]] Cell<T, Descriptor> &cell,
+    [[maybe_unused]] Array<T, Descriptor<T>::q> const &f)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::setExternalField(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] plint pos, [[maybe_unused]] plint size, [[maybe_unused]] const T *ext)
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] plint pos,
+    [[maybe_unused]] plint size, [[maybe_unused]] const T *ext)
 { }
 
 template <typename T, template <typename U> class Descriptor>
-void ConstParallelDynamics<T, Descriptor>::defineDensity([[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rho)
+void ConstParallelDynamics<T, Descriptor>::defineDensity(
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rho)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::defineVelocity(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] Array<T, Descriptor<T>::d> const &u)
+    [[maybe_unused]] Cell<T, Descriptor> &cell,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &u)
 { }
 
 template <typename T, template <typename U> class Descriptor>
@@ -624,21 +649,25 @@ void ConstParallelDynamics<T, Descriptor>::defineTemperature(
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::defineHeatFlux(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] Array<T, Descriptor<T>::d> const &q)
+    [[maybe_unused]] Cell<T, Descriptor> &cell,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &q)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::definePiNeq(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq)
+    [[maybe_unused]] Cell<T, Descriptor> &cell,
+    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::defineMoment(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] plint momentId, [[maybe_unused]] T const *value)
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] plint momentId,
+    [[maybe_unused]] T const *value)
 { }
 
 template <typename T, template <typename U> class Descriptor>
-T ConstParallelDynamics<T, Descriptor>::computeRhoBar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ConstParallelDynamics<T, Descriptor>::computeRhoBar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T rhoBar = T();
     if (hasBulkCell) {
@@ -650,7 +679,8 @@ T ConstParallelDynamics<T, Descriptor>::computeRhoBar([[maybe_unused]] Cell<T, D
 
 template <typename T, template <typename U> class Descriptor>
 void ConstParallelDynamics<T, Descriptor>::computeRhoBarJ(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar, Array<T, Descriptor<T>::d> &j) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar,
+    Array<T, Descriptor<T>::d> &j) const
 {
     if (hasBulkCell) {
         baseCells[0]->getDynamics().computeRhoBarJ(*baseCells[0], rhoBar, j);
@@ -673,7 +703,8 @@ void ConstParallelDynamics<T, Descriptor>::computeRhoBarJPiNeq(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T ConstParallelDynamics<T, Descriptor>::computeEbar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T ConstParallelDynamics<T, Descriptor>::computeEbar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     T eBar = T();
     if (hasBulkCell) {

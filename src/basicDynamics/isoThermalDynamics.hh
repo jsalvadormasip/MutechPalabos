@@ -80,7 +80,8 @@ void IsoThermalBulkDynamics<T, Descriptor>::regularize(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T IsoThermalBulkDynamics<T, Descriptor>::computeTemperature([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T IsoThermalBulkDynamics<T, Descriptor>::computeTemperature(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return (T)1;
 }
@@ -115,7 +116,8 @@ void IsoThermalBulkDynamics<T, Descriptor>::computeHeatFlux(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T IsoThermalBulkDynamics<T, Descriptor>::computeEbar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T IsoThermalBulkDynamics<T, Descriptor>::computeEbar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return T();
 }
@@ -345,8 +347,8 @@ void BGKdynamics<T, Descriptor>::collide(Cell<T, Descriptor> &cell, BlockStatist
 
 template <typename T, template <typename U> class Descriptor>
 void BGKdynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
-    BlockStatistics &stat)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T thetaBar, BlockStatistics &stat)
 {
     T uSqr = dynamicsTemplates<T, Descriptor>::bgk_ma2_collision(cell, rhoBar, j, this->getOmega());
     if (cell.takesStatistics()) {
@@ -356,7 +358,8 @@ void BGKdynamics<T, Descriptor>::collideExternal(
 
 template <typename T, template <typename U> class Descriptor>
 T BGKdynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr, [[maybe_unused]] T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T, Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);

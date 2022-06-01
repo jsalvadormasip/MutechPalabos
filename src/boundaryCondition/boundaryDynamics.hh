@@ -188,7 +188,8 @@ T BoundaryCompositeDynamics<T, Descriptor>::computeEbar(Cell<T, Descriptor> cons
  *  method completePopulations().
  */
 template <typename T, template <typename U> class Descriptor>
-void BoundaryCompositeDynamics<T, Descriptor>::completePopulations([[maybe_unused]] Cell<T, Descriptor> &cell) const
+void BoundaryCompositeDynamics<T, Descriptor>::completePopulations(
+    [[maybe_unused]] Cell<T, Descriptor> &cell) const
 { }
 
 template <typename T, template <typename U> class Descriptor>
@@ -249,19 +250,22 @@ void StoreDensityDynamics<T, Descriptor>::serialize(HierarchicSerializer &serial
 }
 
 template <typename T, template <typename U> class Descriptor>
-T StoreDensityDynamics<T, Descriptor>::computeDensity([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T StoreDensityDynamics<T, Descriptor>::computeDensity(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return Descriptor<T>::fullRho(rhoBar);
 }
 
 template <typename T, template <typename U> class Descriptor>
-void StoreDensityDynamics<T, Descriptor>::defineDensity([[maybe_unused]] Cell<T, Descriptor> &cell, T rho_)
+void StoreDensityDynamics<T, Descriptor>::defineDensity(
+    [[maybe_unused]] Cell<T, Descriptor> &cell, T rho_)
 {
     rhoBar = Descriptor<T>::rhoBar(rho_);
 }
 
 template <typename T, template <typename U> class Descriptor>
-T StoreDensityDynamics<T, Descriptor>::computeRhoBar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T StoreDensityDynamics<T, Descriptor>::computeRhoBar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return rhoBar;
 }
