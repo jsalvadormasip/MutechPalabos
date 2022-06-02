@@ -275,7 +275,7 @@ int MultiScalarField3D<T>::getStaticId() const
 template <typename T>
 void MultiScalarField3D<T>::copyReceive(
     MultiBlock3D const &fromBlock, Box3D const &fromDomain, Box3D const &toDomain,
-    modif::ModifT whichData)
+    [[maybe_unused]] modif::ModifT whichData)
 {
     MultiScalarField3D<T> const *fromField =
         dynamic_cast<MultiScalarField3D<T> const *>(&fromBlock);
@@ -916,7 +916,7 @@ int MultiNTensorField3D<T>::getStaticId() const
 template <typename T>
 void MultiNTensorField3D<T>::copyReceive(
     MultiBlock3D const &fromBlock, Box3D const &fromDomain, Box3D const &toDomain,
-    modif::ModifT whichData)
+    [[maybe_unused]] modif::ModifT whichData)
 {
     MultiNTensorField3D<T> const *fromField =
         dynamic_cast<MultiNTensorField3D<T> const *>(&fromBlock);

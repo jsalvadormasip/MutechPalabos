@@ -65,7 +65,8 @@ public:
     /// Receive data from a byte-stream into the lattice.
     virtual void receive(Box2D domain, std::vector<char> const &buffer, modif::ModifT kind);
     virtual void receive(
-        Box2D domain, std::vector<char> const &buffer, modif::ModifT kind, Dot2D offset)
+        Box2D domain, std::vector<char> const &buffer, modif::ModifT kind,
+        [[maybe_unused]] Dot2D offset)
     {
         receive(domain, buffer, kind);
     }
@@ -78,7 +79,7 @@ public:
         Box2D toDomain, plint deltaX, plint deltaY, AtomicBlock2D const &from, modif::ModifT kind);
     virtual void attribute(
         Box2D toDomain, plint deltaX, plint deltaY, AtomicBlock2D const &from, modif::ModifT kind,
-        Dot2D absoluteOffset)
+        [[maybe_unused]] Dot2D absoluteOffset)
     {
         attribute(toDomain, deltaX, deltaY, from, kind);
     }
