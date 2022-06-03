@@ -605,7 +605,7 @@ std::unique_ptr<MultiTensorField2D<T, nDim> > generateMultiTensorField(
 // TODO: why is there an unnamed arg?
 template <typename T, int nDim>
 std::unique_ptr<MultiTensorField2D<T, nDim> > defaultGenerateMultiTensorField2D(
-    MultiBlockManagement2D const &management, plint unnamedDummyArg)
+    MultiBlockManagement2D const &management, [[maybe_unused]] plint unnamedDummyArg)
 {
     Array<T, nDim> iniVal;
     iniVal.resetToZero();
