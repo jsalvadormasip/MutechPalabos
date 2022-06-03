@@ -875,22 +875,25 @@ void BounceBack<T, Descriptor>::collideExternal(
 
 template <typename T, template <typename U> class Descriptor>
 T BounceBack<T, Descriptor>::computeEquilibrium(
-    plint iPop, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j,
-    [[maybe_unused]] T jSqr, [[maybe_unused]] T thetaBar) const
+    [[maybe_unused]] plint iPop, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     // default equilibrium for u = 0
-    return Descriptor<T>::t[iPop] * Descriptor<T>::rhoBar(rho);
+    // return Descriptor<T>::t[iPop] * Descriptor<T>::rhoBar(rho);
+    return T();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void BounceBack<T, Descriptor>::regularize(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr,
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
     [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq, T thetaBar) const
 {
     // just equilibrium
-    for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
-        cell[iPop] = this->computeEquilibrium(iPop, rhoBar, j, jSqr, thetaBar);
-    }
+    // for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
+    //     cell[iPop] = this->computeEquilibrium(iPop, rhoBar, j, jSqr, thetaBar);
+    // }
 }
 
 template <typename T, template <typename U> class Descriptor>
