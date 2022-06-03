@@ -70,7 +70,9 @@ plb_ofstream::plb_ofstream(const char *filename, std::ostream::openmode mode) :
     original(global::mpi().isMainProcessor() ? new std::ofstream(filename, mode) : 0)
 { }
 
-plb_ofstream::plb_ofstream([[maybe_unused]] plb_ofstream const &rhs) : devNullStream(&devNullBuffer), original(0) { }
+plb_ofstream::plb_ofstream([[maybe_unused]] plb_ofstream const &rhs) :
+    devNullStream(&devNullBuffer), original(0)
+{ }
 
 plb_ofstream &plb_ofstream::operator=([[maybe_unused]] plb_ofstream const &rhs)
 {

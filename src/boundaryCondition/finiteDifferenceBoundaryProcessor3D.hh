@@ -45,7 +45,8 @@
 
 namespace plb {
 
-namespace fdBoundaryAlgorithm { }  // namespace fdBoundaryAlgorithm
+namespace fdBoundaryAlgorithm {
+}  // namespace fdBoundaryAlgorithm
 
 ////////  PlaneFdBoundaryFunctional3D ///////////////////////////////////
 

@@ -121,7 +121,9 @@ class PoiseuilleDensityAndZeroVelocity {
 public:
     PoiseuilleDensityAndZeroVelocity(const Pipe<T> &pipe_, T DPAdim_) : pipe(pipe_), DPAdim(DPAdim_)
     { }
-    void operator()([[maybe_unused]] plint iX, [[maybe_unused]] plint iY, plint iZ, T &rho, Array<T, 3> &u) const
+    void operator()(
+        [[maybe_unused]] plint iX, [[maybe_unused]] plint iY, plint iZ, T &rho,
+        Array<T, 3> &u) const
     {
         rho = poiseuilleDensity(iZ, pipe, DPAdim);
         u[0] = T();

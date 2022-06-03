@@ -42,7 +42,8 @@
 namespace plb {
 
 template <typename T, template <typename U> class Descriptor>
-struct kbcTemplates { };
+struct kbcTemplates {
+};
 
 }  // namespace plb
 

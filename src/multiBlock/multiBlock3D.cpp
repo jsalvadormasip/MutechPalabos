@@ -705,9 +705,12 @@ MultiBlock3D *MultiBlockRegistration3D::find(id_t id)
     }
 }
 
-MultiBlockRegistration3D::MultiBlockRegistration3D([[maybe_unused]] MultiBlockRegistration3D const &rhs) { }
+MultiBlockRegistration3D::MultiBlockRegistration3D(
+    [[maybe_unused]] MultiBlockRegistration3D const &rhs)
+{ }
 
-MultiBlockRegistration3D &MultiBlockRegistration3D::operator=([[maybe_unused]] MultiBlockRegistration3D const &rhs)
+MultiBlockRegistration3D &MultiBlockRegistration3D::operator=(
+    [[maybe_unused]] MultiBlockRegistration3D const &rhs)
 {
     return *this;
 }

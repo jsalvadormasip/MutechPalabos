@@ -69,7 +69,8 @@ public:
     /// Receive data from a byte-stream into the lattice.
     virtual void receive(Box3D domain, std::vector<char> const &buffer, modif::ModifT kind);
     virtual void receive(
-        Box3D domain, std::vector<char> const &buffer, modif::ModifT kind, [[maybe_unused]] Dot3D absoluteOffset)
+        Box3D domain, std::vector<char> const &buffer, modif::ModifT kind,
+        [[maybe_unused]] Dot3D absoluteOffset)
     {
         receive(domain, buffer, kind);
     }

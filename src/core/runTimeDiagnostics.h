@@ -104,7 +104,8 @@ void plbOutOfRangeError(bool issueError, std::string message);
 void plbOutOfRangeError(std::string message);
 void plbMainProcOutOfRangeError(bool issueError, std::string message);
 
-class PlbException : public std::exception { };
+class PlbException : public std::exception {
+};
 
 class PlbGenericException : public PlbException {
 public:

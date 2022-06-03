@@ -582,7 +582,8 @@ struct SymmetricRankThreeTensor {
 };
 
 template <typename T, int d>
-struct SymmetricRankFourTensorImpl { };
+struct SymmetricRankFourTensorImpl {
+};
 
 template <typename T>
 struct SymmetricRankFourTensorImpl<T, 2> {
@@ -709,7 +710,8 @@ struct SymmetricRankFourTensor {
 };
 
 template <typename T, int d>
-struct SymmetricRankFiveTensorImpl { };
+struct SymmetricRankFiveTensorImpl {
+};
 
 template <typename T>
 struct SymmetricRankFiveTensorImpl<T, 2> {
@@ -773,7 +775,8 @@ struct SymmetricRankFiveTensor {
 };
 
 template <typename T, int d>
-struct SymmetricRankSixTensorImpl { };
+struct SymmetricRankSixTensorImpl {
+};
 
 template <typename T>
 struct SymmetricRankSixTensorImpl<T, 2> {
