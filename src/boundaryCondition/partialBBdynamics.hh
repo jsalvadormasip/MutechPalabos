@@ -65,12 +65,12 @@ void PartialBBdynamics<T, Descriptor>::collideExternal(
     Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, T thetaBar,
     BlockStatistics &stat)
 {
-    PLB_ASSERT(true);
+    PLB_ASSERT(false);
 }
 
 template <typename T, template <typename U> class Descriptor>
 T PartialBBdynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr, T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr, [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T, Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -124,6 +124,7 @@ void PartialBBdynamics<T, Descriptor>::recomposeOrder0(
     }
 }
 
+// QUESTION: 
 template <typename T, template <typename U> class Descriptor>
 T PartialBBdynamics<T, Descriptor>::PSMCollision(
     Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,

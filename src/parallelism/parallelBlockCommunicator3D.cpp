@@ -173,7 +173,7 @@ ParallelBlockCommunicator3D::ParallelBlockCommunicator3D() :
 
 // QUESTION: Why copy construction does nothing?
 ParallelBlockCommunicator3D::ParallelBlockCommunicator3D(
-    [[maybe_unused]] ParallelBlockCommunicator3D const &rhs) :
+    ParallelBlockCommunicator3D const &rhs) :
     overlapsModified(true), communication(0)
 { }
 

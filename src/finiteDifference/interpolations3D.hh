@@ -179,6 +179,7 @@ Array<T, 3> predictorCorrectorNTensorField(
     return (vector1 + vector2) / (T)2;
 }
 
+// QUESTION: Maybe we could discard this misleading velIsJ here.
 template <typename T>
 void predictorCorrectorRhoBarJ(
     NTensorField3D<T> &rhoBarJ, Array<T, 3> const &position, bool velIsJ, Array<T, 3> &j, T &rhoBar)

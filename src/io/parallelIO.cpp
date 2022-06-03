@@ -70,10 +70,9 @@ plb_ofstream::plb_ofstream(const char *filename, std::ostream::openmode mode) :
     original(global::mpi().isMainProcessor() ? new std::ofstream(filename, mode) : 0)
 { }
 
-// QUESTION: Why is the copy const and equal doing nothing?
-plb_ofstream::plb_ofstream(plb_ofstream const &rhs) : devNullStream(&devNullBuffer), original(0) { }
+plb_ofstream::plb_ofstream([[maybe_unused]] plb_ofstream const &rhs) : devNullStream(&devNullBuffer), original(0) { }
 
-plb_ofstream &plb_ofstream::operator=(plb_ofstream const &rhs)
+plb_ofstream &plb_ofstream::operator=([[maybe_unused]] plb_ofstream const &rhs)
 {
     return *this;
 }

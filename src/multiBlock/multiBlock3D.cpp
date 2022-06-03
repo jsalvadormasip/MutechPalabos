@@ -705,10 +705,9 @@ MultiBlock3D *MultiBlockRegistration3D::find(id_t id)
     }
 }
 
-// TODO: WHy copy const and equal do nothing?
-MultiBlockRegistration3D::MultiBlockRegistration3D(MultiBlockRegistration3D const &rhs) { }
+MultiBlockRegistration3D::MultiBlockRegistration3D([[maybe_unused]] MultiBlockRegistration3D const &rhs) { }
 
-MultiBlockRegistration3D &MultiBlockRegistration3D::operator=(MultiBlockRegistration3D const &rhs)
+MultiBlockRegistration3D &MultiBlockRegistration3D::operator=([[maybe_unused]] MultiBlockRegistration3D const &rhs)
 {
     return *this;
 }

@@ -88,58 +88,65 @@ void Particle3D<T, Descriptor>::setTag(plint tag_)
 }
 
 template <typename T, template <typename U> class Descriptor>
-bool Particle3D<T, Descriptor>::getVector(plint whichVector, Array<T, 3> &vector) const
+bool Particle3D<T, Descriptor>::getVector(
+    [[maybe_unused]] plint whichVector, [[maybe_unused]] Array<T, 3> &vector) const
 {
     return false;
 }
 
 template <typename T, template <typename U> class Descriptor>
-bool Particle3D<T, Descriptor>::setVector(plint whichVector, Array<T, 3> const &vector)
+bool Particle3D<T, Descriptor>::setVector(
+    [[maybe_unused]] plint whichVector, [[maybe_unused]] Array<T, 3> const &vector)
 {
     return false;
 }
 
 template <typename T, template <typename U> class Descriptor>
-bool Particle3D<T, Descriptor>::getScalar(plint whichScalar, T &scalar) const
+bool Particle3D<T, Descriptor>::getScalar(
+    [[maybe_unused]] plint whichScalar, [[maybe_unused]] T &scalar) const
 {
     return false;
 }
 
 template <typename T, template <typename U> class Descriptor>
-bool Particle3D<T, Descriptor>::setScalar(plint whichScalar, T scalar)
+bool Particle3D<T, Descriptor>::setScalar(
+    [[maybe_unused]] plint whichScalar, [[maybe_unused]] T scalar)
 {
     return false;
 }
 
 template <typename T, template <typename U> class Descriptor>
 bool Particle3D<T, Descriptor>::getTensor(
-    plint whichVector, Array<T, SymmetricTensorImpl<T, 3>::n> &tensor) const
+    [[maybe_unused]] plint whichVector,
+    [[maybe_unused]] Array<T, SymmetricTensorImpl<T, 3>::n> &tensor) const
 {
     return false;
 }
 
 template <typename T, template <typename U> class Descriptor>
 bool Particle3D<T, Descriptor>::setTensor(
-    plint whichVector, Array<T, SymmetricTensorImpl<T, 3>::n> const &tensor)
+    [[maybe_unused]] plint whichVector,
+    [[maybe_unused]] Array<T, SymmetricTensorImpl<T, 3>::n> const &tensor)
 {
     return false;
 }
 
 template <typename T, template <typename U> class Descriptor>
-bool Particle3D<T, Descriptor>::setScalars(std::vector<T> const &scalars)
+bool Particle3D<T, Descriptor>::setScalars([[maybe_unused]] std::vector<T> const &scalars)
 {
     return false;
 }
 
 template <typename T, template <typename U> class Descriptor>
-bool Particle3D<T, Descriptor>::setVectors(std::vector<Array<T, 3> > const &vectors)
+bool Particle3D<T, Descriptor>::setVectors(
+    [[maybe_unused]] std::vector<Array<T, 3> > const &vectors)
 {
     return false;
 }
 
 template <typename T, template <typename U> class Descriptor>
 bool Particle3D<T, Descriptor>::setTensors(
-    std::vector<Array<T, SymmetricTensorImpl<T, 3>::n> > const &tensors)
+    [[maybe_unused]] std::vector<Array<T, SymmetricTensorImpl<T, 3>::n> > const &tensors)
 {
     return false;
 }
