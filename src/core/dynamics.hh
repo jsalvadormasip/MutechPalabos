@@ -888,7 +888,8 @@ template <typename T, template <typename U> class Descriptor>
 void BounceBack<T, Descriptor>::regularize(
     [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
     [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
-    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq, [[maybe_unused]] T thetaBar) const
+    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq,
+    [[maybe_unused]] T thetaBar) const
 {
     // just equilibrium
     // for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
@@ -1385,33 +1386,39 @@ void SpecularReflection<T, Descriptor>::collide(
 
 template <typename T, template <typename U> class Descriptor>
 void SpecularReflection<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, T thetaBar,
-    BlockStatistics &stat)
+    Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, T thetaBar, BlockStatistics &stat)
 {
     collide(cell, stat);
 }
 
 template <typename T, template <typename U> class Descriptor>
 T SpecularReflection<T, Descriptor>::computeEquilibrium(
-    [[maybe_unused]] plint iPop, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr, [[maybe_unused]] T thetaBar) const
+    [[maybe_unused]] plint iPop, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     return T();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void SpecularReflection<T, Descriptor>::regularize(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
-    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq, [[maybe_unused]] T thetaBar) const
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq,
+    [[maybe_unused]] T thetaBar) const
 { }
 
 template <typename T, template <typename U> class Descriptor>
-T SpecularReflection<T, Descriptor>::computeDensity([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T SpecularReflection<T, Descriptor>::computeDensity(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return rho;
 }
 
 template <typename T, template <typename U> class Descriptor>
-T SpecularReflection<T, Descriptor>::computePressure([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T SpecularReflection<T, Descriptor>::computePressure(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return T();
 }
@@ -1424,21 +1431,24 @@ void SpecularReflection<T, Descriptor>::computeVelocity(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T SpecularReflection<T, Descriptor>::computeTemperature([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T SpecularReflection<T, Descriptor>::computeTemperature(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return T();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void SpecularReflection<T, Descriptor>::computePiNeq(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
 {
     PiNeq.resetToZero();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void SpecularReflection<T, Descriptor>::computeShearStress(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
 {
     stress.resetToZero();
 }
@@ -1452,7 +1462,8 @@ void SpecularReflection<T, Descriptor>::computeHeatFlux(
 
 template <typename T, template <typename U> class Descriptor>
 void SpecularReflection<T, Descriptor>::computeMoment(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId, [[maybe_unused]] T *moment) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId,
+    [[maybe_unused]] T *moment) const
 { }
 
 template <typename T, template <typename U> class Descriptor>
@@ -1490,7 +1501,8 @@ void SpecularReflection<T, Descriptor>::computeRhoBarJPiNeq(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T SpecularReflection<T, Descriptor>::computeEbar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T SpecularReflection<T, Descriptor>::computeEbar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return T();
 }
@@ -1511,14 +1523,16 @@ void SpecularReflection<T, Descriptor>::decompose(
 
 template <typename T, template <typename U> class Descriptor>
 void SpecularReflection<T, Descriptor>::recompose(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] std::vector<T> const &rawData, [[maybe_unused]] plint order) const
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] std::vector<T> const &rawData,
+    [[maybe_unused]] plint order) const
 {
     //     PLB_PRECONDITION( (plint)rawData.size() == numDecomposedVariables(order) );
 }
 
 template <typename T, template <typename U> class Descriptor>
 void SpecularReflection<T, Descriptor>::rescale(
-    [[maybe_unused]] std::vector<T> &rawData, [[maybe_unused]] T xDxInv, [[maybe_unused]] T xDt, [[maybe_unused]] plint order) const
+    [[maybe_unused]] std::vector<T> &rawData, [[maybe_unused]] T xDxInv, [[maybe_unused]] T xDt,
+    [[maybe_unused]] plint order) const
 { }
 
 template <typename T, template <typename U> class Descriptor>

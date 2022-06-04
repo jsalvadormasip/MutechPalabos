@@ -408,7 +408,8 @@ BoundaryCompositeDynamics<T, Descriptor>
 template <typename T, template <typename U> class Descriptor>
 template <int plane, int normal1, int normal2>
 BoxProcessingFunctional3D_L<T, Descriptor>
-    *AdvectionDiffusionBoundaryManager3D<T, Descriptor>::getTemperatureEdgeProcessor([[maybe_unused]] Box3D domain)
+    *AdvectionDiffusionBoundaryManager3D<T, Descriptor>::getTemperatureEdgeProcessor(
+        [[maybe_unused]] Box3D domain)
 {
     return 0;
 }

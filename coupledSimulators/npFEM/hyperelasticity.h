@@ -53,8 +53,8 @@ namespace npfem {
 ///////////////////////////////////////////////////////////////////////////////
 // Trianglular Elements
 ///////////////////////////////////////////////////////////////////////////////
-SHAPEOP_INLINE Scalar
-    f_tr(const Scalar &x, const Scalar &miu, const Scalar &lambda, [[maybe_unused]] const Scalar &kappa)
+SHAPEOP_INLINE Scalar f_tr(
+    const Scalar &x, const Scalar &miu, const Scalar &lambda, [[maybe_unused]] const Scalar &kappa)
 {
     // Custom Energy
     // return miu * (1. / 4.) * std::pow(x - 1., 4.);

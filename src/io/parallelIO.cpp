@@ -146,7 +146,9 @@ plb_ifstream::plb_ifstream(const char *filename, std::istream::openmode mode) :
     original(global::mpi().isMainProcessor() ? new std::ifstream(filename, mode) : 0)
 { }
 
-plb_ifstream::plb_ifstream([[maybe_unused]] plb_ifstream const &rhs) : devNullStream(&devNullBuffer), original(0) { }
+plb_ifstream::plb_ifstream([[maybe_unused]] plb_ifstream const &rhs) :
+    devNullStream(&devNullBuffer), original(0)
+{ }
 
 plb_ifstream &plb_ifstream::operator=([[maybe_unused]] plb_ifstream const &rhs)
 {

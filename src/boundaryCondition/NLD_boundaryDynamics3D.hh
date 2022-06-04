@@ -1536,13 +1536,15 @@ NLD_AD_DirichletDynamics3D<T, Descriptor>::NLD_AD_DirichletDynamics3D(
 }
 
 template <typename T, template <typename U> class Descriptor>
-void NLD_AD_DirichletDynamics3D<T, Descriptor>::defineDensity([[maybe_unused]] Cell<T, Descriptor> &cell, T density)
+void NLD_AD_DirichletDynamics3D<T, Descriptor>::defineDensity(
+    [[maybe_unused]] Cell<T, Descriptor> &cell, T density)
 {
     rho = density;
 }
 
 template <typename T, template <typename U> class Descriptor>
-T NLD_AD_DirichletDynamics3D<T, Descriptor>::computeDensity([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T NLD_AD_DirichletDynamics3D<T, Descriptor>::computeDensity(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return rho;
 }
@@ -1568,7 +1570,8 @@ int NLD_AD_DirichletDynamics3D<T, Descriptor>::getId() const
 }
 
 template <typename T, template <typename U> class Descriptor>
-void NLD_AD_DirichletDynamics3D<T, Descriptor>::prepareCollision([[maybe_unused]] Cell<T, Descriptor> &cell)
+void NLD_AD_DirichletDynamics3D<T, Descriptor>::prepareCollision(
+    [[maybe_unused]] Cell<T, Descriptor> &cell)
 { }
 
 template <typename T, template <typename U> class Descriptor>
@@ -1590,8 +1593,9 @@ void NLD_AD_DirichletDynamics3D<T, Descriptor>::planeComputeMacroscopic(
 
 template <typename T, template <typename U> class Descriptor>
 void NLD_AD_DirichletDynamics3D<T, Descriptor>::edgeComputeMacroscopic(
-    [[maybe_unused]] int plane, [[maybe_unused]] int normal1, [[maybe_unused]] int normal2, plint iX, plint iY, plint iZ,
-    BlockLattice3D<T, Descriptor> &lattice, T &rhoBar, Array<T, 3> &j, T &thetaBar)
+    [[maybe_unused]] int plane, [[maybe_unused]] int normal1, [[maybe_unused]] int normal2,
+    plint iX, plint iY, plint iZ, BlockLattice3D<T, Descriptor> &lattice, T &rhoBar, Array<T, 3> &j,
+    T &thetaBar)
 {
     rhoBar = Descriptor<T>::rhoBar(rho);
     // Here we decide to return j^eq instead of j.
@@ -1601,8 +1605,9 @@ void NLD_AD_DirichletDynamics3D<T, Descriptor>::edgeComputeMacroscopic(
 
 template <typename T, template <typename U> class Descriptor>
 void NLD_AD_DirichletDynamics3D<T, Descriptor>::cornerComputeMacroscopic(
-    [[maybe_unused]] int xNormal, [[maybe_unused]] int yNormal, [[maybe_unused]] int zNormal, plint iX, plint iY, plint iZ,
-    BlockLattice3D<T, Descriptor> &lattice, T &rhoBar, Array<T, 3> &j, T &thetaBar)
+    [[maybe_unused]] int xNormal, [[maybe_unused]] int yNormal, [[maybe_unused]] int zNormal,
+    plint iX, plint iY, plint iZ, BlockLattice3D<T, Descriptor> &lattice, T &rhoBar, Array<T, 3> &j,
+    T &thetaBar)
 {
     rhoBar = Descriptor<T>::rhoBar(rho);
     // Here we decide to return j^eq instead of j.
@@ -1794,7 +1799,8 @@ int NLD_AD_NeumannBoundaryDynamics3D<T, Descriptor>::getId() const
 }
 
 template <typename T, template <typename U> class Descriptor>
-void NLD_AD_NeumannBoundaryDynamics3D<T, Descriptor>::prepareCollision([[maybe_unused]] Cell<T, Descriptor> &cell)
+void NLD_AD_NeumannBoundaryDynamics3D<T, Descriptor>::prepareCollision(
+    [[maybe_unused]] Cell<T, Descriptor> &cell)
 { }
 
 template <typename T, template <typename U> class Descriptor>

@@ -64,12 +64,14 @@ void NoSlipProfile3D<T>::setNormal([[maybe_unused]] Array<T, 3> const &normal_)
 { }
 
 template <typename T>
-void NoSlipProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
+void NoSlipProfile3D<T>::defineCircularShape(
+    [[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void NoSlipProfile3D<T>::getData(
-    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id,
+    [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     data.resetToZero();
@@ -89,12 +91,14 @@ void FreeSlipProfile3D<T>::setNormal([[maybe_unused]] Array<T, 3> const &normal_
 { }
 
 template <typename T>
-void FreeSlipProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
+void FreeSlipProfile3D<T>::defineCircularShape(
+    [[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void FreeSlipProfile3D<T>::getData(
-    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id,
+    [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     data.resetToZero();
@@ -129,7 +133,8 @@ void PoiseuilleProfile3D<T>::defineCircularShape(Array<T, 3> const &center_, T r
 
 template <typename T>
 void PoiseuilleProfile3D<T>::getData(
-    Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, [[maybe_unused]] Array<T, 3> &data,
+    Array<T, 3> const &pos, [[maybe_unused]] plint id,
+    [[maybe_unused]] AtomicBlock3D const *argument, [[maybe_unused]] Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -427,12 +432,14 @@ void VelocityPlugProfile3D<T>::setNormal(Array<T, 3> const &normal_)
 }
 
 template <typename T>
-void VelocityPlugProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
+void VelocityPlugProfile3D<T>::defineCircularShape(
+    [[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void VelocityPlugProfile3D<T>::getData(
-    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id,
+    [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -517,12 +524,14 @@ void DensityNeumannBoundaryProfile3D<T>::setNormal([[maybe_unused]] Array<T, 3> 
 { }
 
 template <typename T>
-void DensityNeumannBoundaryProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
+void DensityNeumannBoundaryProfile3D<T>::defineCircularShape(
+    [[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void DensityNeumannBoundaryProfile3D<T>::getData(
-    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id,
+    [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::densityNeumann;
@@ -550,12 +559,14 @@ void ScalarDirichletProfile3D<T>::setNormal([[maybe_unused]] Array<T, 3> const &
 { }
 
 template <typename T>
-void ScalarDirichletProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
+void ScalarDirichletProfile3D<T>::defineCircularShape(
+    [[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void ScalarDirichletProfile3D<T>::getData(
-    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 2> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id,
+    [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 2> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -578,12 +589,14 @@ void ScalarNeumannProfile3D<T>::setNormal(Array<T, 3> const &normal_)
 }
 
 template <typename T>
-void ScalarNeumannProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
+void ScalarNeumannProfile3D<T>::defineCircularShape(
+    [[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void ScalarNeumannProfile3D<T>::getData(
-    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 2> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id,
+    [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 2> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::neumann;

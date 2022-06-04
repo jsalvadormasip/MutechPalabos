@@ -74,8 +74,10 @@ AdvectionDiffusionDynamics<T, Descriptor>::AdvectionDiffusionDynamics(T omega_) 
 
 template <typename T, template <typename U> class Descriptor>
 void AdvectionDiffusionDynamics<T, Descriptor>::regularize(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
-    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq, [[maybe_unused]] T thetaBar) const
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T jSqr,
+    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq,
+    [[maybe_unused]] T thetaBar) const
 {
     // jAdvDiff is the first order moment of
     Array<T, Descriptor<T>::d> jEq;
@@ -86,7 +88,8 @@ void AdvectionDiffusionDynamics<T, Descriptor>::regularize(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T AdvectionDiffusionDynamics<T, Descriptor>::computeEbar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T AdvectionDiffusionDynamics<T, Descriptor>::computeEbar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return T();
 }
@@ -102,7 +105,8 @@ void AdvectionDiffusionDynamics<T, Descriptor>::computeVelocity(
 }
 
 template <typename T, template <typename U> class Descriptor>
-plint AdvectionDiffusionDynamics<T, Descriptor>::numDecomposedVariables([[maybe_unused]] plint order) const
+plint AdvectionDiffusionDynamics<T, Descriptor>::numDecomposedVariables(
+    [[maybe_unused]] plint order) const
 {
     // Start with the decomposed version of the populations.
     plint numVariables = 1 + Descriptor<T>::d + Descriptor<T>::q;
@@ -170,7 +174,8 @@ void AdvectionDiffusionDynamics<T, Descriptor>::recompose(
 
 template <typename T, template <typename U> class Descriptor>
 void AdvectionDiffusionDynamics<T, Descriptor>::rescale(
-    [[maybe_unused]] std::vector<T> &rawData, [[maybe_unused]] T xDxInv, [[maybe_unused]] T xDt, [[maybe_unused]] plint order) const
+    [[maybe_unused]] std::vector<T> &rawData, [[maybe_unused]] T xDxInv, [[maybe_unused]] T xDt,
+    [[maybe_unused]] plint order) const
 {
     // TODO: rescale velcotiy in the external scalars.
 }
@@ -446,8 +451,8 @@ void AdvectionDiffusionRLBdynamics<T, Descriptor>::collide(
 
 template <typename T, template <typename U> class Descriptor>
 void AdvectionDiffusionRLBdynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &jEq, [[maybe_unused]] T thetaBar,
-    BlockStatistics &statistics)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &jEq,
+    [[maybe_unused]] T thetaBar, BlockStatistics &statistics)
 {
     Array<T, Descriptor<T>::d> j;
     momentTemplates<T, Descriptor>::get_j(cell, j);
@@ -465,7 +470,8 @@ void AdvectionDiffusionRLBdynamics<T, Descriptor>::collideExternal(
  */
 template <typename T, template <typename U> class Descriptor>
 T AdvectionDiffusionRLBdynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &jEq, [[maybe_unused]] T jSqr, [[maybe_unused]] T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &jEq, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     return advectionDiffusionDynamicsTemplates<T, Descriptor>::bgk_ma1_equilibrium(
         iPop, rhoBar, jEq);
@@ -805,8 +811,8 @@ void AdvectionDiffusionBGKdynamics<T, Descriptor>::collide(
 
 template <typename T, template <typename U> class Descriptor>
 void AdvectionDiffusionBGKdynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &jEq, [[maybe_unused]] T thetaBar,
-    BlockStatistics &statistics)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &jEq,
+    [[maybe_unused]] T thetaBar, BlockStatistics &statistics)
 {
     T uSqr = advectionDiffusionDynamicsTemplates<T, Descriptor>::no_corr_bgk_collision(
         cell, rhoBar, jEq, this->getOmega());
@@ -820,7 +826,8 @@ void AdvectionDiffusionBGKdynamics<T, Descriptor>::collideExternal(
  */
 template <typename T, template <typename U> class Descriptor>
 T AdvectionDiffusionBGKdynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &jEq, [[maybe_unused]] T jSqr, [[maybe_unused]] T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &jEq, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     return advectionDiffusionDynamicsTemplates<T, Descriptor>::bgk_ma1_equilibrium(
         iPop, rhoBar, jEq);

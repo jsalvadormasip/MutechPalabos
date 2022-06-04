@@ -343,8 +343,8 @@ void SmagorinskyBGKdynamics<T, Descriptor>::collide(
 
 template <typename T, template <typename U> class Descriptor>
 void SmagorinskyBGKdynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
-    BlockStatistics &stat)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T thetaBar, BlockStatistics &stat)
 {
     Array<T, SymmetricTensor<T, Descriptor>::n> PiNeq;
     momentTemplates<T, Descriptor>::compute_PiNeq(cell, rhoBar, j, PiNeq);
@@ -357,7 +357,8 @@ void SmagorinskyBGKdynamics<T, Descriptor>::collideExternal(
 
 template <typename T, template <typename U> class Descriptor>
 T SmagorinskyBGKdynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr, [[maybe_unused]] T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T, Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
@@ -753,8 +754,8 @@ void ConsistentSmagorinskyCompleteRegularizedBGKdynamics<T, Descriptor>::collide
 
 template <typename T, template <typename U> class Descriptor>
 void ConsistentSmagorinskyCompleteRegularizedBGKdynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
-    BlockStatistics &stat)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T thetaBar, BlockStatistics &stat)
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     Array<T, SymmetricTensor<T, Descriptor>::n> piNeq;
@@ -1460,8 +1461,8 @@ void SmagorinskyIncBGKdynamics<T, Descriptor>::collide(
 
 template <typename T, template <typename U> class Descriptor>
 void SmagorinskyIncBGKdynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
-    BlockStatistics &stat)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T thetaBar, BlockStatistics &stat)
 {
     Array<T, SymmetricTensor<T, Descriptor>::n> PiNeq;
     momentTemplates<T, Descriptor>::compute_PiNeq(cell, rhoBar, j, PiNeq);
@@ -1474,7 +1475,8 @@ void SmagorinskyIncBGKdynamics<T, Descriptor>::collideExternal(
 
 template <typename T, template <typename U> class Descriptor>
 T SmagorinskyIncBGKdynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr, [[maybe_unused]] T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     // Incompressible: rho0=1
     T invRho0 = (T)1;
@@ -1576,8 +1578,8 @@ void SmagorinskyRegularizedDynamics<T, Descriptor>::collide(
 
 template <typename T, template <typename U> class Descriptor>
 void SmagorinskyRegularizedDynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
-    BlockStatistics &stat)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T thetaBar, BlockStatistics &stat)
 {
     Array<T, SymmetricTensor<T, Descriptor>::n> PiNeq;
     momentTemplates<T, Descriptor>::compute_PiNeq(cell, rhoBar, j, PiNeq);
@@ -1591,7 +1593,8 @@ void SmagorinskyRegularizedDynamics<T, Descriptor>::collideExternal(
 
 template <typename T, template <typename U> class Descriptor>
 T SmagorinskyRegularizedDynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr, [[maybe_unused]] T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T, Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);

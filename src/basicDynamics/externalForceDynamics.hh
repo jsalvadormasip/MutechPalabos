@@ -349,8 +349,8 @@ void GuoExternalForceBGKdynamics<T, Descriptor>::collide(
 
 template <typename T, template <typename U> class Descriptor>
 void GuoExternalForceBGKdynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
-    BlockStatistics &stat)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T thetaBar, BlockStatistics &stat)
 {
     Array<T, Descriptor<T>::d> u;
     this->computeVelocityExternal(cell, rhoBar, j, u);
@@ -371,7 +371,8 @@ void GuoExternalForceBGKdynamics<T, Descriptor>::collideExternal(
 
 template <typename T, template <typename U> class Descriptor>
 T GuoExternalForceBGKdynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr, [[maybe_unused]] T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     return dynamicsTemplates<T, Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, invRho, j, jSqr);
