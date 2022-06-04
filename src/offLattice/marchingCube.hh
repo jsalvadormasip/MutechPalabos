@@ -236,7 +236,7 @@ std::vector<plint> BoundaryShapeIsoSurface3D<T, SurfaceData>::getSurfaceIds() co
 
 template <typename T, class SurfaceData>
 bool BoundaryShapeIsoSurface3D<T, SurfaceData>::isInside(
-    plint surfaceId, Array<plint, 3> const &position) const
+    [[maybe_unused]] plint surfaceId, Array<plint, 3> const &position) const
 {
     return shape->isInside(Dot3D(position[0], position[1], position[2]));
 }

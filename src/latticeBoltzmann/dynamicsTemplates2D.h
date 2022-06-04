@@ -187,7 +187,7 @@ struct dynamicsTemplatesImpl<T, descriptors::D2Q9DescriptorBase<T> > {
     }
 
     static void complete_bgk_ma2_equilibria(
-        T rhoBar, T invRho, Array<T, D::d> const &j, T jSqr, Array<T, D::q> &eqPop)
+        T rhoBar, T invRho, Array<T, D::d> const &j, [[maybe_unused]] T jSqr, Array<T, D::q> &eqPop)
     {
         // T t0 = D::t[0];
         // T t1 = D::t[1];

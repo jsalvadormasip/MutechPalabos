@@ -226,6 +226,7 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
     }
 }
 
+// TODO: We should add bcType for the edges.
 template <typename T, template <typename U> class Descriptor, class BoundaryManager>
 template <int plane, int normal1, int normal2>
 void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryManager>::
@@ -249,6 +250,7 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
     }
 }
 
+// TODO: We should add bcType for the corners.
 template <typename T, template <typename U> class Descriptor, class BoundaryManager>
 template <int xNormal, int yNormal, int zNormal>
 void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryManager>::
@@ -504,6 +506,7 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
     }
 }
 
+// TODO: We should add bcType for the edges.
 template <typename T, template <typename U> class Descriptor, class BoundaryManager>
 template <int plane, int normal1, int normal2>
 void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryManager>::
@@ -527,6 +530,7 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
     }
 }
 
+// TODO: We should add bcType for the corners.
 template <typename T, template <typename U> class Descriptor, class BoundaryManager>
 template <int xNormal, int yNormal, int zNormal>
 void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryManager>::

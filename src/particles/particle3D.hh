@@ -563,25 +563,25 @@ RestParticle3D<T, Descriptor>::RestParticle3D(plint tag_, Array<T, 3> const &pos
 
 template <typename T, template <typename U> class Descriptor>
 void RestParticle3D<T, Descriptor>::velocityToParticle(
-    TensorField3D<T, 3> &velocityField, T scaling)
+    [[maybe_unused]] TensorField3D<T, 3> &velocityField, [[maybe_unused]] T scaling)
 { }
 
 template <typename T, template <typename U> class Descriptor>
-void RestParticle3D<T, Descriptor>::velocityToParticle(NTensorField3D<T> &velocityField, T scaling)
+void RestParticle3D<T, Descriptor>::velocityToParticle([[maybe_unused]] NTensorField3D<T> &velocityField, [[maybe_unused]] T scaling)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void RestParticle3D<T, Descriptor>::rhoBarJtoParticle(
-    NTensorField3D<T> &rhoBarJfield, bool velIsJ, T scaling)
+    [[maybe_unused]] NTensorField3D<T> &rhoBarJfield, [[maybe_unused]] bool velIsJ, [[maybe_unused]] T scaling)
 { }
 
 template <typename T, template <typename U> class Descriptor>
-void RestParticle3D<T, Descriptor>::fluidToParticle(BlockLattice3D<T, Descriptor> &fluid, T scaling)
+void RestParticle3D<T, Descriptor>::fluidToParticle([[maybe_unused]] BlockLattice3D<T, Descriptor> &fluid, [[maybe_unused]] T scaling)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void RestParticle3D<T, Descriptor>::fluidToParticle(
-    BlockLattice3D<T, Descriptor> &fluid, ScalarField3D<T> &sF, T scaling)
+    [[maybe_unused]] BlockLattice3D<T, Descriptor> &fluid, [[maybe_unused]] ScalarField3D<T> &sF, [[maybe_unused]] T scaling)
 { }
 
 template <typename T, template <typename U> class Descriptor>

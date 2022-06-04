@@ -1353,7 +1353,7 @@ struct comprehensiveDynamicsTemplatesImpl<T, descriptors::D3Q27DescriptorBase<T>
     // Gauss-Hermite formalisms. All formulations are equivalent for the D3Q27 so we use the fastest
     // one (RMs)
     static void CMcomputeEquilibrium(
-        T rho, Array<T, D::d> const &u, Array<T, D::q> const &CMeq, Array<T, D::q> &eq)
+        T rho, Array<T, D::d> const &u, [[maybe_unused]] Array<T, D::q> const &CMeq, Array<T, D::q> &eq)
     {
         Array<T, D::q> RMeq;
         // Order 2
@@ -1945,7 +1945,7 @@ struct comprehensiveDynamicsTemplatesImpl<T, descriptors::D3Q27DescriptorBase<T>
     // Gauss-Hermite formalisms. All formulations are equivalent for the D3Q27 so we use the fastest
     // one (RMs)
     static void CHMcomputeEquilibrium(
-        T rho, Array<T, D::d> const &u, Array<T, D::q> const &CHMeq, Array<T, D::q> &eq)
+        T rho, Array<T, D::d> const &u, [[maybe_unused]] Array<T, D::q> const &CHMeq, Array<T, D::q> &eq)
     {
         Array<T, D::q> RMeq;
         // Order 2
@@ -2625,7 +2625,7 @@ struct comprehensiveDynamicsTemplatesImpl<T, descriptors::D3Q27DescriptorBase<T>
     // Gauss-Hermite formalisms. All formulations are equivalent for the D3Q27 so we use the fastest
     // one (RMs)
     static void KcomputeEquilibrium(
-        T rho, Array<T, D::d> const &u, Array<T, D::q> const &Keq, Array<T, D::q> &eq)
+        T rho, Array<T, D::d> const &u, [[maybe_unused]] Array<T, D::q> const &Keq, Array<T, D::q> &eq)
     {
         Array<T, D::q> RMeq;
         // Order 2

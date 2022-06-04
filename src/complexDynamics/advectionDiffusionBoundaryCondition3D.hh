@@ -390,7 +390,7 @@ template <typename T, template <typename U> class Descriptor>
 template <int direction, int orientation>
 BoxProcessingFunctional3D_L<T, Descriptor>
     *AdvectionDiffusionBoundaryManager3D<T, Descriptor>::getTemperatureBoundaryProcessor(
-        Box3D domain)
+        [[maybe_unused]] Box3D domain)
 {
     return 0;
 }
@@ -408,7 +408,7 @@ BoundaryCompositeDynamics<T, Descriptor>
 template <typename T, template <typename U> class Descriptor>
 template <int plane, int normal1, int normal2>
 BoxProcessingFunctional3D_L<T, Descriptor>
-    *AdvectionDiffusionBoundaryManager3D<T, Descriptor>::getTemperatureEdgeProcessor(Box3D domain)
+    *AdvectionDiffusionBoundaryManager3D<T, Descriptor>::getTemperatureEdgeProcessor([[maybe_unused]] Box3D domain)
 {
     return 0;
 }
@@ -427,7 +427,7 @@ template <typename T, template <typename U> class Descriptor>
 template <int xNormal, int yNormal, int zNormal>
 BoxProcessingFunctional3D_L<T, Descriptor>
     *AdvectionDiffusionBoundaryManager3D<T, Descriptor>::getTemperatureCornerProcessor(
-        plint x, plint y, plint z)
+        [[maybe_unused]] plint x, [[maybe_unused]] plint y, [[maybe_unused]] plint z)
 {
     return 0;
 }

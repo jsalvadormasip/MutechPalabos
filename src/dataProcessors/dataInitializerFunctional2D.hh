@@ -92,7 +92,7 @@ void OneCellIndexedFunctional2D<T, Descriptor>::getTypeOfModification(
 }
 
 template <typename T, template <class U> class Descriptor>
-void OneCellIndexedFunctional2D<T, Descriptor>::setscale(int dxScale, int dtScale)
+void OneCellIndexedFunctional2D<T, Descriptor>::setscale([[maybe_unused]] int dxScale, [[maybe_unused]] int dtScale)
 { }
 
 template <typename T, template <class U> class Descriptor>
@@ -113,7 +113,7 @@ void OneCellIndexedWithRandFunctional2D<T, Descriptor>::getTypeOfModification(
 }
 
 template <typename T, template <class U> class Descriptor>
-void OneCellIndexedWithRandFunctional2D<T, Descriptor>::setscale(int dxScale, int dtScale)
+void OneCellIndexedWithRandFunctional2D<T, Descriptor>::setscale([[maybe_unused]] int dxScale, [[maybe_unused]] int dtScale)
 { }
 
 template <typename T, template <class U> class Descriptor>

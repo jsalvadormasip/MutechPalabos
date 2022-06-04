@@ -1966,7 +1966,7 @@ void MpiManager::gatherv_impl<__float128>(
 template <>
 void MpiManager::gatherv_impl<Complex<float> >(
     [[maybe_unused]] Complex<float> *sendBuf, [[maybe_unused]] int sendCount,
-    [[maybe_unused]] Complex<float> *recvBuf, [[maybe_unused]] int *recvCounts, int *displs,
+    [[maybe_unused]] Complex<float> *recvBuf, [[maybe_unused]] int *recvCounts, [[maybe_unused]] int *displs,
     [[maybe_unused]] int root)
 {
     if (!ok)
@@ -1977,7 +1977,7 @@ void MpiManager::gatherv_impl<Complex<float> >(
 template <>
 void MpiManager::gatherv_impl<Complex<double> >(
     [[maybe_unused]] Complex<double> *sendBuf, [[maybe_unused]] int sendCount,
-    [[maybe_unused]] Complex<double> *recvBuf, [[maybe_unused]] int *recvCounts, int *displs,
+    [[maybe_unused]] Complex<double> *recvBuf, [[maybe_unused]] int *recvCounts, [[maybe_unused]] int *displs,
     [[maybe_unused]] int root)
 {
     if (!ok)

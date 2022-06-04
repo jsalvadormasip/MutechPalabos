@@ -58,7 +58,7 @@ struct advectionDiffusionDynamicsTemplatesImpl<T, descriptors::D3Q7DescriptorBas
 
     /// Regularization
     static void regularize(
-        Array<T, D::q> &f, T rhoBar, Array<T, D::d> const &jAdvDiff, Array<T, D::d> const &jEq)
+        Array<T, D::q> &f, T rhoBar, Array<T, D::d> const &jAdvDiff, [[maybe_unused]] Array<T, D::d> const &jEq)
     {
         f[0] = D::t[0] * rhoBar;
 
