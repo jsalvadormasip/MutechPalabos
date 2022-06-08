@@ -249,8 +249,10 @@ void buildConeGeometry()
     pcout << std::endl << "Voxelizing the domain." << std::endl;
     voxelizedDomain = new VoxelizedDomain3D<T>(
         *triangleBd, flowType, extraLayer, borderWidth, extendedEnvelopeWidth, blockSize);
+#ifndef PLB_REGRESSION
     pcout << getMultiBlockInfo(voxelizedDomain->getVoxelMatrix()) << std::endl;
     // At this point, the MultiScalarField voxelizedDomain->getVoxelMatrix() contains the cell tags.
+#endif
 }
 
 // Compute the dimensions of the cone in lattice units, and the relaxation parameter omega for the
@@ -473,8 +475,8 @@ int main(int argc, char *argv[])
         if (i == maxFluidIter) {
             pcout << "Writing fluid data.." << std::endl;
             VtkImageOutput3D<T> vtkOut("volume", 1.);
-            vtkOut.writeData<float>(*boundaryCondition->computePressure(), "p", 1.);
-            vtkOut.writeData<float>(*boundaryCondition->computeVelocityNorm(), "u", 1.);
+            vtkOut.writeData<float>(*(boundaryCondition->computePressure()), "p", 1.);
+            vtkOut.writeData<float>(*(boundaryCondition->computeVelocityNorm()), "u", 1.);
         }
 
         if (i % saveIter == 0 && i > startParticleIter) {
