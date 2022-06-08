@@ -51,7 +51,7 @@ if (BUILD_TESTING_MPI)
              COMMAND diff ref.dat output_mpi.dat)
 endif()
 
-################################2###############################################
+###############################################################################
 
 # This returns when you compile Palabos and all the examples (root CMakeLists.txt)
 return()
