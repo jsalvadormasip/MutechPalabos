@@ -467,7 +467,8 @@ void MarchingCubeSurfaces3D<T>::removeFromVertex(
 
 template <typename T>
 void MarchingCubeSurfaces3D<T>::marchingCubeImpl(
-    plint iX, plint iY, plint iZ, plint surfaceId, [[maybe_unused]] std::vector<Triangle> &triangles, int &cubeindex,
+    plint iX, plint iY, plint iZ, plint surfaceId,
+    [[maybe_unused]] std::vector<Triangle> &triangles, int &cubeindex,
     std::vector<Array<T, 3> > &vertlist)
 {
     typedef MarchingCubeConstants mcc;

@@ -164,7 +164,8 @@ typename RawTriangleMesh<T>::CPTriangle RawTriangleMesh<T>::Vertex::adjacentTria
 }
 
 template <typename T>
-typename RawTriangleMesh<T>::PTriangle RawTriangleMesh<T>::Vertex::adjacentTriangle([[maybe_unused]] plint iTriangle)
+typename RawTriangleMesh<T>::PTriangle RawTriangleMesh<T>::Vertex::adjacentTriangle(
+    [[maybe_unused]] plint iTriangle)
 {
     // Not implemented at the level of raw triangle meshes.
     PLB_ASSERT(false);
@@ -196,7 +197,8 @@ T RawTriangleMesh<T>::Vertex::property([[maybe_unused]] plint whichProperty) con
 }
 
 template <typename T>
-void RawTriangleMesh<T>::Vertex::setProperty([[maybe_unused]] plint whichProperty, [[maybe_unused]] T value)
+void RawTriangleMesh<T>::Vertex::setProperty(
+    [[maybe_unused]] plint whichProperty, [[maybe_unused]] T value)
 {
     // Not implemented at the level of raw triangle meshes.
     PLB_ASSERT(false);
@@ -211,7 +213,8 @@ plint RawTriangleMesh<T>::Vertex::tag([[maybe_unused]] plint whichTag) const
 }
 
 template <typename T>
-void RawTriangleMesh<T>::Vertex::setTag([[maybe_unused]] plint whichTag, [[maybe_unused]] plint value)
+void RawTriangleMesh<T>::Vertex::setTag(
+    [[maybe_unused]] plint whichTag, [[maybe_unused]] plint value)
 {
     // Not implemented at the level of raw triangle meshes.
     PLB_ASSERT(false);
@@ -287,7 +290,8 @@ Array<T, 3> RawTriangleMesh<T>::Triangle::normalTimesArea() const
 }
 
 template <typename T>
-Array<T, 3> RawTriangleMesh<T>::Triangle::edgeNormal([[maybe_unused]] plint iEdge, [[maybe_unused]] bool areaWeighted) const
+Array<T, 3> RawTriangleMesh<T>::Triangle::edgeNormal(
+    [[maybe_unused]] plint iEdge, [[maybe_unused]] bool areaWeighted) const
 {
     // Not implemented at the level of raw triangle meshes.
     PLB_ASSERT(false);
@@ -345,7 +349,8 @@ T RawTriangleMesh<T>::Triangle::property([[maybe_unused]] plint whichProperty) c
 }
 
 template <typename T>
-void RawTriangleMesh<T>::Triangle::setProperty([[maybe_unused]] plint whichProperty, [[maybe_unused]] T value)
+void RawTriangleMesh<T>::Triangle::setProperty(
+    [[maybe_unused]] plint whichProperty, [[maybe_unused]] T value)
 {
     // Not implemented at the level of raw triangle meshes.
     PLB_ASSERT(false);
