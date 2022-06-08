@@ -152,7 +152,6 @@ public:
     using BaseTRTdynamics<T, Descriptor>::BaseTRTdynamics;
     /// Clone the object on its dynamic type.
     Ma1TRTdynamics<T, Descriptor> *clone() const override;
-    ;
 
     /// Return a unique ID for this class.
     int getId() const override;
