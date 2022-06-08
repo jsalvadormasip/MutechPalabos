@@ -45,6 +45,9 @@
 
 namespace plb {
 
+// TODO: Several functionals could be added based on the 3D implementations
+// from immersedWalls3H.h/hh
+
 /* ******** FavierDeltaFunction ************************************ */
 
 /* ******** InamuroDeltaFunction2D ************************************ */
@@ -256,14 +259,10 @@ void instantiateImmersedWallData(
 /* ******** InstantiateImmersedWallDataWithIndexedTagging2D ************************************ */
 /* ******** InstantiateSurfaceBlockData2D ****************************** */
 /* ******** SurfaceOnLattice2D **************************************** */
-/* ******** SurfaceOnLattice3D_N **************************************** */
-/* ******** ResetForceStatistics3D ************************************ */
-/* ******** RecomputeImmersedForce3D ************************************ */
-/* ******** OpenSurfaceImmersedForce3D ************************************ */
-/* ******** TwoPhaseInamuroParam3D ************************************ */
-/* ******** TwoPhaseInamuroIteration3D ************************************ */
-/* ******** TwoPhaseIndexedInamuroIteration3D ************************************ */
-/* ******** TwoPhaseConstVelInamuroIteration3D ************************************ */
+/* ******** SurfaceOnLattice2D_N **************************************** */
+/* ******** ResetForceStatistics2D ************************************ */
+/* ******** RecomputeImmersedForce2D ************************************ */
+/* ******** OpenSurfaceImmersedForce2D ************************************ */
 
 }  // namespace plb
 
