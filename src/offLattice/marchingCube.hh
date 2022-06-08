@@ -243,7 +243,7 @@ bool BoundaryShapeIsoSurface3D<T, SurfaceData>::isInside(
 
 template <typename T, class SurfaceData>
 Array<T, 3> BoundaryShapeIsoSurface3D<T, SurfaceData>::getSurfacePosition(
-    plint surfaceId, Array<plint, 3> const &p1, Array<plint, 3> const &p2) const
+    [[maybe_unused]] plint surfaceId, Array<plint, 3> const &p1, Array<plint, 3> const &p2) const
 {
     Array<T, 3> realP1(p1), realP2(p2);
     // Here's the catch: the marching-cube algorithm will call this function multiple times,
@@ -467,7 +467,7 @@ void MarchingCubeSurfaces3D<T>::removeFromVertex(
 
 template <typename T>
 void MarchingCubeSurfaces3D<T>::marchingCubeImpl(
-    plint iX, plint iY, plint iZ, plint surfaceId, std::vector<Triangle> &triangles, int &cubeindex,
+    plint iX, plint iY, plint iZ, plint surfaceId, [[maybe_unused]] std::vector<Triangle> &triangles, int &cubeindex,
     std::vector<Array<T, 3> > &vertlist)
 {
     typedef MarchingCubeConstants mcc;
@@ -838,14 +838,14 @@ TriangleSet<T> vofToTriangles(MultiScalarField3D<T> &scalarField, T threshold)
 
 template <typename T, class Function>
 bool AnalyticalIsoSurface3D<T, Function>::isInside(
-    plint surfaceId, Array<plint, 3> const &position) const
+    [[maybe_unused]] plint surfaceId, Array<plint, 3> const &position) const
 {
     return function.intIsInside(position);
 }
 
 template <typename T, class Function>
 Array<T, 3> AnalyticalIsoSurface3D<T, Function>::getSurfacePosition(
-    plint surfaceId, Array<plint, 3> const &p1, Array<plint, 3> const &p2) const
+    [[maybe_unused]] plint surfaceId, Array<plint, 3> const &p1, Array<plint, 3> const &p2) const
 {
     static const T epsilon = 1.e-4;
 

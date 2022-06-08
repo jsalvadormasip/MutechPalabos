@@ -275,7 +275,7 @@ MultiBlockManagement3D intersect(
         management1.getRefinementLevel());
 }
 
-// TODO: Suspicious that this addedUniqueBulk is not used
+// QUESTION: Suspicious that this addedUniqueBulk is not used
 MultiBlockManagement3D extend(
     MultiBlockManagement3D const &management, Box3D addedBulk, Box3D addedUniqueBulk)
 {

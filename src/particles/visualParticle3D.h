@@ -68,7 +68,7 @@ public:
     { }
     virtual void fluidToParticle(
         [[maybe_unused]] BlockLattice3D<T, Descriptor> &fluid,
-        [[maybe_unused]] ScalarField3D<T> &sF, T scaling = 1.)
+        [[maybe_unused]] ScalarField3D<T> &sF, [[maybe_unused]] T scaling = 1.)
     { }
     virtual void advance() { }
     virtual void serialize(HierarchicSerializer &serializer) const;

@@ -53,6 +53,7 @@
 namespace plb {
 namespace npfem {
 
+// QUESTION: dt, rho, and legacy are not used. Should we remove them?
 template <typename T>
 void multiProcWriteVTK(
     // mesh in lattice units since it comes from palabos

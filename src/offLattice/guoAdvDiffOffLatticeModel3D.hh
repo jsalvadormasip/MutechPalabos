@@ -147,6 +147,7 @@ ContainerBlockData *GuoAdvDiffOffLatticeModel3D<T, Descriptor>::generateOffLatti
     return new GuoAdvDiffOffLatticeInfo3D;
 }
 
+// QUESTION: What are args used for, and why isn't it used yet.
 template <typename T, template <typename U> class Descriptor>
 void GuoAdvDiffOffLatticeModel3D<T, Descriptor>::boundaryCompletion(
     AtomicBlock3D &nonTypeLattice, AtomicContainerBlock3D &container,

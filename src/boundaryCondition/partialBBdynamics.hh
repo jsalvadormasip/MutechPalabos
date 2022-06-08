@@ -60,6 +60,7 @@ void PartialBBdynamics<T, Descriptor>::collide(
     }
 }
 
+// QUESTION: Why isn't there a collideExternal for this BB?
 template <typename T, template <typename U> class Descriptor>
 void PartialBBdynamics<T, Descriptor>::collideExternal(
     Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, T thetaBar,
@@ -125,7 +126,8 @@ void PartialBBdynamics<T, Descriptor>::recomposeOrder0(
     }
 }
 
-// QUESTION:
+// QUESTION: There is a version with Krueger's method. We should add it in a second
+// step.
 template <typename T, template <typename U> class Descriptor>
 T PartialBBdynamics<T, Descriptor>::PSMCollision(
     Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,

@@ -75,7 +75,7 @@ inline void transferDataProcessors(MultiBlock2D const &from, MultiBlock2D &to)
 
 /* *************** 1. MultiScalarField ************************************** */
 
-// TODO: Does it make sense to have a useless domain here?
+// QUESTION: Does it make sense to have a useless domain here?
 template <typename T>
 void transferScalarFieldLocal(
     MultiScalarField2D<T> &from, MultiScalarField2D<T> &to, Box2D const &domain)

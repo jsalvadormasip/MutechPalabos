@@ -1387,7 +1387,7 @@ void SpecularReflection<T, Descriptor>::collide(
 template <typename T, template <typename U> class Descriptor>
 void SpecularReflection<T, Descriptor>::collideExternal(
     Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
-    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, T thetaBar, BlockStatistics &stat)
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar, BlockStatistics &stat)
 {
     collide(cell, stat);
 }
@@ -1473,18 +1473,18 @@ T SpecularReflection<T, Descriptor>::getOmega() const
 }
 
 template <typename T, template <typename U> class Descriptor>
-void SpecularReflection<T, Descriptor>::setOmega(T omega_)
+void SpecularReflection<T, Descriptor>::setOmega([[maybe_unused]] T omega_)
 { }
 
 template <typename T, template <typename U> class Descriptor>
-T SpecularReflection<T, Descriptor>::computeRhoBar(Cell<T, Descriptor> const &cell) const
+T SpecularReflection<T, Descriptor>::computeRhoBar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return Descriptor<T>::rhoBar(rho);
 }
 
 template <typename T, template <typename U> class Descriptor>
 void SpecularReflection<T, Descriptor>::computeRhoBarJ(
-    Cell<T, Descriptor> const &cell, T &rhoBar, Array<T, Descriptor<T>::d> &j) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar, Array<T, Descriptor<T>::d> &j) const
 {
     rhoBar = Descriptor<T>::rhoBar(rho);
     j.resetToZero();

@@ -253,6 +253,7 @@ void sendBodiesVelocities(std::vector<ShapeOpBody<T>> &shapeOpBodies)
         shapeOpBodies[i].sendVelocities();
 }
 
+// QUESTION: Why is rho unused here? Should we remove it?
 // This is the "receive" part of the MPI communication for velocities (ShapeOp->Palabos).
 template <typename T>
 void receiveBodiesVelocities(

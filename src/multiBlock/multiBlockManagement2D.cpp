@@ -259,7 +259,7 @@ MultiBlockManagement2D intersect(
         management1.getRefinementLevel());
 }
 
-// TODO: Suspicious that this unique bulk is not used
+// QUESTION: Suspicious that this unique bulk is not used
 MultiBlockManagement2D extend(
     MultiBlockManagement2D const &management, Box2D addedBulk, Box2D addedUniqueBulk)
 {
