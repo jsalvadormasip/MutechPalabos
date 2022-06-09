@@ -1106,7 +1106,8 @@ void VelocityBounceBack<T, Descriptor>::collide(
 
 template <typename T, template <typename U> class Descriptor>
 void VelocityBounceBack<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
+    Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
     BlockStatistics &stat)
 {
     collide(cell, stat);
@@ -1114,25 +1115,31 @@ void VelocityBounceBack<T, Descriptor>::collideExternal(
 
 template <typename T, template <typename U> class Descriptor>
 T VelocityBounceBack<T, Descriptor>::computeEquilibrium(
-    [[maybe_unused]] plint iPop, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr, [[maybe_unused]] T thetaBar) const
+    [[maybe_unused]] plint iPop, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     return T();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void VelocityBounceBack<T, Descriptor>::regularize(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
-    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq, [[maybe_unused]] T thetaBar) const
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq,
+    [[maybe_unused]] T thetaBar) const
 { }
 
 template <typename T, template <typename U> class Descriptor>
-T VelocityBounceBack<T, Descriptor>::computeDensity([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T VelocityBounceBack<T, Descriptor>::computeDensity(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return rhoWall;
 }
 
 template <typename T, template <typename U> class Descriptor>
-T VelocityBounceBack<T, Descriptor>::computePressure([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T VelocityBounceBack<T, Descriptor>::computePressure(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return T();
 }
@@ -1145,21 +1152,24 @@ void VelocityBounceBack<T, Descriptor>::computeVelocity(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T VelocityBounceBack<T, Descriptor>::computeTemperature([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T VelocityBounceBack<T, Descriptor>::computeTemperature(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return T();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void VelocityBounceBack<T, Descriptor>::computePiNeq(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
 {
     PiNeq.resetToZero();
 }
 
 template <typename T, template <typename U> class Descriptor>
 void VelocityBounceBack<T, Descriptor>::computeShearStress(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell,
+    Array<T, SymmetricTensor<T, Descriptor>::n> &stress) const
 {
     stress.resetToZero();
 }
@@ -1173,7 +1183,8 @@ void VelocityBounceBack<T, Descriptor>::computeHeatFlux(
 
 template <typename T, template <typename U> class Descriptor>
 void VelocityBounceBack<T, Descriptor>::computeMoment(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId, [[maybe_unused]] T *moment) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint momentId,
+    [[maybe_unused]] T *moment) const
 { }
 
 template <typename T, template <typename U> class Descriptor>
@@ -1187,14 +1198,16 @@ void VelocityBounceBack<T, Descriptor>::setOmega([[maybe_unused]] T omega_)
 { }
 
 template <typename T, template <typename U> class Descriptor>
-T VelocityBounceBack<T, Descriptor>::computeRhoBar([[maybe_unused]] Cell<T, Descriptor> const &cell) const
+T VelocityBounceBack<T, Descriptor>::computeRhoBar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return Descriptor<T>::rhoBar(rhoWall);
 }
 
 template <typename T, template <typename U> class Descriptor>
 void VelocityBounceBack<T, Descriptor>::computeRhoBarJ(
-    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar, Array<T, Descriptor<T>::d> &j) const
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar,
+    Array<T, Descriptor<T>::d> &j) const
 {
     rhoBar = Descriptor<T>::rhoBar(rhoWall);
     j = rhoWall * uWall;
@@ -1232,14 +1245,16 @@ void VelocityBounceBack<T, Descriptor>::decompose(
 
 template <typename T, template <typename U> class Descriptor>
 void VelocityBounceBack<T, Descriptor>::recompose(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] std::vector<T> const &rawData, [[maybe_unused]] plint order) const
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] std::vector<T> const &rawData,
+    [[maybe_unused]] plint order) const
 {
     //     PLB_PRECONDITION( (plint)rawData.size() == numDecomposedVariables(order) );
 }
 
 template <typename T, template <typename U> class Descriptor>
 void VelocityBounceBack<T, Descriptor>::rescale(
-    [[maybe_unused]] std::vector<T> &rawData, [[maybe_unused]] T xDxInv, [[maybe_unused]] T xDt, [[maybe_unused]] plint order) const
+    [[maybe_unused]] std::vector<T> &rawData, [[maybe_unused]] T xDxInv, [[maybe_unused]] T xDt,
+    [[maybe_unused]] plint order) const
 { }
 
 template <typename T, template <typename U> class Descriptor>

@@ -63,7 +63,8 @@ void PartialBBdynamics<T, Descriptor>::collide(
 // TODO: This function should be implemented.
 template <typename T, template <typename U> class Descriptor>
 void PartialBBdynamics<T, Descriptor>::collideExternal(
-    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar, [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
+    [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] T rhoBar,
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T thetaBar,
     [[maybe_unused]] BlockStatistics &stat)
 {
     PLB_ASSERT(false);

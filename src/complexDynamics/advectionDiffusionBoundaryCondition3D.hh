@@ -600,8 +600,10 @@ BoundaryCompositeDynamics<T, Descriptor> *CompleteRegularizedAdvectionDiffusionB
 // QUESTION: I think x,y,z is never used we should discard it, no?
 template <typename T, template <typename U> class Descriptor>
 template <int xNormal, int yNormal, int zNormal>
-BoxProcessingFunctional3D_L<T, Descriptor> *CompleteRegularizedAdvectionDiffusionBoundaryManager3D<
-    T, Descriptor>::getTemperatureCornerProcessor([[maybe_unused]] plint x, [[maybe_unused]] plint y, [[maybe_unused]] plint z)
+BoxProcessingFunctional3D_L<T, Descriptor>
+    *CompleteRegularizedAdvectionDiffusionBoundaryManager3D<T, Descriptor>::
+        getTemperatureCornerProcessor(
+            [[maybe_unused]] plint x, [[maybe_unused]] plint y, [[maybe_unused]] plint z)
 {
     return new CompleteAdvectionDiffusionCornerBoundaryFunctional3D<
         T, Descriptor, xNormal, yNormal, zNormal>();

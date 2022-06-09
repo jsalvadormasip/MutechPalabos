@@ -323,7 +323,8 @@ void WaveAbsorptionDynamics<T, Descriptor>::recomposeOrder1(
 }
 
 template <typename T, template <typename U> class Descriptor>
-void WaveAbsorptionDynamics<T, Descriptor>::prepareCollision([[maybe_unused]] Cell<T, Descriptor> &cell)
+void WaveAbsorptionDynamics<T, Descriptor>::prepareCollision(
+    [[maybe_unused]] Cell<T, Descriptor> &cell)
 { }
 
 template <typename T, template <typename U> class Descriptor>

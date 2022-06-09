@@ -552,7 +552,8 @@ int NLD_VelocityBoundaryDynamics3D<T, Descriptor>::getId() const
 }
 
 template <typename T, template <typename U> class Descriptor>
-void NLD_VelocityBoundaryDynamics3D<T, Descriptor>::prepareCollision([[maybe_unused]] Cell<T, Descriptor> &cell)
+void NLD_VelocityBoundaryDynamics3D<T, Descriptor>::prepareCollision(
+    [[maybe_unused]] Cell<T, Descriptor> &cell)
 { }
 
 template <typename T, template <typename U> class Descriptor>
@@ -1419,7 +1420,8 @@ int NLD_OutflowBoundaryDynamics3D<T, Descriptor>::getId() const
 }
 
 template <typename T, template <typename U> class Descriptor>
-void NLD_OutflowBoundaryDynamics3D<T, Descriptor>::prepareCollision([[maybe_unused]] Cell<T, Descriptor> &cell)
+void NLD_OutflowBoundaryDynamics3D<T, Descriptor>::prepareCollision(
+    [[maybe_unused]] Cell<T, Descriptor> &cell)
 { }
 
 template <typename T, template <typename U> class Descriptor>

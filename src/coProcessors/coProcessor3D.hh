@@ -139,7 +139,9 @@ D3Q19CudaCoProcessor3D<T>::~D3Q19CudaCoProcessor3D()
 }
 
 template <typename T>
-int D3Q19CudaCoProcessor3D<T>::addDomain([[maybe_unused]] plint nx, [[maybe_unused]] plint ny, [[maybe_unused]] plint nz, [[maybe_unused]] T omega, [[maybe_unused]] int &domainHandle)
+int D3Q19CudaCoProcessor3D<T>::addDomain(
+    [[maybe_unused]] plint nx, [[maybe_unused]] plint ny, [[maybe_unused]] plint nz,
+    [[maybe_unused]] T omega, [[maybe_unused]] int &domainHandle)
 // int D3Q19CudaCoProcessor3D<T>::addDomain(Box3D const& domain, T omega)
 {
     /*
@@ -194,7 +196,8 @@ int D3Q19CudaCoProcessor3D<T>::addDomain([[maybe_unused]] plint nx, [[maybe_unus
 
 template <typename T>
 int D3Q19CudaCoProcessor3D<T>::send(
-    [[maybe_unused]] int domainHandle, [[maybe_unused]] Box3D const &subDomain, [[maybe_unused]] std::vector<char> const &data)
+    [[maybe_unused]] int domainHandle, [[maybe_unused]] Box3D const &subDomain,
+    [[maybe_unused]] std::vector<char> const &data)
 {
     /*
     PyObject *memories, *memory, *args;
@@ -284,7 +287,8 @@ for (int i = 0; i < size; i++) {
 }
 template <typename T>
 int D3Q19CudaCoProcessor3D<T>::receive(
-    [[maybe_unused]] int domainHandle, [[maybe_unused]] Box3D const &subDomain, [[maybe_unused]] std::vector<char> &data) const
+    [[maybe_unused]] int domainHandle, [[maybe_unused]] Box3D const &subDomain,
+    [[maybe_unused]] std::vector<char> &data) const
 {
     /*
     PyObject *memories, *memory, *args;

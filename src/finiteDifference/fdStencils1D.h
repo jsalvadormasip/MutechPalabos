@@ -233,8 +233,8 @@ inline T edgeZderiv(
 
 template <typename T>
 inline T cornerXderiv(
-    ScalarField3D<T> const &field, int normalX, [[maybe_unused]] int normalY, [[maybe_unused]] int normalZ, plint iX, plint iY,
-    plint iZ)
+    ScalarField3D<T> const &field, int normalX, [[maybe_unused]] int normalY,
+    [[maybe_unused]] int normalZ, plint iX, plint iY, plint iZ)
 {
     int orientation = normalX;
     return -orientation
@@ -243,8 +243,8 @@ inline T cornerXderiv(
 
 template <typename T>
 inline T cornerYderiv(
-    ScalarField3D<T> const &field, [[maybe_unused]] int normalX, int normalY, [[maybe_unused]] int normalZ, plint iX, plint iY,
-    plint iZ)
+    ScalarField3D<T> const &field, [[maybe_unused]] int normalX, int normalY,
+    [[maybe_unused]] int normalZ, plint iX, plint iY, plint iZ)
 {
     int orientation = normalY;
     return -orientation
@@ -253,8 +253,8 @@ inline T cornerYderiv(
 
 template <typename T>
 inline T cornerZderiv(
-    ScalarField3D<T> const &field, [[maybe_unused]] int normalX, [[maybe_unused]] int normalY, int normalZ, plint iX, plint iY,
-    plint iZ)
+    ScalarField3D<T> const &field, [[maybe_unused]] int normalX, [[maybe_unused]] int normalY,
+    int normalZ, plint iX, plint iY, plint iZ)
 {
     int orientation = normalZ;
     return -orientation

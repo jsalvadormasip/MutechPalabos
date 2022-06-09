@@ -520,7 +520,8 @@ void NTensorFieldDataTransfer2D<T>::receive(
 
 template <typename T>
 void NTensorFieldDataTransfer2D<T>::attribute(
-    Box2D toDomain, plint deltaX, plint deltaY, AtomicBlock2D const &from, [[maybe_unused]] modif::ModifT kind)
+    Box2D toDomain, plint deltaX, plint deltaY, AtomicBlock2D const &from,
+    [[maybe_unused]] modif::ModifT kind)
 {
     PLB_PRECONDITION(typeid(from) == typeid(NTensorField2D<T> const &));
     PLB_PRECONDITION(contained(toDomain, field.getBoundingBox()));
