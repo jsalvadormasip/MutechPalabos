@@ -1719,7 +1719,7 @@ void TriangularSurfaceMesh<T>::writeHTML(std::string fname)
 // in the <title>
 template <typename T>
 void TriangularSurfaceMesh<T>::writeHTML(
-    std::string fname, std::string title, T phys_dx, Array<T, 3> phys_location)
+    std::string fname, [[maybe_unused]] std::string title, [[maybe_unused]] T phys_dx, [[maybe_unused]] Array<T, 3> phys_location)
 {
     if (!global::mpi().isMainProcessor()) {
         return;
@@ -1828,7 +1828,7 @@ void TriangularSurfaceMesh<T>::writeX3D(std::string fname)
 // QUESTION: title, phys_dx and phys_location unused could we remove them?
 template <typename T>
 void TriangularSurfaceMesh<T>::writeX3D(
-    std::string fname, std::string title, T phys_dx, Array<T, 3> phys_location)
+    std::string fname, [[maybe_unused]] std::string title, [[maybe_unused]] T phys_dx, [[maybe_unused]] Array<T, 3> phys_location)
 {
     if (!global::mpi().isMainProcessor()) {
         return;

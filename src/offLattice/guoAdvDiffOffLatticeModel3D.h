@@ -59,7 +59,7 @@ public:
     virtual ContainerBlockData *generateOffLatticeInfo() const;
     // QUESTION: What is container used for, and why isn't it used? Maybe no LocalForce
     // in the AdvDiff case?
-    virtual Array<T, 3> getLocalForce(AtomicContainerBlock3D &container) const
+    virtual Array<T, 3> getLocalForce([[maybe_unused]] AtomicContainerBlock3D &container) const
     {
         return Array<T, 3>(T(), T(), T());
     }

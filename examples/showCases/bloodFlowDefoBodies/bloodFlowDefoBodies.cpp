@@ -1575,6 +1575,9 @@ int main(int argc, char *argv[])
         {
             // Define number of bodies
             xmlFile["System_Setup"]["ht"].read(sp.ht);
+            // QUESTION: If these ifs are never satisfied Vtot is never
+            // initialized. Is that a desired behavior or should
+            // we warn the user?
             T Vtot;
             if (sp.Simulation_Type.compare("Shear_Flow") == 0
                 || sp.Simulation_Type.compare("Box_Poiseuille_Flow") == 0)

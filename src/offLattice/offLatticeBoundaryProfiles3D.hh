@@ -177,7 +177,7 @@ void IncreasingPoiseuilleProfile3D<T, Descriptor>::defineCircularShape(
 
 template <typename T, template <typename U> class Descriptor>
 void IncreasingPoiseuilleProfile3D<T, Descriptor>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
+    Array<T, 3> const &pos, [[maybe_unused]] plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -210,17 +210,17 @@ IncreasingVelocityProfile3D<T, Descriptor>::IncreasingVelocityProfile3D(
 { }
 
 template <typename T, template <typename U> class Descriptor>
-void IncreasingVelocityProfile3D<T, Descriptor>::setNormal(Array<T, 3> const &normal_)
+void IncreasingVelocityProfile3D<T, Descriptor>::setNormal([[maybe_unused]] Array<T, 3> const &normal_)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void IncreasingVelocityProfile3D<T, Descriptor>::defineCircularShape(
-    Array<T, 3> const &center_, T radius_)
+    [[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void IncreasingVelocityProfile3D<T, Descriptor>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -254,12 +254,12 @@ void IncreasingVelocityPlugProfile3D<T, Descriptor>::setNormal(Array<T, 3> const
 
 template <typename T, template <typename U> class Descriptor>
 void IncreasingVelocityPlugProfile3D<T, Descriptor>::defineCircularShape(
-    Array<T, 3> const &center_, T radius_)
+    [[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void IncreasingVelocityPlugProfile3D<T, Descriptor>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
+    Array<T, 3> const &pos, [[maybe_unused]] plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -307,17 +307,17 @@ void TimeDependentVelocityProfile3D<T, Descriptor>::swap(
 }
 
 template <typename T, template <typename U> class Descriptor>
-void TimeDependentVelocityProfile3D<T, Descriptor>::setNormal(Array<T, 3> const &normal_)
+void TimeDependentVelocityProfile3D<T, Descriptor>::setNormal([[maybe_unused]] Array<T, 3> const &normal_)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void TimeDependentVelocityProfile3D<T, Descriptor>::defineCircularShape(
-    Array<T, 3> const &center_, T radius_)
+    [[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T, template <typename U> class Descriptor>
 void TimeDependentVelocityProfile3D<T, Descriptor>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -363,7 +363,7 @@ void OscillatingPoiseuilleProfile3D<T, Descriptor>::defineCircularShape(
 
 template <typename T, template <typename U> class Descriptor>
 void OscillatingPoiseuilleProfile3D<T, Descriptor>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
+    Array<T, 3> const &pos, [[maybe_unused]] plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -397,16 +397,16 @@ ConstantVelocityProfile3D<T>::ConstantVelocityProfile3D(Array<T, 3> const &u_) :
 { }
 
 template <typename T>
-void ConstantVelocityProfile3D<T>::setNormal(Array<T, 3> const &normal_)
+void ConstantVelocityProfile3D<T>::setNormal([[maybe_unused]] Array<T, 3> const &normal_)
 { }
 
 template <typename T>
-void ConstantVelocityProfile3D<T>::defineCircularShape(Array<T, 3> const &center_, T radius_)
+void ConstantVelocityProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void ConstantVelocityProfile3D<T>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -461,16 +461,16 @@ ExactRotationalVelocityProfile3D<T>::ExactRotationalVelocityProfile3D(
 { }
 
 template <typename T>
-void ExactRotationalVelocityProfile3D<T>::setNormal(Array<T, 3> const &normal_)
+void ExactRotationalVelocityProfile3D<T>::setNormal([[maybe_unused]] Array<T, 3> const &normal_)
 { }
 
 template <typename T>
-void ExactRotationalVelocityProfile3D<T>::defineCircularShape(Array<T, 3> const &center_, T radius_)
+void ExactRotationalVelocityProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void ExactRotationalVelocityProfile3D<T>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
@@ -492,12 +492,12 @@ void NeumannBoundaryProfile3D<T>::setNormal(Array<T, 3> const &normal_)
 }
 
 template <typename T>
-void NeumannBoundaryProfile3D<T>::defineCircularShape(Array<T, 3> const &center_, T radius_)
+void NeumannBoundaryProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void NeumannBoundaryProfile3D<T>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 3> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 3> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::neumann;
@@ -624,12 +624,12 @@ void ScalarFluxProfile3D<T>::setNormal(Array<T, 3> const &normal_)
 }
 
 template <typename T>
-void ScalarFluxProfile3D<T>::defineCircularShape(Array<T, 3> const &center_, T radius_)
+void ScalarFluxProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void ScalarFluxProfile3D<T>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 2> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 2> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::flux;
@@ -657,12 +657,12 @@ void ScalarIsolationProfile3D<T>::setNormal(Array<T, 3> const &normal_)
 }
 
 template <typename T>
-void ScalarIsolationProfile3D<T>::defineCircularShape(Array<T, 3> const &center_, T radius_)
+void ScalarIsolationProfile3D<T>::defineCircularShape([[maybe_unused]] Array<T, 3> const &center_, [[maybe_unused]] T radius_)
 { }
 
 template <typename T>
 void ScalarIsolationProfile3D<T>::getData(
-    Array<T, 3> const &pos, plint id, AtomicBlock3D const *argument, Array<T, 2> &data,
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id, [[maybe_unused]] AtomicBlock3D const *argument, Array<T, 2> &data,
     OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::isolation;

@@ -151,7 +151,7 @@ ContainerBlockData *GuoAdvDiffOffLatticeModel3D<T, Descriptor>::generateOffLatti
 template <typename T, template <typename U> class Descriptor>
 void GuoAdvDiffOffLatticeModel3D<T, Descriptor>::boundaryCompletion(
     AtomicBlock3D &nonTypeLattice, AtomicContainerBlock3D &container,
-    std::vector<AtomicBlock3D *> const &args)
+    [[maybe_unused]] std::vector<AtomicBlock3D *> const &args)
 {
     BlockLattice3D<T, Descriptor> &lattice =
         dynamic_cast<BlockLattice3D<T, Descriptor> &>(nonTypeLattice);

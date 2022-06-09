@@ -77,6 +77,7 @@ public:
         Dot3D offsetSolidFractionPhys =
             computeRelativeDisplacement(clotFlags, clotSolidFractionPhys);
 
+        // QUESTION: These two seem unused. Should we remove them?
         plint totalFnQty = 0;
         plint totalNbVoxels = 0;
         std::ifstream clotGeoFile;

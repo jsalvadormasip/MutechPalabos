@@ -64,6 +64,8 @@ public:
     virtual void send(Box2D domain, std::vector<char> &buffer, modif::ModifT kind) const;
     /// Receive data from a byte-stream into the lattice.
     virtual void receive(Box2D domain, std::vector<char> const &buffer, modif::ModifT kind);
+    // QUESTION: offset is not used in all (I think) implementations of receive. Is that correct
+    // to leave it be?
     virtual void receive(
         Box2D domain, std::vector<char> const &buffer, modif::ModifT kind,
         [[maybe_unused]] Dot2D offset)

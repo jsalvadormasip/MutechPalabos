@@ -11,12 +11,13 @@ project(palabos)
 
 enable_language(CXX)
 
+
 # This compiles Palabos library and all the examples
 # It is used mainly for Continuous Integration (CI)
 set(CI ON CACHE BOOL "Compile Everything (Continuous Integration)")
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
+    set(CMAKE_BUILD_TYPE "Debug")
     #set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 endif()
 message("Generated with config types: ${CMAKE_CONFIGURATION_TYPES}")
@@ -47,7 +48,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     set(CMAKE_CXX_LINKER_FLAGS_TEST "${CMAKE_CXX_LINKER_FLAGS_TEST} -g -fsanitize=address")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     message("Clang.")
-    set(CMAKE_CXX_FLAGS "-std=c++17 -Wall  -Wextra -Wnon-virtual-dtor")
+    set(CMAKE_CXX_FLAGS "-std=c++17 -Wall -Wextra -pedantic -Wnon-virtual-dtor")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
     set(CMAKE_CXX_FLAGS_TEST "-g -DPLB_DEBUG -DPLB_REGRESSION -O1 -fno-omit-frame-pointer -fsanitize=address")

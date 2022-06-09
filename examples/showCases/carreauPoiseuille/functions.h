@@ -161,6 +161,7 @@ public:
         return nu0 * z * hyp(-lambda * lambda * z * z) + kappa * (ly / (T)2 - y);
     }
 
+    // QUESTION: Is it normal that y is unused?
     virtual T derivative(T y, T z) const
     {
         std::vector<T> a, b;

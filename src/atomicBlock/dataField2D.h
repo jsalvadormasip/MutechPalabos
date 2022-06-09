@@ -236,22 +236,24 @@ public:
     /// Receive data from a byte-stream into the block.
     virtual void receive(Box2D domain, std::vector<char> const &buffer, modif::ModifT kind);
     virtual void receive(
-        Box2D domain, std::vector<char> const &buffer, modif::ModifT kind, Dot2D offset)
+        Box2D domain, std::vector<char> const &buffer, modif::ModifT kind, [[maybe_unused]] Dot2D offset)
     {
         receive(domain, buffer, kind);
     }
     virtual void receive(
         Box2D domain, std::vector<char> const &buffer, modif::ModifT kind,
-        std::map<int, std::string> const &foreignIds)
+        [[maybe_unused]] std::map<int, std::string> const &foreignIds)
     {
         receive(domain, buffer, kind);
     }
     /// Attribute data between two blocks.
     virtual void attribute(
         Box2D toDomain, plint deltaX, plint deltaY, AtomicBlock2D const &from, modif::ModifT kind);
+    // QUESTION: This absoluteOffset is never used in pretty much all implementations. Is that correct
+    // to leave it be?
     virtual void attribute(
         Box2D toDomain, plint deltaX, plint deltaY, AtomicBlock2D const &from, modif::ModifT kind,
-        Dot2D absoluteOffset)
+        [[maybe_unused]] Dot2D absoluteOffset)
     {
         attribute(toDomain, deltaX, deltaY, from, kind);
     }

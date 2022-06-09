@@ -473,11 +473,12 @@ BoundaryCompositeDynamics<T, Descriptor>
         baseDynamics);
 }
 
+// QUESTION: I think domain is never used we should discard it, no?
 template <typename T, template <typename U> class Descriptor>
 template <int direction, int orientation>
 BoxProcessingFunctional3D_L<T, Descriptor>
     *RegularizedAdvectionDiffusionBoundaryManager3D<T, Descriptor>::getTemperatureBoundaryProcessor(
-        Box3D domain)
+        [[maybe_unused]] Box3D domain)
 {
     return 0;
 }
@@ -492,11 +493,12 @@ BoundaryCompositeDynamics<T, Descriptor>
         baseDynamics);
 }
 
+// QUESTION: I think domain is never used we should discard it, no?
 template <typename T, template <typename U> class Descriptor>
 template <int plane, int normal1, int normal2>
 BoxProcessingFunctional3D_L<T, Descriptor>
     *RegularizedAdvectionDiffusionBoundaryManager3D<T, Descriptor>::getTemperatureEdgeProcessor(
-        Box3D domain)
+        [[maybe_unused]] Box3D domain)
 {
     return 0;
 }
@@ -511,11 +513,12 @@ BoundaryCompositeDynamics<T, Descriptor>
         baseDynamics);
 }
 
+// QUESTION: I think x,y,z is never used we should discard it, no?
 template <typename T, template <typename U> class Descriptor>
 template <int xNormal, int yNormal, int zNormal>
 BoxProcessingFunctional3D_L<T, Descriptor>
     *RegularizedAdvectionDiffusionBoundaryManager3D<T, Descriptor>::getTemperatureCornerProcessor(
-        plint x, plint y, plint z)
+        [[maybe_unused]] plint x, [[maybe_unused]] plint y, [[maybe_unused]] plint z)
 {
     return 0;
 }
@@ -559,10 +562,11 @@ BoundaryCompositeDynamics<T, Descriptor> *CompleteRegularizedAdvectionDiffusionB
         T, Descriptor, direction, orientation>(baseDynamics);
 }
 
+// QUESTION: I think domain is never used we should discard it, no?
 template <typename T, template <typename U> class Descriptor>
 template <int direction, int orientation>
 BoxProcessingFunctional3D_L<T, Descriptor> *CompleteRegularizedAdvectionDiffusionBoundaryManager3D<
-    T, Descriptor>::getTemperatureBoundaryProcessor(Box3D domain)
+    T, Descriptor>::getTemperatureBoundaryProcessor([[maybe_unused]] Box3D domain)
 {
     return 0;
 }
@@ -575,10 +579,11 @@ BoundaryCompositeDynamics<T, Descriptor> *CompleteRegularizedAdvectionDiffusionB
     return new StoreDensityDynamics<T, Descriptor>(baseDynamics);
 }
 
+// QUESTION: I think domain is never used we should discard it, no?
 template <typename T, template <typename U> class Descriptor>
 template <int plane, int normal1, int normal2>
 BoxProcessingFunctional3D_L<T, Descriptor> *CompleteRegularizedAdvectionDiffusionBoundaryManager3D<
-    T, Descriptor>::getTemperatureEdgeProcessor(Box3D domain)
+    T, Descriptor>::getTemperatureEdgeProcessor([[maybe_unused]] Box3D domain)
 {
     return new CompleteAdvectionDiffusionEdgeBoundaryFunctional3D<
         T, Descriptor, plane, normal1, normal2>();
@@ -592,10 +597,11 @@ BoundaryCompositeDynamics<T, Descriptor> *CompleteRegularizedAdvectionDiffusionB
     return new StoreDensityDynamics<T, Descriptor>(baseDynamics);
 }
 
+// QUESTION: I think x,y,z is never used we should discard it, no?
 template <typename T, template <typename U> class Descriptor>
 template <int xNormal, int yNormal, int zNormal>
 BoxProcessingFunctional3D_L<T, Descriptor> *CompleteRegularizedAdvectionDiffusionBoundaryManager3D<
-    T, Descriptor>::getTemperatureCornerProcessor(plint x, plint y, plint z)
+    T, Descriptor>::getTemperatureCornerProcessor([[maybe_unused]] plint x, [[maybe_unused]] plint y, [[maybe_unused]] plint z)
 {
     return new CompleteAdvectionDiffusionCornerBoundaryFunctional3D<
         T, Descriptor, xNormal, yNormal, zNormal>();

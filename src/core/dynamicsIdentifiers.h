@@ -90,8 +90,8 @@ public:
     DynamicsRegistration() { }
 
 private:
-    DynamicsRegistration(DynamicsRegistration<T, Descriptor> const &rhs) { }
-    DynamicsRegistration<T, Descriptor> &operator=(DynamicsRegistration<T, Descriptor> const &rhs)
+    DynamicsRegistration([[maybe_unused]] DynamicsRegistration<T, Descriptor> const &rhs) { }
+    DynamicsRegistration<T, Descriptor> &operator=([[maybe_unused]] DynamicsRegistration<T, Descriptor> const &rhs)
     {
         return *this;
     }
