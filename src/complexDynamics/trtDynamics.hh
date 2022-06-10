@@ -439,8 +439,8 @@ void IncTRTdynamics<T, Descriptor>::collide(Cell<T, Descriptor> &cell, BlockStat
 
 template <typename T, template <typename U> class Descriptor>
 void IncTRTdynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, T thetaBar,
-    BlockStatistics &statistics)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T thetaBar, BlockStatistics &statistics)
 {
     const T omegaPlus = this->getOmega();
     const T omegaMinus = this->getOmegaMinus();
@@ -477,7 +477,8 @@ void IncTRTdynamics<T, Descriptor>::collideExternal(
 
 template <typename T, template <typename U> class Descriptor>
 T IncTRTdynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr, T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     return dynamicsTemplates<T, Descriptor>::bgk_ma2_equilibrium(iPop, rhoBar, (T)1, j, jSqr);
 }

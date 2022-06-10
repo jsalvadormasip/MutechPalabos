@@ -78,7 +78,7 @@ inline void transferDataProcessors(MultiBlock3D const &from, MultiBlock3D &to)
 // QUESTION: Does it make sense to have a useless domain here?
 template <typename T>
 void transferScalarFieldLocal(
-    MultiScalarField3D<T> &from, MultiScalarField3D<T> &to, Box3D const &domain)
+    MultiScalarField3D<T> &from, MultiScalarField3D<T> &to, [[maybe_unused]] Box3D const &domain)
 {
     // 1. Copy all data from the old to the new field.
     plb::copy(from, to, from.getBoundingBox());

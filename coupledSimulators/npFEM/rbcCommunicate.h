@@ -258,7 +258,7 @@ void sendBodiesVelocities(std::vector<ShapeOpBody<T>> &shapeOpBodies)
 template <typename T>
 void receiveBodiesVelocities(
     std::map<pluint, pluint> &bodyToProc, std::vector<ShapeOpBody<T>> &shapeOpBodies, T dx, T dt,
-    T rho)
+    [[maybe_unused]] T rho)
 {
     // From physical to lattice units (From ShapeOp to Palabos)
     T Cu = dt / dx;

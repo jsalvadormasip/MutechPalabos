@@ -118,7 +118,8 @@ std::string constructIdNameChain(std::vector<int> const &ids, std::string separa
 
 template <typename T, template <typename U> class Descriptor, class NoParamDynamics>
 class NoParamDynamicsGenerator : public DynamicsGenerator<T, Descriptor> {
-    virtual Dynamics<T, Descriptor> *generate(HierarchicUnserializer &unserializer) const
+    virtual Dynamics<T, Descriptor> *generate(
+        [[maybe_unused]] HierarchicUnserializer &unserializer) const
     {
         return new NoParamDynamics();
     }

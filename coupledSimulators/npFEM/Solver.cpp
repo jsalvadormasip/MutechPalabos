@@ -616,7 +616,9 @@ SHAPEOP_INLINE bool Solver::solve(
 
     // counters
     unsigned int it = 0;
+#ifdef NPFEM_SA
     unsigned int avg_line_search_loops = 0;
+#endif
 
     // convergence related
     unsigned int attempts_to_solve_stagnation = 0;
@@ -737,7 +739,9 @@ SHAPEOP_INLINE bool Solver::solve(
 #endif
 
             line_search_loops += 1;
+#ifdef NPFEM_SA
             avg_line_search_loops += 1;
+#endif
 
 #ifdef WOLFE
             if (Armijo_condition && curvature_condition) {

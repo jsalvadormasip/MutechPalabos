@@ -87,12 +87,17 @@ struct ExternalForceAccess<T, Descriptor, 0> {
         return T();
     }
 
-    static void setComponent(Cell<T, Descriptor> const &cell, plint iD, T component) { }
-    static Array<T, 0> get(Cell<T, Descriptor> const &cell)
+    static void setComponent(
+        [[maybe_unused]] Cell<T, Descriptor> const &cell, [[maybe_unused]] plint iD,
+        [[maybe_unused]] T component)
+    { }
+    static Array<T, 0> get([[maybe_unused]] Cell<T, Descriptor> const &cell)
     {
         return Array<T, 0>();
     }
-    static void set(Cell<T, Descriptor> &cell, Array<T, 0> const &force) { }
+    static void set(
+        [[maybe_unused]] Cell<T, Descriptor> &cell, [[maybe_unused]] Array<T, 0> const &force)
+    { }
 };
 
 /// Automatic instantiation of ExternalForceAccess, depending on the Descriptor

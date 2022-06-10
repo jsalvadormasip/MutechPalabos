@@ -128,11 +128,11 @@ void PartialBBdynamics<T, Descriptor>::recomposeOrder0(
 }
 
 // QUESTION: There is a version with Krueger's method. We should add it in a second
-// step.
+// step. wallVelocity is therefore not used
 template <typename T, template <typename U> class Descriptor>
 T PartialBBdynamics<T, Descriptor>::PSMCollision(
     Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
-    Array<T, Descriptor<T>::d> const &wallVelocity, T &solidFraction, T omega)
+    [[maybe_unused]] Array<T, Descriptor<T>::d> const &wallVelocity, T &solidFraction, T omega)
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
     const T jSqr = VectorTemplate<T, Descriptor>::normSqr(j);

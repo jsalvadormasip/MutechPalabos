@@ -375,7 +375,7 @@ struct dynamicsTemplatesImpl<T, descriptors::D2Q9DescriptorBase<T> > {
     }
 
     static void complete_neq_ma2_moments_from_phys_moments(
-        Array<T, D::q> &mNeq, T rhoBar, T invRho, const Array<T, D::d> &j,
+        Array<T, D::q> &mNeq, [[maybe_unused]] T rhoBar, T invRho, const Array<T, D::d> &j,
         const Array<T, SymmetricTensorImpl<T, D::d>::n> &piNeq, plint order, T omega,
         T omegaNonPhys)
     {

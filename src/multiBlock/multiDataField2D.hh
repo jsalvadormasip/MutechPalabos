@@ -765,7 +765,7 @@ int MultiNTensorField2D<T>::getStaticId() const
 template <typename T>
 void MultiNTensorField2D<T>::copyReceive(
     MultiBlock2D const &fromBlock, Box2D const &fromDomain, Box2D const &toDomain,
-    modif::ModifT whichData)
+    [[maybe_unused]] modif::ModifT whichData)
 {
     MultiNTensorField2D<T> const *fromField =
         dynamic_cast<MultiNTensorField2D<T> const *>(&fromBlock);

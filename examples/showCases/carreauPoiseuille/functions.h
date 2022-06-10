@@ -162,7 +162,7 @@ public:
     }
 
     // QUESTION: Is it normal that y is unused?
-    virtual T derivative(T y, T z) const
+    virtual T derivative([[maybe_unused]] T y, T z) const
     {
         std::vector<T> a, b;
         a.push_back((T)1 / (T)2);

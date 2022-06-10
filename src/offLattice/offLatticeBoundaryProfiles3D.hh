@@ -260,8 +260,8 @@ void IncreasingVelocityPlugProfile3D<T, Descriptor>::defineCircularShape(
 
 template <typename T, template <typename U> class Descriptor>
 void IncreasingVelocityPlugProfile3D<T, Descriptor>::getData(
-    Array<T, 3> const &pos, [[maybe_unused]] plint id, AtomicBlock3D const *argument,
-    Array<T, 3> &data, OffBoundary::Type &bdType) const
+    [[maybe_unused]] Array<T, 3> const &pos, [[maybe_unused]] plint id,
+    AtomicBlock3D const *argument, Array<T, 3> &data, OffBoundary::Type &bdType) const
 {
     bdType = OffBoundary::dirichlet;
     BlockLattice3D<T, Descriptor> const *lattice =

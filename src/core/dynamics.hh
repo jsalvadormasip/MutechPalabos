@@ -1215,7 +1215,7 @@ void VelocityBounceBack<T, Descriptor>::computeRhoBarJ(
 
 template <typename T, template <typename U> class Descriptor>
 void VelocityBounceBack<T, Descriptor>::computeRhoBarJPiNeq(
-    Cell<T, Descriptor> const &cell, T &rhoBar, Array<T, Descriptor<T>::d> &j,
+    [[maybe_unused]] Cell<T, Descriptor> const &cell, T &rhoBar, Array<T, Descriptor<T>::d> &j,
     Array<T, SymmetricTensor<T, Descriptor>::n> &PiNeq) const
 {
     rhoBar = Descriptor<T>::rhoBar(rhoWall);
@@ -1224,7 +1224,8 @@ void VelocityBounceBack<T, Descriptor>::computeRhoBarJPiNeq(
 }
 
 template <typename T, template <typename U> class Descriptor>
-T VelocityBounceBack<T, Descriptor>::computeEbar(Cell<T, Descriptor> const &cell) const
+T VelocityBounceBack<T, Descriptor>::computeEbar(
+    [[maybe_unused]] Cell<T, Descriptor> const &cell) const
 {
     return T();
 }

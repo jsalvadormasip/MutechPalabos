@@ -104,8 +104,8 @@ void WaveDynamics<T, Descriptor>::collide(Cell<T, Descriptor> &cell, BlockStatis
 
 template <typename T, template <typename U> class Descriptor>
 void WaveDynamics<T, Descriptor>::collideExternal(
-    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, T thetaBar,
-    BlockStatistics &stat)
+    Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j,
+    [[maybe_unused]] T thetaBar, BlockStatistics &stat)
 {
     T uSqr = waveCollision(cell, rhoBar, j, vs2);
     if (cell.takesStatistics()) {
@@ -115,10 +115,11 @@ void WaveDynamics<T, Descriptor>::collideExternal(
 
 template <typename T, template <typename U> class Descriptor>
 T WaveDynamics<T, Descriptor>::computeEquilibrium(
-    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr, T thetaBar) const
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
+    [[maybe_unused]] T thetaBar) const
 {
     T invRho = Descriptor<T>::invRho(rhoBar);
-    return waveEquilibrium(iPop, rhoBar, invRho, j, jSqr, vs2);
+    return waveEquilibrium(iPop, rhoBar, j, vs2);
 }
 
 template <typename T, template <typename U> class Descriptor>
@@ -167,7 +168,7 @@ T WaveDynamics<T, Descriptor>::waveCollision(
 
 template <typename T, template <typename U> class Descriptor>
 T WaveDynamics<T, Descriptor>::waveEquilibrium(
-    plint iPop, T rhoBar, T invRho, Array<T, Descriptor<T>::d> const &j, T jSqr, T vs2)
+    plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T vs2)
 {
     T kappa = vs2 - Descriptor<T>::cs2;
     if (iPop == 0) {
