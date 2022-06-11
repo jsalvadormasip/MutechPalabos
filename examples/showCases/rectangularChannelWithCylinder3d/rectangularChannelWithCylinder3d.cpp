@@ -44,7 +44,8 @@ using namespace plb;
 using namespace std;
 
 typedef double T;
-#define DESCRIPTOR descriptors::D3Q19Descriptor
+// #define DESCRIPTOR descriptors::D3Q19Descriptor
+#define DESCRIPTOR descriptors::AbsorbingWaveD3Q27Descriptor
 
 #define NMAX 150
 
@@ -178,6 +179,51 @@ private:
     plint maxN;
 };
 
+template <typename T>
+class SigmaFunction {
+public:
+    SigmaFunction(Box3D domain_, plint L_, T omega, T xiFactor) :
+        domain(domain_), L(L_), xi(omega - xiFactor)
+    { }
+    T operator()(plint iX, plint iY, plint iZ) const
+    {
+        std::vector<plint> distances;
+        addDistance(domain.x0 + L, iX, distances);
+        addDistance(iX, domain.x1 - L, distances);
+
+        plint distance = 0;
+        for (pluint i = 0; i < distances.size(); ++i) {
+            if (distances[i] > distance) {
+                distance = distances[i];
+            }
+        }
+
+        if (distance == 0) {
+            return T();
+        } else {
+            return xi * sigma(T(), (T)L, (T)distance);
+        }
+    }
+
+private:
+    void addDistance(plint from, plint pos, std::vector<plint> &distances) const
+    {
+        plint dist = from - pos;
+        if (dist > 0) {
+            distances.push_back(dist);
+        }
+    }
+    static T sigma(T x0, T x1, T x)
+    {
+        return (3125. * (x1 - x) * pow(x - x0, 4.)) / (256. * pow(x1 - x0, 5.));
+    }
+
+private:
+    Box3D domain;
+    plint L;
+    T xi;
+};
+
 void simulationSetup(
     MultiBlockLattice3D<T, DESCRIPTOR> &lattice, IncomprFlowParam<T> const &parameters,
     OnLatticeBoundaryCondition3D<T, DESCRIPTOR> &boundaryCondition, Array<plint, 3> &forceIds)
@@ -230,6 +276,18 @@ void simulationSetup(
         } else if (param.outletSpongeZoneType == 1) {
             pcout << "Generating an outlet Smagorinsky sponge zone." << std::endl;
             bulkValue = 0.14;  // Parameter for the Smagorinsky LES model
+        } else if (param.outletSpongeZoneType == 2) {
+            T xiFactor = 1.5;
+            setExternalScalar(lattice, lattice.getBoundingBox(),
+                        DESCRIPTOR<T>::ExternalField::rhoBarBeginsAt, T() );
+            setExternalVector(
+                lattice, lattice.getBoundingBox(), DESCRIPTOR<T>::ExternalField::uBeginsAt,
+                SquarePoiseuilleVelocity<T>(parameters, NMAX));
+            setGenericExternalScalar(
+                lattice, lattice.getBoundingBox(), DESCRIPTOR<T>::ExternalField::sigmaBeginsAt,
+                SigmaFunction<T>(
+                    lattice.getBoundingBox(), param.numOutletSpongeCells, parameters.getOmega(),
+                    xiFactor));
         } else {
             pcout << "Error: unknown type of sponge zone." << std::endl;
             exit(-1);
@@ -254,7 +312,7 @@ void simulationSetup(
             applyProcessingFunctional(
                 new ViscositySpongeZone3D<T, DESCRIPTOR>(nx, ny, nz, bulkValue, numSpongeCells),
                 lattice.getBoundingBox(), args);
-        } else {
+        } else if (param.outletSpongeZoneType == 1) {
             applyProcessingFunctional(
                 new SmagorinskySpongeZone3D<T, DESCRIPTOR>(
                     nx, ny, nz, bulkValue, param.targetSpongeCSmago, numSpongeCells),
@@ -305,12 +363,14 @@ void writeVTK(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, pli
     T dx = parameters.getDeltaX();
     T dt = parameters.getDeltaT();
 
-    // VtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), dx);
-    ParallelVtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), 3, dx);
+    VtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), dx);
+    // ParallelVtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), 3, dx);
 
     vtkOut.writeData<3, float>(*computeVelocity(lattice), "velocity", dx / dt);
     vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx / dt);
     vtkOut.writeData<3, float>(*computeVorticity(*computeVelocity(lattice)), "vorticity", 1. / dt);
+    vtkOut.writeData<float>(*computeExternalScalar(lattice, DESCRIPTOR<T>::ExternalField::sigmaBeginsAt), "sigma", (T)1);
+
 }
 
 int main(int argc, char *argv[])
@@ -361,12 +421,15 @@ int main(int argc, char *argv[])
     pcout << "omega= " << parameters.getOmega() << std::endl;
     writeLogFile(parameters, "3D square Poiseuille with Cylinder as an obstacle");
 
+    Dynamics<T, DESCRIPTOR> *dyn =
+        new ConsistentSmagorinskyCompleteRegularizedBGKdynamics<T, DESCRIPTOR>(
+            parameters.getOmega(), 0.16);
     MultiBlockLattice3D<T, DESCRIPTOR> lattice(
         parameters.getNx(), parameters.getNy(), parameters.getNz(),
-        new ConsistentSmagorinskyCompleteRegularizedBGKdynamics<T, DESCRIPTOR>(parameters.getOmega(), 0.16));
+        new WaveAbsorptionDynamics<T, DESCRIPTOR>(dyn));
 
     OnLatticeBoundaryCondition3D<T, DESCRIPTOR> *boundaryCondition =
-        createLocalBoundaryCondition3D<T, DESCRIPTOR>();
+        createInterpBoundaryCondition3D<T, DESCRIPTOR>();
 
     Array<plint, 3> forceIds;
     simulationSetup(lattice, parameters, *boundaryCondition, forceIds);
