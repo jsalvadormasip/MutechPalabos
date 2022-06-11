@@ -299,6 +299,20 @@ void writeGifs(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, pl
         createFileName("uNorm", iter, 6), *computeVelocityNorm(lattice, slice), imSize, imSize);
 }
 
+template <class BlockLatticeT>
+void writeVTK(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, plint iter)
+{
+    T dx = parameters.getDeltaX();
+    T dt = parameters.getDeltaT();
+
+    // VtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), dx);
+    ParallelVtkImageOutput3D<T> vtkOut(createFileName("vtk", iter, 6), 3, dx);
+
+    vtkOut.writeData<3, float>(*computeVelocity(lattice), "velocity", dx / dt);
+    vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx / dt);
+    vtkOut.writeData<3, float>(*computeVorticity(*computeVelocity(lattice)), "vorticity", 1. / dt);
+}
+
 int main(int argc, char *argv[])
 {
     plbInit(&argc, &argv);
@@ -349,7 +363,7 @@ int main(int argc, char *argv[])
 
     MultiBlockLattice3D<T, DESCRIPTOR> lattice(
         parameters.getNx(), parameters.getNy(), parameters.getNz(),
-        new BGKdynamics<T, DESCRIPTOR>(parameters.getOmega()));
+        new ConsistentSmagorinskyCompleteRegularizedBGKdynamics<T, DESCRIPTOR>(parameters.getOmega(), 0.16));
 
     OnLatticeBoundaryCondition3D<T, DESCRIPTOR> *boundaryCondition =
         createLocalBoundaryCondition3D<T, DESCRIPTOR>();
@@ -363,6 +377,7 @@ int main(int argc, char *argv[])
             pcout << "step " << iT << "; t=" << iT * parameters.getDeltaT() << std::endl;
 
             writeGifs(lattice, parameters, iT);
+            writeVTK(lattice, parameters, iT);
         }
 
         // Execute a time iteration.

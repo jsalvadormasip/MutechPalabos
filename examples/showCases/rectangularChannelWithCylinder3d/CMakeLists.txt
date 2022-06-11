@@ -28,6 +28,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 project(palabosExample)
 enable_language(CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
 set(EXECUTABLE_NAME "rectangularChannelWithCylinder3d")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
