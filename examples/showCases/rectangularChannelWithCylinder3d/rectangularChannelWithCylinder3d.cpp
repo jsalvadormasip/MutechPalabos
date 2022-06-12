@@ -47,7 +47,7 @@ typedef double T;
 // #define DESCRIPTOR descriptors::D3Q19Descriptor
 #define DESCRIPTOR descriptors::AbsorbingWaveD3Q27Descriptor
 
-#define NMAX 150
+#define NMAX 100
 
 const T pi = (T)4. * std::atan((T)1.);
 
@@ -123,16 +123,16 @@ T poiseuilleVelocity(plint iX, plint iY, IncomprFlowParam<T> const &parameters, 
 
     for (plint iN = 0; iN < maxN; iN += 2) {
         T twoNplusOne = (T)2 * (T)iN + (T)1;
-
+        
         sum +=
-            (std::cos(twoNplusOne * pi * x / a) * std::cosh(twoNplusOne * pi * y / b)
+            (std::cos(twoNplusOne * pi * x / a) * std::cosh(twoNplusOne * pi * y / a)
              / (std::pow(twoNplusOne, (T)3) * std::cosh(twoNplusOne * pi * b / ((T)2 * a))));
     }
     for (plint iN = 1; iN < maxN; iN += 2) {
         T twoNplusOne = (T)2 * (T)iN + (T)1;
 
         sum -=
-            (std::cos(twoNplusOne * pi * x / a) * std::cosh(twoNplusOne * pi * y / b)
+            (std::cos(twoNplusOne * pi * x / a) * std::cosh(twoNplusOne * pi * y / a)
              / (std::pow(twoNplusOne, (T)3) * std::cosh(twoNplusOne * pi * b / ((T)2 * a))));
     }
 
@@ -363,9 +363,9 @@ void writeVTK(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, pli
     vtkOut.writeData<3, float>(*computeVelocity(lattice), "velocity", dx / dt);
     vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx / dt);
     vtkOut.writeData<3, float>(*computeVorticity(*computeVelocity(lattice)), "vorticity", 1. / dt);
-    // vtkOut.writeData<float>(
-    //     *computeExternalScalar(lattice, DESCRIPTOR<T>::ExternalField::sigmaBeginsAt), "sigma",
-    //     (T)1);
+    vtkOut.writeData<float>(
+        *computeExternalScalar(lattice, DESCRIPTOR<T>::ExternalField::sigmaBeginsAt), "sigma",
+        (T)1);
 }
 
 int main(int argc, char *argv[])
