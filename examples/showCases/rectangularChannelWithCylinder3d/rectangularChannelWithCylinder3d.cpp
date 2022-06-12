@@ -297,8 +297,9 @@ void simulationSetup(
                 lattice.getBoundingBox(), args);
         } else if (param.outletSpongeZoneType == 2) {
             T xiFactor = 1.5;
-            setExternalScalar(lattice, lattice.getBoundingBox(),
-                        DESCRIPTOR<T>::ExternalField::rhoBarBeginsAt, T() );
+            setExternalScalar(
+                lattice, lattice.getBoundingBox(), DESCRIPTOR<T>::ExternalField::rhoBarBeginsAt,
+                T());
             setExternalVector(
                 lattice, lattice.getBoundingBox(), DESCRIPTOR<T>::ExternalField::uBeginsAt,
                 SquarePoiseuilleVelocity<T>(parameters, NMAX));
@@ -319,7 +320,7 @@ void simulationSetup(
     // Add the obstacle: cylinder 3d
     plint cx = nx / 2 + 2;  // cx is slightly offset to avoid full symmetry,
                             // and to get a Von Karman Vortex street.
-    plint cz = param.numOutletSpongeCells +  parameters.getResolution() * 4;
+    plint cz = param.numOutletSpongeCells + parameters.getResolution() * 4;
     plint radius = parameters.getResolution() / 2;  // the diameter is the reference length
 
     lattice.toggleInternalStatistics(true);
@@ -362,8 +363,9 @@ void writeVTK(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, pli
     vtkOut.writeData<3, float>(*computeVelocity(lattice), "velocity", dx / dt);
     vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx / dt);
     vtkOut.writeData<3, float>(*computeVorticity(*computeVelocity(lattice)), "vorticity", 1. / dt);
-    vtkOut.writeData<float>(*computeExternalScalar(lattice, DESCRIPTOR<T>::ExternalField::sigmaBeginsAt), "sigma", (T)1);
-
+    vtkOut.writeData<float>(
+        *computeExternalScalar(lattice, DESCRIPTOR<T>::ExternalField::sigmaBeginsAt), "sigma",
+        (T)1);
 }
 
 int main(int argc, char *argv[])
