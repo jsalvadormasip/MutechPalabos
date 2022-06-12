@@ -296,7 +296,7 @@ void simulationSetup(
                     nx, ny, nz, bulkValue, param.targetSpongeCSmago, numSpongeCells),
                 lattice.getBoundingBox(), args);
         } else if (param.outletSpongeZoneType == 2) {
-            T xiFactor = 1.5;
+            T xiFactor = param.targetSpongeCSmago;
             setExternalScalar(
                 lattice, lattice.getBoundingBox(), DESCRIPTOR<T>::ExternalField::rhoBarBeginsAt,
                 T());
@@ -369,9 +369,9 @@ void writeVTK(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, pli
     vtkOut.writeData<3, float>(*computeVelocity(lattice), "velocity", dx / dt);
     vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx / dt);
     vtkOut.writeData<3, float>(*computeVorticity(*computeVelocity(lattice)), "vorticity", 1. / dt);
-    vtkOut.writeData<float>(
-        *computeExternalScalar(lattice, DESCRIPTOR<T>::ExternalField::sigmaBeginsAt), "sigma",
-        (T)1);
+    // vtkOut.writeData<float>(
+    //     *computeExternalScalar(lattice, DESCRIPTOR<T>::ExternalField::sigmaBeginsAt), "sigma",
+    //     (T)1);
 }
 
 int main(int argc, char *argv[])
