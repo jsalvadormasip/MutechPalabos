@@ -352,7 +352,7 @@ void writeGifs(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, pl
     imageWriter.writeScaledGif(
         createFileName("uNormX", iter, 6), *computeVelocityNorm(lattice, slice_x), imSize, imSize);
     imageWriter.writeScaledGif(
-            createFileName("uNormY", iter, 6), *computeVelocityNorm(lattice, slice_y), imSize, imSize);
+        createFileName("uNormY", iter, 6), *computeVelocityNorm(lattice, slice_y), imSize, imSize);
     imageWriter.writeScaledGif(
         createFileName("uNormZ", iter, 6), *computeVelocityNorm(lattice, slice_z), imSize, imSize);
 }
