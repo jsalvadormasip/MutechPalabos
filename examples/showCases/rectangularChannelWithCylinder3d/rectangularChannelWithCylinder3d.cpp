@@ -365,9 +365,9 @@ void writeVTK(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, pli
     vtkOut.writeData<3, float>(*computeVelocity(lattice), "velocity", dx / dt);
     vtkOut.writeData<float>(*computeVelocityNorm(lattice), "velocityNorm", dx / dt);
     vtkOut.writeData<3, float>(*computeVorticity(*computeVelocity(lattice)), "vorticity", 1. / dt);
-    vtkOut.writeData<float>(
-        *computeExternalScalar(lattice, DESCRIPTOR<T>::ExternalField::sigmaBeginsAt), "sigma",
-        (T)1);
+    // vtkOut.writeData<float>(
+    //     *computeExternalScalar(lattice, DESCRIPTOR<T>::ExternalField::sigmaBeginsAt), "sigma",
+    //     (T)1);
 }
 
 int main(int argc, char *argv[])
