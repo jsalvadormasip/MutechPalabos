@@ -138,8 +138,6 @@ T poiseuilleVelocity(plint iX, plint iY, IncomprFlowParam<T> const &parameters, 
 
     sum *= ((T)4 * alpha * a * a / std::pow(pi, (T)3));
     sum += (alpha / (T)2 * (x * x - a * a / (T)4));
-    pcout << "x = " << x << ", y = " << y << ", sum = " << sum << std::endl;
-    pcout << "iX = " << iX << ", iY = " << iY << ", sum = " << sum << std::endl;
 
     return sum;
 }
