@@ -125,19 +125,21 @@ T poiseuilleVelocity(plint iX, plint iY, IncomprFlowParam<T> const &parameters, 
         T twoNplusOne = (T)2 * (T)iN + (T)1;
 
         sum +=
-            (std::cos(twoNplusOne * pi * x / a) * std::cosh(twoNplusOne * pi * y / a)
+            (std::cos(twoNplusOne * pi * x / a) * std::cosh(twoNplusOne * pi * y / b)
              / (std::pow(twoNplusOne, (T)3) * std::cosh(twoNplusOne * pi * b / ((T)2 * a))));
     }
     for (plint iN = 1; iN < maxN; iN += 2) {
         T twoNplusOne = (T)2 * (T)iN + (T)1;
 
         sum -=
-            (std::cos(twoNplusOne * pi * x / a) * std::cosh(twoNplusOne * pi * y / a)
+            (std::cos(twoNplusOne * pi * x / a) * std::cosh(twoNplusOne * pi * y / b)
              / (std::pow(twoNplusOne, (T)3) * std::cosh(twoNplusOne * pi * b / ((T)2 * a))));
     }
 
     sum *= ((T)4 * alpha * a * a / std::pow(pi, (T)3));
     sum += (alpha / (T)2 * (x * x - a * a / (T)4));
+    pcout << "x = " << x << ", y = " << y << ", sum = " << sum << std::endl;
+    pcout << "iX = " << iX << ", iY = " << iY << ", sum = " << sum << std::endl;
 
     return sum;
 }
