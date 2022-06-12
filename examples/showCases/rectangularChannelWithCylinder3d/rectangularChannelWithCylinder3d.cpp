@@ -123,7 +123,7 @@ T poiseuilleVelocity(plint iX, plint iY, IncomprFlowParam<T> const &parameters, 
 
     for (plint iN = 0; iN < maxN; iN += 2) {
         T twoNplusOne = (T)2 * (T)iN + (T)1;
-        
+
         sum +=
             (std::cos(twoNplusOne * pi * x / a) * std::cosh(twoNplusOne * pi * y / a)
              / (std::pow(twoNplusOne, (T)3) * std::cosh(twoNplusOne * pi * b / ((T)2 * a))));
@@ -344,11 +344,17 @@ void writeGifs(BlockLatticeT &lattice, IncomprFlowParam<T> const &parameters, pl
     const plint ny = parameters.getNy();
     const plint nz = parameters.getNz();
 
-    Box3D slice(0, nx - 1, ny / 2, ny / 2, 0, nz - 1);
+    Box3D slice_x(nx / 2, nx / 2, 0, ny - 1, 0, nz - 1);
+    Box3D slice_y(0, nx - 1, ny / 2, ny / 2, 0, nz - 1);
+    Box3D slice_z(0, nx - 1, 0, ny - 1, nz / 2, nz / 2);
     ImageWriter<T> imageWriter("leeloo");
 
     imageWriter.writeScaledGif(
-        createFileName("uNorm", iter, 6), *computeVelocityNorm(lattice, slice), imSize, imSize);
+        createFileName("uNormX", iter, 6), *computeVelocityNorm(lattice, slice_x), imSize, imSize);
+    imageWriter.writeScaledGif(
+            createFileName("uNormY", iter, 6), *computeVelocityNorm(lattice, slice_y), imSize, imSize);
+    imageWriter.writeScaledGif(
+        createFileName("uNormZ", iter, 6), *computeVelocityNorm(lattice, slice_z), imSize, imSize);
 }
 
 template <class BlockLatticeT>
