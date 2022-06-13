@@ -161,7 +161,7 @@ T WaveDynamics<T, Descriptor>::waveCollision(
     T invRho = Descriptor<T>::invRho(rhoBar);
     for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
         cell[iPop] *= (T)-1.0;
-        cell[iPop] += (T)2.0 * waveEquilibrium(iPop, rhoBar, invRho, j, jSqr, vs2);
+        cell[iPop] += (T)2.0 * waveEquilibrium(iPop, rhoBar, j, jSqr, vs2);
     }
     return invRho * invRho * jSqr;
 }
