@@ -890,12 +890,7 @@ void BounceBack<T, Descriptor>::regularize(
     [[maybe_unused]] Array<T, Descriptor<T>::d> const &j, [[maybe_unused]] T jSqr,
     [[maybe_unused]] Array<T, SymmetricTensor<T, Descriptor>::n> const &PiNeq,
     [[maybe_unused]] T thetaBar) const
-{
-    // just equilibrium
-    // for (plint iPop = 0; iPop < Descriptor<T>::q; ++iPop) {
-    //     cell[iPop] = this->computeEquilibrium(iPop, rhoBar, j, jSqr, thetaBar);
-    // }
-}
+{ }
 
 template <typename T, template <typename U> class Descriptor>
 T BounceBack<T, Descriptor>::computeDensity([[maybe_unused]] Cell<T, Descriptor> const &cell) const
