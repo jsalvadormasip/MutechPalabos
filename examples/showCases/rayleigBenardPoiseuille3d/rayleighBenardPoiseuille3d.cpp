@@ -194,8 +194,8 @@ struct PerturbTemperatureRayleighBenardProcessor3D :
                     plint absoluteY = absoluteOffset.y + iY;
                     plint absoluteZ = absoluteOffset.z + iZ;
 
-                    if ((absoluteX == (parameters.getNx() - 1) / 2)
-                        && (absoluteY == (parameters.getNy() - 1) / 2) && (absoluteZ == 1))
+                    if ((absoluteX == (parameters.getNx() - 1) / 8 + 2)
+                        && (absoluteY == (parameters.getNy() - 1) / 2) && (absoluteZ == 0))
                     {
                         T temperature = T();
                         temperature = parameters.getHotTemperature() * 1.1;
@@ -240,12 +240,12 @@ void rayleighBenardSetup(
     Box3D inletPN(0, 0, 0, ny - 1, nz - 1, nz - 1);
     Box3D outlet(nx - 1, nx - 1, 0, ny - 1, 1, nz - 2);
     Box3D outletPP(nx - 1, nx - 1, 0, ny - 1, nz - 1, nz - 1);
-    Box3D outletNP(nx - 1, nx - 1, 0, ny - 1, nz - 1, nz - 1);
+    Box3D outletNP(nx - 1, nx - 1, 0, ny - 1, 0, 0);
 
     nsBoundaryCondition.addVelocityBoundary2N(bottom, nsLattice);
     nsBoundaryCondition.addVelocityBoundary2P(top, nsLattice);
     nsBoundaryCondition.addVelocityBoundary0N(inlet, nsLattice);
-    nsBoundaryCondition.addVelocityBoundary0P(outlet, nsLattice);
+    nsBoundaryCondition.addVelocityBoundary0P(outlet, nsLattice, boundary::neumann);
     nsBoundaryCondition.addExternalVelocityEdge1NN(inletNN, nsLattice);
     nsBoundaryCondition.addExternalVelocityEdge1PN(inletPN, nsLattice);
     nsBoundaryCondition.addExternalVelocityEdge1PP(outletPP, nsLattice);
@@ -258,7 +258,7 @@ void rayleighBenardSetup(
     adBoundaryCondition.addTemperatureBoundary2N(bottom, adLattice);
     adBoundaryCondition.addTemperatureBoundary2P(top, adLattice);
     adBoundaryCondition.addTemperatureBoundary0N(inlet, adLattice);
-    adBoundaryCondition.addTemperatureBoundary0P(outlet, adLattice);
+    adBoundaryCondition.addTemperatureBoundary0P(outlet, adLattice, boundary::neumann);
     adBoundaryCondition.addTemperatureEdge1NN(inletNN, adLattice);
     adBoundaryCondition.addTemperatureEdge1PN(inletPN, adLattice);
     adBoundaryCondition.addTemperatureEdge1PP(outletPP, adLattice);
@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
     }
 
     const T lx = 5.0;
-    const T ly = 2.0;
+    const T ly = 4.0;
     const T lz = 1.0;
     const T uMax = 0.1;
     const T Pr = 1.0;
@@ -435,6 +435,10 @@ int main(int argc, char *argv[])
                         parameters),
                     adLattice.getBoundingBox(), adLattice);
                 pcout << "Intermetiate convergence.\n";
+#ifndef PLB_REGRESSION
+                pcout << iT * parameters.getDeltaT() << " : Writing VTK." << endl;
+                writeVTK(nsLattice, adLattice, parameters, iT);
+#endif
             } else {
                 pcout << "Simulation is over.\n";
                 break;
