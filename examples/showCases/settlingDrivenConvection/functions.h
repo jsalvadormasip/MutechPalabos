@@ -1,8 +1,12 @@
+#ifndef FUNCTIONS_SDC_H
+#define FUNCTIONS_SDC_H
+
 #include <cmath>
 #include <vector>
 
-#ifndef FUNCTIONS_SDC_H
-#define FUNCTIONS_SDC_H
+#include "palabos3D.h"
+#include "palabos3D.hh"
+
 #define M_PI 3.14159265358979323846
 
 namespace plb {
