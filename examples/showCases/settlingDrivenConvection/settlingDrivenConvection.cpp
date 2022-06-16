@@ -2,10 +2,9 @@
 #include <iostream>
 #include <random>
 
+#include "functions.h"
 #include "palabos3D.h"
 #include "palabos3D.hh"
-
-#include "functions.h"
 
 using namespace plb;
 using namespace std;
