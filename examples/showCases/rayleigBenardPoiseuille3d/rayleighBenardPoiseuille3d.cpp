@@ -139,11 +139,13 @@ struct IniTemperatureRayleighBenardProcessor3D :
 
                     T temperature = T();
                     if (absoluteX < meanRegion || absoluteX > 7 * meanRegion) {
-                        temperature = (parameters.getHotTemperature() + parameters.getColdTemperature()) / (T)2;
+                        temperature =
+                            (parameters.getHotTemperature() + parameters.getColdTemperature())
+                            / (T)2;
                     } else {
                         temperature = parameters.getHotTemperature()
-                                    - parameters.getDeltaTemperature() / (T)(parameters.getNz() - 1)
-                                          * (T)absoluteZ;
+                                      - parameters.getDeltaTemperature()
+                                            / (T)(parameters.getNz() - 1) * (T)absoluteZ;
                     }
 
                     Array<T, adDescriptor<T>::d> jEq(0., 0., 0.);
@@ -252,7 +254,6 @@ void rayleighBenardSetup(
     setBoundaryVelocity(nsLattice, nsLattice.getBoundingBox(), PoiseuilleVelocity<T>(parameters));
     initializeAtEquilibrium(
         nsLattice, nsLattice.getBoundingBox(), OneDensityAndPoiseuilleVelocity<T>(parameters));
-
 
     adBoundaryCondition.addTemperatureBoundary2N(bottom, adLattice);
     adBoundaryCondition.addTemperatureBoundary2P(top, adLattice);
