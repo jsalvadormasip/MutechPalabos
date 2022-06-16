@@ -205,7 +205,7 @@ In palabos root directory, we provide a CMakeLists.txt file that compiles palabo
 
 # Documentation
 
-The documentation of Palabos can be found following this [link](http://www.palabos.org/documentation/userguide/).
+The documentation of Palabos can be found following this [link](https://palabos.unige.ch/get-started/palabos-documentation/).
 
 # Getting help
 
@@ -230,17 +230,24 @@ By alphabetic order
 * @ccoreixas
 * @daniel-lagrava-niwa
 * @dkdk
+* @constracktor
 * @helenmo
+* @izumiko
 * @jfburdet
+* @jolinjolin
 * @kotsaloscv
+* @liuanjun
 * @Latt
 * @msguskova
 * @omalaspinas
 * @onmars
 * @parmigiani
 * @rconradin
+* @remy.pet
 * @swang251 
+* @vmapelli
 * @YannThorimbert
 * @ysagon
+* @Yulan-Fang
 
 

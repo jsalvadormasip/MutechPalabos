@@ -29,13 +29,13 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 /** \file
  * Groups all the include files for basic 3D dynamics.
  */
 
-#include "finiteDifference/fdWeights.h"
 #include "finiteDifference/fdFunctional3D.h"
+#include "finiteDifference/fdWeights.h"
 #include "finiteDifference/fdWrapper3D.h"
 #include "finiteDifference/WENO3_procedure.h"
