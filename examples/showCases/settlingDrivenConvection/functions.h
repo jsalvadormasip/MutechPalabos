@@ -9,6 +9,195 @@ namespace plb {
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 1st order Upwind finite differences for advection-diffuion including Neumann boundary conditions
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+class AdvectionDiffusionFd3D_neumann : public BoxProcessingFunctional3D
+{
+public:
+    AdvectionDiffusionFd3D_neumann(T d_, bool upwind_, bool neumann_, plint nx_, plint ny_, plint nz_);
+    virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> fields );
+    virtual AdvectionDiffusionFd3D_neumann<T>* clone() const;
+    virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
+private:
+    T d;
+    bool upwind, neumann;
+    plint nx, ny, nz;
+};
+
+template<typename T>
+    AdvectionDiffusionFd3D_neumann<T>::AdvectionDiffusionFd3D_neumann(T d_, bool upwind_, bool neumann_, plint nx_, plint ny_, plint nz_)
+    : d(d_),
+      upwind(upwind_), neumann(neumann_), nx(nx_), ny(ny_), nz(nz_)
+    { }
+
+    template<typename T>
+    void AdvectionDiffusionFd3D_neumann<T>::processGenericBlocks (
+            Box3D domain,  std::vector<AtomicBlock3D*> fields )
+    {
+        PLB_PRECONDITION( fields.size()==5 );
+        ScalarField3D<T>* phi_t    = dynamic_cast<ScalarField3D<T>*>(fields[0]);
+        ScalarField3D<T>* phi_tp1  = dynamic_cast<ScalarField3D<T>*>(fields[1]);
+        ScalarField3D<T>* result   = dynamic_cast<ScalarField3D<T>*>(fields[2]);
+        TensorField3D<T,3>* uField = dynamic_cast<TensorField3D<T,3>*>(fields[3]);
+        ScalarField3D<T>* Q        = dynamic_cast<ScalarField3D<T>*>(fields[4]);
+
+
+
+
+        Dot3D ofs1 = computeRelativeDisplacement(*phi_t, *phi_tp1);
+        Dot3D ofs2 = computeRelativeDisplacement(*phi_t, *result);
+        Dot3D ofs3 = computeRelativeDisplacement(*phi_t, *uField);
+        Dot3D ofs4 = computeRelativeDisplacement(*phi_t, *Q);
+
+        Dot3D absoluteOffset = phi_tp1->getLocation();
+
+
+
+        if (upwind) {
+            for (plint iX=domain.x0; iX<=domain.x1; ++iX) {
+                for (plint iY=domain.y0; iY<=domain.y1; ++iY) {
+                    for (plint iZ=domain.z0; iZ<=domain.z1; ++iZ) {
+
+                      plint absoluteX = absoluteOffset.x + iX + ofs1.x;
+                      plint absoluteY = absoluteOffset.y + iY + ofs1.y;
+                      plint absoluteZ = absoluteOffset.z + iZ + ofs1.z;
+
+
+                        T phiC = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiE = phi_tp1->get(iX+1+ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiW = phi_tp1->get(iX-1+ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiN = phi_tp1->get(iX  +ofs1.x, iY+1+ofs1.y, iZ  +ofs1.z);
+                        T phiS = phi_tp1->get(iX  +ofs1.x, iY-1+ofs1.y, iZ  +ofs1.z);
+                        T phiT = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ+1+ofs1.z);
+                        T phiB = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ-1+ofs1.z);
+
+                        Array<T,3> const& u = uField->get(iX+ofs3.x, iY+ofs3.y, iZ+ofs3.z);
+
+                        Array<T, 3> adv;
+                        T diffX, diffY, diffZ;
+
+                        adv[0] = (util::greaterThan(u[0], (T) 0) ? (phiC - phiW) : (util::lessThan(   u[0], (T) 0) ? (phiE - phiC) : (T) 0.5 * (phiE - phiW)));
+                        adv[1] = (util::greaterThan(u[1], (T) 0) ? (phiC - phiS) : (util::lessThan(   u[1], (T) 0) ? (phiN - phiC) : (T) 0.5 * (phiN - phiS)));
+                        adv[2] = (util::greaterThan(u[2], (T) 0) ? (phiC - phiB) : (util::lessThan(   u[2], (T) 0) ? (phiT - phiC) : (T) 0.5 * (phiT - phiB)));
+
+                        diffX = phiW + phiE - (T) 2 * phiC;
+                        diffY = phiS + phiN - (T) 2 * phiC;
+                        diffZ = phiT + phiB - (T) 2 * phiC;
+
+
+                        if(neumann){
+                          if(absoluteX==0) { adv[0] = 0; diffX = (T) 2 * phiE - (T) 2 * phiC;}
+
+                          if(absoluteX==nx-1) { adv[0] = 0; diffX = (T) 2 * phiW - (T) 2 * phiC;}
+
+                          if(absoluteY==0) { adv[1] = 0; diffY = (T) 2 * phiN - (T) 2 * phiC;}
+
+                          if(absoluteY==ny-1) { adv[1] = 0; diffY = (T) 2 * phiS - (T) 2 * phiC;}
+
+                          if(absoluteZ==0) { adv[2] = 0; diffZ = (T) 2 * phiT - (T) 2 * phiC;}
+
+                          if(absoluteZ==nz-1) { adv[2] = 0; diffZ = (T) 2 * phiB - (T) 2 * phiC;}
+
+                          }
+
+
+
+
+                        T advection = u[0] * adv[0] + u[1] * adv[1] + u[2] * adv[2];
+
+                        T diffusion = d * (diffX + diffY + diffZ);
+
+
+                        result->get(iX+ofs2.x,iY+ofs2.y,iZ+ofs2.z) = phi_t->get(iX,iY,iZ) +
+                            diffusion - advection + Q->get(iX+ofs4.x,iY+ofs4.y,iZ+ofs4.z);
+
+
+
+
+                    }
+                }
+            }
+        } else {
+            for (plint iX=domain.x0; iX<=domain.x1; ++iX) {
+                for (plint iY=domain.y0; iY<=domain.y1; ++iY) {
+                    for (plint iZ=domain.z0; iZ<=domain.z1; ++iZ) {
+
+
+                        plint absoluteX = absoluteOffset.x + iX + ofs1.x;
+                        plint absoluteY = absoluteOffset.y + iY + ofs1.y;
+                        plint absoluteZ = absoluteOffset.z + iZ + ofs1.z;
+
+                        T phiC = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiE = phi_tp1->get(iX+1+ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiW = phi_tp1->get(iX-1+ofs1.x, iY  +ofs1.y, iZ  +ofs1.z);
+                        T phiN = phi_tp1->get(iX  +ofs1.x, iY+1+ofs1.y, iZ  +ofs1.z);
+                        T phiS = phi_tp1->get(iX  +ofs1.x, iY-1+ofs1.y, iZ  +ofs1.z);
+                        T phiT = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ+1+ofs1.z);
+                        T phiB = phi_tp1->get(iX  +ofs1.x, iY  +ofs1.y, iZ-1+ofs1.z);
+
+                        Array<T,3> const& u = uField->get(iX+ofs3.x, iY+ofs3.y, iZ+ofs3.z);
+                        Array<T, 3> adv;
+                        T diffX, diffY, diffZ;
+
+                        adv[0] = (T) 0.5 * (phiE - phiW);
+                        adv[1] = (T) 0.5 * (phiN - phiS);
+                        adv[2] = (T) 0.5 * (phiT - phiB);
+
+                        diffX = phiW + phiE - (T) 2 * phiC;
+                        diffY = phiS + phiN - (T) 2 * phiC;
+                        diffZ = phiT + phiB - (T) 2 * phiC;
+
+                        if(neumann){
+                          if(absoluteX==0) { adv[0] = 0; diffX = (T) 2 * phiE - (T) 2 * phiC;}
+
+                          if(absoluteX==nx-1) { adv[0] = 0; diffX = (T) 2 * phiW - (T) 2 * phiC;}
+
+                          if(absoluteY==0) { adv[1] = 0; diffY = (T) 2 * phiN - (T) 2 * phiC;}
+
+                          if(absoluteY==ny-1) { adv[1] = 0; diffY = (T) 2 * phiS - (T) 2 * phiC;}
+
+                          if(absoluteZ==0) { adv[2] = 0; diffZ = (T) 2 * phiT - (T) 2 * phiC;}
+
+                          if(absoluteZ==nz-1) { adv[2] = 0; diffZ = (T) 2 * phiB - (T) 2 * phiC;}
+
+                          }
+
+
+                          T advection = u[0] * adv[0] + u[1] * adv[1] + u[2] * adv[2];
+
+                          T diffusion = d * (diffX + diffY + diffZ);
+
+                        result->get(iX+ofs2.x,iY+ofs2.y,iZ+ofs2.z) = phi_t->get(iX,iY,iZ) +
+                            diffusion - advection + Q->get(iX+ofs4.x,iY+ofs4.y,iZ+ofs4.z);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+  template<typename T>
+  AdvectionDiffusionFd3D_neumann<T>* AdvectionDiffusionFd3D_neumann<T>::clone() const
+  {
+      return new AdvectionDiffusionFd3D_neumann<T>(*this);
+  }
+
+  template<typename T>
+  void AdvectionDiffusionFd3D_neumann<T>::getTypeOfModification(std::vector<modif::ModifT>& modified) const {
+      modified[0] = modif::nothing;           // phi_t
+      modified[1] = modif::nothing;           // phi_tp1
+      modified[2] = modif::staticVariables;   // result
+      modified[3] = modif::nothing;           // u
+      modified[4] = modif::nothing;           // Q
+
+  }
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Buoyant force term
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 

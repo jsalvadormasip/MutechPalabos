@@ -13,8 +13,8 @@ using namespace std;
 typedef double T;
 
 #define NSDESCRIPTOR descriptors::ForcedD3Q19Descriptor
-#define NSDYNAMICS GuoExternalForceConsistentSmagorinskyCompleteRegularizedBGKdynamics
-//#define NSDYNAMICS GuoExternalForceBGKdynamics
+// #define NSDYNAMICS GuoExternalForceConsistentSmagorinskyCompleteRegularizedBGKdynamics
+#define NSDYNAMICS GuoExternalForceBGKdynamics
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Initialization of the particle volume fraction field.
@@ -250,12 +250,13 @@ int main(int argc, char *argv[])
     T nsOmega = parameters.getSolventOmega();
     T convers = parameters.getDeltaT()/parameters.getDeltaX();
     T mu = 1e-3;                    //Dynamic viscosity
-    T cSmago = 0.12;
+    // T cSmago = 0.12;
 
     plint envelopeWidth = 2;
     SparseBlockStructure3D blockStructure(createRegularDistribution3D(nx, ny, nz));
 
-    Dynamics<T,NSDESCRIPTOR>* nsdynamics = new NSDYNAMICS<T,NSDESCRIPTOR>(nsOmega, cSmago);
+    Dynamics<T,NSDESCRIPTOR>* nsdynamics = new NSDYNAMICS<T,NSDESCRIPTOR>(nsOmega);
+    // Dynamics<T,NSDESCRIPTOR>* nsdynamics = new NSDYNAMICS<T,NSDESCRIPTOR>(nsOmega, cSmago);
     MultiBlockLattice3D<T,NSDESCRIPTOR> nsLattice(nx,ny,nz, nsdynamics->clone());
     defineDynamics(nsLattice, nsLattice.getBoundingBox(), nsdynamics->clone());
     delete nsdynamics; nsdynamics = 0;
@@ -395,7 +396,7 @@ int main(int argc, char *argv[])
         plint phi_2_adv_ID = cycle.addBlock(phi_2_adv);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// Solve the advection diffusion for the density (sugar) field with 1st order finite difference
+// Solve the advection diffusion for the density field with 1st order upwind finite difference
 //////////////////////////////////////////////////////////////////////////////////////////////
         cycle.addProcessor (
             new CopyConvertScalarFunctional3D<T,T>(),

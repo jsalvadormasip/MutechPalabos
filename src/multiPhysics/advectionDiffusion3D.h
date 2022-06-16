@@ -335,20 +335,6 @@ private:
 
 
 template<typename T>
-class AdvectionDiffusionFd3D_neumann : public BoxProcessingFunctional3D
-{
-public:
-    AdvectionDiffusionFd3D_neumann(T d_, bool upwind_, bool neumann_, plint nx_, plint ny_, plint nz_);
-    virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> fields );
-    virtual AdvectionDiffusionFd3D_neumann<T>* clone() const;
-    virtual void getTypeOfModification(std::vector<modif::ModifT>& modified) const;
-private:
-    T d;
-    bool upwind, neumann;
-    plint nx, ny, nz;
-};
-
-template<typename T>
 class VariableDiffusivityAdvectionDiffusionFd3D : public BoxProcessingFunctional3D {
 public:
     VariableDiffusivityAdvectionDiffusionFd3D(bool upwind_);
