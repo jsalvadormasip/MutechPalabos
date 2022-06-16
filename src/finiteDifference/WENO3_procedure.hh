@@ -272,7 +272,11 @@ bp_n12_1[2] = (phiC - phiT1)*(phiC - phiT1);
 }
 
   adv = fp_p12 - fp_n12;
+  T diffX, diffY, diffZ;
 
+  diffX = phiW1 + phiE1 - (T) 2 * phiC;
+  diffY = phiS1 + phiN1 - (T) 2 * phiC;
+  diffZ = phiT1 + phiB1 - (T) 2 * phiC;
 
 
 if(neumann){
@@ -283,6 +287,7 @@ if(neumann){
     adv[0] = (util::greaterThan(u[0], (T) 0) ? (phiC - phiW1) : (util::lessThan(   u[0], (T) 0) ? (phiE1 - phiC) : (T) 0.5 * (phiE1 - phiW1)));
     adv[1] = (util::greaterThan(u[1], (T) 0) ? (phiC - phiS1) : (util::lessThan(   u[1], (T) 0) ? (phiN1 - phiC) : (T) 0.5 * (phiN1 - phiS1)));
     adv[2] = (util::greaterThan((u[2]+v_sedC), (T) 0) ? (phiC - phiB1) : (util::lessThan((u[2]+v_sedC), (T) 0) ? (phiT1 - phiC) : (T) 0.5 * (phiT1 - phiB1)));
+    diffX = (T) 2 * phiE1 - (T) 2 * phiC;
   }
 
   if(absoluteX==nx-1)
@@ -291,6 +296,7 @@ if(neumann){
     adv[0] = (util::greaterThan(u[0], (T) 0) ? (phiC - phiW1) : (util::lessThan(   u[0], (T) 0) ? (phiE1 - phiC) : (T) 0.5 * (phiE1 - phiW1)));
     adv[1] = (util::greaterThan(u[1], (T) 0) ? (phiC - phiS1) : (util::lessThan(   u[1], (T) 0) ? (phiN1 - phiC) : (T) 0.5 * (phiN1 - phiS1)));
     adv[2] = (util::greaterThan((u[2]+v_sedC), (T) 0) ? (phiC - phiB1) : (util::lessThan((u[2]+v_sedC), (T) 0) ? (phiT1 - phiC) : (T) 0.5 * (phiT1 - phiB1)));
+    diffX = (T) 2 * phiW1 - (T) 2 * phiC;
   }
 
   if(absoluteY==0)
@@ -299,6 +305,7 @@ if(neumann){
     adv[0] = (util::greaterThan(u[0], (T) 0) ? (phiC - phiW1) : (util::lessThan(   u[0], (T) 0) ? (phiE1 - phiC) : (T) 0.5 * (phiE1 - phiW1)));
     adv[1] = (util::greaterThan(u[1], (T) 0) ? (phiC - phiS1) : (util::lessThan(   u[1], (T) 0) ? (phiN1 - phiC) : (T) 0.5 * (phiN1 - phiS1)));
     adv[2] = (util::greaterThan((u[2]+v_sedC), (T) 0) ? (phiC - phiB1) : (util::lessThan((u[2]+v_sedC), (T) 0) ? (phiT1 - phiC) : (T) 0.5 * (phiT1 - phiB1)));
+        diffY = (T) 2 * phiN1 - (T) 2 * phiC;
   }
 
   if(absoluteY==ny-1)
@@ -307,6 +314,7 @@ if(neumann){
     adv[0] = (util::greaterThan(u[0], (T) 0) ? (phiC - phiW1) : (util::lessThan(   u[0], (T) 0) ? (phiE1 - phiC) : (T) 0.5 * (phiE1 - phiW1)));
     adv[1] = (util::greaterThan(u[1], (T) 0) ? (phiC - phiS1) : (util::lessThan(   u[1], (T) 0) ? (phiN1 - phiC) : (T) 0.5 * (phiN1 - phiS1)));
     adv[2] = (util::greaterThan((u[2]+v_sedC), (T) 0) ? (phiC - phiB1) : (util::lessThan((u[2]+v_sedC), (T) 0) ? (phiT1 - phiC) : (T) 0.5 * (phiT1 - phiB1)));
+    diffY = (T) 2 * phiS1 - (T) 2 * phiC;
   }
 
   if(absoluteZ==0)
@@ -315,6 +323,7 @@ if(neumann){
     adv[0] = (util::greaterThan(u[0], (T) 0) ? (phiC - phiW1) : (util::lessThan(   u[0], (T) 0) ? (phiE1 - phiC) : (T) 0.5 * (phiE1 - phiW1)));
     adv[1] = (util::greaterThan(u[1], (T) 0) ? (phiC - phiS1) : (util::lessThan(   u[1], (T) 0) ? (phiN1 - phiC) : (T) 0.5 * (phiN1 - phiS1)));
     adv[2] = (util::greaterThan((u[2]+v_sedC), (T) 0) ? (phiC - phiB1) : (util::lessThan((u[2]+v_sedC), (T) 0) ? (phiT1 - phiC) : (T) 0.5 * (phiT1 - phiB1)));
+    diffZ = (T) 2 * phiT1 - (T) 2 * phiC;
   }
 
   if(absoluteZ==nz-1)
@@ -323,6 +332,7 @@ if(neumann){
     adv[0] = (util::greaterThan(u[0], (T) 0) ? (phiC - phiW1) : (util::lessThan(   u[0], (T) 0) ? (phiE1 - phiC) : (T) 0.5 * (phiE1 - phiW1)));
     adv[1] = (util::greaterThan(u[1], (T) 0) ? (phiC - phiS1) : (util::lessThan(   u[1], (T) 0) ? (phiN1 - phiC) : (T) 0.5 * (phiN1 - phiS1)));
     adv[2] = (util::greaterThan((u[2]+v_sedC), (T) 0) ? (phiC - phiB1) : (util::lessThan((u[2]+v_sedC), (T) 0) ? (phiT1 - phiC) : (T) 0.5 * (phiT1 - phiB1)));
+    diffZ = (T) 2 * phiB1 - (T) 2 * phiC;
   }
 
 
@@ -361,13 +371,6 @@ if(neumann){
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //     DIFFUSION
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  T diffX, diffY, diffZ;
-
-  diffX = phiW1 + phiE1 - (T) 2 * phiC;
-  diffY = phiS1 + phiN1 - (T) 2 * phiC;
-  diffZ = phiT1 + phiB1 - (T) 2 * phiC;
-
 
   T diff = d * (diffX + diffY + diffZ);
 
