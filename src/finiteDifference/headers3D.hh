@@ -35,8 +35,8 @@
  * Groups all the include files for basic 3D dynamics.
  */
 
+#include "finiteDifference/WENO3_procedure.hh"
 #include "finiteDifference/fdFunctional3D.hh"
 #include "finiteDifference/fdWeights.hh"
 #include "finiteDifference/fdWrapper3D.hh"
 #include "finiteDifference/interpolations3D.hh"
-#include "finiteDifference/WENO3_procedure.hh"
