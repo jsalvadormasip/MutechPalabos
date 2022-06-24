@@ -1,5 +1,5 @@
-#ifndef FUNCTIONS_SDC_H
-#define FUNCTIONS_SDC_H
+#ifndef FUNCTIONS_H
+#define FUNCTIONS_H
 
 #include <cmath>
 #include <vector>
@@ -7,7 +7,7 @@
 #include "palabos3D.h"
 #include "palabos3D.hh"
 
-#define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846L
 
 namespace plb {
 
@@ -16,12 +16,12 @@ namespace plb {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-class AdvectionDiffusionFd3D_neumann : public BoxProcessingFunctional3D {
+class AdvectionDiffusionNeumannFd3D : public BoxProcessingFunctional3D {
 public:
-    AdvectionDiffusionFd3D_neumann(
+    AdvectionDiffusionNeumannFd3D(
         T d_, bool upwind_, bool neumann_, plint nx_, plint ny_, plint nz_);
     virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D *> fields);
-    virtual AdvectionDiffusionFd3D_neumann<T> *clone() const;
+    virtual AdvectionDiffusionNeumannFd3D<T> *clone() const;
     virtual void getTypeOfModification(std::vector<modif::ModifT> &modified) const;
 
 private:
@@ -31,13 +31,13 @@ private:
 };
 
 template <typename T>
-AdvectionDiffusionFd3D_neumann<T>::AdvectionDiffusionFd3D_neumann(
+AdvectionDiffusionNeumannFd3D<T>::AdvectionDiffusionNeumannFd3D(
     T d_, bool upwind_, bool neumann_, plint nx_, plint ny_, plint nz_) :
     d(d_), upwind(upwind_), neumann(neumann_), nx(nx_), ny(ny_), nz(nz_)
 { }
 
 template <typename T>
-void AdvectionDiffusionFd3D_neumann<T>::processGenericBlocks(
+void AdvectionDiffusionNeumannFd3D<T>::processGenericBlocks(
     Box3D domain, std::vector<AtomicBlock3D *> fields)
 {
     PLB_PRECONDITION(fields.size() == 5);
@@ -211,13 +211,13 @@ void AdvectionDiffusionFd3D_neumann<T>::processGenericBlocks(
 }
 
 template <typename T>
-AdvectionDiffusionFd3D_neumann<T> *AdvectionDiffusionFd3D_neumann<T>::clone() const
+AdvectionDiffusionNeumannFd3D<T> *AdvectionDiffusionNeumannFd3D<T>::clone() const
 {
-    return new AdvectionDiffusionFd3D_neumann<T>(*this);
+    return new AdvectionDiffusionNeumannFd3D<T>(*this);
 }
 
 template <typename T>
-void AdvectionDiffusionFd3D_neumann<T>::getTypeOfModification(
+void AdvectionDiffusionNeumannFd3D<T>::getTypeOfModification(
     std::vector<modif::ModifT> &modified) const
 {
     modified[0] = modif::nothing;          // phi_t
@@ -232,13 +232,13 @@ void AdvectionDiffusionFd3D_neumann<T>::getTypeOfModification(
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, template <typename U> class FluidDescriptor>
-class ScalarBuoyanTermProcessor3D : public BoxProcessingFunctional3D {
+class ScalarBuoyancyTermProcessor3D : public BoxProcessingFunctional3D {
 public:
-    ScalarBuoyanTermProcessor3D(
+    ScalarBuoyancyTermProcessor3D(
         T gravity_, T rho0_, T rhoP_, T TotalVolFrac_, T dt_, Array<T, FluidDescriptor<T>::d> dir_);
 
     virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D *> fields);
-    virtual ScalarBuoyanTermProcessor3D<T, FluidDescriptor> *clone() const;
+    virtual ScalarBuoyancyTermProcessor3D<T, FluidDescriptor> *clone() const;
     virtual void getTypeOfModification(std::vector<modif::ModifT> &modified) const;
 
 private:
@@ -247,7 +247,7 @@ private:
 };
 
 template <typename T, template <typename U> class FluidDescriptor>
-ScalarBuoyanTermProcessor3D<T, FluidDescriptor>::ScalarBuoyanTermProcessor3D(
+ScalarBuoyancyTermProcessor3D<T, FluidDescriptor>::ScalarBuoyancyTermProcessor3D(
     T gravity_, T rho0_, T rhoP_, T TotalVolFrac_, T dt_, Array<T, FluidDescriptor<T>::d> dir_) :
     gravity(gravity_), rho0(rho0_), rhoP(rhoP_), TotalVolFrac(TotalVolFrac_), dt(dt_), dir(dir_)
 {
@@ -259,7 +259,7 @@ ScalarBuoyanTermProcessor3D<T, FluidDescriptor>::ScalarBuoyanTermProcessor3D(
 }
 
 template <typename T, template <typename U> class FluidDescriptor>
-void ScalarBuoyanTermProcessor3D<T, FluidDescriptor>::processGenericBlocks(
+void ScalarBuoyancyTermProcessor3D<T, FluidDescriptor>::processGenericBlocks(
     Box3D domain, std::vector<AtomicBlock3D *> fields)
 {
     typedef FluidDescriptor<T> D;
@@ -301,14 +301,14 @@ void ScalarBuoyanTermProcessor3D<T, FluidDescriptor>::processGenericBlocks(
 }
 
 template <typename T, template <typename U> class FluidDescriptor>
-ScalarBuoyanTermProcessor3D<T, FluidDescriptor>
-    *ScalarBuoyanTermProcessor3D<T, FluidDescriptor>::clone() const
+ScalarBuoyancyTermProcessor3D<T, FluidDescriptor>
+    *ScalarBuoyancyTermProcessor3D<T, FluidDescriptor>::clone() const
 {
-    return new ScalarBuoyanTermProcessor3D<T, FluidDescriptor>(*this);
+    return new ScalarBuoyancyTermProcessor3D<T, FluidDescriptor>(*this);
 }
 
 template <typename T, template <typename U> class FluidDescriptor>
-void ScalarBuoyanTermProcessor3D<T, FluidDescriptor>::getTypeOfModification(
+void ScalarBuoyancyTermProcessor3D<T, FluidDescriptor>::getTypeOfModification(
     std::vector<modif::ModifT> &modified) const
 {
     modified[0] = modif::staticVariables;
@@ -320,13 +320,13 @@ void ScalarBuoyanTermProcessor3D<T, FluidDescriptor>::getTypeOfModification(
 // Settling velocity field
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T>
-class Get_v_sedimentation : public BoxProcessingFunctional3D {
+class ComputeSedimentationVelocity3D : public BoxProcessingFunctional3D {
 public:
-    Get_v_sedimentation(T rhoP_, T Dp_, T convers_, T mu_, T g_);
+    ComputeSedimentationVelocity3D(T rhoP_, T Dp_, T convers_, T mu_, T g_);
 
     virtual void processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D *> atomicBlocks);
     virtual void getTypeOfModification(std::vector<modif::ModifT> &modified) const;
-    virtual Get_v_sedimentation<T> *clone() const;
+    virtual ComputeSedimentationVelocity3D<T> *clone() const;
 
 private:
     T rhoP;
@@ -337,12 +337,12 @@ private:
 };
 
 template <typename T>
-Get_v_sedimentation<T>::Get_v_sedimentation(T rhoP_, T Dp_, T convers_, T mu_, T g_) :
+ComputeSedimentationVelocity3D<T>::ComputeSedimentationVelocity3D(T rhoP_, T Dp_, T convers_, T mu_, T g_) :
     rhoP(rhoP_), Dp(Dp_), convers(convers_), mu(mu_), g(g_)
 { }
 
 template <typename T>
-void Get_v_sedimentation<T>::processGenericBlocks(
+void ComputeSedimentationVelocity3D<T>::processGenericBlocks(
     Box3D domain, std::vector<AtomicBlock3D *> atomicBlocks)
 {
     // typedef DensityDescriptor<T> D;
@@ -373,13 +373,13 @@ void Get_v_sedimentation<T>::processGenericBlocks(
 }
 
 template <typename T>
-Get_v_sedimentation<T> *Get_v_sedimentation<T>::clone() const
+ComputeSedimentationVelocity3D<T> *ComputeSedimentationVelocity3D<T>::clone() const
 {
-    return new Get_v_sedimentation<T>(*this);
+    return new ComputeSedimentationVelocity3D<T>(*this);
 }
 
 template <typename T>
-void Get_v_sedimentation<T>::getTypeOfModification(std::vector<modif::ModifT> &modified) const
+void ComputeSedimentationVelocity3D<T>::getTypeOfModification(std::vector<modif::ModifT> &modified) const
 {
     modified[0] = modif::nothing;
     modified[1] = modif::nothing;

@@ -18,4 +18,4 @@ The different outputs (.gif images of the density field, particle field, fluid v
 
 In the example, the spatial resolution is 250 is order to allow the program to run on a classical computer. Increasing the resolution will provide more precision but will require more resources.
 
-For more precisions, please refer to "Lemus et al. 2021 - Bla bla bla...."
+For more precisions, please refer to "Lemus J, Fries A, Jarvis PA, Bonadonna C, Chopard B and Lätt J (2021) Modelling Settling-Driven Gravitational Instabilities at the Base of Volcanic Clouds Using the Lattice Boltzmann Method. Front. Earth Sci. 9:713175. doi: 10.3389/feart.2021.713175"

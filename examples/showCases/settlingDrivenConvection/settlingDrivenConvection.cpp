@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
     args_f.push_back(&densityField);
 
     integrateProcessingFunctional(
-        new ScalarBuoyanTermProcessor3D<T, NSDESCRIPTOR>(
+        new ScalarBuoyancyTermProcessor3D<T, NSDESCRIPTOR>(
             g_lb, rho0, rhoP, TotalVolFrac, parameters.getDeltaT(), forceOrientation),
         nsLattice.getBoundingBox(), args_f, 1);
 
@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
             densityField.getBoundingBox());
         cycle.addCommunication(D_tp1_ID, modif::staticVariables);
         cycle.addProcessor(
-            new AdvectionDiffusionFd3D_neumann<T>(
+            new AdvectionDiffusionNeumannFd3D<T>(
                 Di * parameters.getLatticeKappa(), upwind, neumann, nx, ny, nz),
             D_t_ID, D_tp1_ID, densityField_ID, velocity_ID, Q_d_ID, densityField.getBoundingBox());
         cycle.addCommunication(densityField_ID, modif::staticVariables);
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
         // Solve the advection-diffusion-sedimentation for the particle field with 3rd order WENO
         //////////////////////////////////////////////////////////////////////////////////////////////
         cycle.addProcessor(
-            new Get_v_sedimentation<T>(rhoP, Dp, convers, mu, g), densityField_ID, volfracField_ID,
+            new ComputeSedimentationVelocity3D<T>(rhoP, Dp, convers, mu, g), densityField_ID, volfracField_ID,
             v_sedimentation_ID, v_sedimentation.getBoundingBox());
         cycle.addCommunication(v_sedimentation_ID, modif::staticVariables);
         cycle.addProcessor(
@@ -400,7 +400,7 @@ int main(int argc, char *argv[])
             volfracField.getBoundingBox());
         cycle.addCommunication(phi_n_adv_ID, modif::staticVariables);
         cycle.addProcessor(
-            new RK3_Step1_functional3D<T>(), volfracField_ID, phi_n_adv_ID, phi_1_ID,
+            new RK3Step1Functional3D<T>(), volfracField_ID, phi_n_adv_ID, phi_1_ID,
             volfracField.getBoundingBox());
         cycle.addCommunication(phi_1_ID, modif::staticVariables);
         cycle.addProcessor(
@@ -423,7 +423,7 @@ int main(int argc, char *argv[])
             volfracField.getBoundingBox());
         cycle.addCommunication(phi_1_adv_ID, modif::staticVariables);
         cycle.addProcessor(
-            new RK3_Step2_functional3D<T>(), volfracField_ID, phi_1_ID, phi_1_adv_ID, phi_2_ID,
+            new RK3Step2Functional3D<T>(), volfracField_ID, phi_1_ID, phi_1_adv_ID, phi_2_ID,
             volfracField.getBoundingBox());
         cycle.addCommunication(phi_1_ID, modif::staticVariables);
         cycle.addProcessor(
@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
             volfracField.getBoundingBox());
         cycle.addCommunication(phi_2_adv_ID, modif::staticVariables);
         cycle.addProcessor(
-            new RK3_Step3_functional3D<T>(), volfracField_ID, phi_2_ID, phi_2_adv_ID,
+            new RK3Step3Functional3D<T>(), volfracField_ID, phi_2_ID, phi_2_adv_ID,
             volfracField_RK_ID, volfracField.getBoundingBox());
         cycle.addCommunication(volfracField_RK_ID, modif::staticVariables);
         cycle.addProcessor(
