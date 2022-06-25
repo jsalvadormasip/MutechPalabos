@@ -60,7 +60,8 @@ can help you format your code in place. Note that the continuous integration
 will fail if you have not formatted your code before making your merge request.
 
 In order to help you with code formatting there is a `docker-compose`
-configuration at the root of the palabos repository. To format the code
+configuration at the root of the palabos repository (it requires the `docker` and `docker-compose`
+packages that are available on most platforms). To format the code
 through docker, run:
 
 ```bash

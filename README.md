@@ -221,14 +221,15 @@ that formats the code in place. To make a dry run of formatting
 must be run. Note that for the CI to succeed one needs version 14 of `clang-format`.
 
 In order to help you with code formatting there is a `docker-compose`
-configuration at the root of the palabos repository. To format the code
+configuration at the root of the palabos repository (this requires `docker` and `docker-compose`
+to be installed). To format the code
 through docker, run:
 
 ```bash
 CURRENT_UID=$(id -u):$(id -g) docker-compose run clang_format
 ```
 
-On some distributions one might need to run this command as root via `sudo`.
+On some linux distributions one might need to run this command as root via `sudo`.
 
 # Documentation
 
