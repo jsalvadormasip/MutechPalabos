@@ -377,8 +377,8 @@ int main(int argc, char *argv[])
         // Solve the advection-diffusion-sedimentation for the particle field with 3rd order WENO
         //////////////////////////////////////////////////////////////////////////////////////////////
         cycle.addProcessor(
-            new ComputeSedimentationVelocity3D<T>(rhoP, Dp, convers, mu, g), densityField_ID, volfracField_ID,
-            v_sedimentation_ID, v_sedimentation.getBoundingBox());
+            new ComputeSedimentationVelocity3D<T>(rhoP, Dp, convers, mu, g), densityField_ID,
+            volfracField_ID, v_sedimentation_ID, v_sedimentation.getBoundingBox());
         cycle.addCommunication(v_sedimentation_ID, modif::staticVariables);
         cycle.addProcessor(
             new CopyConvertScalarFunctional3D<T, T>(), volfracField_ID, T_t_ID,

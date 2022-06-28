@@ -337,7 +337,8 @@ private:
 };
 
 template <typename T>
-ComputeSedimentationVelocity3D<T>::ComputeSedimentationVelocity3D(T rhoP_, T Dp_, T convers_, T mu_, T g_) :
+ComputeSedimentationVelocity3D<T>::ComputeSedimentationVelocity3D(
+    T rhoP_, T Dp_, T convers_, T mu_, T g_) :
     rhoP(rhoP_), Dp(Dp_), convers(convers_), mu(mu_), g(g_)
 { }
 
@@ -379,7 +380,8 @@ ComputeSedimentationVelocity3D<T> *ComputeSedimentationVelocity3D<T>::clone() co
 }
 
 template <typename T>
-void ComputeSedimentationVelocity3D<T>::getTypeOfModification(std::vector<modif::ModifT> &modified) const
+void ComputeSedimentationVelocity3D<T>::getTypeOfModification(
+    std::vector<modif::ModifT> &modified) const
 {
     modified[0] = modif::nothing;
     modified[1] = modif::nothing;

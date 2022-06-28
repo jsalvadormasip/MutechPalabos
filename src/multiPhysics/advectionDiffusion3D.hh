@@ -2174,7 +2174,7 @@ void ArrheniusChemicalReactionCoupling3D<T>::getTypeOfModification(
  * 3rd order Weighted Essentially Non-Oscillatory procedure for the convective term
  * (includes diffusion term and settling velocity)
  * Includes also the Runge-Kunta steps for the time discretization (to ensure the TVD properties)
-*/
+ */
 template <typename T>
 WENO3<T>::WENO3(T d_, T eps_, bool neumann_, plint nx_, plint ny_, plint nz_) :
     d(d_), eps(eps_), neumann(neumann_), nx(nx_), ny(ny_), nz(nz_)
@@ -2280,7 +2280,6 @@ void WENO3<T>::processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D *> f
 
                     bp_n12_1[0] = (phiC - phiE1) * (phiC - phiE1);
                     bp_n12_2[0] = (phiW1 - phiC) * (phiW1 - phiC);
-
                 }
 
                 if (util::greaterThan(u[1], (T)0)) {

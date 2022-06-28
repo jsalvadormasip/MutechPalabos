@@ -554,7 +554,7 @@ private:
  * 3rd order Weighted Essentially Non-Oscillatory procedure for the convective term
  * (includes diffusion term and settling velocity)
  * Includes also the Runge-Kunta steps for the time discretization (to ensure the TVD properties)
-*/
+ */
 template <typename T>
 class WENO3 : public BoxProcessingFunctional3D {
 public:
