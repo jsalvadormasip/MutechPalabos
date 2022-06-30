@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 
-#include "functions.h"
+#include "SDCfunctions.h"
 #include "palabos3D.h"
 #include "palabos3D.hh"
 

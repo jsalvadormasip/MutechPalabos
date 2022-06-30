@@ -1,5 +1,5 @@
-#ifndef FUNCTIONS_H
-#define FUNCTIONS_H
+#ifndef SDCFUNCTIONS_H
+#define SDCFUNCTIONS_H
 
 #include <cmath>
 #include <vector>
@@ -7,7 +7,9 @@
 #include "palabos3D.h"
 #include "palabos3D.hh"
 
+#ifndef M_PI
 #define M_PI 3.14159265358979323846L
+#endif
 
 namespace plb {
 
