@@ -36,17 +36,14 @@ struct IniVolFracProcessor3D : public BoxProcessingFunctional3D_S<T> {
                 for (plint iZ = domain.z0; iZ <= domain.z1; ++iZ) {
                     plint absoluteZ = absoluteOffset.z + iZ;
 
-                    std::random_device rd;
-                    std::mt19937 mt(rd());
-                    std::normal_distribution<> dist(1, 0.01);
-                    T rand_val = dist(mt);
                     T VolFrac;
                     if (absoluteZ < (nz - 1) - util::roundToInt(((up / (up + low)) * nz)))
                         VolFrac = 0.0;
                     else
-                        VolFrac = rand_val;
+                        VolFrac = 0.02 * volfracField.get(iX, iY, iZ) + 0.99;
                     if (absoluteZ > 0.95 * (nz - 1))
-                        VolFrac = rand_val * 0.5 * (1 - erf((absoluteZ - 0.98 * (nz - 1)) / 6));
+                        VolFrac = (0.02 * volfracField.get(iX, iY, iZ) + 0.99) * 0.5
+                                  * (1 - erf((absoluteZ - 0.98 * (nz - 1)) / 6));
                     volfracField.get(iX, iY, iZ) = VolFrac;
                 }
             }
@@ -130,6 +127,15 @@ void ExpSetup(
     initializeAtEquilibrium(
         nsLattice, nsLattice.getBoundingBox(), (T)1., Array<T, 3>((T)0., (T)0., (T)0.));
 
+    T up = 0.135;  // upper layer thickness
+    T low = 0.25;  // lower layer thickness
+    T nx = parameters.getNx();
+    T ny = parameters.getNy();
+    T nz = parameters.getNz();
+    T nupper = (nz - 1) - util::roundToInt(((up / (up + low)) * nz));
+    Box3D upper(0, nx - 1, 0, ny - 1, nupper, nz - 1);
+    uint32_t seed = 1;
+    setToRandom(volfracField, upper, seed);
     applyProcessingFunctional(
         new IniVolFracProcessor3D<T, NSDESCRIPTOR>(parameters), volfracField.getBoundingBox(),
         volfracField);
