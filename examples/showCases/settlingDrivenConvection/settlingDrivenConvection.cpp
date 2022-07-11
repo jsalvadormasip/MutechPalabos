@@ -303,17 +303,22 @@ int main(int argc, char *argv[])
     pcout << "time elapsed for ExpSetup:" << tIni << endl;
     global::timer("simTime").start();
 
+#ifndef PLB_REGRESSION
     plint evalTime = 2000;
     plint iT = 0;
     plint maxT = 20 / parameters.getDeltaT();
     plint saveIter = 0.05 / parameters.getDeltaT();
-    plint saveIterVtk = 0.5 / parameters.getDeltaT();
+    plint saveIterVtk = 0.05 / parameters.getDeltaT();
+#else
+    plint maxT = 0.5 / parameters.getDeltaT();
+#endif
     util::ValueTracer<T> converge((T)1, (T)100, 1.0e-3);
 
     pcout << "Max Number of iterations: " << maxT << endl;
     pcout << "Number of saving iterations: " << saveIter << endl;
 
     for (iT = 0; iT <= maxT; ++iT) {
+#ifndef PLB_REGRESSION
         if (iT == (evalTime)) {
             T tEval = global::timer("simTime").stop();
             T remainTime = (tEval - tIni) / (T)evalTime * (T)maxT / (T)3600;
@@ -326,12 +331,17 @@ int main(int argc, char *argv[])
         if (iT % saveIterVtk == 0) {
             pcout << iT * parameters.getDeltaT() << " : Writing VTK." << endl;
             writeVTK(nsLattice, volfracField, densityField, parameters, iT);
+            pcout << "Average energy = "
+                  << computeAverageEnergy(nsLattice, nsLattice.getBoundingBox());
+            pcout << " ; Average volume fraction = " << TotalVolFrac * computeAverage(volfracField)
+                  << endl;
         }
 
         if (iT % saveIter == 0) {
             pcout << iT * parameters.getDeltaT() << " : Writing gif." << endl;
             writeGif(nsLattice, volfracField, densityField, iT);
         }
+#endif
 
         bool upwind = true;
         bool neumann = true;
