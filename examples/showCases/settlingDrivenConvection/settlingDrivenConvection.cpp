@@ -303,12 +303,13 @@ int main(int argc, char *argv[])
     pcout << "time elapsed for ExpSetup:" << tIni << endl;
     global::timer("simTime").start();
 
-#ifndef PLB_REGRESSION
+
     plint evalTime = 2000;
     plint iT = 0;
-    plint maxT = 20 / parameters.getDeltaT();
     plint saveIter = 0.05 / parameters.getDeltaT();
     plint saveIterVtk = 0.05 / parameters.getDeltaT();
+#ifndef PLB_REGRESSION
+    plint maxT = 20 / parameters.getDeltaT();
 #else
     plint maxT = 0.5 / parameters.getDeltaT();
 #endif
