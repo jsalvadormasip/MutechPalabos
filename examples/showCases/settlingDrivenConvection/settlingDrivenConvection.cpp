@@ -300,9 +300,8 @@ int main(int argc, char *argv[])
         nsLattice.getBoundingBox(), args_f, 1);
 
     T tIni = global::timer("simTime").stop();
-    pcout << "time elapsed for ExpSetup:" << tIni << endl;
+    // pcout << "time elapsed for ExpSetup:" << tIni << endl;
     global::timer("simTime").start();
-
 
     plint evalTime = 2000;
     plint iT = 0;
