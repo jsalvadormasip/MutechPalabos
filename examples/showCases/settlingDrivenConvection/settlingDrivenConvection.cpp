@@ -300,7 +300,9 @@ int main(int argc, char *argv[])
         nsLattice.getBoundingBox(), args_f, 1);
 
     T tIni = global::timer("simTime").stop();
-    // pcout << "time elapsed for ExpSetup:" << tIni << endl;
+#ifndef PLB_REGRESSION
+    pcout << "time elapsed for ExpSetup:" << tIni << endl;
+#endif
     global::timer("simTime").start();
 
     plint evalTime = 2000;
@@ -313,12 +315,9 @@ int main(int argc, char *argv[])
     plint maxT = 0.5 / parameters.getDeltaT();
 #endif
     util::ValueTracer<T> converge((T)1, (T)100, 1.0e-3);
-
     pcout << "Max Number of iterations: " << maxT << endl;
     pcout << "Number of saving iterations: " << saveIter << endl;
-
     for (iT = 0; iT <= maxT; ++iT) {
-#ifndef PLB_REGRESSION
         if (iT == (evalTime)) {
             T tEval = global::timer("simTime").stop();
             T remainTime = (tEval - tIni) / (T)evalTime * (T)maxT / (T)3600;
@@ -341,7 +340,6 @@ int main(int argc, char *argv[])
             pcout << iT * parameters.getDeltaT() << " : Writing gif." << endl;
             writeGif(nsLattice, volfracField, densityField, iT);
         }
-#endif
 
         bool upwind = true;
         bool neumann = true;
@@ -472,7 +470,7 @@ int main(int argc, char *argv[])
 
         cycle.execute();
     }
-
+#ifndef PLB_REGRESSION
     saveBinaryBlock(nsLattice, "checkpoint_fluid.dat");
     saveBinaryBlock(volfracField, "checkpoint_vf.dat");
     saveBinaryBlock(densityField, "checkpoint_dens.dat");
@@ -491,6 +489,7 @@ int main(int argc, char *argv[])
     pcout << "total time: " << tEnd << endl;
     pcout << "total iterations: " << iT << endl;
     pcout << "Msus: " << nx100 * ny100 * nz100 * (T)iT / totalTime << endl;
+#endif
 
     return 0;
 }

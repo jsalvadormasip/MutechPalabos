@@ -33,9 +33,3 @@ Average energy = 5.16245e-14 ; Average volume fraction = 0.000666337
 0.4992 : Writing VTK.
 Average energy = 5.78227e-12 ; Average volume fraction = 0.000666407
 0.4992 : Writing gif.
-N=250
-number of processors: 4
-simulation time: 74.3146
-total time: 74.3726
-total iterations: 1563
-Msus: 3.14179
