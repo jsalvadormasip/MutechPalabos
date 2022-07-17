@@ -90,10 +90,18 @@ void executeDataProcessor(
 }
 
 void addInternalProcessor(
+    DataProcessorGenerator2D const &generator, AtomicBlock2D &actor,
+    std::vector<AtomicBlock2D *> objects, plint level)
+{
+    PLB_PRECONDITION(!objects.empty());
+    actor.integrateDataProcessor(generator.generate(objects), level);
+}
+
+void addInternalProcessor(
     DataProcessorGenerator2D const &generator, std::vector<AtomicBlock2D *> objects, plint level)
 {
     PLB_PRECONDITION(!objects.empty());
-    objects[0]->integrateDataProcessor(generator.generate(objects), level);
+    addInternalProcessor(generator, *objects[0], objects, level);
 }
 
 void addInternalProcessor(

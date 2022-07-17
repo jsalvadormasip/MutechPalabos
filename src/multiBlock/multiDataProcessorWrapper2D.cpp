@@ -56,6 +56,13 @@ void integrateProcessingFunctional(
     addInternalProcessor(BoxProcessorGenerator2D(functional, domain), multiBlocks, level);
 }
 
+void integrateProcessingFunctional(
+    BoxProcessingFunctional2D *functional, Box2D domain, MultiBlock2D &actor,
+    std::vector<MultiBlock2D *> multiBlockArgs, plint level)
+{
+    addInternalProcessor(BoxProcessorGenerator2D(functional, domain), actor, multiBlockArgs, level);
+}
+
 /* *************** DotProcessing, general case ***************************** */
 
 void applyProcessingFunctional(

@@ -137,7 +137,8 @@ void executeDataProcessor(
 }
 
 void addInternalProcessor(
-    DataProcessorGenerator2D const &generator, std::vector<MultiBlock2D *> multiBlocks, plint level)
+    DataProcessorGenerator2D const &generator, MultiBlock2D &actor,
+    std::vector<MultiBlock2D *> multiBlocks, plint level)
 {
     MultiProcessing2D<DataProcessorGenerator2D const, DataProcessorGenerator2D> multiProcessing(
         generator, multiBlocks);
@@ -152,8 +153,11 @@ void addInternalProcessor(
             extractedAtomicBlocks[iBlock] =
                 &multiBlocks[iBlock]->getComponent(atomicBlockNumbers[iGenerator][iBlock]);
         }
+        PLB_ASSERT(!atomicBlockNumbers[iGenerator].empty());
+        AtomicBlock2D &atomicActor = actor.getComponent(atomicBlockNumbers[iGenerator][0]);
         // Delegate to the "AtomicBlock version" of addInternal.
-        plb::addInternalProcessor(*retainedGenerators[iGenerator], extractedAtomicBlocks, level);
+        plb::addInternalProcessor(
+            *retainedGenerators[iGenerator], atomicActor, extractedAtomicBlocks, level);
     }
     // Subscribe the processor in the multi-block. This guarantees that the multi-block is aware
     //   of the maximal current processor level, and it instantiates the communication pattern
@@ -161,10 +165,18 @@ void addInternalProcessor(
     std::vector<MultiBlock2D *> updatedMultiBlocks;
     std::vector<modif::ModifT> typeOfModification;
     multiProcessing.multiBlocksWhichRequireUpdate(updatedMultiBlocks, typeOfModification);
-    multiBlocks[0]->subscribeProcessor(
+    actor.subscribeProcessor(
         level, updatedMultiBlocks, typeOfModification,
         BlockDomain::usesEnvelope(generator.appliesTo()));
-    multiBlocks[0]->storeProcessor(generator, multiBlocks, level);
+    actor.storeProcessor(generator, multiBlocks, level);
+}
+
+void addInternalProcessor(
+    DataProcessorGenerator2D const &generator, std::vector<MultiBlock2D *> multiBlocks, plint level)
+{
+    if (multiBlocks.size() > 0) {
+        addInternalProcessor(generator, *multiBlocks[0], multiBlocks, level);
+    }
 }
 
 void addInternalProcessor(

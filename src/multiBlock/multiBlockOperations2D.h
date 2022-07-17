@@ -70,6 +70,10 @@ void addInternalProcessor(
     plint level = 0);
 
 void addInternalProcessor(
+    DataProcessorGenerator2D const &generator, MultiBlock2D &actor,
+    std::vector<MultiBlock2D *> multiBlockArgs, plint level = 0);
+
+void addInternalProcessor(
     DataProcessorGenerator2D const &generator, MultiBlock2D &object, plint level = 0);
 
 void addInternalProcessor(

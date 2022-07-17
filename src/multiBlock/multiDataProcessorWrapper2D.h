@@ -75,6 +75,10 @@ void integrateProcessingFunctional(
     BoxProcessingFunctional2D *functional, Box2D domain, std::vector<MultiBlock2D *> multiBlocks,
     plint level = 0);
 
+void integrateProcessingFunctional(
+    BoxProcessingFunctional2D *functional, Box2D domain, MultiBlock2D &actor,
+    std::vector<MultiBlock2D *> multiBlockArgs, plint level = 0);
+
 /// Apply a functional on a sequence of block-lattices. If the number
 /// of lattices is 1 or 2, you should prefer the _L and _LL version
 /// of the functional.
