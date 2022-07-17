@@ -79,7 +79,7 @@ plint Parallelizer2D::computeCost(std::vector<std::vector<Box2D> > const &origin
             Box2D currentBox;
             if (intersect(originalBlocks[iLevel][iComp], levelBox, currentBox)) {
                 plint volume = currentBox.getNx() * currentBox.getNy();
-                totalCost += (plint)util::twoToThePower(iLevel) * volume;
+                totalCost += volume;
             }
         }
     }

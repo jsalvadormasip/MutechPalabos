@@ -153,4 +153,4 @@ void DiffusiveRefinementParameters<T>::createParameters()
 
 }  // namespace plb
 
-#endif  // MULTI_GRID_PARAMETER_MANAGER_H
+#endif  // MULTI_GRID_PARAMETER_MANAGER_HH

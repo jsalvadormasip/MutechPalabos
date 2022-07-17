@@ -1,10 +1,10 @@
-Total cost of computations = 86140
+Total cost of computations = 29120
 We are using 1 processors...
-Ideal cost per processor = 86140
+Ideal cost per processor = 29120
 ---- Costs Per Processor ----
-0 : 86140
+0 : 29120
 *******************************
-Sum of all costs = 86140
+Sum of all costs = 29120
 *******************************
 step 0; t=0; Entstrophy= 781.495
 step 129; t=0.099975; Entstrophy= 603.227
