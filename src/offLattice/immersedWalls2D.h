@@ -533,7 +533,7 @@ public:
     virtual BlockDomain::DomainT appliesTo() const;
 
 private:
-    std::vector<Array<T, 3> > const &vertices;
+    std::vector<Array<T, 2> > const &vertices;
     std::vector<T> const &areas;
     std::vector<int> const &flags;
 };

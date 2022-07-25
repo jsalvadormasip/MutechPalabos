@@ -761,7 +761,7 @@ void ComputeImmersedBoundaryForce2D<T>::processGenericBlocks(
         for (plint dx = xLim[0]; dx <= xLim[1]; dx++) {
             for (plint dy = yLim[0]; dy <= yLim[1]; dy++) {
                 Array<plint, 2> pos(intPos + Array<plint, 2>(dx, dy));
-                Array<T, 3> r((T)dx - fracPos[0], (T)dy - fracPos[1]);
+                Array<T, 2> r((T)dx - fracPos[0], (T)dy - fracPos[1]);
                 T W = inamuroDeltaFunction2D<T>().W(r);
                 force->get(pos[0], pos[1]) += W * g[i];
             }
