@@ -12,8 +12,7 @@ using namespace std;
 typedef double T;
 
 #define NSDESCRIPTOR descriptors::ForcedD3Q19Descriptor
-// #define NSDYNAMICS GuoExternalForceConsistentSmagorinskyCompleteRegularizedBGKdynamics
-#define NSDYNAMICS GuoExternalForceBGKdynamics
+#define NSDYNAMICS   GuoExternalForceBGKdynamics
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization of the particle volume fraction field.
@@ -231,13 +230,11 @@ int main(int argc, char *argv[])
     T nsOmega = parameters.getSolventOmega();
     T convers = parameters.getDeltaT() / parameters.getDeltaX();
     T mu = 1e-3;  // Dynamic viscosity
-    // T cSmago = 0.12;
 
     plint envelopeWidth = 2;
     SparseBlockStructure3D blockStructure(createRegularDistribution3D(nx, ny, nz));
 
     Dynamics<T, NSDESCRIPTOR> *nsdynamics = new NSDYNAMICS<T, NSDESCRIPTOR>(nsOmega);
-    // Dynamics<T,NSDESCRIPTOR>* nsdynamics = new NSDYNAMICS<T,NSDESCRIPTOR>(nsOmega, cSmago);
     MultiBlockLattice3D<T, NSDESCRIPTOR> nsLattice(nx, ny, nz, nsdynamics->clone());
     defineDynamics(nsLattice, nsLattice.getBoundingBox(), nsdynamics->clone());
     delete nsdynamics;
@@ -348,8 +345,6 @@ int main(int argc, char *argv[])
         nsLattice.collideAndStream();
 
         computeVelocity(nsLattice, velocity, nsLattice.getBoundingBox());
-        // velocity.reset();
-        //
 
         Actions3D cycle;
         plint D_t_ID = cycle.addBlock(D_t);

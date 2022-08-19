@@ -2226,30 +2226,30 @@ void WENO3<T>::processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D *> f
                 T v_sedT1 = v_sedimentation->get(iX + ofs5.x, iY + ofs5.y, iZ + 1 + ofs5.z);
                 T v_sedB1 = v_sedimentation->get(iX + ofs5.x, iY + ofs5.y, iZ - 1 + ofs5.z);
 
-                Array<T, 3> adv;
+                Array<T, 3> adv((T)0, (T)0, (T)0);
 
-                Array<T, 3> fp_p12;
-                Array<T, 3> fp_n12;
+                Array<T, 3> fp_p12((T)0, (T)0, (T)0);
+                Array<T, 3> fp_n12((T)0, (T)0, (T)0);
 
-                Array<T, 3> fp_p12_1;
-                Array<T, 3> fp_p12_2;
-                Array<T, 3> fp_n12_1;
-                Array<T, 3> fp_n12_2;
+                Array<T, 3> fp_p12_1((T)0, (T)0, (T)0);
+                Array<T, 3> fp_p12_2((T)0, (T)0, (T)0);
+                Array<T, 3> fp_n12_1((T)0, (T)0, (T)0);
+                Array<T, 3> fp_n12_2((T)0, (T)0, (T)0);
 
-                Array<T, 3> bp_p12_1;
-                Array<T, 3> bp_p12_2;
-                Array<T, 3> bp_n12_1;
-                Array<T, 3> bp_n12_2;
+                Array<T, 3> bp_p12_1((T)0, (T)0, (T)0);
+                Array<T, 3> bp_p12_2((T)0, (T)0, (T)0);
+                Array<T, 3> bp_n12_1((T)0, (T)0, (T)0);
+                Array<T, 3> bp_n12_2((T)0, (T)0, (T)0);
 
-                Array<T, 3> alpha_p_p12_1;
-                Array<T, 3> alpha_p_p12_2;
-                Array<T, 3> alpha_p_n12_1;
-                Array<T, 3> alpha_p_n12_2;
+                Array<T, 3> alpha_p_p12_1((T)0, (T)0, (T)0);
+                Array<T, 3> alpha_p_p12_2((T)0, (T)0, (T)0);
+                Array<T, 3> alpha_p_n12_1((T)0, (T)0, (T)0);
+                Array<T, 3> alpha_p_n12_2((T)0, (T)0, (T)0);
 
-                Array<T, 3> w1p_p12;
-                Array<T, 3> w2p_p12;
-                Array<T, 3> w1p_n12;
-                Array<T, 3> w2p_n12;
+                Array<T, 3> w1p_p12((T)0, (T)0, (T)0);
+                Array<T, 3> w2p_p12((T)0, (T)0, (T)0);
+                Array<T, 3> w1p_n12((T)0, (T)0, (T)0);
+                Array<T, 3> w2p_n12((T)0, (T)0, (T)0);
 
                 if (util::greaterThan(u[0], (T)0)) {
                     /* fp_p12x */
@@ -2361,7 +2361,9 @@ void WENO3<T>::processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D *> f
                 }
 
                 adv = fp_p12 - fp_n12;
-                T diffX, diffY, diffZ;
+                T diffX;
+                T diffY;
+                T diffZ;
 
                 diffX = phiW1 + phiE1 - (T)2 * phiC;
                 diffY = phiS1 + phiN1 - (T)2 * phiC;

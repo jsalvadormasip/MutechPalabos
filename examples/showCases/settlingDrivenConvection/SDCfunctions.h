@@ -398,18 +398,6 @@ void ComputeSedimentationVelocity3D<T>::getTypeOfModification(
 template <typename T, template <typename NSU> class nsDescriptor>
 class RayleighTaylorFlowParam {
 public:
-    /// Constructor
-    /** \param Re_  Reynolds number
-     * \param Ra_  Raylegh number
-     *  \param Pr_  Prandtl number
-     *  \param coldTemperature_  minimum temperature
-     *  \param hotTemperature_  maximum temperature
-     *  \param deltaT_ time discretization number
-     *  \param N_  resolution (a lattice of size 1 has N_+1 cells)
-     *  \param lx_ x-length in dimensionless units (e.g. 1)
-     *  \param ly_ y-length in dimensionless units (e.g. 1)
-     *  \param lz_ z-length in dimensionless units (e.g. 1)
-     */
     RayleighTaylorFlowParam(
         T Ri_, T Gr_, T uMax_, T uCar_, T resolution_, T lx_, T ly_, T lz_, T Di_ = T()) :
         Ri(Ri_),
@@ -422,8 +410,6 @@ public:
         lz(lz_),
         Di(Di_)
     { }
-    /// Peclet number
-    // T getPe() const      { return getResolution() * getLatticeU() / getLatticeKappa(); }
     /// Rayleigh number
     T getRi() const
     {
@@ -464,10 +450,6 @@ public:
     {
         return 1 / (T)resolution;
     }
-    /// caracteristic velocity
-    // T getCarvel() const  { return uCar; }
-    /// time step in dimensionless units
-    // T getDeltaT() const  { return getDeltaX()*getDeltaX(); }
     T getDeltaT() const
     {
         return getLatticeU() * getDeltaX() / getUcar();
@@ -498,7 +480,6 @@ public:
         return nCell(lz) + 1;
     }
     /// velocity in lattice units (proportional to Mach number)
-    // T getLatticeU() const       { return (getRe()*getLatticeNu())/(getNz()-1); }
     T getLatticeU() const
     {
         return uMax;
@@ -513,7 +494,6 @@ public:
     {
         return getLatticeU() * (getNz() - 1) / getRe();
     }
-
     /// Diffusivity in lattice units
     T getLatticeKappa() const
     {
@@ -547,7 +527,6 @@ void writeLogFile(
     std::ofstream ofile(fullName.c_str());
     ofile << title << "\n\n";
     ofile << "Reynolds number:           Re=" << parameters.getRe() << "\n";
-    // ofile << "Peclet number:             Pe=" << parameters.getPe() << "\n";
     ofile << "Richardson number:          Ri=" << parameters.getRi() << "\n";
     ofile << "Grasshoff number:            Gr=" << parameters.getGr() << "\n";
     ofile << "Kinematic viscosity:       Nu=" << parameters.getLatticeNu() << "\n";
