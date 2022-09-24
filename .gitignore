@@ -6,3 +6,8 @@
 *.pyc
 *.os
 *.exe
+.vscode
+.ccls-cache
+.vs
+.cache
+compile_commands.json

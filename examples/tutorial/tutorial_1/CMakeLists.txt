@@ -1,19 +1,31 @@
 if(CI)
 ###############################################################################
 
-set(EXECUTABLE_NAME "tutorial_1_1")
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 ###############################################################################
 
-get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-add_executable(${PROJECT_NAME} "./${EXECUTABLE_NAME}.cpp")
+add_executable(tutorial_1_1 "./tutorial_1_1.cpp")
+add_executable(tutorial_1_2 "./tutorial_1_2.cpp")
+add_executable(tutorial_1_4 "./tutorial_1_4.cpp")
+add_executable(tutorial_1_5 "./tutorial_1_5.cpp")
+add_executable(tutorial_1_6 "./tutorial_1_6.cpp")
+add_executable(tutorial_1_7 "./tutorial_1_7.cpp")
 
 # Link with the following libraries
-target_link_libraries(${PROJECT_NAME} palabos)
+target_link_libraries(tutorial_1_1 palabos)
+target_link_libraries(tutorial_1_2 palabos)
+target_link_libraries(tutorial_1_4 palabos)
+target_link_libraries(tutorial_1_5 palabos)
+target_link_libraries(tutorial_1_6 palabos)
+target_link_libraries(tutorial_1_7 palabos)
 if(ENABLE_MPI)
-    target_link_libraries(${PROJECT_NAME} ${MPI_CXX_LIBRARIES})
+    target_link_libraries(tutorial_1_1 ${MPI_CXX_LIBRARIES})
+    target_link_libraries(tutorial_1_2 ${MPI_CXX_LIBRARIES})
+    target_link_libraries(tutorial_1_4 ${MPI_CXX_LIBRARIES})
+    target_link_libraries(tutorial_1_5 ${MPI_CXX_LIBRARIES})
+    target_link_libraries(tutorial_1_6 ${MPI_CXX_LIBRARIES})
+    target_link_libraries(tutorial_1_7 ${MPI_CXX_LIBRARIES})
 endif()
 
 ###############################################################################
@@ -43,12 +55,12 @@ message(${CMAKE_BUILD_TYPE})
 # Append flags: set(CMAKE_XXX_FLAGS "${CMAKE_XXX_FLAGS} ...")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     message("GCC.")
-    set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
+    set(CMAKE_CXX_FLAGS "-std=c++11 -Wall  -Wextra -Wnon-virtual-dtor")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     message("Clang.")
-    set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
+    set(CMAKE_CXX_FLAGS "-std=c++11 -Wall  -Wextra -Wnon-virtual-dtor")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)

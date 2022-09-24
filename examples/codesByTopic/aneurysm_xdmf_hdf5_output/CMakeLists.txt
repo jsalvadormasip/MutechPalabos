@@ -3,30 +3,9 @@ if(CI)
 
 enable_language(CXX)
 
-option(BUILD_HDF5 "compile with hdf5" ON)
-
-if(BUILD_HDF5)
-	set(HDF5_PREFER_PARALLEL ON)
-	find_package(HDF5 REQUIRED )
-	if(HDF5_FOUND)
-		if(HDF5_IS_PARALLEL)
-			message("HDF5 PARALLEL FOUND")
-			add_definitions(-DHDF5)
-		else()
-			message("You need the parallel version of HDF5 to run this example, the code will compile and run, but without the HFD5 output!")
-			option(BUILD_HDF5 "compile with hdf5" OFF)
-		endif()
-	else()
-		message("You don’t have HDF5 library or cmake couldn’t find it, the code will compile and run, but without the HFD5 output!")
-		option(BUILD_HDF5 "compile with hdf5" OFF)
-	endif()
-endif()
-
 set(EXECUTABLE_NAME "aneurysm")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
-include_directories(${HDF5_INCLUDE_DIRS})
 
 ###############################################################################
 set(PROJECT_NAME "aneurysm_hdf5")
@@ -40,6 +19,26 @@ endif()
 
 if(ENABLE_MPI)
 	target_link_libraries(${PROJECT_NAME} ${MPI_CXX_LIBRARIES})
+endif()
+
+if(BUILD_TESTING)
+    add_custom_target(${PROJECT_NAME}_test
+        ALL
+        DEPENDS ${PROJECT_NAME}
+        COMMAND tar xzf aneurysm.stl.tgz
+        # COMMAND "LSAN_OPTIONS=suppressions=${CMAKE_CURRENT_SOURCE_DIR}/test/LAsan.supp" ./${PROJECT_NAME} test/param_aneurysm_regression.xml > test/output.dat || (cat test/output.dat\; exit 1)
+        COMMAND "LSAN_OPTIONS=suppressions=${LSAN_SUPPRESSION_FILE}" ./${PROJECT_NAME} test/param_regression.xml > test/output.dat || (cat test/output.dat\; exit 1)
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "run generated test in ${CMAKE_CURRENT_SOURCE_DIR}"
+        SOURCES ./${EXECUTABLE_NAME}.cpp
+    )
+endif()
+
+if (BUILD_TESTING)
+    enable_testing()
+    add_test(NAME ${CMAKE_CURRENT_SOURCE_DIR}_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+             COMMAND ${CMAKE_COMMAND} -E compare_files ref.dat output.dat)
 endif()
 
 ###############################################################################
@@ -89,12 +88,12 @@ message(${CMAKE_BUILD_TYPE})
 # Append flags: set(CMAKE_XXX_FLAGS "${CMAKE_XXX_FLAGS} ...")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     message("GCC.")
-    set(CMAKE_CXX_FLAGS "-std=c++11  -Wall -Wnon-virtual-dtor -Wno-unused-result")
+    set(CMAKE_CXX_FLAGS "-std=c++11  -Wall  -Wextra -Wnon-virtual-dtor -Wno-unused-result")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     message("Clang.")
-    set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wnon-virtual-dtor")
+    set(CMAKE_CXX_FLAGS "-std=c++11 -Wall  -Wextra -Wnon-virtual-dtor")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -DPLB_DEBUG -O0")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)

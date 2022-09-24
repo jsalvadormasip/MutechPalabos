@@ -26,13 +26,14 @@ Palabos is very easy to install since it does not depend on any external depende
 The mandatory packages are the following:
 
 - A modern C++ compiler `gcc` or `clang`
+- `clang-format` version 14
 - `make`
 - `cmake`
 
 ### For Debian based distributions
 
 ```
-$ sudo apt install gcc clang cmake make
+$ sudo apt install gcc clang clang-format cmake make
 ```
 
 ### For Arch based distributions
@@ -203,6 +204,33 @@ you can use the CMakeLists.txt provided in any of the examples. With some minor 
 
 In palabos root directory, we provide a CMakeLists.txt file that compiles palabos library and all the available examples.
 
+# Code formatting
+
+To format the code run 
+
+```bash
+./run-clang-format.sh -i
+```
+
+that formats the code in place. To make a dry run of formatting 
+
+```bash
+./run-clang-format.sh -n
+```
+
+must be run. Note that for the CI to succeed one needs version 14 of `clang-format`.
+
+In order to help you with code formatting there is a `docker-compose`
+configuration at the root of the palabos repository (this requires `docker` and `docker-compose`
+to be installed). To format the code
+through docker, run:
+
+```bash
+CURRENT_UID=$(id -u):$(id -g) docker-compose run clang_format
+```
+
+On some linux distributions one might need to run this command as root via `sudo`.
+
 # Documentation
 
 The documentation of Palabos can be found following this [link](https://palabos.unige.ch/get-started/palabos-documentation/).
@@ -230,15 +258,20 @@ By alphabetic order
 * @ccoreixas
 * @daniel-lagrava-niwa
 * @dkdk
+* @constracktor
 * @helenmo
+* @izumiko
 * @jfburdet
+* @jolinjolin
 * @kotsaloscv
+* @liuanjun
 * @Latt
 * @msguskova
 * @omalaspinas
 * @onmars
 * @parmigiani
 * @rconradin
+* @remy.pet
 * @swang251 
 * @vmapelli
 * @YannThorimbert

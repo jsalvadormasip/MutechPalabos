@@ -42,6 +42,34 @@ When you think your contributions are ready to be added to Palabos, you should c
 a `merge request` (see [here](https://docs.gitlab.com/ee/gitlab-basics/add-merge-request.html) for how to 
 create one). In your `merge request` briefly summarize what your additions are and highlight the particularly important ones.
 
+## Continuous integration
+
+To facilitate merge request we have been setting non-regression tests for most of the examples in Palabos. These Continuous 
+Integration (CI) tests are run with
+a gitlab runner. If possible set your own runner (it's not possible for us to provide you with one runner unfortunately) for the 
+Palabos project. See the [appropriate documentation](https://docs.gitlab.com/runner/install/) to do so. This would make the 
+maintainers life much simpler by haveing the CI perform the tests on your branch directly.
+
+## Code formatting
+
+In order to have an uniform code formatting we are using a custom 
+`clang-format` configuration file that can be found at the root of the project 
+and which is named `.clang-format`. It is mandatory to use `clang-format` version 14.
+A `bash` script named `run-clang-format.sh` 
+can help you format your code in place. Note that the continuous integration 
+will fail if you have not formatted your code before making your merge request.
+
+In order to help you with code formatting there is a `docker-compose`
+configuration at the root of the palabos repository (it requires the `docker` and `docker-compose`
+packages that are available on most platforms). To format the code
+through docker, run:
+
+```bash
+CURRENT_UID=$(id -u):$(id -g) docker-compose run clang_format
+```
+
+On some distributions one might need to run this command as root via `sudo`.
+
 ## Feature requests
 
 Feature requests can be created as issues. Keep in mind that we are an open source community
