@@ -115,7 +115,7 @@ add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 
 ###############################################################################
 
-add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_NAME} "./src/solutions/${EXECUTABLE_NAME}_solution.cpp")
+add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_NAME} "./src/${EXECUTABLE_NAME}.cpp")
 
 # Link with the following libraries
 target_link_libraries(${EXECUTABLE_NAME} palabos)

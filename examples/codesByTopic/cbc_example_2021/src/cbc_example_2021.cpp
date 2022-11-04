@@ -30,7 +30,7 @@
 
 #include "palabos3D.h"
 #include "palabos3D.hh"  // explicit inclusion because it contains templates
-#include "setup.h"
+#include "setup3d.h"
 #include "shapes.h"
 #include "simulationParameters.cpp"  // explicit inclusion because it contains templates
 #include "simulationParameters.h"
@@ -64,6 +64,7 @@ auto setupLattice3d(IncomprFlowParam<Real> const &parameters) {
         parameters.getNz() / 2.0 + 0.01);
     Real radius = parameters.getResolution() / 2.;
     TriangleSet<Real> *triangle_set =
+//        readObstacle(*location_ellipsoid, radius, radius, radius, 0.5*parameters.getResolution());
         generateEllipsoid(*location_ellipsoid, radius, radius, radius, 0.5);
     triangle_set->writeBinarySTL("tmp/obstacle.stl");
 
@@ -75,11 +76,15 @@ auto setupLattice3d(IncomprFlowParam<Real> const &parameters) {
     auto lattice_ptr = new MultiBlockLattice3D<Real, Descriptor>(
         voxelized_domain->getVoxelMatrix());
 
+//    ImageWriter<Int> imageWriter("leeloo");
+
     // 4. Define the dynamics
+    MultiScalarField3D<int> flagMatrix((MultiBlock3D &)voxelized_domain->getVoxelMatrix());
+//    imageWriter.writeScaledGif("voxels",*extractSubDomain(flagMatrix,flagMatrix.getBoundingBox()));
     if (parameters.getRe() >= 2000.0) {
-        defineDynamics(*lattice_ptr, lattice_ptr->getBoundingBox(),
+        defineDynamics(*lattice_ptr,flagMatrix, lattice_ptr->getBoundingBox(),
                        new ConsistentSmagorinskyCompleteRegularizedBGKdynamics<Real, Descriptor>(
-                           parameters.getOmega(), 0.1));
+                           parameters.getOmega(), 0.1), voxelFlag::outside);
         pcout << "Using Smagorinsky BGK dynamics." << std::endl;
     } else {
         defineDynamics(
@@ -87,12 +92,6 @@ auto setupLattice3d(IncomprFlowParam<Real> const &parameters) {
             new BGKdynamics<Real, Descriptor>(parameters.getOmega()));
         pcout << "Using BGK dynamics." << std::endl;
     }
-    MultiScalarField3D<int> flagMatrix((MultiBlock3D &)voxelized_domain->getVoxelMatrix());
-    defineDynamics(
-        *lattice_ptr,flagMatrix, lattice_ptr->getBoundingBox(),
-        new NoDynamics<Real, Descriptor>(parameters.getOmega()), 0);
-    pcout << "Setting noDynamics inside the bodies." << std::endl;
-
 
     // 5. Set sponge zones to reduce pressure waves reflections
     createSpongeZones(
@@ -108,7 +107,7 @@ auto setupLattice3d(IncomprFlowParam<Real> const &parameters) {
     OffLatticeBoundaryCondition3D<Real, Descriptor, Array<Real, 3>>
         *offlatt_boundary_condition =
             inject_off_lattice_bc(lattice_ptr, voxelized_domain);
-    lattice_ptr->initialize();
+
     // return lattice and boundary conditions
     return std::tuple{lattice_ptr, onlatt_boundary_condition,
                       offlatt_boundary_condition};
@@ -118,11 +117,16 @@ int main(int argc, char *argv[]) {
     // Palabos initialization
     plbInit(&argc, &argv);
     string outdir = "tmp/";
+
+    if(argc > 2){ cout << "Error! too many parameters" << endl;abort();}
+    else if(argc == 2) outdir = static_cast<string>(argv[1]);
+    else outdir = "tmp";
+    outdir.append("/");
     if (global::mpi().getRank() == 0) system(("mkdir -p " + outdir).c_str());
     global::directories().setOutputDir(outdir);
 
     // Define simulation parameters: we use two ad-hoc units helper
-    const Real re = 100;  // NB: Obstacle reynolds!
+    const Real re = 10;  // NB: Obstacle reynolds!
     sp::Numerics<Real, Int> lu;
     sp::NonDimensional<Real> dimless;
     dimless.initReLxLyLz(re, 15, 5, 5);// the diameter is the reference length
@@ -130,7 +134,7 @@ int main(int argc, char *argv[]) {
     // initLrefluNodim initializes lu, getIncomprFlowParam() returns
     // the palabos structure IncomprFlowParam
     IncomprFlowParam<Real> parameters =
-        lu.initLrefluNodim(7/*resolution*/, &dimless, 0.01 /*u_lb*/,
+        lu.initLrefluNodim(15/*resolution*/, &dimless, 0.05 /*u_lb*/,
                            false /*tau, optional*/)
             .printParameters()
             .getIncomprFlowParam();
@@ -138,8 +142,8 @@ int main(int argc, char *argv[]) {
     // Define output constants
     const Real logT = (Real)0.02;
     [[maybe_unused]] const Real imSave = (Real)0.06;
-    [[maybe_unused]] const Real vtkSave = (Real)1.0;
-    const Real maxT = (Real)15.1;
+    [[maybe_unused]] const Real vtkSave = 1.0;(Real)parameters.getDeltaT();
+    const Real maxT = (Real)5.1;
     writeLogFile(parameters, "Poiseuille flow");
 
     // Setup the simulation and allocate lattice and boundary conditions
@@ -155,11 +159,13 @@ int main(int argc, char *argv[]) {
     for (plint iT = 0; (Real)iT * parameters.getDeltaT() < maxT; ++iT) {
         Real cd = 0.;
         if (iT % parameters.nStep(logT) == 0) {
-            cd = norm(boundaryoff->getForceOnObject()) /*TODO*/;
+            cd = 2.0*norm(boundaryoff->getForceOnObject()) /
+                      (0.25 * 1.0 * lu.getUlb() * lu.getUlb() * lu.getLref() *
+                       lu.getLref() * M_PI);
             std::string fullName =
                 global::directories().getLogOutDir() + "Cd.dat";
             plb_ofstream ofile(fullName.c_str(), std::ostream::app);
-            ofile << 1.0/*TODO*/ << std::endl;
+            ofile << cd << std::endl;
         }
         // At this point, the state of the lattice corresponds to the
         //   discrete time iT. However, the stored averages
@@ -178,7 +184,9 @@ int main(int argc, char *argv[]) {
         global::timer("iteration").restart();
 
         // Lattice Boltzmann iteration step.
+//        lattice.executeInternalProcessors(static_cast<plint>(ProcessorLevel::rhoBarJ));
         lattice.collideAndStream();
+//        lattice.executeInternalProcessors(static_cast<plint>(ProcessorLevel::offLattice));
 
         // At this point, the state of the lattice corresponds to the
         //   discrete time iT+1, and the stored averages are upgraded to time

@@ -309,6 +309,8 @@ void ELIULModel3D<T, Descriptor>::cellCompletion(
        T feq_solid = cellF.getDynamics().computeEquilibrium(i_solid, f_rhoBar, f_j, f_jSqr);
        T eqPlus = 0.5 * (feq_solid+feq_fluid);
        T eqMinus = 0.5 * (feq_solid-feq_fluid);
+       T c_i_w_j = D::c[i_solid][0] * w_j[0] + D::c[i_solid][1] * w_j[1] + D::c[i_solid][2] * w_j[2];
+       T eqMinusWall = -2.0 * D::t[i_solid] * D::invCs2 * c_i_w_j;
 
 
        // YLI
@@ -327,38 +329,25 @@ void ELIULModel3D<T, Descriptor>::cellCompletion(
        T Kmin = Kelim;
 
        // ELIUL-C
-       Kmin = 0.0;
+//       Kmin = 0.0;
 //       // k1 eli
 //       Kmin = 1.-alphaMinus/2.0;
 //       // k4 eli
 //       Kmin = 1.+alphaMinus*(LambdaMinus-0.5);
 
-       cellS[i_fluid] =   0.5 * (alphaPlus + alphaMinus) * cellS[i_solid]
+       cellF[i_fluid] =   0.5 * (alphaPlus + alphaMinus) * cellS[i_solid]
                         + (1. + 0.5 * (alphaPlus - alphaMinus)) * cellF[i_fluid]
                         + beta * cellFF[i_fluid]
                         + Kelip * (fPlus-eqPlus) / (-1.+tauPlus)
                         + Kmin * (fMinus-eqMinus) / (-1.+tauMinus)
                         - alphaPlus * eqPlus
-           //                                - eqMinusWall
+                        - eqMinusWall
            ;
 
-       localForce[0] += D::c[i_solid][0] * (cellS[i_fluid] + cellS[i_solid]);
-       localForce[1] += D::c[i_solid][1] * (cellS[i_fluid] + cellS[i_solid]);
-       localForce[2] += D::c[i_solid][2] * (cellS[i_fluid] + cellS[i_solid]);
+       localForce[0] += D::c[i_solid][0] * (cellF[i_fluid] + cellS[i_solid]);
+       localForce[1] += D::c[i_solid][1] * (cellF[i_fluid] + cellS[i_solid]);
+       localForce[2] += D::c[i_solid][2] * (cellF[i_fluid] + cellS[i_solid]);
 
-   }
-   for (plint iDirection = 0; iDirection < (plint)dryNodeFluidDirections.size(); ++iDirection){
-       int i_fluid = dryNodeFluidDirections[iDirection];
-       int i_solid = indexTemplates::opposite<Descriptor<T> >(i_fluid);
-       Dot3D fluidDirection(D::c[i_fluid][0], D::c[i_fluid][1], D::c[i_fluid][2]);
-       plint dryNodeId = dryNodeIds[iDirection];
-       Cell<T, Descriptor> &cellF = lattice.get(
-           guoNode.x + fluidDirection.x, guoNode.y + fluidDirection.y,
-           guoNode.z + fluidDirection.z);
-       Cell<T, Descriptor> const &cellFF = lattice.get(
-           guoNode.x + 2*fluidDirection.x, guoNode.y + 2*fluidDirection.y,
-           guoNode.z + 2*fluidDirection.z);
-       cellF[i_fluid] = cellS[i_fluid];
    }
 }
 

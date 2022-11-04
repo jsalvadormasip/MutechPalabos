@@ -26,6 +26,8 @@
 
 #include <cmath>
 
+#include "HWLatticeModel3D.h"
+#include "HWLatticeModel3D.hh"
 #include "palabos2D.h"
 #include "palabos2D.hh"
 #include "setupMacroscopiFields.h"
@@ -35,7 +37,6 @@ using namespace plb::descriptors;
 namespace lu = incompressible_simulation_parameters;
 #ifndef CBC_EXAMPLE_SETUP_H
 #define CBC_EXAMPLE_SETUP_H
-
 
 /**
  * This helper functions return a voxelized domain form a TriangleSet for an
@@ -75,6 +76,11 @@ auto voxelize_helper(const IncomprFlowParam<Real> parameters,
     return std::tuple{voxalized_domain, boundary};
 }
 
+
+enum class ProcessorLevel{
+        offLattice = 1,
+        rhoBarJ = 2
+    };
 /**
  * This functions integrates a data-processor for the boundary condition in the
  * target_lattice. It needs as parameter also the voxalized_domain to know the
@@ -96,20 +102,46 @@ auto inject_off_lattice_bc(
     bool useAllDirections = true;
     OffLatticeModel3D<Real, Array3D>* offLatticeModel = nullptr;
     profiles->setWallProfile(new NoSlipProfile3D<Real>);
-    offLatticeModel = new BouzidiOffLatticeModel3D<Real, Descriptor>(
-        new TriangleFlowShape3D<Real, Array<Real, 3> >(
-            voxalized_domain->getBoundary(), *profiles),
-        voxelFlag::outside);
-    boundaryCondition =
-        new OffLatticeBoundaryCondition3D<Real, Descriptor, Array3D>(
-            offLatticeModel, *voxalized_domain, *target_lattice);
 
+    pcout << "Setting noDynamics for voxelFlag::inside and voxelFlag::innerBorder...";
     defineDynamics(*target_lattice, voxalized_domain->getVoxelMatrix(),
                    target_lattice->getBoundingBox(),
                    new NoDynamics<Real, Descriptor>(), voxelFlag::inside);
+    defineDynamics(*target_lattice, voxalized_domain->getVoxelMatrix(),
+                   target_lattice->getBoundingBox(),
+                   new NoDynamics<Real, Descriptor>(), voxelFlag::innerBorder);
+    pcout << "done." << std::endl;
+    offLatticeModel = new FilippovaHaenelLocalModel3D<Real, Descriptor>(
+        new TriangleFlowShape3D<Real, Array<Real, 3> >(
+            voxalized_domain->getBoundary(), *profiles),
+        voxelFlag::outside);
 
-    boundaryCondition->insert();
+//    FilippovaHaenelLocalModel3D<T, DESCRIPTOR> *model =
+//        new FilippovaHaenelLocalModel3D<T, DESCRIPTOR>(
+//            new TriangleFlowShape3D<T, Array<T, 3> >(voxelizedDomain.getBoundary(), profiles),
+//            flowType);
+    boundaryCondition =
+        new OffLatticeBoundaryCondition3D<Real, Descriptor, Array3D>(
+            offLatticeModel, *voxalized_domain, *target_lattice);
+    std::vector<MultiBlock3D *> rhoBarJarg;
+    plint numScalars = 4;
+    plint extendedEnvelopeWidth = 2;
+    MultiNTensorField3D<Real> *rhoBarJfield =
+        generateMultiNTensorField3D<Real>(*target_lattice, extendedEnvelopeWidth, numScalars);
+    rhoBarJfield->toggleInternalStatistics(false);
+    rhoBarJarg.push_back(rhoBarJfield);
+    boundaryCondition->insert(rhoBarJarg,(plint)ProcessorLevel::offLattice);
+//    plint processorLevel = -2;
+    integrateProcessingFunctional(
+        new PackedRhoBarJfunctional3D<Real, Descriptor>(), target_lattice->getBoundingBox(), *target_lattice,
+        *rhoBarJfield, (plint)ProcessorLevel::rhoBarJ);
 
+//    initializeAtEquilibrium(
+//            *target_lattice, target_lattice->getBoundingBox(), 1., Array<Real, 3>(0., 0., 0.));
+//    target_lattice->initialize();
+    applyProcessingFunctional(
+            new PackedRhoBarJfunctional3D<Real, Descriptor>(), target_lattice->getBoundingBox(), *target_lattice,
+            *rhoBarJfield);
     return boundaryCondition;
 }
 
@@ -142,19 +174,19 @@ auto inject_on_lattice_bc(MultiBlockLattice3D<Real, Descriptor>* target_lattice,
     onlatt_boundary_condition->setVelocityConditionOnBlockBoundaries(
         *target_lattice, Box3D(0, 0, 1, ny - 2, 1, nz - 2));
     onlatt_boundary_condition->setVelocityConditionOnBlockBoundaries(
-        *target_lattice, Box3D(0, nx - 1, 0, 0, 1, nz - 2), boundary::dirichlet);
+        *target_lattice, Box3D(0, nx - 1, 0, 0, 1, nz - 2), boundary::neumann);
     onlatt_boundary_condition->setVelocityConditionOnBlockBoundaries(
-        *target_lattice, Box3D(0, nx - 1, ny - 1, ny - 1, 1, nz - 2), boundary::dirichlet);
+        *target_lattice, Box3D(0, nx - 1, ny - 1, ny - 1, 1, nz - 2), boundary::neumann);
     onlatt_boundary_condition->setPressureConditionOnBlockBoundaries(
         *target_lattice, outlet, boundary::density);
 
     setBoundaryVelocity(*target_lattice, target_lattice->getBoundingBox(),
-                        PoiseuilleVelocity<Real>(parameters));
+                        ConstantVelocity<Real>(parameters));
     setBoundaryDensity(*target_lattice, outlet,
-                       PoiseuilleDensity<Real,Descriptor>(parameters));
+                       ConstantDensity<Real>(1.0));
     initializeAtEquilibrium(
         *target_lattice, target_lattice->getBoundingBox(),
-        PoiseuilleVelocityAndDensity<Real, Descriptor>(parameters));
+        ConstantVelocityAndDensity<Real, Descriptor>(parameters));
 
     return onlatt_boundary_condition;
 }

@@ -217,15 +217,15 @@ void FilippovaHaenelLocalModel3D<T, Descriptor>::cellCompletion(
         s_cell.getDynamics().getId() == noDynId
         && "Filippova-Haenel BC needs the dynamics to be set to NoDynamics.");
     for (plint iDirection = 0; iDirection < (plint)dryNodeFluidDirections.size(); ++iDirection) {
-        int iOpp = dryNodeFluidDirections[iDirection];
-        int iPop = indexTemplates::opposite<Descriptor<T> >(iOpp);
-        Dot3D fluidDirection(D::c[iOpp][0], D::c[iOpp][1], D::c[iOpp][2]);
+        int i_fluid = dryNodeFluidDirections[iDirection];
+        int i_solid = indexTemplates::opposite<Descriptor<T> >(i_fluid);
+        Dot3D fluidDirection(D::c[i_fluid][0], D::c[i_fluid][1], D::c[i_fluid][2]);
         plint dryNodeId = dryNodeIds[iDirection];
 
         Array<T, 3> wallNode, wall_vel;
         T wallDistance;
         OffBoundary::Type bdType;
-        Cell<T, Descriptor> const &f_cell = lattice.get(
+        Cell<T, Descriptor> &f_cell = lattice.get(
             guoNode.x + fluidDirection.x, guoNode.y + fluidDirection.y,
             guoNode.z + fluidDirection.z);
 
@@ -238,12 +238,8 @@ void FilippovaHaenelLocalModel3D<T, Descriptor>::cellCompletion(
         Array<T, 3> wallNormal;
 
         if (args.empty()) {
-            Cell<T, Descriptor> const &ff_cell = lattice.get(
-                guoNode.x + 2 * fluidDirection.x, guoNode.y + 2 * fluidDirection.y,
-                guoNode.z + 2 * fluidDirection.z);
-
-            f_cell.getDynamics().computeRhoBarJ(f_cell, f_rhoBar, f_j);
-            ff_cell.getDynamics().computeRhoBarJ(ff_cell, ff_rhoBar, ff_j);
+            plbLogicError("FilippovaHaenelLocalModel3D requires externally "
+                "provided rhoBar and j fields!");
         } else {
             if ((plint)args.size() == 1) {
                 NTensorField3D<T> const *macroField =
@@ -282,7 +278,9 @@ void FilippovaHaenelLocalModel3D<T, Descriptor>::cellCompletion(
 
                 ff_j = jField->get(posJ2.x, posJ2.y, posJ2.z);
             } else {
-                PLB_ASSERT(false);  // Not implemented for 3 args.
+                plbLogicError(
+                    "FilippovaHaenelLocalModel3D requires externally "
+                    "provided rhoBar and j fields!");
             }
         }
 
@@ -298,7 +296,7 @@ void FilippovaHaenelLocalModel3D<T, Descriptor>::cellCompletion(
         PLB_ASSERT(ok);
 
         Array<T, 3> w_j = wall_vel * f_rho;
-        T d = std::sqrt(D::cNormSqr[iOpp]);
+        T d = std::sqrt(D::cNormSqr[i_fluid]);
         PLB_ASSERT(wallDistance <= d);
         T delta = 1.0 - wallDistance / d;
 
@@ -316,19 +314,19 @@ void FilippovaHaenelLocalModel3D<T, Descriptor>::cellCompletion(
             kappa = omega * (2.0 * delta - 1.0);
         }
 
-        T c_i_wf_j_f_j = D::c[iPop][0] * (wf_j[0] - f_j[0]) + D::c[iPop][1] * (wf_j[1] - f_j[1])
-                         + D::c[iPop][2] * (wf_j[2] - f_j[2]);
+        T c_i_wf_j_f_j = D::c[i_solid][0] * (wf_j[0] - f_j[0]) + D::c[i_solid][1] * (wf_j[1] - f_j[1])
+                         + D::c[i_solid][2] * (wf_j[2] - f_j[2]);
 
-        T c_i_w_j = D::c[iPop][0] * w_j[0] + D::c[iPop][1] * w_j[1] + D::c[iPop][2] * w_j[2];
+        T c_i_w_j = D::c[i_solid][0] * w_j[0] + D::c[i_solid][1] * w_j[1] + D::c[i_solid][2] * w_j[2];
 
-        T f_ieq = f_cell.getDynamics().computeEquilibrium(iPop, f_rhoBar, f_j, f_jSqr)
-                  + D::t[iPop] * D::invCs2 * c_i_wf_j_f_j;
-        s_cell[iOpp] = (1.0 - kappa) * collidedCell[iPop] + kappa * f_ieq
-                       + 2.0 * D::t[iPop] * D::invCs2 * c_i_w_j;
+        T f_ieq = f_cell.getDynamics().computeEquilibrium(i_solid, f_rhoBar, f_j, f_jSqr)
+                  + D::t[i_solid] * D::invCs2 * c_i_wf_j_f_j;
+        f_cell[i_fluid] = (1.0 - kappa) * s_cell[i_solid] + kappa * f_ieq
+                       + 2.0 * D::t[i_solid] * D::invCs2 * c_i_w_j;
 
-        localForce[0] += D::c[iPop][0] * (s_cell[iPop] + s_cell[iOpp]);
-        localForce[1] += D::c[iPop][1] * (s_cell[iPop] + s_cell[iOpp]);
-        localForce[2] += D::c[iPop][2] * (s_cell[iPop] + s_cell[iOpp]);
+        localForce[0] += D::c[i_solid][0] * (s_cell[i_solid] + f_cell[i_fluid]);
+        localForce[1] += D::c[i_solid][1] * (s_cell[i_solid] + f_cell[i_fluid]);
+        localForce[2] += D::c[i_solid][2] * (s_cell[i_solid] + f_cell[i_fluid]);
     }
 }
 
