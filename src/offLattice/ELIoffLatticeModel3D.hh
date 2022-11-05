@@ -31,18 +31,26 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ELIUL_OFF_LATTICE_MODEL_3D_HH
-#define ELIUL_OFF_LATTICE_MODEL_3D_HH
+#ifndef ELI_OFF_LATTICE_MODEL_3D_HH
+#define ELI_OFF_LATTICE_MODEL_3D_HH
+
+#ifdef _DEBUG
+constexpr bool debug_mode = true;
+#else
+constexpr bool debug_mode = false;
+#endif
 
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <array>
 
 #include "core/dynamics.h"
 #include "latticeBoltzmann/externalFieldAccess.h"
 #include "latticeBoltzmann/geometricOperationTemplates.h"
 #include "offLattice/meiLuoShyyOffLatticeModel3D.h"
 #include "offLattice/nextNeighbors3D.h"
+#include "ELIoffLatticeModel3D.h"
 
 namespace plb {
 
@@ -68,36 +76,36 @@ namespace plb {
 * @tparam Descriptor
 */
 template <typename T, template <typename U> class Descriptor>
-ELIULModel3D<T, Descriptor>::ELIULModel3D(
+ELIModels3D<T, Descriptor>::ELIModels3D(
    BoundaryShape3D<T, Array<T, 3> > *shape_, int flowType_) :
    OffLatticeModel3D<T, Array<T, 3> >(shape_, flowType_)
 { }
 
-template <typename T, template <typename U> class Descriptor>
-ELIULModel3D<T, Descriptor> *ELIULModel3D<T, Descriptor>::clone() const
-{
-   return new ELIULModel3D(*this);
-}
+//template <typename T, template <typename U> class Descriptor>
+//ELIModels3D<T, Descriptor> *ELIModels3D<T, Descriptor>::clone() const
+//{
+//   return new ELIModels3D(*this);
+//}
 
 template <typename T, template <typename U> class Descriptor>
-plint ELIULModel3D<T, Descriptor>::getNumNeighbors() const
+plint ELIModels3D<T, Descriptor>::getNumNeighbors() const
 {
    return 1;
 }
 
 template <typename T, template <typename U> class Descriptor>
-bool ELIULModel3D<T, Descriptor>::isExtrapolated() const
+bool ELIModels3D<T, Descriptor>::isExtrapolated() const
 {
    return true;
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ELIULModel3D<T, Descriptor>::prepareCell(
+void ELIModels3D<T, Descriptor>::prepareCell(
    Dot3D const &cellLocation, AtomicContainerBlock3D &container)
 {
    typedef Descriptor<T> D;
    Dot3D offset = container.getLocation();
-   OffLatticeInfo3D *info = dynamic_cast<OffLatticeInfo3D *>(container.getData());
+   auto *info = dynamic_cast<OffLatticeInfo3D *>(container.getData());
    PLB_ASSERT(info);
    std::vector<int> liquidNeighbors;
    std::vector<plint> ids;
@@ -118,20 +126,23 @@ void ELIULModel3D<T, Descriptor>::prepareCell(
                Array<T, 3> wallNormal;
                Array<T, 3> surfaceData;
                OffBoundary::Type bdType;
-#ifdef PLB_DEBUG
-               bool ok =
-#endif
+
+               if constexpr (debug_mode) {
+                   bool ok = this->pointOnSurface(
+                       cellLocation + offset, Dot3D(D::c[iPop][0], D::c[iPop][1], D::c[iPop][2]),
+                       locatedPoint, distance, wallNormal, surfaceData, bdType, iTriangle);
+                   PLB_ASSERT(ok);
+               } else{
                    this->pointOnSurface(
                        cellLocation + offset, Dot3D(D::c[iPop][0], D::c[iPop][1], D::c[iPop][2]),
                        locatedPoint, distance, wallNormal, surfaceData, bdType, iTriangle);
-
+               }
                // In the following, the importance of directions is sorted wrt. how well they
                //   are aligned with the wall normal. It is better to take the continuous normal,
                //   because it is not sensitive to the choice of the triangle when we shoot at
                //   an edge.
                // wallNormal = this->computeContinuousNormal(locatedPoint, iTriangle);
                global::timer("intersect").stop();
-               PLB_ASSERT(ok);
                // ... then add this node to the list.
                liquidNeighbors.push_back(iPop);
                ids.push_back(iTriangle);
@@ -146,13 +157,13 @@ void ELIULModel3D<T, Descriptor>::prepareCell(
 }
 
 template <typename T, template <typename U> class Descriptor>
-ContainerBlockData *ELIULModel3D<T, Descriptor>::generateOffLatticeInfo() const
+ContainerBlockData *ELIModels3D<T, Descriptor>::generateOffLatticeInfo() const
 {
    return new OffLatticeInfo3D;
 }
 
 template <typename T, template <typename U> class Descriptor>
-Array<T, 3> ELIULModel3D<T, Descriptor>::getLocalForce(AtomicContainerBlock3D &container) const
+Array<T, 3> ELIModels3D<T, Descriptor>::getLocalForce(AtomicContainerBlock3D &container) const
 {
    OffLatticeInfo3D *info = dynamic_cast<OffLatticeInfo3D *>(container.getData());
    PLB_ASSERT(info);
@@ -160,13 +171,13 @@ Array<T, 3> ELIULModel3D<T, Descriptor>::getLocalForce(AtomicContainerBlock3D &c
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ELIULModel3D<T, Descriptor>::boundaryCompletion(
+void ELIModels3D<T, Descriptor>::boundaryCompletion(
    AtomicBlock3D &nonTypeLattice, AtomicContainerBlock3D &container,
    std::vector<AtomicBlock3D *> const &args)
 {
-   BlockLattice3D<T, Descriptor> &lattice =
+   auto &lattice =
        dynamic_cast<BlockLattice3D<T, Descriptor> &>(nonTypeLattice);
-   OffLatticeInfo3D *info = dynamic_cast<OffLatticeInfo3D *>(container.getData());
+   auto *info = dynamic_cast<OffLatticeInfo3D *>(container.getData());
    PLB_ASSERT(info);
    std::vector<Dot3D> const &dryNodes = info->getDryNodes();
    std::vector<std::vector<int> > const &dryNodeFluidDirections =
@@ -186,7 +197,7 @@ void ELIULModel3D<T, Descriptor>::boundaryCompletion(
 }
 
 template <typename T, template <typename U> class Descriptor>
-void ELIULModel3D<T, Descriptor>::cellCompletion(
+void ELIModels3D<T, Descriptor>::cellCompletion(
    BlockLattice3D<T, Descriptor> &lattice, Dot3D const &guoNode,
    std::vector<int> const &dryNodeFluidDirections, std::vector<plint> const &dryNodeIds,
    Dot3D const &absoluteOffset, Array<T, 3> &localForce, std::vector<AtomicBlock3D *> const &args)
@@ -195,12 +206,12 @@ void ELIULModel3D<T, Descriptor>::cellCompletion(
    Array<T, D::d> deltaJ;
    deltaJ.resetToZero();
    Cell<T, Descriptor> &cellS = lattice.get(guoNode.x, guoNode.y, guoNode.z);
-//#ifdef PLB_DEBUG
-//   int noDynId = NoDynamics<T, Descriptor>().getId();
-//#endif
-//   PLB_ASSERT(
-//       cellS.getDynamics().getId() == noDynId
-//       && "ELIUL BC needs the dynamics to be set to NoDynamics.");
+#ifdef PLB_DEBUG
+   int noDynId = NoDynamics<T, Descriptor>().getId();
+#endif
+   PLB_ASSERT(
+       cellS.getDynamics().getId() == noDynId
+       && "ELIUL BC needs the dynamics to be set to NoDynamics.");
    for (plint iDirection = 0; iDirection < (plint)dryNodeFluidDirections.size(); ++iDirection) {
        int i_fluid = dryNodeFluidDirections[iDirection];
        int i_solid = indexTemplates::opposite<Descriptor<T> >(i_fluid);
@@ -221,54 +232,10 @@ void ELIULModel3D<T, Descriptor>::cellCompletion(
        BlockStatistics statsCopy(lattice.getInternalStatistics());
        collidedCell.collide(statsCopy);
 
-       T f_rhoBar, ff_rhoBar;
-       Array<T, 3> f_j, ff_j;
        Array<T, 3> wallNormal;
 
-       if (args.empty()) {
-           cellF.getDynamics().computeRhoBarJ(cellF, f_rhoBar, f_j);
-           cellFF.getDynamics().computeRhoBarJ(cellFF, ff_rhoBar, ff_j);
-       } else {
-           if ((plint)args.size() == 1) {
-               auto const *macroField =
-                   dynamic_cast<NTensorField3D<T> const *>(args[0]);
-               PLB_ASSERT(macroField);
-               // 1 Variable for rhoBar, 3 variables for j.
-               PLB_ASSERT(macroField->getNdim() == 4);
-               Dot3D off = computeRelativeDisplacement(lattice, *macroField);
-
-               Dot3D macroPos = guoNode + fluidDirection + off;
-               Dot3D macroPos2 = macroPos + fluidDirection;
-               T const *macroscopic = macroField->get(macroPos.x, macroPos.y, macroPos.z);
-               f_rhoBar = macroscopic[0];
-               f_j.from_cArray(macroscopic + 1);
-               T const *macroscopic2 = macroField->get(macroPos2.x, macroPos2.y, macroPos2.z);
-               ff_j.from_cArray(macroscopic2 + 1);
-           } else if ((plint)args.size() == 2) {
-               // 1 field for rhoBar, 1 field for j.
-               // #ifdef PLB_DEBUG
-               auto const *rhoBarField =
-                   dynamic_cast<ScalarField3D<T> const *>(args[0]);
-               // #endif
-               auto const *jField =
-                   dynamic_cast<TensorField3D<T, 3> const *>(args[1]);
-               PLB_ASSERT(rhoBarField);
-               PLB_ASSERT(jField);
-
-               Dot3D posJ =
-                   guoNode + fluidDirection + computeRelativeDisplacement(lattice, *jField);
-               Dot3D posRho =
-                   guoNode + fluidDirection + computeRelativeDisplacement(lattice, *rhoBarField);
-
-               f_rhoBar = rhoBarField->get(posRho.x, posRho.y, posRho.z);
-               f_j = jField->get(posJ.x, posJ.y, posJ.z);
-               Dot3D posJ2 = posJ + fluidDirection;
-
-               ff_j = jField->get(posJ2.x, posJ2.y, posJ2.z);
-           } else {
-               PLB_ASSERT(false);  // Not implemented for 3 args.
-           }
-       }
+       auto [f_rhoBar, f_j] =
+           getRhoBarJ(lattice, guoNode, args, fluidDirection, cellF);
 
        T f_rho = D::fullRho(f_rhoBar);
        T f_jSqr = normSqr(f_j);
@@ -297,14 +264,14 @@ void ELIULModel3D<T, Descriptor>::cellCompletion(
            omega_minus = cellF.getDynamics().getParameter(dynamicParams::omega_minus);
        else
            omega_minus = omega_plus;
+
+
        T tauPlus = 1./omega_plus;
-       T LambdaPlus = tauPlus-0.5;
+//       T LambdaPlus = tauPlus-0.5;
        T tauMinus = 1./omega_minus;
-       T LambdaMinus = tauMinus-0.5;
+//       T LambdaMinus = tauMinus-0.5;
        T fPlus  = 0.5*(cellS[i_solid] + cellFF[i_fluid]);
        T fMinus = 0.5*(cellS[i_solid] - cellFF[i_fluid]);
-       T Kelip = q-tauPlus;
-       T Kelim = q-tauMinus;
        T feq_fluid = cellF.getDynamics().computeEquilibrium(i_fluid, f_rhoBar, f_j, f_jSqr);
        T feq_solid = cellF.getDynamics().computeEquilibrium(i_solid, f_rhoBar, f_j, f_jSqr);
        T eqPlus = 0.5 * (feq_solid+feq_fluid);
@@ -313,6 +280,8 @@ void ELIULModel3D<T, Descriptor>::cellCompletion(
        T eqMinusWall = -2.0 * D::t[i_solid] * D::invCs2 * c_i_w_j;
 
 
+//       T Kplus = q-tauPlus;
+//       T Kelim = q-tauMinus;
        // YLI
 //       T alphaPlus = 0.;
 //       T alphaMinus = 2./(1.+q);
@@ -323,10 +292,9 @@ void ELIULModel3D<T, Descriptor>::cellCompletion(
 
 
        // ELIUL
-       T alphaPlus = -1.;
-       T alphaMinus = 1.;
-       T beta = 0.;
-       T Kmin = Kelim;
+//       T alphaPlus = -1.;
+//       T alphaMinus = 1.;
+//       T Kmin = Kelim;
 
        // ELIUL-C
 //       Kmin = 0.0;
@@ -334,15 +302,20 @@ void ELIULModel3D<T, Descriptor>::cellCompletion(
 //       Kmin = 1.-alphaMinus/2.0;
 //       // k4 eli
 //       Kmin = 1.+alphaMinus*(LambdaMinus-0.5);
+       auto [alphaPlus,alphaMinus,Kplus,Kmin] = eliCoefficients(q,tauPlus,tauMinus);
 
        cellF[i_fluid] =   0.5 * (alphaPlus + alphaMinus) * cellS[i_solid]
                         + (1. + 0.5 * (alphaPlus - alphaMinus)) * cellF[i_fluid]
-                        + beta * cellFF[i_fluid]
-                        + Kelip * (fPlus-eqPlus) / (-1.+tauPlus)
+                        + Kplus * (fPlus-eqPlus) / (-1.+tauPlus)
                         + Kmin * (fMinus-eqMinus) / (-1.+tauMinus)
                         - alphaPlus * eqPlus
+//                        - alphaMinus * eqMinus
                         - eqMinusWall
            ;
+
+       // the following line is needed to make the algorithm more compact and avoid fetching the
+       // population in cellFF[i_fluid], but simple in cellF[i_fluid]
+       cellS[i_fluid] = cellF[i_fluid];
 
        localForce[0] += D::c[i_solid][0] * (cellF[i_fluid] + cellS[i_solid]);
        localForce[1] += D::c[i_solid][1] * (cellF[i_fluid] + cellS[i_solid]);
@@ -350,8 +323,76 @@ void ELIULModel3D<T, Descriptor>::cellCompletion(
 
    }
 }
+template <typename T, template<typename U> class Descriptor>
+std::tuple<T,Array<T,3>> ELIModels3D<T, Descriptor>::getRhoBarJ(
+    const BlockLattice3D<T, Descriptor> &lattice, const Dot3D &guoNode,
+    const std::vector<AtomicBlock3D *> &args, const Dot3D &fluidDirection,
+    const Cell<T, Descriptor> &cellF) const
+{
+    T f_rhoBar = 0;
+    Array<T, 3> f_j;
+    if (args.empty()) {
+        plbLogicError(
+            "ELI requires externally "
+            "provided rhoBar and j fields!");
+    } else {
+        if ((plint)args.size() == 1) {
+            auto const *macroField =
+                dynamic_cast<NTensorField3D<T> const *>(args[0]);
+            PLB_ASSERT(macroField);
+            // 1 Variable for rhoBar, 3 variables for j.
+            PLB_ASSERT(macroField->getNdim() == 4);
+            Dot3D off = computeRelativeDisplacement(lattice, *macroField);
+
+            Dot3D macroPos = guoNode + fluidDirection + off;
+            T const *macroscopic = macroField->get(macroPos.x, macroPos.y, macroPos.z);
+            f_rhoBar = macroscopic[0];
+            f_j.from_cArray(macroscopic + 1);
+        } else if ((plint)args.size() == 2) {
+            // 1 field for rhoBar, 1 field for j.
+            // #ifdef PLB_DEBUG
+            auto const *rhoBarField =
+                dynamic_cast<ScalarField3D<T> const *>(args[0]);
+            // #endif
+            auto const *jField =
+                dynamic_cast<TensorField3D<T, 3> const *>(args[1]);
+            PLB_ASSERT(rhoBarField);
+            PLB_ASSERT(jField);
+
+            Dot3D posJ =
+                guoNode + fluidDirection + computeRelativeDisplacement(lattice, *jField);
+            Dot3D posRho =
+                guoNode + fluidDirection + computeRelativeDisplacement(lattice, *rhoBarField);
+
+            f_rhoBar = rhoBarField->get(posRho.x, posRho.y, posRho.z);
+            f_j = jField->get(posJ.x, posJ.y, posJ.z);
+        } else {
+            plbLogicError(
+                "ELI requires externally "
+                "provided rhoBar and j fields!");
+        }
+    }
+    return std::tuple<T,Array<T,3>>{f_rhoBar, f_j};
+}
+
+template <typename T, template<typename U> class Descriptor>
+inline std::array<T,4> ELIUL<T, Descriptor>::eliCoefficients(T q,T tauPlus, T tauMinus) const
+{
+    T alphaPlus = -1.;
+    T alphaMinus = 1.;
+    T Kplus = q-tauPlus;
+    T Kelim = q-tauMinus;
+    T Kmin = Kelim;
+    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+}
+
+template <typename T, template <typename U> class D>
+ELIUL<T, D> *ELIUL<T, D>::clone() const
+{
+    return new ELIUL<T,D>(*this);
+}
 
 }  // namespace plb
 
-#endif  // ELIUL_OFF_LATTICE_MODEL_3D_HH
+#endif  // ELI_OFF_LATTICE_MODEL_3D_HH
 

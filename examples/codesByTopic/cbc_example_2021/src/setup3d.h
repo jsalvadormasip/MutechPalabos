@@ -99,7 +99,7 @@ auto inject_off_lattice_bc(
     using Array3D = Array<Real, 3>;
     OffLatticeBoundaryCondition3D<Real, Descriptor, Array3D>* boundaryCondition;
     auto profiles = new BoundaryProfiles3D<Real, Array3D>;
-    bool useAllDirections = true;
+//    bool useAllDirections = true;
     OffLatticeModel3D<Real, Array3D>* offLatticeModel = nullptr;
     profiles->setWallProfile(new NoSlipProfile3D<Real>);
 
@@ -111,7 +111,7 @@ auto inject_off_lattice_bc(
                    target_lattice->getBoundingBox(),
                    new NoDynamics<Real, Descriptor>(), voxelFlag::innerBorder);
     pcout << "done." << std::endl;
-    offLatticeModel = new FilippovaHaenelLocalModel3D<Real, Descriptor>(
+    offLatticeModel = new ELIUL<Real, Descriptor>(
         new TriangleFlowShape3D<Real, Array<Real, 3> >(
             voxalized_domain->getBoundary(), *profiles),
         voxelFlag::outside);

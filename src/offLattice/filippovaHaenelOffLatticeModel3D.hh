@@ -233,7 +233,7 @@ void FilippovaHaenelLocalModel3D<T, Descriptor>::cellCompletion(
         BlockStatistics statsCopy(lattice.getInternalStatistics());
         collidedCell.collide(statsCopy);
 
-        T f_rhoBar, ff_rhoBar;
+        T f_rhoBar = 0.0;
         Array<T, 3> f_j, ff_j;
         Array<T, 3> wallNormal;
 
