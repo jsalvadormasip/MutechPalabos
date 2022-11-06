@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
     // Define output constants
     const Real logT = (Real)0.02;
     [[maybe_unused]] const Real imSave = (Real)0.06;
-    [[maybe_unused]] const Real vtkSave = 1.0;(Real)parameters.getDeltaT();
+    [[maybe_unused]] const Real vtkSave = 1.0;//(Real)parameters.getDeltaT();
     const Real maxT = (Real)5.1;
     writeLogFile(parameters, "Poiseuille flow");
 

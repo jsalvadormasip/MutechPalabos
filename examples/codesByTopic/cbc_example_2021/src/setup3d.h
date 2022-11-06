@@ -111,14 +111,26 @@ auto inject_off_lattice_bc(
                    target_lattice->getBoundingBox(),
                    new NoDynamics<Real, Descriptor>(), voxelFlag::innerBorder);
     pcout << "done." << std::endl;
-    offLatticeModel = new ELIUL<Real, Descriptor>(
+
+
+    auto coefficients = [](Real q, Real tauPlus, Real tauMinus)
+        -> std::array<Real,4>{
+        Real alphaPlus = -1.;
+        Real alphaMinus = 1.;
+        Real Kplus = q - tauPlus;
+        Real LambdaMinus = tauMinus-0.5;
+        Real Kmin = 1. + alphaMinus * (LambdaMinus - 0.5);
+        return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+    };
+
+    offLatticeModel = new ELIgeneric<Real, Descriptor, decltype(coefficients)>(
         new TriangleFlowShape3D<Real, Array<Real, 3> >(
             voxalized_domain->getBoundary(), *profiles),
-        voxelFlag::outside);
+        voxelFlag::outside, coefficients);
 
 //    FilippovaHaenelLocalModel3D<T, DESCRIPTOR> *model =
 //        new FilippovaHaenelLocalModel3D<T, DESCRIPTOR>(
-//            new TriangleFlowShape3D<T, Array<T, 3> >(voxelizedDomain.getBoundary(), profiles),
+//            new TriangleFlowShape3D<ST, Array<T, 3> >(voxelizedDomain.getBoundary(), profiles),
 //            flowType);
     boundaryCondition =
         new OffLatticeBoundaryCondition3D<Real, Descriptor, Array3D>(

@@ -55,22 +55,7 @@ constexpr bool debug_mode = false;
 namespace plb {
 
 /**
-* This class implements the Mei-Luo-Shyy (MLS,1999) boundary condition on a BoundaryShape.
-* The BoundaryShape determines whether the points of the discrete lattice are voxelFlag::inside
-* or voxelFlag::outside some geometry.
 *
-* It can handle moving boundaries using the momentum correction of ladd (LADD, 1994).
-* The wall velocity is recovered from SurfaceData stored in BoundaryShape3D<T,SurfaceData>*
-*
-* NOTE: this class was previously called FilippovaHaenelModel3D in Palabos before June 2020
-*
-* (MLS,1999) R. Mei, L.-S. Luo, and W. Shyy, “An Accurate Curved Boundary Treatment in the Lattice
-* Boltzmann Method,” Journal of Computational Physics, vol. 155, no. 2, pp. 307–330, Nov. 1999,
-* doi: 10.1006/jcph.1999.6334.
-*
-* (LADD, 1994) A. J. C. Ladd, “Numerical simulations of particulate suspensions via a discretized
-* Boltzmann equation. Part 1. Theoretical foundation,” Journal of Fluid Mechanics, vol. 271, pp.
-* 285–309, Jul. 1994, doi: 10.1017/S0022112094001771.
 *
 * @tparam T
 * @tparam Descriptor
@@ -128,7 +113,7 @@ void ELIModels3D<T, Descriptor>::prepareCell(
                OffBoundary::Type bdType;
 
                if constexpr (debug_mode) {
-                   bool ok = this->pointOnSurface(
+                   [[maybe_unused]] bool ok = this->pointOnSurface(
                        cellLocation + offset, Dot3D(D::c[iPop][0], D::c[iPop][1], D::c[iPop][2]),
                        locatedPoint, distance, wallNormal, surfaceData, bdType, iTriangle);
                    PLB_ASSERT(ok);
@@ -165,7 +150,7 @@ ContainerBlockData *ELIModels3D<T, Descriptor>::generateOffLatticeInfo() const
 template <typename T, template <typename U> class Descriptor>
 Array<T, 3> ELIModels3D<T, Descriptor>::getLocalForce(AtomicContainerBlock3D &container) const
 {
-   OffLatticeInfo3D *info = dynamic_cast<OffLatticeInfo3D *>(container.getData());
+   auto *info = dynamic_cast<OffLatticeInfo3D *>(container.getData());
    PLB_ASSERT(info);
    return info->getLocalForce();
 }
@@ -300,8 +285,6 @@ void ELIModels3D<T, Descriptor>::cellCompletion(
 //       Kmin = 0.0;
 //       // k1 eli
 //       Kmin = 1.-alphaMinus/2.0;
-//       // k4 eli
-//       Kmin = 1.+alphaMinus*(LambdaMinus-0.5);
        auto [alphaPlus,alphaMinus,Kplus,Kmin] = eliCoefficients(q,tauPlus,tauMinus);
 
        cellF[i_fluid] =   0.5 * (alphaPlus + alphaMinus) * cellS[i_solid]
@@ -390,6 +373,57 @@ template <typename T, template <typename U> class D>
 ELIUL<T, D> *ELIUL<T, D>::clone() const
 {
     return new ELIUL<T,D>(*this);
+}
+
+
+
+template <typename T, template <typename U> class D>
+ELIULK4<T, D> *ELIULK4<T, D>::clone() const
+{
+    return new ELIULK4<T, D>(*this);
+}
+
+template <typename T, template <typename U> class D>
+std::array<T, 4> ELIULK4<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+{
+    T alphaPlus = -1.;
+    T alphaMinus = 1.;
+    T Kplus = q - tauPlus;
+//    T Kelim = q - tauMinus;
+    T LambdaMinus = tauMinus-0.5;
+    T Kmin = 1. + alphaMinus * (LambdaMinus - 0.5);
+    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+}
+
+template <typename T, template <typename U> class D, typename Function>
+#if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
+    requires std::invocable<Function, T, T, T> /*&& object<Function>*/
+#endif
+ELIgeneric<T, D, Function>::ELIgeneric(
+    BoundaryShape3D<T, Array<T, 3>> *shape_, int flowType_, Function coefficients_):
+    ELIModels3D<T, D>(shape_,flowType_),
+    compute_coefficients(coefficients_)
+{
+//    compute_coefficients = coefficients_;
+}
+
+
+template <typename T, template <typename U> class D, typename Function>
+#if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
+    requires std::invocable<Function, T, T, T> /*&& object<Function>*/
+#endif
+ELIgeneric<T, D, Function> *ELIgeneric<T, D, Function>::clone() const
+{
+    return new ELIgeneric<T, D, Function>(*this);
+}
+
+template <typename T, template <typename U> class D, typename Function>
+#if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
+    requires std::invocable<Function, T, T, T> /*&& object<Function>*/
+#endif
+std::array<T, 4> ELIgeneric<T, D, Function>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+{
+    return compute_coefficients(q,tauPlus,tauMinus);
 }
 
 }  // namespace plb

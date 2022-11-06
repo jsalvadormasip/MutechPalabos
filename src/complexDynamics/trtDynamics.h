@@ -75,7 +75,7 @@ public:
     /// Clone the object on its dynamic type.
     // QUESTION: This clone function seems to override the IsoThermalBulkDynamics baseclass
     // clone. Is this normal?
-    virtual BaseTRTdynamics<T, Descriptor> *clone() const = 0;
+    BaseTRTdynamics<T, Descriptor> *clone() const override = 0;
 
     /* *************** Access to Dynamics variables, e.g. omega ***************** */
     /// Get local relaxation parameter of the dynamics
@@ -103,21 +103,21 @@ public:
     /// Implementation of the collision step
     // QUESTION: This collide function seems to override the IsoThermalBulkDynamics baseclass
     // clone. Is this normal?
-    virtual void collide(Cell<T, Descriptor> &cell, BlockStatistics &statistics_) = 0;
+    void collide(Cell<T, Descriptor> &cell, BlockStatistics &statistics_) override = 0;
 
     /// Implementation of the collision step, with imposed macroscopic variables
     // QUESTION: This collideExternal function seems to override the IsoThermalBulkDynamics
     // baseclass clone. Is this normal?
-    virtual void collideExternal(
+    void collideExternal(
         Cell<T, Descriptor> &cell, T rhoBar, Array<T, Descriptor<T>::d> const &j, T thetaBar,
-        BlockStatistics &stat) = 0;
+        BlockStatistics &stat) override = 0;
 
     /// Compute equilibrium distribution function
     // QUESTION: This computeEquilibrium function seems to override the IsoThermalBulkDynamics
     // baseclass clone. Is this normal?
-    virtual T computeEquilibrium(
+    T computeEquilibrium(
         plint iPop, T rhoBar, Array<T, Descriptor<T>::d> const &j, T jSqr,
-        T thetaBar = T()) const = 0;
+        T thetaBar = T()) const override = 0;
 
 private:
     T omegaMinus;

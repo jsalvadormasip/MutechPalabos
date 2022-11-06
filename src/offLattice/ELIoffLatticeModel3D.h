@@ -37,26 +37,16 @@
 #include "core/globalDefs.h"
 #include "offLattice/guoOffLatticeModel3D.h"
 #include "offLattice/offLatticeModel3D.h"
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus > 201703L)
+#include <concepts>
+#endif
 
 namespace plb {
 
 /**
-* This class implements the Mei-Luo-Shyy (MLS,1999) boundary condition on a BoundaryShape.
-* The BoundaryShape determines whether the points of the discrete lattice are voxelFlag::inside
-* or voxelFlag::outside some geometry.
-*
-* It can handle moving boundaries using the momentum correction of ladd (LADD, 1994).
-* The wall velocity is recovered from SurfaceData stored in BoundaryShape3D<T,SurfaceData>*
-*
-* NOTE: this class was previously called FilippovaHaenelModel3D in Palabos before June 2020
-*
-* (MLS,1999) R. Mei, L.-S. Luo, and W. Shyy, “An Accurate Curved Boundary Treatment in the Lattice
-* Boltzmann Method,” Journal of Computational Physics, vol. 155, no. 2, pp. 307–330, Nov. 1999,
-* doi: 10.1006/jcph.1999.6334.
-*
-* (LADD, 1994) A. J. C. Ladd, “Numerical simulations of particulate suspensions via a discretized
-* Boltzmann equation. Part 1. Theoretical foundation,” Journal of Fluid Mechanics, vol. 271, pp.
-* 285–309, Jul. 1994, doi: 10.1017/S0022112094001771.
+* This class implements the ELI infinite class of directional (link-wise) schemes.
+ * Some schemes are named, e.g. ELIUL, ELIULT, ELIFL, others are not and can defined by explicitly
+ * providing the alpha- and K- parameters to the constructor using the class ELIgeneric.
 *
 * @tparam T
 * @tparam Descriptor
@@ -66,15 +56,15 @@ class ELIModels3D : public OffLatticeModel3D<T, Array<T, 3> > {
 public:
     ELIModels3D(BoundaryShape3D<T, Array<T, 3> > *shape_, int flowType_);
     ELIModels3D<T, Descriptor> *clone() const override = 0;
-    [[nodiscard]] virtual plint getNumNeighbors() const;
-    [[nodiscard]] virtual bool isExtrapolated() const;
+    [[nodiscard]] plint getNumNeighbors() const override;
+    [[nodiscard]] bool isExtrapolated() const override;
     void prepareCell(Dot3D const &cellLocation, AtomicContainerBlock3D &container) override;
     void boundaryCompletion(
         AtomicBlock3D &lattice, AtomicContainerBlock3D &container,
         std::vector<AtomicBlock3D *> const &args) override;
 
-    virtual ContainerBlockData *generateOffLatticeInfo() const;
-    virtual Array<T, 3> getLocalForce(AtomicContainerBlock3D &container) const;
+    ContainerBlockData *generateOffLatticeInfo() const override;
+    Array<T, 3> getLocalForce(AtomicContainerBlock3D &container) const override;
     void selectComputeStat(bool flag)
     {
         computeStat = flag;
@@ -143,7 +133,7 @@ private:
         std::vector<std::vector<plint> > dryNodeIds;
         Array<T, 3> localForce;
     };
-    virtual std::tuple<T,Array<T,3>> getRhoBarJ(
+    std::tuple<T,Array<T,3>> getRhoBarJ(
         const BlockLattice3D<T, Descriptor> &lattice, const Dot3D &guoNode,
         const std::vector<AtomicBlock3D *> &args, const Dot3D &fluidDirection,
         const Cell<T, Descriptor> &cellF) const;
@@ -156,6 +146,33 @@ class ELIUL : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
     ELIUL<T,D>* clone() const override;
     inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+};
+
+template <typename T, template <typename U> class D>
+class ELIULK4 : public ELIModels3D<T, D> {
+    using ELIModels3D<T, D>::ELIModels3D;
+    ELIULK4<T,D>* clone() const override;
+    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+};
+
+//#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus > 201703L)
+//template<typename F>
+//concept object = requires(F f){
+//                     std::is_object_v<F>(f);
+//                 };
+//#endif
+
+template <typename T, template <typename U> class D, typename Function>
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus > 201703L)
+    requires std::invocable<Function, T, T, T> /*&& object<Function>*/
+#endif
+class ELIgeneric : public ELIModels3D<T, D> {
+public:
+    ELIgeneric(BoundaryShape3D<T, Array<T, 3> > *shape_, int flowType_, Function coefficients_);
+private:
+    ELIgeneric<T,D,Function>* clone() const final;
+    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+    Function compute_coefficients;
 };
 
 }// namespace plb
