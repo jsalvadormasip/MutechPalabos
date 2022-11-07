@@ -148,6 +148,83 @@ class ELIUL : public ELIModels3D<T, D> {
     inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
 
+
+/**
+ * See (Marson, 2022) pag 101, ELIUL was firstly introduced in (Marson et al., 2021)
+ *
+ * \Bibliography Marson, F. (2022). Directional lattice Boltzmann boundary conditions.
+ * https://doi.org/10.13097/archive-ouverte/unige:160770
+ *
+ * \Bibliography Marson, F., Thorimbert, Y., Chopard, B., Ginzburg, I., & Latt, J. (2021).
+ * Enhanced single-node lattice Boltzmann boundary condition for fluid flows.
+ * Physical Review E, 103(5), 053308. https://doi.org/10.1103/PhysRevE.103.053308
+ *
+ * @tparam T
+ * @tparam D
+ */
+template <typename T, template <typename U> class D>
+class ELIULC : public ELIModels3D<T, D> {
+    using ELIModels3D<T, D>::ELIModels3D;
+    ELIULC<T,D>* clone() const override;
+    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+};
+
+/**
+ * See (Marson, 2022) pag 102, ELIUL was firstly introduced in (Marson et al., 2021),
+ * correction K1 was first introduced in (Ginzburg et al., 2008)
+ *
+ * Marson, F. (2022). Directional lattice Boltzmann boundary conditions.
+ * https://doi.org/10.13097/archive-ouverte/unige:160770
+ *
+ * Marson, F., Thorimbert, Y., Chopard, B., Ginzburg, I., & Latt, J. (2021).
+ * Enhanced single-node lattice Boltzmann boundary condition for fluid flows.
+ * Physical Review E, 103(5), 053308. https://doi.org/10.1103/PhysRevE.103.053308
+ *
+ * Ginzburg, I., Verhaeghe, F., & d’Humières, D. (2008).
+ * Two-Relaxation-Time Lattice Boltzmann Scheme: About Parametrization, Velocity, Pressure and
+ * Mixed Boundary Conditions. Commun. Comput. Phys., 3(2), 427–478.
+ * @tparam T
+ * @tparam D
+ */
+template <typename T, template <typename U> class D>
+class ELIULK1 : public ELIModels3D<T, D> {
+    using ELIModels3D<T, D>::ELIModels3D;
+    ELIULK1<T,D>* clone() const override;
+    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+};
+
+
+/**
+ * See (Marson, 2022) pag 102, ELIUL was firstly introduced in (Marson et al., 2021)
+ *
+ * Marson, F. (2022). Directional lattice Boltzmann boundary conditions.
+ * https://doi.org/10.13097/archive-ouverte/unige:160770
+ *
+ * Marson, F., Thorimbert, Y., Chopard, B., Ginzburg, I., & Latt, J. (2021).
+ * Enhanced single-node lattice Boltzmann boundary condition for fluid flows.
+ * Physical Review E, 103(5), 053308. https://doi.org/10.1103/PhysRevE.103.053308
+ * @tparam T
+ * @tparam D
+ */
+template <typename T, template <typename U> class D>
+class ELIULK3 : public ELIModels3D<T, D> {
+    using ELIModels3D<T, D>::ELIModels3D;
+    ELIULK3<T,D>* clone() const override;
+    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+};
+
+/**
+ * See (Marson, 2022) pag 102, ELIUL was firstly introduced in (Marson et al., 2021)
+ *
+ * Marson, F. (2022). Directional lattice Boltzmann boundary conditions.
+ * https://doi.org/10.13097/archive-ouverte/unige:160770
+ *
+ * Marson, F., Thorimbert, Y., Chopard, B., Ginzburg, I., & Latt, J. (2021).
+ * Enhanced single-node lattice Boltzmann boundary condition for fluid flows.
+ * Physical Review E, 103(5), 053308. https://doi.org/10.1103/PhysRevE.103.053308
+ * @tparam T
+ * @tparam D
+ */
 template <typename T, template <typename U> class D>
 class ELIULK4 : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;

@@ -32,12 +32,17 @@
 #include "palabos2D.hh"
 #include "setupMacroscopiFields.h"
 #include "simulationParameters.h"
+#include "magic_enum.hpp"
 using namespace plb;
 using namespace plb::descriptors;
 namespace lu = incompressible_simulation_parameters;
 #ifndef CBC_EXAMPLE_SETUP_H
 #define CBC_EXAMPLE_SETUP_H
 
+
+
+enum class Kmin{HW = -3,
+    C = -2, automatic = -1, zero=0, one=1, three = 3, four = 4};
 /**
  * This helper functions return a voxelized domain form a TriangleSet for an
  * external flow
@@ -94,7 +99,7 @@ enum class ProcessorLevel{
 template <typename Real, template <typename U> class Descriptor>
 auto inject_off_lattice_bc(
     MultiBlockLattice3D<Real, Descriptor>* target_lattice,
-    VoxelizedDomain3D<Real>* voxalized_domain) {
+    VoxelizedDomain3D<Real>* voxalized_domain, Kmin kmin_) {
     pcout << "Generating off lattice boundary conditions." << std::endl;
     using Array3D = Array<Real, 3>;
     OffLatticeBoundaryCondition3D<Real, Descriptor, Array3D>* boundaryCondition;
@@ -112,21 +117,62 @@ auto inject_off_lattice_bc(
                    new NoDynamics<Real, Descriptor>(), voxelFlag::innerBorder);
     pcout << "done." << std::endl;
 
-
-    auto coefficients = [](Real q, Real tauPlus, Real tauMinus)
-        -> std::array<Real,4>{
+    auto coefficients = [](Real q, Real tauPlus,
+                           Real tauMinus) -> std::array<Real, 4> {
         Real alphaPlus = -1.;
         Real alphaMinus = 1.;
         Real Kplus = q - tauPlus;
-        Real LambdaMinus = tauMinus-0.5;
+        Real LambdaMinus = tauMinus - 0.5;
         Real Kmin = 1. + alphaMinus * (LambdaMinus - 0.5);
         return {{alphaPlus, alphaMinus, Kplus, Kmin}};
     };
 
-    offLatticeModel = new ELIgeneric<Real, Descriptor, decltype(coefficients)>(
-        new TriangleFlowShape3D<Real, Array<Real, 3> >(
-            voxalized_domain->getBoundary(), *profiles),
-        voxelFlag::outside, coefficients);
+    switch (kmin_) {
+        case Kmin::HW:
+            offLatticeModel = new HWLatticeModel3D<Real, Descriptor>(
+                new TriangleFlowShape3D<Real, Array<Real, 3> >(
+                    voxalized_domain->getBoundary(), *profiles),
+                voxelFlag::outside);
+             break;
+        case Kmin::C:
+            offLatticeModel = new ELIULC<Real, Descriptor>(
+                new TriangleFlowShape3D<Real, Array<Real, 3> >(
+                    voxalized_domain->getBoundary(), *profiles),
+                voxelFlag::outside);
+             break;
+        case Kmin::zero:
+            offLatticeModel = new ELIUL<Real, Descriptor>(
+                new TriangleFlowShape3D<Real, Array<Real, 3> >(
+                    voxalized_domain->getBoundary(), *profiles),
+                voxelFlag::outside);
+             break;
+        case Kmin::one:
+            offLatticeModel = new ELIULK1<Real, Descriptor>(
+                new TriangleFlowShape3D<Real, Array<Real, 3> >(
+                    voxalized_domain->getBoundary(), *profiles),
+                voxelFlag::outside);
+             break;
+        case Kmin::three:
+            offLatticeModel = new ELIULK3<Real, Descriptor>(
+                new TriangleFlowShape3D<Real, Array<Real, 3> >(
+                    voxalized_domain->getBoundary(), *profiles),
+                voxelFlag::outside);
+             break;
+        case Kmin::four:
+            offLatticeModel = new ELIULK4<Real, Descriptor>(
+                new TriangleFlowShape3D<Real, Array<Real, 3> >(
+                    voxalized_domain->getBoundary(), *profiles),
+                voxelFlag::outside);
+             break;
+        case Kmin::automatic:
+            offLatticeModel = new ELIgeneric<Real, Descriptor, decltype(coefficients)>(
+                new TriangleFlowShape3D<Real, Array<Real, 3> >(
+                    voxalized_domain->getBoundary(), *profiles),
+                voxelFlag::outside, coefficients);
+        default:
+            pcout << "Case non defined...aborting..."<<std::endl;
+            abort();
+    }
 
 //    FilippovaHaenelLocalModel3D<T, DESCRIPTOR> *model =
 //        new FilippovaHaenelLocalModel3D<T, DESCRIPTOR>(

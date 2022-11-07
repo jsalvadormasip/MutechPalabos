@@ -375,7 +375,38 @@ ELIUL<T, D> *ELIUL<T, D>::clone() const
     return new ELIUL<T,D>(*this);
 }
 
+template <typename T, template <typename U> class D>
+ELIULC<T, D> *ELIULC<T, D>::clone() const
+{
+    return new ELIULC<T,D>(*this);
+}
+template <typename T, template <typename U> class D>
+std::array<T, 4> ELIULC<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+{
+    T alphaPlus = -1.;
+    T alphaMinus = 1.;
+    T Kplus = q - tauPlus;
+//    T LambdaMinus = tauMinus-0.5;
+    T Kmin = 0.0;
+    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+}
 
+template <typename T, template <typename U> class D>
+ELIULK1<T, D> *ELIULK1<T, D>::clone() const
+{
+    return new ELIULK1<T,D>(*this);
+}
+template <typename T, template <typename U> class D>
+std::array<T, 4> ELIULK1<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+{
+    T alphaPlus = -1.;
+    T alphaMinus = 1.;
+    T Kplus = q - tauPlus;
+    //    T Kelim = q - tauMinus;
+    T LambdaMinus = tauMinus-0.5;
+    T Kmin = 1. + alphaMinus * (LambdaMinus - 0.5);
+    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+}
 
 template <typename T, template <typename U> class D>
 ELIULK4<T, D> *ELIULK4<T, D>::clone() const
@@ -392,6 +423,27 @@ std::array<T, 4> ELIULK4<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) cons
 //    T Kelim = q - tauMinus;
     T LambdaMinus = tauMinus-0.5;
     T Kmin = 1. + alphaMinus * (LambdaMinus - 0.5);
+    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+}
+
+
+template <typename T, template <typename U> class D>
+ELIULK3<T, D> *ELIULK3<T, D>::clone() const
+{
+    return new ELIULK3<T,D>(*this);
+}
+
+
+template <typename T, template <typename U> class D>
+std::array<T, 4> ELIULK3<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+{
+    T alphaPlus = -1.;
+    T alphaMinus = 1.;
+    T Kplus = q - tauPlus;
+    //    T Kelim = q - tauMinus;
+    T LambdaMinus = tauMinus-0.5;
+    T LambdaPlus = tauPlus-0.5;
+    T Kmin = 1. + alphaMinus * LambdaMinus - (alphaMinus*(q*q+LambdaPlus))/(2.*LambdaPlus);
     return {{alphaPlus, alphaMinus, Kplus, Kmin}};
 }
 

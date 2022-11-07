@@ -34,6 +34,7 @@
 #include "shapes.h"
 #include "simulationParameters.cpp"  // explicit inclusion because it contains templates
 #include "simulationParameters.h"
+#include "magic_enum.hpp"
 
 #define DESCRIPTOR D3Q27Descriptor
 namespace sp = incompressible_simulation_parameters;
@@ -57,7 +58,7 @@ void writeVTK3d(MultiBlockLattice3D<Real, DESCRIPTOR> &lattice,
 }
 
 template <typename Real, template <typename U> class Descriptor>
-auto setupLattice3d(IncomprFlowParam<Real> const &parameters) {
+auto setupLattice3d(IncomprFlowParam<Real> const &parameters, Kmin kmin_) {
     // 1. Create a TriangleSet on the heap and dump it on a stl file
     auto location_ellipsoid = new Array<Real, 3>(
         parameters.getNx() / 3.0, parameters.getNy() / 2.0 + 1.1,
@@ -106,25 +107,41 @@ auto setupLattice3d(IncomprFlowParam<Real> const &parameters) {
     // 7. Define inner-offlattice boundary conditions
     OffLatticeBoundaryCondition3D<Real, Descriptor, Array<Real, 3>>
         *offlatt_boundary_condition =
-            inject_off_lattice_bc(lattice_ptr, voxelized_domain);
+            inject_off_lattice_bc(lattice_ptr, voxelized_domain, kmin_);
 
     // return lattice and boundary conditions
     return std::tuple{lattice_ptr, onlatt_boundary_condition,
                       offlatt_boundary_condition};
 }
 
+
 int main(int argc, char *argv[]) {
     // Palabos initialization
     plbInit(&argc, &argv);
     string outdir = "tmp/";
-
-    if(argc > 2){ cout << "Error! too many parameters" << endl;abort();}
-    else if(argc == 2) outdir = static_cast<string>(argv[1]);
+    Kmin kmin = Kmin::automatic;
+    if(argc > 3){ cout << "Error! too many parameters" << endl;abort();}
+    else if(argc == 3) {
+        outdir = static_cast<string>(argv[1]);
+        auto kcasts = magic_enum::enum_cast<Kmin>(argv[2]);
+        if(kcasts.has_value())
+            kmin = kcasts.value();
+        else {
+            auto kcastf = magic_enum::enum_cast<Kmin>(util::roundToInt(stof(argv[2])));
+            if(kcastf.has_value()) {
+                kmin = kcastf.value();
+            } else {
+                pcout << "Kmin value" << argv[2]
+                      << " wrong or not implemented, aborting..." << std::endl;
+                abort();
+            }
+        }
+    } else if(argc == 2) outdir = static_cast<string>(argv[1]);
     else outdir = "tmp";
     outdir.append("/");
     if (global::mpi().getRank() == 0) system(("mkdir -p " + outdir).c_str());
     global::directories().setOutputDir(outdir);
-
+    pcout << "The selected model is " << magic_enum::enum_name(kmin) << std::endl;
     // Define simulation parameters: we use two ad-hoc units helper
     const Real re = 10;  // NB: Obstacle reynolds!
     sp::Numerics<Real, Int> lu;
@@ -148,7 +165,7 @@ int main(int argc, char *argv[]) {
 
     // Setup the simulation and allocate lattice and boundary conditions
     auto [lattice_ptr, boundaryon, boundaryoff] =
-        setupLattice3d<Real, DESCRIPTOR>(parameters);
+        setupLattice3d<Real, DESCRIPTOR>(parameters, kmin);
 
     auto &lattice = *lattice_ptr;
 
