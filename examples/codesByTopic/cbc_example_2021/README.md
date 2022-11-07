@@ -108,7 +108,7 @@ cmake .. && make -j 2
 cd ..
 ```
 
-in the case of a Linux-based system. CMake runs in automatic in release mode, if you want to change the build mode to
+in the case of a Linux-based system. CMake runs in ELIgeneric in release mode, if you want to change the build mode to
 debug, you can use the CMake with the option `-DCMAKE_BUILD_TYPE=Debug`.
 
 ## 3. Compile and run the exercise after choosing the simulation parameters

@@ -33,16 +33,84 @@
 #include "setupMacroscopiFields.h"
 #include "simulationParameters.h"
 #include "magic_enum.hpp"
+#include "exprtk/exprtk.hpp"
 using namespace plb;
 using namespace plb::descriptors;
 namespace lu = incompressible_simulation_parameters;
+
 #ifndef CBC_EXAMPLE_SETUP_H
 #define CBC_EXAMPLE_SETUP_H
 
+typedef exprtk::symbol_table<double> symbol_table_t;
+typedef exprtk::expression<double>     expression_t;
+typedef exprtk::parser<double>             parser_t;
 
 
-enum class Kmin{HW = -3,
-    C = -2, automatic = -1, zero=0, one=1, three = 3, four = 4};
+class BSchemeInfo{
+public:
+    explicit BSchemeInfo(const std::string &boundaryXmlPathFromRoot);
+    //    XMLreader boundaryXml("ELIgeneric.xml");
+    //    std::string main_expression_str{};
+    //    symbol_table_t main_table;
+    //    expression_t main_expression;
+    parser_t main_parser;
+    std::string alphaMin_expression_str;
+    symbol_table_t alphaMin_table;
+    expression_t alphaMin_expression;
+    std::string alphaPlus_expression_str;
+    symbol_table_t alphaPlus_table;
+    expression_t alphaPlus_expression;
+    std::string kMin_expression_str;
+    symbol_table_t kMin_table;
+    expression_t kMin_expression;
+    std::string kPlus_expression_str;
+    symbol_table_t kPlus_table;
+    expression_t kPlus_expression;
+
+    double q{}, up{}, down{};
+    double Lambda_min{}, Lambda_plus{},tau_plus{}, tau_min{};
+    double magic{};
+    void parse(symbol_table_t& table,expression_t& expression, std::string& expression_str, parser_t& parser) {
+        table.add_variable("q", q);
+        table.add_variable("LambdaMinus", Lambda_min);
+        table.add_variable("LambdaPlus", Lambda_plus);
+        table.add_variable("tauPlus", tau_plus);
+        table.add_variable("tauMin", tau_min);
+        expression.register_symbol_table(table);
+        // Create the parsing tree (compiling) and check error
+        if (not parser.compile(expression_str, expression)) {
+            pcout <<
+                "ERROR PARSING EXPRESSION "<< expression_str <<": Compilation error..."
+                  <<std::endl;
+            pcout << parser.error() << std::endl;
+            {getchar(); abort();}
+        }
+    }
+};
+
+BSchemeInfo::BSchemeInfo(const std::string &boundaryXmlPathFromRoot)
+{
+    // 1. Read from xml and store as vectors of strings the information
+    XMLreader boundaryXml(boundaryXmlPathFromRoot);
+    std::string tmp;
+    boundaryXml["generic_eli"]["alphaMin"].read(tmp);
+    alphaMin_expression_str = tmp;
+    boundaryXml["generic_eli"]["alphaPlus"].read(tmp);
+    alphaPlus_expression_str = tmp;
+    boundaryXml["generic_eli"]["kMin"].read(tmp);
+    kMin_expression_str = tmp;
+    boundaryXml["generic_eli"]["kPlus"].read(tmp);
+    kPlus_expression_str = tmp;
+
+    parse(alphaMin_table, alphaMin_expression, alphaMin_expression_str, main_parser);
+    parse(alphaPlus_table, alphaPlus_expression, alphaPlus_expression_str, main_parser);
+    parse(kMin_table, kMin_expression, kMin_expression_str, main_parser);
+    parse(kPlus_table, kPlus_expression, kPlus_expression_str, main_parser);
+
+}
+
+enum class BCmodel {HW,
+    ELIULC, ELIgeneric, ELIUL, ELIULK1, ELIULK3, ELIULK4};
 /**
  * This helper functions return a voxelized domain form a TriangleSet for an
  * external flow
@@ -99,7 +167,8 @@ enum class ProcessorLevel{
 template <typename Real, template <typename U> class Descriptor>
 auto inject_off_lattice_bc(
     MultiBlockLattice3D<Real, Descriptor>* target_lattice,
-    VoxelizedDomain3D<Real>* voxalized_domain, Kmin kmin_) {
+    VoxelizedDomain3D<Real>* voxalized_domain, BCmodel kmin_,
+    BSchemeInfo& xmlParse) {
     pcout << "Generating off lattice boundary conditions." << std::endl;
     using Array3D = Array<Real, 3>;
     OffLatticeBoundaryCondition3D<Real, Descriptor, Array3D>* boundaryCondition;
@@ -117,58 +186,63 @@ auto inject_off_lattice_bc(
                    new NoDynamics<Real, Descriptor>(), voxelFlag::innerBorder);
     pcout << "done." << std::endl;
 
-    auto coefficients = [](Real q, Real tauPlus,
+    auto coefficients = [&xmlParse](Real q, Real tauPlus,
                            Real tauMinus) -> std::array<Real, 4> {
-        Real alphaPlus = -1.;
-        Real alphaMinus = 1.;
-        Real Kplus = q - tauPlus;
-        Real LambdaMinus = tauMinus - 0.5;
-        Real Kmin = 1. + alphaMinus * (LambdaMinus - 0.5);
+        xmlParse.q = q;
+        xmlParse.tau_plus = tauPlus;
+        xmlParse.tau_min = tauMinus;
+        xmlParse.Lambda_min = tauMinus-0.5;
+        xmlParse.Lambda_plus = tauPlus-0.5;
+        Real alphaPlus = xmlParse.alphaPlus_expression.value();
+        Real alphaMinus = xmlParse.alphaMin_expression.value();
+        Real Kplus = xmlParse.kPlus_expression.value();
+        Real Kmin = xmlParse.kMin_expression.value();;
         return {{alphaPlus, alphaMinus, Kplus, Kmin}};
     };
 
     switch (kmin_) {
-        case Kmin::HW:
+        case BCmodel::HW:
             offLatticeModel = new HWLatticeModel3D<Real, Descriptor>(
                 new TriangleFlowShape3D<Real, Array<Real, 3> >(
                     voxalized_domain->getBoundary(), *profiles),
                 voxelFlag::outside);
              break;
-        case Kmin::C:
+        case BCmodel::ELIULC:
             offLatticeModel = new ELIULC<Real, Descriptor>(
                 new TriangleFlowShape3D<Real, Array<Real, 3> >(
                     voxalized_domain->getBoundary(), *profiles),
                 voxelFlag::outside);
              break;
-        case Kmin::zero:
+        case BCmodel::ELIUL:
             offLatticeModel = new ELIUL<Real, Descriptor>(
                 new TriangleFlowShape3D<Real, Array<Real, 3> >(
                     voxalized_domain->getBoundary(), *profiles),
                 voxelFlag::outside);
              break;
-        case Kmin::one:
+        case BCmodel::ELIULK1:
             offLatticeModel = new ELIULK1<Real, Descriptor>(
                 new TriangleFlowShape3D<Real, Array<Real, 3> >(
                     voxalized_domain->getBoundary(), *profiles),
                 voxelFlag::outside);
              break;
-        case Kmin::three:
+        case BCmodel::ELIULK3:
             offLatticeModel = new ELIULK3<Real, Descriptor>(
                 new TriangleFlowShape3D<Real, Array<Real, 3> >(
                     voxalized_domain->getBoundary(), *profiles),
                 voxelFlag::outside);
              break;
-        case Kmin::four:
+        case BCmodel::ELIULK4:
             offLatticeModel = new ELIULK4<Real, Descriptor>(
                 new TriangleFlowShape3D<Real, Array<Real, 3> >(
                     voxalized_domain->getBoundary(), *profiles),
                 voxelFlag::outside);
              break;
-        case Kmin::automatic:
+        case BCmodel::ELIgeneric:
             offLatticeModel = new ELIgeneric<Real, Descriptor, decltype(coefficients)>(
                 new TriangleFlowShape3D<Real, Array<Real, 3> >(
                     voxalized_domain->getBoundary(), *profiles),
                 voxelFlag::outside, coefficients);
+            break ;
         default:
             pcout << "Case non defined...aborting..."<<std::endl;
             abort();

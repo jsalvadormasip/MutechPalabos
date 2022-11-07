@@ -43,6 +43,24 @@ using namespace std;
 using Real = double;
 using Int = plint;
 
+
+auto split_string(const std::string &text, const char delim = ' ')
+    -> std::vector<std::string> {
+    std::string line;
+    std::vector<std::string> vec;
+    std::stringstream ss(text);
+    while (std::getline(ss, line, delim)) {
+        vec.push_back(line);
+    }
+    return vec;
+}
+
+
+//using vectorOfPairsNameValue = std::vector<std::pair<std::string,double>>;
+//using vectorOfPairsNamesValue = std::vector<std::pair<std::vector<std::string>,double>>;
+
+
+
 void writeVTK3d(MultiBlockLattice3D<Real, DESCRIPTOR> &lattice,
                  IncomprFlowParam<Real> const &parameters, plint iter) {
     Real dx = 1;  // parameters.getDeltaX();
@@ -58,7 +76,8 @@ void writeVTK3d(MultiBlockLattice3D<Real, DESCRIPTOR> &lattice,
 }
 
 template <typename Real, template <typename U> class Descriptor>
-auto setupLattice3d(IncomprFlowParam<Real> const &parameters, Kmin kmin_) {
+auto setupLattice3d(IncomprFlowParam<Real> const &parameters, BCmodel kmin_,
+                    BSchemeInfo& xmlParse) {
     // 1. Create a TriangleSet on the heap and dump it on a stl file
     auto location_ellipsoid = new Array<Real, 3>(
         parameters.getNx() / 3.0, parameters.getNy() / 2.0 + 1.1,
@@ -107,7 +126,8 @@ auto setupLattice3d(IncomprFlowParam<Real> const &parameters, Kmin kmin_) {
     // 7. Define inner-offlattice boundary conditions
     OffLatticeBoundaryCondition3D<Real, Descriptor, Array<Real, 3>>
         *offlatt_boundary_condition =
-            inject_off_lattice_bc(lattice_ptr, voxelized_domain, kmin_);
+            inject_off_lattice_bc(lattice_ptr, voxelized_domain, kmin_,
+                                  xmlParse);
 
     // return lattice and boundary conditions
     return std::tuple{lattice_ptr, onlatt_boundary_condition,
@@ -115,19 +135,26 @@ auto setupLattice3d(IncomprFlowParam<Real> const &parameters, Kmin kmin_) {
 }
 
 
+
 int main(int argc, char *argv[]) {
     // Palabos initialization
     plbInit(&argc, &argv);
     string outdir = "tmp/";
-    Kmin kmin = Kmin::automatic;
+    BCmodel kmin = BCmodel::ELIgeneric;
+
+
+    BSchemeInfo xmlParse("ELIgeneric.xml");
+
+
+
     if(argc > 3){ cout << "Error! too many parameters" << endl;abort();}
     else if(argc == 3) {
         outdir = static_cast<string>(argv[1]);
-        auto kcasts = magic_enum::enum_cast<Kmin>(argv[2]);
+        auto kcasts = magic_enum::enum_cast<BCmodel>(argv[2]);
         if(kcasts.has_value())
             kmin = kcasts.value();
         else {
-            auto kcastf = magic_enum::enum_cast<Kmin>(util::roundToInt(stof(argv[2])));
+            auto kcastf = magic_enum::enum_cast<BCmodel>(util::roundToInt(stof(argv[2])));
             if(kcastf.has_value()) {
                 kmin = kcastf.value();
             } else {
@@ -165,7 +192,8 @@ int main(int argc, char *argv[]) {
 
     // Setup the simulation and allocate lattice and boundary conditions
     auto [lattice_ptr, boundaryon, boundaryoff] =
-        setupLattice3d<Real, DESCRIPTOR>(parameters, kmin);
+        setupLattice3d<Real, DESCRIPTOR>(parameters, kmin,
+                                         xmlParse);
 
     auto &lattice = *lattice_ptr;
 
@@ -201,9 +229,7 @@ int main(int argc, char *argv[]) {
         global::timer("iteration").restart();
 
         // Lattice Boltzmann iteration step.
-//        lattice.executeInternalProcessors(static_cast<plint>(ProcessorLevel::rhoBarJ));
         lattice.collideAndStream();
-//        lattice.executeInternalProcessors(static_cast<plint>(ProcessorLevel::offLattice));
 
         // At this point, the state of the lattice corresponds to the
         //   discrete time iT+1, and the stored averages are upgraded to time
