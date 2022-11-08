@@ -26,8 +26,8 @@
 
 #include "palabos2D.h"
 #include "palabos2D.hh"
-#ifndef CBC_EXAMPLE_SETUP_POISEUILLE_H
-#define CBC_EXAMPLE_SETUP_POISEUILLE_H
+#ifndef CURVED_BOUNDARIES_SETUP_POISEUILLE_H
+#define CURVED_BOUNDARIES_SETUP_POISEUILLE_H
 using namespace plb;
 using namespace plb::descriptors;
 /// Velocity on the parabolic Poiseuille profile
@@ -171,4 +171,4 @@ private:
     IncomprFlowParam<Real> parameters;
 };
 
-#endif  // CBC_EXAMPLE_SETUP_POISEUILLE_H
+#endif  // CURVED_BOUNDARIES_SETUP_POISEUILLE_H

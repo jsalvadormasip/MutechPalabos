@@ -52,8 +52,8 @@ As beneficial collateral effects, you may familiarize yourself with the followin
    * (optional) Use the TRT dynamics for low Reynolds and Smagorinsky for the turbulent case.
 6. Have fun:
    * Change the planar Poiseuille configuration to periodic+neumann (on the sides) flow configuration;
-   * replace the ellipsoids with the "cbc_example_2021.stl" file;
-   * translate and rotate the cbc_example_2021.stl
+   * replace the ellipsoids with the "curvedBoundaries.stl" file;
+   * translate and rotate the curvedBoundaries.stl
 7. Implement the half-way bounce-back starting from the implementation of the BFL scheme
 
 # Guide
@@ -113,7 +113,7 @@ debug, you can use the CMake with the option `-DCMAKE_BUILD_TYPE=Debug`.
 
 ## 3. Compile and run the exercise after choosing the simulation parameters
 
-Check now the file `cbc_example_3d.cpp`. First, choose your numerical resolution in:
+Check now the file `curvedBoundaries_3d.cpp`. First, choose your numerical resolution in:
 
 ```c++
     IncomprFlowParam<Real> parameters =
@@ -126,11 +126,11 @@ Check now the file `cbc_example_3d.cpp`. First, choose your numerical resolution
 then, compile it again, and run the simulation in parallel using mpirun (if installed in your system)
 
 ```bash
-mpirun -np 2 cbc_example_3d
+mpirun -np 2 curvedBoundaries_3d
 ```
 in case of problems with mpi, try to run the serial version
 ```bash
-./cbc_example_3d
+./curvedBoundaries_3d
 ```
 
 ## 4. Drag coefficient
@@ -163,7 +163,7 @@ ellipsoids. Hint: check file `shapes.h`.
 
 ### Use an external .stl mesh file
 
-Inside this folder, you will find a file called `cbc_example_2021.stl`. I downloaded it from https://www.thingiverse.com/,
+Inside this folder, you will find a file called `curvedBoundaries_2021.stl`. I downloaded it from https://www.thingiverse.com/,
 then I have scaled, rotated, and simplified it using `meshlab`. Try to read it using the available method in `shapes.h`,
 then try to run simulations with different parameters.
 

@@ -31,7 +31,7 @@ enable_language(CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(EXECUTABLE_NAME "cbc_example_2021")
+set(EXECUTABLE_NAME "curvedBoundaries")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -114,8 +114,8 @@ file(GLOB_RECURSE EXT_SRC "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
 add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 
 ###############################################################################
-
-add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_NAME} "./src/${EXECUTABLE_NAME}.cpp")
+message("src/${EXECUTABLE_NAME}.cpp")
+add_executable(${EXECUTABLE_NAME} "src/${EXECUTABLE_NAME}.cpp")
 
 # Link with the following libraries
 target_link_libraries(${EXECUTABLE_NAME} palabos)

@@ -38,8 +38,8 @@ using namespace plb;
 using namespace plb::descriptors;
 namespace lu = incompressible_simulation_parameters;
 
-#ifndef CBC_EXAMPLE_SETUP_H
-#define CBC_EXAMPLE_SETUP_H
+#ifndef CURVED_BOUNDARIES_SETUP_H
+#define CURVED_BOUNDARIES_SETUP_H
 
 typedef exprtk::symbol_table<double> symbol_table_t;
 typedef exprtk::expression<double>     expression_t;
@@ -356,4 +356,4 @@ void createSpongeZones(IncomprFlowParam<Real> const& parameters,
     }
 }
 
-#endif  // CBC_EXAMPLE_SETUP_H
+#endif  // CURVED_BOUNDARIES_SETUP_H

@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef CBC_EXAMPLE_SIMULATIONPARAMETERS_H
-#define CBC_EXAMPLE_SIMULATIONPARAMETERS_H
+#ifndef CURVED_BOUNDARIES_SIMULATIONPARAMETERS_H
+#define CURVED_BOUNDARIES_SIMULATIONPARAMETERS_H
 
 #undef NDEBUG
 #include <cassert>  // reinclude the header to update the definition of assert()
@@ -230,4 +230,4 @@ private:
 };
 
 }  // namespace incompressible_simulation_parameters
-#endif  // CBC_EXAMPLE_SIMULATIONPARAMETERS_H
+#endif  // CURVED_BOUNDARIES_SIMULATIONPARAMETERS_H

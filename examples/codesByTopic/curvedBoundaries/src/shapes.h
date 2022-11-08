@@ -32,8 +32,8 @@
 
 using namespace plb;
 using namespace plb::descriptors;
-#ifndef CBC_EXAMPLE_SHAPES_H
-#define CBC_EXAMPLE_SHAPES_H
+#ifndef CURVED_BOUNDARIES_SHAPES_H
+#define CURVED_BOUNDARIES_SHAPES_H
 
 template <typename Real>
 TriangleSet<Real> *generateEllipsoid(Array<Real, 3> &center, Real a, Real b,
@@ -72,7 +72,7 @@ template <typename Real>
 TriangleSet<Real> *readObstacle(Array<Real, 3> &center, Real a, Real b,
                                      Real c, Real scale = 1.) {
     Real p = 2.0;
-    TriangleSet<Real> obstacle("cbc_example_2021.stl");
+    TriangleSet<Real> obstacle("curvedBoundaries.stl");
     // Place the obstacle in the correct place in the simulation domain.
     // Here the "geometric center" of the obstacle is computed manually,
     // by computing first its bounding cuboid. In cases that the STL
@@ -89,4 +89,4 @@ TriangleSet<Real> *readObstacle(Array<Real, 3> &center, Real a, Real b,
     return obstacle.clone();
 }
 
-#endif  // CBC_EXAMPLE_SHAPES_H
+#endif  // CURVED_BOUNDARIES_SHAPES_H
