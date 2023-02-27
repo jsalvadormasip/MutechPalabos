@@ -285,14 +285,14 @@ void ELIModels3D<T, Descriptor>::cellCompletion(
 //       Kmin = 0.0;
 //       // k1 eli
 //       Kmin = 1.-alphaMinus/2.0;
-       auto [alphaPlus,alphaMinus,Kplus,Kmin] = eliCoefficients(q,tauPlus,tauMinus);
+       auto [alphaPlus,alphaMinus,beta,Kplus,Kmin] = eliCoefficients(q,tauPlus,tauMinus);
 
        cellF[i_fluid] =   0.5 * (alphaPlus + alphaMinus) * cellS[i_solid]
-                        + (1. + 0.5 * (alphaPlus - alphaMinus)) * cellF[i_fluid]
+                        + (1. + 0.5 * (alphaPlus - alphaMinus)) * cellF[i_fluid] /* = cellFF[i_fluid]*/
+                        + beta * cellF[i_solid]
                         + Kplus * (fPlus-eqPlus) / (-1.+tauPlus)
                         + Kmin * (fMinus-eqMinus) / (-1.+tauMinus)
                         - alphaPlus * eqPlus
-//                        - alphaMinus * eqMinus
                         - eqMinusWall
            ;
 
@@ -359,14 +359,15 @@ std::tuple<T,Array<T,3>> ELIModels3D<T, Descriptor>::getRhoBarJ(
 }
 
 template <typename T, template<typename U> class Descriptor>
-inline std::array<T,4> ELIUL<T, Descriptor>::eliCoefficients(T q,T tauPlus, T tauMinus) const
+inline std::array<T,5> ELIUL<T, Descriptor>::eliCoefficients(T q,T tauPlus, T tauMinus) const
 {
     T alphaPlus = -1.;
     T alphaMinus = 1.;
     T Kplus = q-tauPlus;
     T Kelim = q-tauMinus;
     T Kmin = Kelim;
-    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+    T beta = 0;
+    return {{alphaPlus, alphaMinus, beta, Kplus, Kmin}};
 }
 
 template <typename T, template <typename U> class D>
@@ -381,14 +382,15 @@ ELIULC<T, D> *ELIULC<T, D>::clone() const
     return new ELIULC<T,D>(*this);
 }
 template <typename T, template <typename U> class D>
-std::array<T, 4> ELIULC<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+std::array<T, 5> ELIULC<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
 {
     T alphaPlus = -1.;
     T alphaMinus = 1.;
     T Kplus = q - tauPlus;
 //    T LambdaMinus = tauMinus-0.5;
     T Kmin = 0.0;
-    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+    T beta = 0.0;
+    return {{alphaPlus, alphaMinus, beta, Kplus, Kmin}};
 }
 
 template <typename T, template <typename U> class D>
@@ -397,7 +399,7 @@ ELIULK1<T, D> *ELIULK1<T, D>::clone() const
     return new ELIULK1<T,D>(*this);
 }
 template <typename T, template <typename U> class D>
-std::array<T, 4> ELIULK1<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+std::array<T, 5> ELIULK1<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
 {
     T alphaPlus = -1.;
     T alphaMinus = 1.;
@@ -405,7 +407,8 @@ std::array<T, 4> ELIULK1<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) cons
     //    T Kelim = q - tauMinus;
     T LambdaMinus = tauMinus-0.5;
     T Kmin = 1. + alphaMinus * (LambdaMinus - 0.5);
-    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+    T beta = 0.0;
+    return {{alphaPlus, alphaMinus, beta, Kplus, Kmin}};
 }
 
 template <typename T, template <typename U> class D>
@@ -415,7 +418,7 @@ ELIULK4<T, D> *ELIULK4<T, D>::clone() const
 }
 
 template <typename T, template <typename U> class D>
-std::array<T, 4> ELIULK4<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+std::array<T, 5> ELIULK4<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
 {
     T alphaPlus = -1.;
     T alphaMinus = 1.;
@@ -423,7 +426,8 @@ std::array<T, 4> ELIULK4<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) cons
 //    T Kelim = q - tauMinus;
     T LambdaMinus = tauMinus-0.5;
     T Kmin = 1. + alphaMinus * (LambdaMinus - 0.5);
-    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+    T beta = 0.0;
+    return {{alphaPlus, alphaMinus, beta, Kplus, Kmin}};
 }
 
 
@@ -435,7 +439,7 @@ ELIULK3<T, D> *ELIULK3<T, D>::clone() const
 
 
 template <typename T, template <typename U> class D>
-std::array<T, 4> ELIULK3<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+std::array<T, 5> ELIULK3<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) const
 {
     T alphaPlus = -1.;
     T alphaMinus = 1.;
@@ -444,7 +448,8 @@ std::array<T, 4> ELIULK3<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) cons
     T LambdaMinus = tauMinus-0.5;
     T LambdaPlus = tauPlus-0.5;
     T Kmin = 1. + alphaMinus * LambdaMinus - (alphaMinus*(q*q+LambdaPlus))/(2.*LambdaPlus);
-    return {{alphaPlus, alphaMinus, Kplus, Kmin}};
+    T beta = 0.0;
+    return {{alphaPlus, alphaMinus, beta, Kplus, Kmin}};
 }
 
 template <typename T, template <typename U> class D, typename Function>
@@ -473,7 +478,7 @@ template <typename T, template <typename U> class D, typename Function>
 #if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
     requires std::invocable<Function, T, T, T> /*&& object<Function>*/
 #endif
-std::array<T, 4> ELIgeneric<T, D, Function>::eliCoefficients(T q, T tauPlus, T tauMinus) const
+std::array<T, 5> ELIgeneric<T, D, Function>::eliCoefficients(T q, T tauPlus, T tauMinus) const
 {
     return compute_coefficients(q,tauPlus,tauMinus);
 }

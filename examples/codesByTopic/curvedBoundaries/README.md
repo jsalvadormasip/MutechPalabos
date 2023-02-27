@@ -5,20 +5,13 @@ date: Palabos Summer School 2021
 geometry: margin=2cm
 output: pdf_document
 ---
-Updated version with improved CMakelists.txt and bug fix from Julius Weinmiller (Ulm University) [see at the end of this document].
 
-To run the solution, go to CMakelists.txt and change the following line
-```cmake
-add_executable(${EXECUTABLE_NAME} "./src/${EXECUTABLE_NAME}.cpp")
-```
-to
-```cmake
-add_executable(${EXECUTABLE_NAME} "./src/solutions/${EXECUTABLE_NAME}_solution.cpp")
-```
+The main goal of this example is to show how you can try and test different curved boundary conditions.
+In particular, it shows how to use the the genericELI class that allows to define any LI+ methods.
 
-# Be a Palabos developer!
-
-The main goal of this exercise is to have fun and to implement a new boundary condition (the HW BB).
+LI+ methods includes two types of boundaries:
+* LI (e.g. Bouzidi et al. 2001, or Yu et al. 2003, or CLI Ginzburg et al. 2008)
+* ELI: a class of local methods introduced in (Marson et al. 2021) and extended in (Marson 2022 and Ginzburg et al. 2022)
 
 As beneficial collateral effects, you may familiarize yourself with the following topics
 
@@ -37,24 +30,18 @@ As beneficial collateral effects, you may familiarize yourself with the followin
 * Moving objects
 * Refilling algorithms
 
-## Tasks list
+**Bibliography**
 
-1. Install CMake, ParaView, and update your `c++` compiler
-2. Test the compilation with CMake
-3. Compile and run the exercise after choosing the simulation parameters;
-4. Compute the drag coefficient and write it on a file using pcout;
-5. Warm-up
-   * Try the available schemes implemented in palabos with different flow parameters;
-   * Compute the drag for each method and save them on different files;
-   * Turn on and off a sponge zone to dump pressure waves;
-   * Using Bouzidi or Guo, add a second sphere behind the first one;
-   * Transform the two spheres into ellipsoids.
-   * (optional) Use the TRT dynamics for low Reynolds and Smagorinsky for the turbulent case.
-6. Have fun:
-   * Change the planar Poiseuille configuration to periodic+neumann (on the sides) flow configuration;
-   * replace the ellipsoids with the "curvedBoundaries.stl" file;
-   * translate and rotate the curvedBoundaries.stl
-7. Implement the half-way bounce-back starting from the implementation of the BFL scheme
+Bouzidi, M., Firdaouss, M., & Lallemand, P. (2001). Momentum transfer of a Boltzmann-lattice fluid with boundaries. Physics of Fluids, 13(11), 3452–3459. https://doi.org/10.1063/1.1399290
+
+Yu, D., Mei, R., & Shyy, W. (2003). A Unified Boundary Treatment in Lattice Boltzmann Method. 41st Aerospace Sciences Meeting and Exhibit. https://doi.org/10.2514/6.2003-953
+
+Ginzburg, I., Verhaeghe, F., & d’Humières, D. (2008). Two-Relaxation-Time Lattice Boltzmann Scheme: About Parametrization, Velocity, Pressure and Mixed Boundary Conditions. Commun. Comput. Phys., 3(2), 427–478.
+
+Marson, F., Thorimbert, Y., Chopard, B., Ginzburg, I., & Latt, J. (2021). Enhanced single-node lattice Boltzmann boundary condition for fluid flows. Physical Review E, 103(5), 053308. https://doi.org/10.1103/PhysRevE.103.053308
+
+Marson, F. (2022). Directional lattice Boltzmann boundary conditions. https://doi.org/10.13097/archive-ouverte/unige:160770
+
 
 # Guide
 
@@ -108,7 +95,7 @@ cmake .. && make -j 2
 cd ..
 ```
 
-in the case of a Linux-based system. CMake runs in ELIgeneric in release mode, if you want to change the build mode to
+in the case of a Linux-based system. CMake runs in LIgeneric in release mode, if you want to change the build mode to
 debug, you can use the CMake with the option `-DCMAKE_BUILD_TYPE=Debug`.
 
 ## 3. Compile and run the exercise after choosing the simulation parameters
@@ -260,7 +247,7 @@ lattice.executeInternalProcessors();  // i.e. boundary conditions in
                                               // this case
 lattice.incrementTime();
 ```
+credits: Julius Weinmiller (Ulm University)
 
-### Questions? Read the [FAQ](FAQ.md)
 
 

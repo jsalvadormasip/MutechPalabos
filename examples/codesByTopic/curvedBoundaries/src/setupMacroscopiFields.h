@@ -31,6 +31,66 @@
 using namespace plb;
 using namespace plb::descriptors;
 /// Velocity on the parabolic Poiseuille profile
+
+
+
+// COMPUTE ANALYTICAL DRAG
+// https://doi.org/10.1016/0032-5910(89)80008-7
+template<typename T>
+auto compute_drag_coeff = [] (T Re, T phi = 1/*for a sphere phi = 1*/) {
+    T A = exp( 2.3288 - 6.4581*phi + 2.4486*(phi*phi) );
+    T B = 0.0964 + 0.5565*phi;
+    T C = exp( 4.905 - 13.8944*phi + 18.4222*(phi*phi) - 10.2599*(phi*phi*phi) );
+    T D = exp( 1.4681 + 12.2584*phi - 20.7322*(phi*phi) + 15.8855*(phi*phi*phi) );
+    T Cd = (24.0/Re)*( 1 + A* std::pow(Re, B) ) + ( C/(1 + (D/Re)) );
+    return Cd;
+};
+
+/**
+ * Implements:
+ * https://doi.org/10.1007/s00021-009-0302-9
+ * credits to J.P. de Santana Neto for the implementation
+ * @param xTil_viscous_length coordinate from the center of the sphere normalized
+ * by l
+ * @param d drag coefficient from experimental data
+ * @param l nu_lb/u_lb
+ */
+template<typename T>
+auto compute_adaptive_boundary_condition_velocity = [] (Array<T,3> xTil_viscous_length,
+                                                       T d /*dragCoeff*/,
+                                                       T l /*viscous length*/) {
+    Array<T,3> xVec = xTil_viscous_length; // xVec = (x,yVec)
+    Array<T,2> yVec(xVec[1], xVec[2]);
+    T x = xVec[0];
+    T y = sqrt( yVec[0]*yVec[0] + yVec[1]*yVec[1] );
+    T r = sqrt(x*x + y*y);
+    T r3 = r*r*r;
+    T pi = std::acos((T) -1);
+    auto heaviside = [] (T x) {return x > 0.0 ? 1.0 : 0.0;};
+    T c = -2*d;
+    T uABC;
+    T limitX = 10.0;
+//    if (std::fabs(x) <= (T) limitX){
+//        uABC = 1. + (1./(2.*pi))*(x/r3)*d;
+//    } else {
+        uABC = 1. + (heaviside(x)/(4.*pi*x))*exp(-(y*y)/(4*x) )*c /*+ (1./(2.*pi))*(x/r3)*d*/;
+//    }
+
+    Array<T,2> v1ABCVec;
+    if (std::fabs(x) <= (T) limitX){
+        v1ABCVec = (d/ (2.*pi*r3) )*yVec;
+    } else {
+        v1ABCVec = (heaviside(x)/ (8.*pi*x*x) )*exp(-(y*y)/ (4.*x) )*c*yVec +
+                   (d/ (2.*pi*r3) )*yVec;
+    }
+
+    Array<T,2> vABCVec = v1ABCVec;
+
+    // Adaptive Boundary Condition Velocity
+    Array<T,3> uABCVec(uABC, vABCVec[0], vABCVec[1]);
+    return uABCVec;
+};
+
 template <typename Real>
 Real poiseuilleVelocity(plint iY, IncomprFlowParam<Real> const& parameters) {
     Real y = (Real)iY / (Real)parameters.getNy();
@@ -59,10 +119,12 @@ class PoiseuilleVelocity {
 public:
     explicit PoiseuilleVelocity(IncomprFlowParam<Real> parameters_)
         : parameters(parameters_) {}
+    // 2D case
     void operator()(plint iX, plint iY, Array<Real, 2>& u) const {
         u[0] = poiseuilleVelocity(iY, parameters);
         u[1] = Real();
     }
+    // 3D case
     void operator()(plint iX, plint iY, plint iZ, Array<Real, 3>& u) const {
         u[0] = poiseuilleVelocity(iY, parameters);
         u[1] = Real();
@@ -71,6 +133,48 @@ public:
 
 private:
     IncomprFlowParam<Real> parameters;
+};
+
+/// A functional, used to initialize the velocity for the boundary conditions
+template <typename Real>
+class AdaptiveVelocityProfileOfSphereInAChannel {
+public:
+    explicit AdaptiveVelocityProfileOfSphereInAChannel(IncomprFlowParam<Real> parameters_, Array<Real,3> spherePosition)
+        : parameters(parameters_), spherePositionLU(spherePosition) {}
+    void operator()(plint iX, plint iY, plint iZ , Array<Real, 3>& u) const {
+        auto viscous_lengh = parameters.getLatticeNu()/parameters.getLatticeU();
+        auto drag = compute_drag_coeff<Real>(parameters.getRe());
+        auto ulb = parameters.getLatticeU();
+        auto p = /*Array<Real,3>(parameters.getNx(),parameters.getNy(),parameters.getNz())
+            -*/Array<Real,3>(iX,iY,iZ);
+        auto pos = (p-spherePositionLU)/viscous_lengh;
+        auto vel = compute_adaptive_boundary_condition_velocity<Real>(
+            pos,drag,viscous_lengh
+            );
+        u[0] = vel[0]*ulb;
+        u[1] = vel[1]*ulb;
+        u[2] = vel[2]*ulb;
+//        if (iZ == 5) pcout << iX << " " << iY << " " << iZ << std::endl;
+    }
+    void operator()(plint iX, plint iY, plint iZ, Real& uniformRhoOne, Array<Real, 3>& u) const {
+        auto viscous_lengh = parameters.getLatticeNu()/parameters.getLatticeU();
+        auto drag = compute_drag_coeff<Real>(parameters.getRe(),1.0);
+        auto ulb = parameters.getLatticeU();
+        auto p = /*Array<Real,3>(parameters.getNx(),parameters.getNy(),parameters.getNz())
+                 -*/Array<Real,3>(iX,iY,iZ);
+        auto pos = (p-spherePositionLU)/viscous_lengh;
+        auto vel = compute_adaptive_boundary_condition_velocity<Real>(
+            pos,drag,viscous_lengh
+        );
+        u[0] = vel[0]*ulb;
+        u[1] = vel[1]*ulb;
+        u[2] = vel[2]*ulb;
+        uniformRhoOne = 1.0;
+    }
+
+private:
+    IncomprFlowParam<Real> parameters;
+    Array<Real, 3> spherePositionLU;
 };
 
 /// A functional, used to initialize the velocity for the boundary conditions
@@ -131,7 +235,7 @@ private:
 
 /// A functional, used to create an initial condition for the density and
 /// velocity
-template <typename Real, template <typename U> class Descriptor>
+template <typename Real>
 class ConstantVelocityAndDensity {
 public:
     explicit ConstantVelocityAndDensity(IncomprFlowParam<Real> parameters_)

@@ -217,7 +217,7 @@ void MeiLuoShyyModel3D<T, Descriptor>::cellCompletion(
         collidedCell.collide(statsCopy);
 
         T f_rhoBar, ff_rhoBar;
-        Array<T, 3> f_j, ff_j;
+        Array<T, 3> f_j(.0,.0,.0), ff_j(.0,.0,.0);
         Array<T, 3> wallNormal;
 
         if (args.empty()) {

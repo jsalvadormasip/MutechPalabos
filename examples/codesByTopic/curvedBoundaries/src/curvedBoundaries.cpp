@@ -80,13 +80,13 @@ auto setupLattice3d(IncomprFlowParam<Real> const &parameters, BCmodel kmin_,
                     BSchemeInfo& xmlParse) {
     // 1. Create a TriangleSet on the heap and dump it on a stl file
     auto location_ellipsoid = new Array<Real, 3>(
-        parameters.getNx() / 3.0, parameters.getNy() / 2.0 + 1.1,
-        parameters.getNz() / 2.0 + 0.01);
+        parameters.getNx() / 3.0, parameters.getNy() / 2.0,
+        parameters.getNz() / 2.0);
     Real radius = parameters.getResolution() / 2.;
     TriangleSet<Real> *triangle_set =
 //        readObstacle(*location_ellipsoid, radius, radius, radius, 0.5*parameters.getResolution());
         generateEllipsoid(*location_ellipsoid, radius, radius, radius, 0.5);
-    triangle_set->writeBinarySTL("tmp/obstacle.stl");
+    triangle_set->writeBinarySTL("obstacle.stl");
 
     // 2. Voxelize the domain
     auto [voxelized_domain,triangle_boundary] =
@@ -121,7 +121,7 @@ auto setupLattice3d(IncomprFlowParam<Real> const &parameters, BCmodel kmin_,
 
     // 6. Define outer boundary conditions
     OnLatticeBoundaryCondition3D<Real, Descriptor> *onlatt_boundary_condition =
-        inject_on_lattice_bc(lattice_ptr, parameters);
+        inject_on_lattice_bc(lattice_ptr, parameters, *location_ellipsoid);
 
     // 7. Define inner-offlattice boundary conditions
     OffLatticeBoundaryCondition3D<Real, Descriptor, Array<Real, 3>>
@@ -140,10 +140,10 @@ int main(int argc, char *argv[]) {
     // Palabos initialization
     plbInit(&argc, &argv);
     string outdir = "tmp/";
-    BCmodel kmin = BCmodel::ELIgeneric;
+    BCmodel kmin = BCmodel::LIgeneric;
 
 
-    BSchemeInfo xmlParse("ELIgeneric.xml");
+    BSchemeInfo xmlParse("LIplusGeneric.xml");
 
 
 
@@ -170,10 +170,10 @@ int main(int argc, char *argv[]) {
     global::directories().setOutputDir(outdir);
     pcout << "The selected model is " << magic_enum::enum_name(kmin) << std::endl;
     // Define simulation parameters: we use two ad-hoc units helper
-    const Real re = 10;  // NB: Obstacle reynolds!
+    const Real re = 1;  // NB: Obstacle reynolds!
     sp::Numerics<Real, Int> lu;
     sp::NonDimensional<Real> dimless;
-    dimless.initReLxLyLz(re, 15, 5, 5);// the diameter is the reference length
+    dimless.initReLxLyLz(re, 15, 7, 7);// the diameter is the reference length
     dimless.printParameters();
     // initLrefluNodim initializes lu, getIncomprFlowParam() returns
     // the palabos structure IncomprFlowParam
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
     // Define output constants
     const Real logT = (Real)0.02;
     [[maybe_unused]] const Real imSave = (Real)0.06;
-    [[maybe_unused]] const Real vtkSave = 1.0;//(Real)parameters.getDeltaT();
+    [[maybe_unused]] const Real vtkSave = 10*(Real)parameters.getDeltaT();//(Real)parameters.getDeltaT();
     const Real maxT = (Real)5.1;
     writeLogFile(parameters, "Poiseuille flow");
 
@@ -202,15 +202,18 @@ int main(int argc, char *argv[]) {
 
     // Main loop over time iterations.
     for (plint iT = 0; (Real)iT * parameters.getDeltaT() < maxT; ++iT) {
-        Real cd = 0.;
+        Real cd = 0., error = 0.0;
         if (iT % parameters.nStep(logT) == 0) {
             cd = 2.0*norm(boundaryoff->getForceOnObject()) /
                       (0.25 * 1.0 * lu.getUlb() * lu.getUlb() * lu.getLref() *
                        lu.getLref() * M_PI);
+            error = (cd-empirical_sphere_drag(parameters.getRe()))/
+                    empirical_sphere_drag(parameters.getRe());
             std::string fullName =
                 global::directories().getLogOutDir() + "Cd.dat";
             plb_ofstream ofile(fullName.c_str(), std::ostream::app);
-            ofile << cd << std::endl;
+            ofile << std::setw(10) << iT * parameters.getDeltaT()
+                  << cd << " " << error << std::endl;
         }
         // At this point, the state of the lattice corresponds to the
         //   discrete time iT. However, the stored averages
@@ -235,10 +238,12 @@ int main(int argc, char *argv[]) {
         //   discrete time iT+1, and the stored averages are upgraded to time
         //   iT.
         if (iT % parameters.nStep(logT) == 0) {
-            pcout << "; av energy =" << setprecision(10)
+            pcout << "; av energy = " << setprecision(10)
                   << getStoredAverageEnergy<Real>(lattice)
-                  << "; av rho =" << getStoredAverageDensity<Real>(lattice)
-                  << "; Cd =" << cd << std::endl;
+                  << "; av rho = " << getStoredAverageDensity<Real>(lattice)
+                  << "; Cd = " << cd
+                  << "; Drag sphere error = " << error
+                  << std::endl;
         }
         global::timer("iteration").stop();
     }

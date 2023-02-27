@@ -1,7 +1,0 @@
-<!--admitted symbols: tauPlus, tauMinus, q -->
-<generic_eli>
-    <alphaPlus>-1</alphaPlus>
-    <alphaMin>+1</alphaMin>
-    <kPlus>q - tauPlus</kPlus>
-    <kMin>0</kMin>
-</generic_eli>

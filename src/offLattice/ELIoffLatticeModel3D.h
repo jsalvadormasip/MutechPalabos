@@ -46,7 +46,7 @@ namespace plb {
 /**
 * This class implements the ELI infinite class of directional (link-wise) schemes.
  * Some schemes are named, e.g. ELIUL, ELIULT, ELIFL, others are not and can defined by explicitly
- * providing the alpha- and K- parameters to the constructor using the class ELIgeneric.
+ * providing the alpha- and K- parameters to the constructor using the class LIgeneric.
 *
 * @tparam T
 * @tparam Descriptor
@@ -138,14 +138,14 @@ private:
         const std::vector<AtomicBlock3D *> &args, const Dot3D &fluidDirection,
         const Cell<T, Descriptor> &cellF) const;
 
-    virtual inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const = 0;
+    virtual inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const = 0;
 };
 
 template <typename T, template <typename U> class D>
 class ELIUL : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
     ELIUL<T,D>* clone() const override;
-    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+    inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
 
 
@@ -166,7 +166,7 @@ template <typename T, template <typename U> class D>
 class ELIULC : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
     ELIULC<T,D>* clone() const override;
-    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+    inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
 
 /**
@@ -190,7 +190,7 @@ template <typename T, template <typename U> class D>
 class ELIULK1 : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
     ELIULK1<T,D>* clone() const override;
-    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+    inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
 
 
@@ -210,7 +210,7 @@ template <typename T, template <typename U> class D>
 class ELIULK3 : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
     ELIULK3<T,D>* clone() const override;
-    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+    inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
 
 /**
@@ -229,7 +229,7 @@ template <typename T, template <typename U> class D>
 class ELIULK4 : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
     ELIULK4<T,D>* clone() const override;
-    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+    inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
 
 //#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus > 201703L)
@@ -248,7 +248,7 @@ public:
     ELIgeneric(BoundaryShape3D<T, Array<T, 3> > *shape_, int flowType_, Function coefficients_);
 private:
     ELIgeneric<T,D,Function>* clone() const final;
-    inline std::array<T, 4> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
+    inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
     Function compute_coefficients;
 };
 

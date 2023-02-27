@@ -218,18 +218,18 @@ void BouzidiOffLatticeModel3D<T, Descriptor>::cellCompletion(
 
     plint numNeumannNodes = 0;
     T neumannDensity = T();
-    Cell<T, Descriptor> &cell = lattice.get(boundaryNode.x, boundaryNode.y, boundaryNode.z);
-    if (this->computesStat()) {
-        for (pluint i = 0; i < solidDirections.size(); ++i) {
-            int iPop = solidDirections[i];
-            deltaJ[0] += D::c[iPop][0] * cell[iPop];
-            deltaJ[1] += D::c[iPop][1] * cell[iPop];
-            deltaJ[2] += D::c[iPop][2] * cell[iPop];
-        }
-    }
+    Cell<T, Descriptor> &cellF = lattice.get(boundaryNode.x, boundaryNode.y, boundaryNode.z);
+//    if (this->computesStat()) {
+//        for (pluint i = 0; i < solidDirections.size(); ++i) {
+//            int iPop = solidDirections[i];
+//            deltaJ[0] += D::c[iPop][0] * cellF[iPop];
+//            deltaJ[1] += D::c[iPop][1] * cellF[iPop];
+//            deltaJ[2] += D::c[iPop][2] * cellF[iPop];
+//        }
+//    }
     for (pluint i = 0; i < solidDirections.size(); ++i) {
-        int iPop = solidDirections[i];
-        int oppPop = indexTemplates::opposite<D>(iPop);
+        int i_solid = solidDirections[i];
+        int i_fluid = indexTemplates::opposite<D>(i_solid);
         Array<T, 3> wallNode, wall_vel;
         T AC;
         OffBoundary::Type bdType;
@@ -239,69 +239,72 @@ void BouzidiOffLatticeModel3D<T, Descriptor>::cellCompletion(
         bool ok =
 #endif
             this->pointOnSurface(
-                boundaryNode + absoluteOffset, Dot3D(D::c[iPop][0], D::c[iPop][1], D::c[iPop][2]),
+                boundaryNode + absoluteOffset, Dot3D(D::c[i_solid][0], D::c[i_solid][1], D::c[i_solid][2]),
                 wallNode, AC, wallNormal, wall_vel, bdType, id);
         PLB_ASSERT(ok);
-        T q = AC * invAB[iPop];
-        Cell<T, Descriptor> &iCell = lattice.get(
-            boundaryNode.x + D::c[iPop][0], boundaryNode.y + D::c[iPop][1],
-            boundaryNode.z + D::c[iPop][2]);
-        Cell<T, Descriptor> &jCell = lattice.get(
-            boundaryNode.x - D::c[iPop][0], boundaryNode.y - D::c[iPop][1],
-            boundaryNode.z - D::c[iPop][2]);
+        T q = AC * invAB[i_solid];
+        Cell<T, Descriptor> &cellS = lattice.get(
+            boundaryNode.x + D::c[i_solid][0], boundaryNode.y + D::c[i_solid][1],
+            boundaryNode.z + D::c[i_solid][2]);
+        Cell<T, Descriptor> &cdllFF = lattice.get(
+            boundaryNode.x - D::c[i_solid][0], boundaryNode.y - D::c[i_solid][1],
+            boundaryNode.z - D::c[i_solid][2]);
         if (bdType == OffBoundary::dirichlet) {
-            T u_ci = D::c[iPop][0] * wall_vel[0] + D::c[iPop][1] * wall_vel[1]
-                     + D::c[iPop][2] * wall_vel[2];
+            T u_ci = D::c[i_solid][0] * wall_vel[0] + D::c[i_solid][1] * wall_vel[1]
+                     + D::c[i_solid][2] * wall_vel[2];
             plint numUnknown = 0;
             if (q < (T)0.5) {
                 if (hasFluidNeighbor[i]) {
-                    cell[oppPop] = 2. * q * iCell[iPop] + (1. - 2. * q) * cell[iPop];
+                    cellF[i_fluid] = 2. * q * cellS[i_solid] + (1. - 2. * q) * cellF[i_solid];
                 } else {
                     ++numUnknown;
-                    cell[oppPop] = iCell[iPop];
+                    cellF[i_fluid] = cellS[i_solid];
                 }
-                cell[oppPop] -= 2. * u_ci * D::t[iPop] * D::invCs2;
+                cellF[i_fluid] -= 2. * u_ci * D::t[i_solid] * D::invCs2;
             } else {
-                cell[oppPop] =
-                    1. / (2. * q) * iCell[iPop] + (2. * q - 1) / (2. * q) * jCell[oppPop];
-                cell[oppPop] -= 1. / q * u_ci * D::t[iPop] * D::invCs2;
+                cellF[i_fluid] =
+                    1. / (2. * q) * cellS[i_solid] + (2. * q - 1) / (2. * q) * cdllFF[i_fluid];
+                cellF[i_fluid] -= 1. / q * u_ci * D::t[i_solid] * D::invCs2;
             }
         } else if (bdType == OffBoundary::densityNeumann) {
             ++numNeumannNodes;
             neumannDensity += wall_vel[0];
-            cell[oppPop] = jCell[oppPop];
+            cellF[i_fluid] = cdllFF[i_fluid];
         } else {
             // Not implemented yet.
             PLB_ASSERT(false);
         }
+        localForce[0] += D::c[i_solid][0] * (cellF[i_fluid] + cellS[i_solid]);
+        localForce[1] += D::c[i_solid][1] * (cellF[i_fluid] + cellS[i_solid]);
+        localForce[2] += D::c[i_solid][2] * (cellF[i_fluid] + cellS[i_solid]);
     }
 
-    if (this->computesStat()) {
-        Cell<T, Descriptor> collidedCell(cell);
-        BlockStatistics statsCopy(lattice.getInternalStatistics());
-        collidedCell.collide(statsCopy);
+//    if (this->computesStat()) {
+//        Cell<T, Descriptor> collidedCell(cellF);
+//        BlockStatistics statsCopy(lattice.getInternalStatistics());
+//        collidedCell.collide(statsCopy);
+//
+//        for (pluint i = 0; i < solidDirections.size(); ++i) {
+//            int iPop = solidDirections[i];
+//            int oppPop = indexTemplates::opposite<D>(iPop);
+//            deltaJ[0] -= D::c[oppPop][0] * collidedCell[oppPop];
+//            deltaJ[1] -= D::c[oppPop][1] * collidedCell[oppPop];
+//            deltaJ[2] -= D::c[oppPop][2] * collidedCell[oppPop];
+//        }
+//    }
 
-        for (pluint i = 0; i < solidDirections.size(); ++i) {
-            int iPop = solidDirections[i];
-            int oppPop = indexTemplates::opposite<D>(iPop);
-            deltaJ[0] -= D::c[oppPop][0] * collidedCell[oppPop];
-            deltaJ[1] -= D::c[oppPop][1] * collidedCell[oppPop];
-            deltaJ[2] -= D::c[oppPop][2] * collidedCell[oppPop];
-        }
-    }
-
-    localForce += deltaJ;
+//    localForce += deltaJ;
     if (numNeumannNodes > 0) {
         neumannDensity /= numNeumannNodes;
         T oldRhoBar;
         Array<T, 3> j;
-        momentTemplates<T, Descriptor>::get_rhoBar_j(cell, oldRhoBar, j);
+        momentTemplates<T, Descriptor>::get_rhoBar_j(cellF, oldRhoBar, j);
         T newRhoBar = D::rhoBar(neumannDensity);
         T jSqr = normSqr(j);
         for (plint iPop = 0; iPop < D::q; ++iPop) {
-            T oldEq = cell.getDynamics().computeEquilibrium(iPop, oldRhoBar, j, jSqr);
-            T newEq = cell.getDynamics().computeEquilibrium(iPop, newRhoBar, j, jSqr);
-            cell[iPop] += newEq - oldEq;
+            T oldEq = cellF.getDynamics().computeEquilibrium(iPop, oldRhoBar, j, jSqr);
+            T newEq = cellF.getDynamics().computeEquilibrium(iPop, newRhoBar, j, jSqr);
+            cellF[iPop] += newEq - oldEq;
         }
     }
 }
