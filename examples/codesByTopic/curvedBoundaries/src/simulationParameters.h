@@ -38,38 +38,41 @@ public:
 
     NonDimensional();
 
-    [[maybe_unused]] NonDimensional<Real> initReLxLyLz(Real re_, Real lx_,
-                                                         Real ly_, Real lz_);
+    [[maybe_unused]] NonDimensional<Real> initReLxLyLz(Real re_, Real lx_, Real ly_, Real lz_);
 
-    [[maybe_unused]] NonDimensional<Real> initReMaLxLyLz(Real re_, Real ma_,
-                                                            Real lx_, Real ly_,
-                                                            Real lz_);
+    [[maybe_unused]] NonDimensional<Real> initReMaLxLyLz(
+        Real re_, Real ma_, Real lx_, Real ly_, Real lz_);
 
     [[maybe_unused]] NonDimensional<Real> initReLxLyLzRhos(
         Real re_, Real lx_, Real ly_, Real lz_, Real rho_solid_);
 
 public:
-    Real getRe() const {
+    Real getRe() const
+    {
         assert(re > 0);
         return re;
     }
 
-    Real getLx() const {
+    Real getLx() const
+    {
         assert(re > 0);
         return lx;
     }
 
-    Real getLy() const {
+    Real getLy() const
+    {
         assert(re > 0);
         return ly;
     }
 
-    Real getLz() const {
+    Real getLz() const
+    {
         assert(re > 0);
         return lz;
     }
 
-    Real getMa() const {
+    Real getMa() const
+    {
         if (ma_is_set)
             return ma;
         else {
@@ -78,9 +81,13 @@ public:
         }
     }
 
-    Real getRhof() const { return rho_f; }
+    Real getRhof() const
+    {
+        return rho_f;
+    }
 
-    Real getRhoSolid() const {
+    Real getRhoSolid() const
+    {
         if (rho_is_set)
             return rho_solid;
         else
@@ -89,7 +96,10 @@ public:
 
     NonDimensional<Real> printParameters() const;
 
-    [[nodiscard]] bool initialized() const { return is_initialized; }
+    [[nodiscard]] bool initialized() const
+    {
+        return is_initialized;
+    }
 
 private:
     Real re;
@@ -121,96 +131,111 @@ public:
     Numerics();
     ~Numerics() = default;
 
-    [[maybe_unused]] Numerics<Real, Int>& initLU(Int l_ref_lu_, Real tau_lu_,
-                                                 Real u_lb_, Int lx_lu,
-                                                 Int ly_lu, Int lz_lu = 0);
+    [[maybe_unused]] Numerics<Real, Int> &initLU(
+        Int l_ref_lu_, Real tau_lu_, Real u_lb_, Int lx_lu, Int ly_lu, Int lz_lu = 0);
 
-    [[maybe_unused]] Numerics<Real, Int>& initReTauUlb(Real re, Real tau_lu_,
-                                                       Real u_lb_, Int lx_lu,
-                                                       Int ly_lu,
-                                                       Int lz_lu = 0);
+    [[maybe_unused]] Numerics<Real, Int> &initReTauUlb(
+        Real re, Real tau_lu_, Real u_lb_, Int lx_lu, Int ly_lu, Int lz_lu = 0);
 
-    [[maybe_unused]] Numerics<Real, Int>& initLrefReUlb(Int l_ref_lu_, Real re,
-                                                        Real u_lb_, Int lx_lu,
-                                                        Int ly_lu,
-                                                        Int lz_lu = 0);
+    [[maybe_unused]] Numerics<Real, Int> &initLrefReUlb(
+        Int l_ref_lu_, Real re, Real u_lb_, Int lx_lu, Int ly_lu, Int lz_lu = 0);
 
-    [[maybe_unused]] Numerics<Real, Int>& initLrefReTau(Int l_ref_lu_, Real re,
-                                                        Real tau_, Int lx_lu,
-                                                        Int ly_lu,
-                                                        Int lz_lu = 0);
+    [[maybe_unused]] Numerics<Real, Int> &initLrefReTau(
+        Int l_ref_lu_, Real re, Real tau_, Int lx_lu, Int ly_lu, Int lz_lu = 0);
 
-    [[maybe_unused]] Numerics<Real, Int>& initLrefluNodim(
-        Int l_ref_lu_, NonDimensional<Real>* dimless_, Real u_lb_ = -1,
-        Real tau_ = -1);
+    [[maybe_unused]] Numerics<Real, Int> &initLrefluNodim(
+        Int l_ref_lu_, NonDimensional<Real> *dimless_, Real u_lb_ = -1, Real tau_ = -1);
 
 public:
-    Real getUlb() const {
+    Real getUlb() const
+    {
         assert(u_lb >= 0);
         return u_lb;
     }
 
-    Real getLref() const {
+    Real getLref() const
+    {
         assert(l_ref_lu >= 0);
         return l_ref_lu;
     }
 
-    Real getTau() const {
+    Real getTau() const
+    {
         assert(tau >= 0);
         return tau;
     }
 
-    Real getOmega() const {
+    Real getOmega() const
+    {
         assert(tau >= 0);
         return 1. / tau;
     }
 
-    Real getNulu(Real tau_, Real cs2) const {
+    Real getNulu(Real tau_, Real cs2) const
+    {
         assert(tau >= 0);
         return cs2 * (tau - 1. / 2.);
     }
 
-    Real getNulu(Real tau_) const {
+    Real getNulu(Real tau_) const
+    {
         assert(tau_ >= 0);
         return (tau_ - 1. / 2.) / 3.0;
     }
 
-    Real getLx() const {
+    Real getLx() const
+    {
         assert(lx_domain >= 0);
         return lx_domain;
     }
 
-    Real getLy() const {
+    Real getLy() const
+    {
         assert(ly_domain >= 0);
         return ly_domain;
     }
 
-    Real getLz() const {
+    Real getLz() const
+    {
         assert(lz_domain >= 0);
         return lz_domain;
     }
 
-    Real getCs2() const { return cs2; }
+    Real getCs2() const
+    {
+        return cs2;
+    }
 
-    Real getCs2Inv() const { return 1. / cs2; }
+    Real getCs2Inv() const
+    {
+        return 1. / cs2;
+    }
 
-    Real getCs() const { return sqrt(cs2); }
+    Real getCs() const
+    {
+        return sqrt(cs2);
+    }
 
-    [[nodiscard]] bool initialized() const { return is_initialized; }
+    [[nodiscard]] bool initialized() const
+    {
+        return is_initialized;
+    }
 
-    Numerics<Real, Int>& printParameters();
+    Numerics<Real, Int> &printParameters();
 
-    Numerics<Real, Int>& writeParametersLog() const;
+    Numerics<Real, Int> &writeParametersLog() const;
 
     plb::IncomprFlowParam<Real> getIncomprFlowParam() const;
 
 private:
-    void setTau(Real tau_) {
+    void setTau(Real tau_)
+    {
         assert(tau_ < 3 && tau_ > 0.5);
         tau = tau_;
     }
 
-    void setUlb(Real u_lb_) {
+    void setUlb(Real u_lb_)
+    {
         assert(u_lb_ < 0.4);
         u_lb = u_lb_;
     }
@@ -226,7 +251,7 @@ private:
     Real cs2;
     Real rhof0;
     bool is_initialized;
-    NonDimensional<Real>* dimless;
+    NonDimensional<Real> *dimless;
 };
 
 }  // namespace incompressible_simulation_parameters

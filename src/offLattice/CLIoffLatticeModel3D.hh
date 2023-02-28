@@ -217,13 +217,13 @@ void CLIoffLatticeModel3D<T, Descriptor>::cellCompletion(
     plint numNeumannNodes = 0;
     T neumannDensity = T();
     Cell<T, Descriptor> &cellF = lattice.get(boundaryNode.x, boundaryNode.y, boundaryNode.z);
-//    if (this->computesStat()) {
-//        for (int iPop : solidDirections) {
-//            deltaJ[0] += D::c[iPop][0] * cellF[iPop];
-//            deltaJ[1] += D::c[iPop][1] * cellF[iPop];
-//            deltaJ[2] += D::c[iPop][2] * cellF[iPop];
-//        }
-//    }
+    //    if (this->computesStat()) {
+    //        for (int iPop : solidDirections) {
+    //            deltaJ[0] += D::c[iPop][0] * cellF[iPop];
+    //            deltaJ[1] += D::c[iPop][1] * cellF[iPop];
+    //            deltaJ[2] += D::c[iPop][2] * cellF[iPop];
+    //        }
+    //    }
     for (pluint i = 0; i < solidDirections.size(); ++i) {
         int i_solid = solidDirections[i];
         int i_fluid = indexTemplates::opposite<D>(i_solid);
@@ -236,8 +236,9 @@ void CLIoffLatticeModel3D<T, Descriptor>::cellCompletion(
         bool ok =
 #endif
             this->pointOnSurface(
-                boundaryNode + absoluteOffset, Dot3D(D::c[i_solid][0], D::c[i_solid][1], D::c[i_solid][2]),
-                wallNode, AC, wallNormal, wall_vel, bdType, id);
+                boundaryNode + absoluteOffset,
+                Dot3D(D::c[i_solid][0], D::c[i_solid][1], D::c[i_solid][2]), wallNode, AC,
+                wallNormal, wall_vel, bdType, id);
         PLB_ASSERT(ok);
         T q = AC * invAB[i_solid];
         Cell<T, Descriptor> &cellS = lattice.get(
@@ -272,20 +273,20 @@ void CLIoffLatticeModel3D<T, Descriptor>::cellCompletion(
         localForce[2] += D::c[i_solid][2] * (cellF[i_fluid] + cellS[i_solid]);
     }
 
-//    if (this->computesStat()) {
-//        Cell<T, Descriptor> collidedCell(cellF);
-//        BlockStatistics statsCopy(lattice.getInternalStatistics());
-//        collidedCell.collide(statsCopy);
-//
-//        for (int iPop : solidDirections) {
-//            int oppPop = indexTemplates::opposite<D>(iPop);
-//            deltaJ[0] -= D::c[oppPop][0] * collidedCell[oppPop];
-//            deltaJ[1] -= D::c[oppPop][1] * collidedCell[oppPop];
-//            deltaJ[2] -= D::c[oppPop][2] * collidedCell[oppPop];
-//        }
-//    }
-//
-//    localForce += deltaJ;
+    //    if (this->computesStat()) {
+    //        Cell<T, Descriptor> collidedCell(cellF);
+    //        BlockStatistics statsCopy(lattice.getInternalStatistics());
+    //        collidedCell.collide(statsCopy);
+    //
+    //        for (int iPop : solidDirections) {
+    //            int oppPop = indexTemplates::opposite<D>(iPop);
+    //            deltaJ[0] -= D::c[oppPop][0] * collidedCell[oppPop];
+    //            deltaJ[1] -= D::c[oppPop][1] * collidedCell[oppPop];
+    //            deltaJ[2] -= D::c[oppPop][2] * collidedCell[oppPop];
+    //        }
+    //    }
+    //
+    //    localForce += deltaJ;
     if (numNeumannNodes > 0) {
         neumannDensity /= numNeumannNodes;
         T oldRhoBar;

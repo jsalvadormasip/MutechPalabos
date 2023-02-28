@@ -36,41 +36,38 @@ using namespace plb::descriptors;
 #define CURVED_BOUNDARIES_SHAPES_H
 
 template <typename Real>
-TriangleSet<Real> *generateEllipsoid(Array<Real, 3> &center, Real a, Real b,
-                                     Real c, Real dx = 1.) {
+TriangleSet<Real> *generateEllipsoid(Array<Real, 3> &center, Real a, Real b, Real c, Real dx = 1.)
+{
     Real p = 2.0;  // 1.6075;
     Real approxSurface =
-        4. * M_PI *
-        pow(1. / 3. * (pow(a * b, p) + pow(a * c, p) + pow(b * c, p)), 1. / p);
+        4. * M_PI * pow(1. / 3. * (pow(a * b, p) + pow(a * c, p) + pow(b * c, p)), 1. / p);
     approxSurface /= (dx * dx);
-    TriangleSet<Real> sphere =
-        constructSphere<Real>(Array<Real, 3>(0, 0, 0), 1., approxSurface);
+    TriangleSet<Real> sphere = constructSphere<Real>(Array<Real, 3>(0, 0, 0), 1., approxSurface);
     sphere.scale(a, b, c);
     sphere.translate(center);
     return sphere.clone();
 }
 template <typename Real>
-TriangleSet<Real> *generateTwoEllipsoid(Array<Real, 3> &center, Real a, Real b,
-                                     Real c, Real dx = 1.) {
+TriangleSet<Real> *generateTwoEllipsoid(
+    Array<Real, 3> &center, Real a, Real b, Real c, Real dx = 1.)
+{
     Real p = 2.0;
     Real approxSurface =
-        4. * M_PI *
-        pow(1. / 3. * (pow(a * b, p) + pow(a * c, p) + pow(b * c, p)), 1. / p);
+        4. * M_PI * pow(1. / 3. * (pow(a * b, p) + pow(a * c, p) + pow(b * c, p)), 1. / p);
     approxSurface /= (dx * dx);
-    TriangleSet<Real> sphere =
-        constructSphere<Real>(Array<Real, 3>(0, 0, 0), 1., approxSurface);
-    auto& sphere2 = *sphere.clone();
+    TriangleSet<Real> sphere = constructSphere<Real>(Array<Real, 3>(0, 0, 0), 1., approxSurface);
+    auto &sphere2 = *sphere.clone();
     sphere.scale(a, b, c);
     sphere2.scale(a, b, c);
     sphere.translate(center);
-    sphere2.translate(center+Array<Real,3>(5.0*a,.1,.0));
+    sphere2.translate(center + Array<Real, 3>(5.0 * a, .1, .0));
     sphere.append(sphere2);
     return sphere.clone();
 }
 
 template <typename Real>
-TriangleSet<Real> *readObstacle(Array<Real, 3> &center, Real a, Real b,
-                                     Real c, Real scale = 1.) {
+TriangleSet<Real> *readObstacle(Array<Real, 3> &center, Real a, Real b, Real c, Real scale = 1.)
+{
     Real p = 2.0;
     TriangleSet<Real> obstacle("curvedBoundaries.stl");
     // Place the obstacle in the correct place in the simulation domain.
@@ -80,10 +77,11 @@ TriangleSet<Real> *readObstacle(Array<Real, 3> &center, Real a, Real b,
     // the point, say (0, 0, 0), then the following variable
     // "obstacleCenter" must be set to (0, 0, 0) manually.
     Cuboid<Real> bCuboid = obstacle.getBoundingCuboid();
-    Array<Real,3> obstacleCenter = (Real) 0.5 * (bCuboid.lowerLeftCorner + bCuboid.upperRightCorner);
+    Array<Real, 3> obstacleCenter =
+        (Real)0.5 * (bCuboid.lowerLeftCorner + bCuboid.upperRightCorner);
     obstacle.translate(-obstacleCenter);
     obstacle.scale(scale);
-    obstacle.rotate(-M_PI/4.,0,0);
+    obstacle.rotate(-M_PI / 4., 0, 0);
     obstacle.scale(a, b, c);
     obstacle.translate(center);
     return obstacle.clone();

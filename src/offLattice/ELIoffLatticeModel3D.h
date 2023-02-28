@@ -1,35 +1,35 @@
 /* This file is part of the Palabos library.
-*
-* The Palabos softare is developed since 2011 by FlowKit-Numeca Group Sarl
-* (Switzerland) and the University of Geneva (Switzerland), which jointly
-* own the IP rights for most of the code base. Since October 2019, the
-* Palabos project is maintained by the University of Geneva and accepts
-* source code contributions from the community.
-*
-* Contact:
-* Jonas Latt
-* Computer Science Department
-* University of Geneva
-* 7 Route de Drize
-* 1227 Carouge, Switzerland
-* jonas.latt@unige.ch
-*
-* The most recent release of Palabos can be downloaded at
-* <https://palabos.unige.ch/>
-*
-* The library Palabos is free software: you can redistribute it and/or
-* modify it under the terms of the GNU Affero General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
-*
-* The library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ *
+ * The Palabos softare is developed since 2011 by FlowKit-Numeca Group Sarl
+ * (Switzerland) and the University of Geneva (Switzerland), which jointly
+ * own the IP rights for most of the code base. Since October 2019, the
+ * Palabos project is maintained by the University of Geneva and accepts
+ * source code contributions from the community.
+ *
+ * Contact:
+ * Jonas Latt
+ * Computer Science Department
+ * University of Geneva
+ * 7 Route de Drize
+ * 1227 Carouge, Switzerland
+ * jonas.latt@unige.ch
+ *
+ * The most recent release of Palabos can be downloaded at
+ * <https://palabos.unige.ch/>
+ *
+ * The library Palabos is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * The library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef ELI_OFF_LATTICE_MODEL_3D_H
 #define ELI_OFF_LATTICE_MODEL_3D_H
@@ -44,17 +44,17 @@
 namespace plb {
 
 /**
-* This class implements the ELI infinite class of directional (link-wise) schemes.
+ * This class implements the ELI infinite class of directional (link-wise) schemes.
  * Some schemes are named, e.g. ELIUL, ELIULT, ELIFL, others are not and can defined by explicitly
  * providing the alpha- and K- parameters to the constructor using the class LIgeneric.
-*
-* @tparam T
-* @tparam Descriptor
+ *
+ * @tparam T
+ * @tparam Descriptor
  */
 template <typename T, template <typename U> class Descriptor>
-class ELIModels3D : public OffLatticeModel3D<T, Array<T, 3> > {
+class ELIModels3D : public OffLatticeModel3D<T, Array<T, 3>> {
 public:
-    ELIModels3D(BoundaryShape3D<T, Array<T, 3> > *shape_, int flowType_);
+    ELIModels3D(BoundaryShape3D<T, Array<T, 3>> *shape_, int flowType_);
     ELIModels3D<T, Descriptor> *clone() const override = 0;
     [[nodiscard]] plint getNumNeighbors() const override;
     [[nodiscard]] bool isExtrapolated() const override;
@@ -98,19 +98,19 @@ private:
         {
             return dryNodes;
         }
-        [[nodiscard]] std::vector<std::vector<int> > const &getDryNodeFluidDirections() const
+        [[nodiscard]] std::vector<std::vector<int>> const &getDryNodeFluidDirections() const
         {
             return dryNodeFluidDirections;
         }
-        std::vector<std::vector<int> > &getDryNodeFluidDirections()
+        std::vector<std::vector<int>> &getDryNodeFluidDirections()
         {
             return dryNodeFluidDirections;
         }
-        [[nodiscard]] std::vector<std::vector<plint> > const &getDryNodeIds() const
+        [[nodiscard]] std::vector<std::vector<plint>> const &getDryNodeIds() const
         {
             return dryNodeIds;
         }
-        std::vector<std::vector<plint> > &getDryNodeIds()
+        std::vector<std::vector<plint>> &getDryNodeIds()
         {
             return dryNodeIds;
         }
@@ -129,11 +129,11 @@ private:
 
     private:
         std::vector<Dot3D> dryNodes;
-        std::vector<std::vector<int> > dryNodeFluidDirections;
-        std::vector<std::vector<plint> > dryNodeIds;
+        std::vector<std::vector<int>> dryNodeFluidDirections;
+        std::vector<std::vector<plint>> dryNodeIds;
         Array<T, 3> localForce;
     };
-    std::tuple<T,Array<T,3>> getRhoBarJ(
+    std::tuple<T, Array<T, 3>> getRhoBarJ(
         const BlockLattice3D<T, Descriptor> &lattice, const Dot3D &guoNode,
         const std::vector<AtomicBlock3D *> &args, const Dot3D &fluidDirection,
         const Cell<T, Descriptor> &cellF) const;
@@ -144,10 +144,9 @@ private:
 template <typename T, template <typename U> class D>
 class ELIUL : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
-    ELIUL<T,D>* clone() const override;
+    ELIUL<T, D> *clone() const override;
     inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
-
 
 /**
  * See (Marson, 2022) pag 101, ELIUL was firstly introduced in (Marson et al., 2021)
@@ -165,7 +164,7 @@ class ELIUL : public ELIModels3D<T, D> {
 template <typename T, template <typename U> class D>
 class ELIULC : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
-    ELIULC<T,D>* clone() const override;
+    ELIULC<T, D> *clone() const override;
     inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
 
@@ -189,10 +188,9 @@ class ELIULC : public ELIModels3D<T, D> {
 template <typename T, template <typename U> class D>
 class ELIULK1 : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
-    ELIULK1<T,D>* clone() const override;
+    ELIULK1<T, D> *clone() const override;
     inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
-
 
 /**
  * See (Marson, 2022) pag 102, ELIUL was firstly introduced in (Marson et al., 2021)
@@ -209,7 +207,7 @@ class ELIULK1 : public ELIModels3D<T, D> {
 template <typename T, template <typename U> class D>
 class ELIULK3 : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
-    ELIULK3<T,D>* clone() const override;
+    ELIULK3<T, D> *clone() const override;
     inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
 
@@ -228,16 +226,16 @@ class ELIULK3 : public ELIModels3D<T, D> {
 template <typename T, template <typename U> class D>
 class ELIULK4 : public ELIModels3D<T, D> {
     using ELIModels3D<T, D>::ELIModels3D;
-    ELIULK4<T,D>* clone() const override;
+    ELIULK4<T, D> *clone() const override;
     inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
 };
 
-//#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus > 201703L)
-//template<typename F>
-//concept object = requires(F f){
-//                     std::is_object_v<F>(f);
-//                 };
-//#endif
+// #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus > 201703L)
+// template<typename F>
+// concept object = requires(F f){
+//                      std::is_object_v<F>(f);
+//                  };
+// #endif
 
 template <typename T, template <typename U> class D, typename Function>
 #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus > 201703L)
@@ -245,13 +243,13 @@ template <typename T, template <typename U> class D, typename Function>
 #endif
 class ELIgeneric : public ELIModels3D<T, D> {
 public:
-    ELIgeneric(BoundaryShape3D<T, Array<T, 3> > *shape_, int flowType_, Function coefficients_);
+    ELIgeneric(BoundaryShape3D<T, Array<T, 3>> *shape_, int flowType_, Function coefficients_);
+
 private:
-    ELIgeneric<T,D,Function>* clone() const final;
+    ELIgeneric<T, D, Function> *clone() const final;
     inline std::array<T, 5> eliCoefficients(T q, T tauPlus, T tauMinus) const final;
     Function compute_coefficients;
 };
 
-}// namespace plb
+}  // namespace plb
 #endif  // ELI_OFF_LATTICE_MODEL_3D_H
-

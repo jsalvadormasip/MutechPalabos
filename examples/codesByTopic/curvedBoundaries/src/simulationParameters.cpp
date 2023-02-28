@@ -29,8 +29,8 @@
 #include <cassert>  // reinclude the header to update the definition of assert()
 namespace incompressible_simulation_parameters {
 template <typename Real>
-NonDimensional<Real>::NonDimensional(Real l_ref, Real rho_f)
-    : l_ref(l_ref), rho_f(rho_f) {
+NonDimensional<Real>::NonDimensional(Real l_ref, Real rho_f) : l_ref(l_ref), rho_f(rho_f)
+{
     re = 0;
     ma = -1;
     ma_is_set = false;
@@ -43,7 +43,8 @@ NonDimensional<Real>::NonDimensional(Real l_ref, Real rho_f)
 }
 
 template <typename Real>
-NonDimensional<Real>::NonDimensional() : l_ref(1), rho_f(1) {
+NonDimensional<Real>::NonDimensional() : l_ref(1), rho_f(1)
+{
     re = 0;
     ma = -1;
     ma_is_set = false;
@@ -64,8 +65,8 @@ NonDimensional<Real>::NonDimensional() : l_ref(1), rho_f(1) {
  * @param lz_
  */
 template <typename Real>
-NonDimensional<Real> NonDimensional<Real>::initReLxLyLz(Real re_, Real lx_,
-                                                          Real ly_, Real lz_) {
+NonDimensional<Real> NonDimensional<Real>::initReLxLyLz(Real re_, Real lx_, Real ly_, Real lz_)
+{
     re = re_;
     lx = lx_;
     ly = ly_;
@@ -75,9 +76,9 @@ NonDimensional<Real> NonDimensional<Real>::initReLxLyLz(Real re_, Real lx_,
 }
 
 template <typename Real>
-NonDimensional<Real> NonDimensional<Real>::initReMaLxLyLz(Real re_, Real ma_,
-                                                             Real lx_, Real ly_,
-                                                             Real lz_) {
+NonDimensional<Real> NonDimensional<Real>::initReMaLxLyLz(
+    Real re_, Real ma_, Real lx_, Real ly_, Real lz_)
+{
     re = re_;
     lx = lx_;
     ly = ly_;
@@ -90,7 +91,8 @@ NonDimensional<Real> NonDimensional<Real>::initReMaLxLyLz(Real re_, Real ma_,
 
 template <typename Real>
 NonDimensional<Real> NonDimensional<Real>::initReLxLyLzRhos(
-    Real re_, Real lx_, Real ly_, Real lz_, Real rho_solid_) {
+    Real re_, Real lx_, Real ly_, Real lz_, Real rho_solid_)
+{
     re = re_;
     lx = lx_;
     ly = ly_;
@@ -102,29 +104,26 @@ NonDimensional<Real> NonDimensional<Real>::initReLxLyLzRhos(
 }
 
 template <typename Real>
-NonDimensional<Real> NonDimensional<Real>::printParameters() const {
+NonDimensional<Real> NonDimensional<Real>::printParameters() const
+{
     plb::pcout << "- DIMENSIONLESS PARAMETERS ------" << std::endl;
     plb::pcout << std::setw(12) << "re:" << std::setw(12) << re << std::endl;
     plb::pcout << std::setw(12) << "ma:" << std::setw(12) << ma << std::endl;
-    plb::pcout << std::setw(12) << "ma_is_set:" << std::setw(12) << ma_is_set
-               << std::endl;
-    plb::pcout << std::setw(12) << "rho_solid:" << std::setw(12) << rho_solid
-               << std::endl;
-    plb::pcout << std::setw(12) << "rho_is_set:" << std::setw(12) << rho_is_set
-               << std::endl;
+    plb::pcout << std::setw(12) << "ma_is_set:" << std::setw(12) << ma_is_set << std::endl;
+    plb::pcout << std::setw(12) << "rho_solid:" << std::setw(12) << rho_solid << std::endl;
+    plb::pcout << std::setw(12) << "rho_is_set:" << std::setw(12) << rho_is_set << std::endl;
     plb::pcout << std::setw(12) << "lx:" << std::setw(12) << lx << std::endl;
     plb::pcout << std::setw(12) << "ly:" << std::setw(12) << ly << std::endl;
     plb::pcout << std::setw(12) << "lz:" << std::setw(12) << lz << std::endl;
-    plb::pcout << std::setw(12) << "l_ref:" << std::setw(12) << l_ref
-               << std::endl;
-    plb::pcout << std::setw(12) << "rho_f:" << std::setw(12) << rho_f
-               << std::endl;
+    plb::pcout << std::setw(12) << "l_ref:" << std::setw(12) << l_ref << std::endl;
+    plb::pcout << std::setw(12) << "rho_f:" << std::setw(12) << rho_f << std::endl;
     plb::pcout << std::endl;
     return *this;
 }
 
 template <typename Real, typename Int>
-Numerics<Real, Int>::Numerics() {
+Numerics<Real, Int>::Numerics()
+{
     tau = -1;
     u_lb = -1;
     l_ref_lu = -1;
@@ -139,9 +138,9 @@ Numerics<Real, Int>::Numerics() {
 }
 
 template <typename Real, typename Int>
-Numerics<Real, Int>& Numerics<Real, Int>::initLU(Int l_ref_lu_, Real tau_lu_,
-                                                  Real u_lb_, Int lx_lu,
-                                                  Int ly_lu, Int lz_lu) {
+Numerics<Real, Int> &Numerics<Real, Int>::initLU(
+    Int l_ref_lu_, Real tau_lu_, Real u_lb_, Int lx_lu, Int ly_lu, Int lz_lu)
+{
     l_ref_lu = l_ref_lu_;
     tau = tau_lu_;
     u_lb = u_lb_;
@@ -149,17 +148,16 @@ Numerics<Real, Int>& Numerics<Real, Int>::initLU(Int l_ref_lu_, Real tau_lu_,
     ly_domain = ly_lu;
     lz_domain = lz_lu;
     is_initialized = true;
-    dimless->initReLxLyLz(l_ref_lu_ * u_lb_ / getNulu(tau_lu_),
-                          lx_lu / l_ref_lu_, ly_lu / l_ref_lu_,
-                          lz_lu / l_ref_lu_);
+    dimless->initReLxLyLz(
+        l_ref_lu_ * u_lb_ / getNulu(tau_lu_), lx_lu / l_ref_lu_, ly_lu / l_ref_lu_,
+        lz_lu / l_ref_lu_);
     return *this;
 }
 
 template <typename Real, typename Int>
-Numerics<Real, Int>& Numerics<Real, Int>::initReTauUlb(Real re, Real tau_lu_,
-                                                          Real u_lb_, Int lx_lu,
-                                                          Int ly_lu,
-                                                          Int lz_lu) {
+Numerics<Real, Int> &Numerics<Real, Int>::initReTauUlb(
+    Real re, Real tau_lu_, Real u_lb_, Int lx_lu, Int ly_lu, Int lz_lu)
+{
     l_ref_lu = re * getNulu(tau_lu_) / u_lb_;
     setTau(tau_lu_);
     setUlb(u_lb_);
@@ -167,16 +165,14 @@ Numerics<Real, Int>& Numerics<Real, Int>::initReTauUlb(Real re, Real tau_lu_,
     ly_domain = ly_lu;
     lz_domain = lz_lu;
     is_initialized = true;
-    dimless->initReLxLyLz(re, lx_lu / l_ref_lu, ly_lu / l_ref_lu,
-                          lz_lu / l_ref_lu);
+    dimless->initReLxLyLz(re, lx_lu / l_ref_lu, ly_lu / l_ref_lu, lz_lu / l_ref_lu);
     return *this;
 }
 
 template <typename Real, typename Int>
-Numerics<Real, Int>& Numerics<Real, Int>::initLrefReUlb(Int l_ref_lu_,
-                                                           Real re, Real u_lb_,
-                                                           Int lx_lu, Int ly_lu,
-                                                           Int lz_lu) {
+Numerics<Real, Int> &Numerics<Real, Int>::initLrefReUlb(
+    Int l_ref_lu_, Real re, Real u_lb_, Int lx_lu, Int ly_lu, Int lz_lu)
+{
     l_ref_lu = l_ref_lu_;
     setTau(3. * (u_lb_ * l_ref_lu_ / re) + 0.5);
     setUlb(u_lb_);
@@ -184,16 +180,15 @@ Numerics<Real, Int>& Numerics<Real, Int>::initLrefReUlb(Int l_ref_lu_,
     ly_domain = ly_lu;
     lz_domain = lz_lu;
     is_initialized = true;
-    dimless->initReLxLyLz(l_ref_lu_ * u_lb_ / getNulu(tau), lx_lu / l_ref_lu_,
-                          ly_lu / l_ref_lu_, lz_lu / l_ref_lu_);
+    dimless->initReLxLyLz(
+        l_ref_lu_ * u_lb_ / getNulu(tau), lx_lu / l_ref_lu_, ly_lu / l_ref_lu_, lz_lu / l_ref_lu_);
     return *this;
 }
 
 template <typename Real, typename Int>
-Numerics<Real, Int>& Numerics<Real, Int>::initLrefReTau(Int l_ref_lu_,
-                                                           Real re, Real tau_,
-                                                           Int lx_lu, Int ly_lu,
-                                                           Int lz_lu) {
+Numerics<Real, Int> &Numerics<Real, Int>::initLrefReTau(
+    Int l_ref_lu_, Real re, Real tau_, Int lx_lu, Int ly_lu, Int lz_lu)
+{
     l_ref_lu = l_ref_lu_;
     setTau(tau_);
     setUlb(re * getNulu(tau_) / l_ref_lu_);
@@ -201,8 +196,8 @@ Numerics<Real, Int>& Numerics<Real, Int>::initLrefReTau(Int l_ref_lu_,
     ly_domain = ly_lu;
     lz_domain = lz_lu;
     is_initialized = true;
-    dimless->initReLxLyLz(l_ref_lu_ * u_lb / getNulu(tau), lx_lu / l_ref_lu_,
-                          ly_lu / l_ref_lu_, lz_lu / l_ref_lu_);
+    dimless->initReLxLyLz(
+        l_ref_lu_ * u_lb / getNulu(tau), lx_lu / l_ref_lu_, ly_lu / l_ref_lu_, lz_lu / l_ref_lu_);
     return *this;
 }
 
@@ -215,8 +210,9 @@ Numerics<Real, Int>& Numerics<Real, Int>::initLrefReTau(Int l_ref_lu_,
 /// @param tau_ if given > 0, it overrides the Ma number in the dimless_
 /// @return *this
 template <typename Real, typename Int>
-Numerics<Real, Int>& Numerics<Real, Int>::initLrefluNodim(
-    Int l_ref_lu_, NonDimensional<Real>* dimless_, Real u_lb_, Real tau_) {
+Numerics<Real, Int> &Numerics<Real, Int>::initLrefluNodim(
+    Int l_ref_lu_, NonDimensional<Real> *dimless_, Real u_lb_, Real tau_)
+{
     assert(dimless_->initialized());
     l_ref_lu = l_ref_lu_;
     if (u_lb_ > getEpsilon(1)) {
@@ -230,7 +226,8 @@ Numerics<Real, Int>& Numerics<Real, Int>::initLrefluNodim(
         setUlb(dimless_->getRe() * getNulu(tau_) / l_ref_lu_);
         setTau(tau_);
     } else {
-        pcout << "Detected invalid tau value, trying to recompute it from Ma number..."<<std::endl;
+        pcout << "Detected invalid tau value, trying to recompute it from Ma number..."
+              << std::endl;
         setUlb(dimless_->getMa() * getCs());
         setTau(getCs2Inv() * (u_lb * l_ref_lu_ / dimless_->getRe()) + 0.5);
     }
@@ -250,23 +247,17 @@ Numerics<Real, Int>& Numerics<Real, Int>::initLrefluNodim(
  * @return *this
  */
 template <typename Real, typename Int>
-Numerics<Real, Int>& Numerics<Real, Int>::printParameters() {
+Numerics<Real, Int> &Numerics<Real, Int>::printParameters()
+{
     plb::pcout << "- NUMERICAL PARAMETERS ------" << std::endl;
     plb::pcout << std::setw(12) << "tau:" << std::setw(12) << tau << std::endl;
-    plb::pcout << std::setw(12) << "u_lb:" << std::setw(12) << u_lb
-               << std::endl;
-    plb::pcout << std::setw(12) << "l_ref_lu:" << std::setw(12) << l_ref_lu
-               << std::endl;
-    plb::pcout << std::setw(12) << "lx_domain:" << std::setw(12) << lx_domain
-               << std::endl;
-    plb::pcout << std::setw(12) << "ly_domain:" << std::setw(12) << ly_domain
-               << std::endl;
-    plb::pcout << std::setw(12) << "lz_domain:" << std::setw(12) << lz_domain
-               << std::endl;
-    plb::pcout << std::setw(12) << "lz_domain:" << std::setw(12) << lz_domain
-               << std::endl;
-    plb::pcout << std::setw(12) << "max_iter:" << std::setw(12) << max_iter
-               << std::endl;
+    plb::pcout << std::setw(12) << "u_lb:" << std::setw(12) << u_lb << std::endl;
+    plb::pcout << std::setw(12) << "l_ref_lu:" << std::setw(12) << l_ref_lu << std::endl;
+    plb::pcout << std::setw(12) << "lx_domain:" << std::setw(12) << lx_domain << std::endl;
+    plb::pcout << std::setw(12) << "ly_domain:" << std::setw(12) << ly_domain << std::endl;
+    plb::pcout << std::setw(12) << "lz_domain:" << std::setw(12) << lz_domain << std::endl;
+    plb::pcout << std::setw(12) << "lz_domain:" << std::setw(12) << lz_domain << std::endl;
+    plb::pcout << std::setw(12) << "max_iter:" << std::setw(12) << max_iter << std::endl;
     plb::pcout << std::setw(12) << "cs2:" << std::setw(12) << cs2 << std::endl;
     plb::pcout << std::endl;
     return *this;
@@ -279,25 +270,19 @@ Numerics<Real, Int>& Numerics<Real, Int>::printParameters() {
  * @return *this
  */
 template <typename Real, typename Int>
-Numerics<Real, Int>& Numerics<Real, Int>::writeParametersLog() const {
-    std::string fullName =
-        global::directories().getLogOutDir() + "lattice_units_Log.dat";
+Numerics<Real, Int> &Numerics<Real, Int>::writeParametersLog() const
+{
+    std::string fullName = global::directories().getLogOutDir() + "lattice_units_Log.dat";
     plb_ofstream ofile(fullName.c_str());
     ofile << "- NUMERICAL PARAMETERS ------" << std::endl;
     ofile << std::setw(12) << "tau:" << std::setw(12) << tau << std::endl;
     ofile << std::setw(12) << "u_lb:" << std::setw(12) << u_lb << std::endl;
-    ofile << std::setw(12) << "l_ref_lu:" << std::setw(12) << l_ref_lu
-          << std::endl;
-    ofile << std::setw(12) << "lx_domain:" << std::setw(12) << lx_domain
-          << std::endl;
-    ofile << std::setw(12) << "ly_domain:" << std::setw(12) << ly_domain
-          << std::endl;
-    ofile << std::setw(12) << "lz_domain:" << std::setw(12) << lz_domain
-          << std::endl;
-    ofile << std::setw(12) << "lz_domain:" << std::setw(12) << lz_domain
-          << std::endl;
-    ofile << std::setw(12) << "max_iter:" << std::setw(12) << max_iter
-          << std::endl;
+    ofile << std::setw(12) << "l_ref_lu:" << std::setw(12) << l_ref_lu << std::endl;
+    ofile << std::setw(12) << "lx_domain:" << std::setw(12) << lx_domain << std::endl;
+    ofile << std::setw(12) << "ly_domain:" << std::setw(12) << ly_domain << std::endl;
+    ofile << std::setw(12) << "lz_domain:" << std::setw(12) << lz_domain << std::endl;
+    ofile << std::setw(12) << "lz_domain:" << std::setw(12) << lz_domain << std::endl;
+    ofile << std::setw(12) << "max_iter:" << std::setw(12) << max_iter << std::endl;
     ofile << std::setw(12) << "cs2:" << std::setw(12) << cs2 << std::endl;
     ofile << std::endl;
     return *this;
@@ -314,13 +299,15 @@ Numerics<Real, Int>& Numerics<Real, Int>::writeParametersLog() const {
  * @return *this
  */
 template <typename Real, typename Int>
-IncomprFlowParam<Real> Numerics<Real, Int>::getIncomprFlowParam() const {
+IncomprFlowParam<Real> Numerics<Real, Int>::getIncomprFlowParam() const
+{
     assert(dimless->initialized() && initialized());
-    return IncomprFlowParam<Real>(getUlb(),                     // uMax
-                                  dimless->getRe(),              // Re
-                                  util::roundToInt(getLref()),  // N
-                                  dimless->getLx(),              // lx
-                                  dimless->getLy(),              // ly
-                                  dimless->getLz());
+    return IncomprFlowParam<Real>(
+        getUlb(),                     // uMax
+        dimless->getRe(),             // Re
+        util::roundToInt(getLref()),  // N
+        dimless->getLx(),             // lx
+        dimless->getLy(),             // ly
+        dimless->getLz());
 }
 }  // namespace incompressible_simulation_parameters

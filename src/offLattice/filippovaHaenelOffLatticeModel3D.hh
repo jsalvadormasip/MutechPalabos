@@ -238,7 +238,8 @@ void FilippovaHaenelLocalModel3D<T, Descriptor>::cellCompletion(
         Array<T, 3> wallNormal;
 
         if (args.empty()) {
-            plbLogicError("FilippovaHaenelLocalModel3D requires externally "
+            plbLogicError(
+                "FilippovaHaenelLocalModel3D requires externally "
                 "provided rhoBar and j fields!");
         } else {
             if ((plint)args.size() == 1) {
@@ -314,15 +315,17 @@ void FilippovaHaenelLocalModel3D<T, Descriptor>::cellCompletion(
             kappa = omega * (2.0 * delta - 1.0);
         }
 
-        T c_i_wf_j_f_j = D::c[i_solid][0] * (wf_j[0] - f_j[0]) + D::c[i_solid][1] * (wf_j[1] - f_j[1])
+        T c_i_wf_j_f_j = D::c[i_solid][0] * (wf_j[0] - f_j[0])
+                         + D::c[i_solid][1] * (wf_j[1] - f_j[1])
                          + D::c[i_solid][2] * (wf_j[2] - f_j[2]);
 
-        T c_i_w_j = D::c[i_solid][0] * w_j[0] + D::c[i_solid][1] * w_j[1] + D::c[i_solid][2] * w_j[2];
+        T c_i_w_j =
+            D::c[i_solid][0] * w_j[0] + D::c[i_solid][1] * w_j[1] + D::c[i_solid][2] * w_j[2];
 
         T f_ieq = f_cell.getDynamics().computeEquilibrium(i_solid, f_rhoBar, f_j, f_jSqr)
                   + D::t[i_solid] * D::invCs2 * c_i_wf_j_f_j;
         f_cell[i_fluid] = (1.0 - kappa) * s_cell[i_solid] + kappa * f_ieq
-                       + 2.0 * D::t[i_solid] * D::invCs2 * c_i_w_j;
+                          + 2.0 * D::t[i_solid] * D::invCs2 * c_i_w_j;
 
         localForce[0] += D::c[i_solid][0] * (s_cell[i_solid] + f_cell[i_fluid]);
         localForce[1] += D::c[i_solid][1] * (s_cell[i_solid] + f_cell[i_fluid]);

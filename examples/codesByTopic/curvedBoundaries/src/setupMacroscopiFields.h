@@ -32,56 +32,56 @@ using namespace plb;
 using namespace plb::descriptors;
 /// Velocity on the parabolic Poiseuille profile
 
-
-
 // COMPUTE ANALYTICAL DRAG
 // https://doi.org/10.1016/0032-5910(89)80008-7
-template<typename T>
-auto compute_drag_coeff = [] (T Re, T phi = 1/*for a sphere phi = 1*/) {
-    T A = exp( 2.3288 - 6.4581*phi + 2.4486*(phi*phi) );
-    T B = 0.0964 + 0.5565*phi;
-    T C = exp( 4.905 - 13.8944*phi + 18.4222*(phi*phi) - 10.2599*(phi*phi*phi) );
-    T D = exp( 1.4681 + 12.2584*phi - 20.7322*(phi*phi) + 15.8855*(phi*phi*phi) );
-    T Cd = (24.0/Re)*( 1 + A* std::pow(Re, B) ) + ( C/(1 + (D/Re)) );
+template <typename T>
+auto compute_drag_coeff = [](T Re, T phi = 1 /*for a sphere phi = 1*/) {
+    T A = exp(2.3288 - 6.4581 * phi + 2.4486 * (phi * phi));
+    T B = 0.0964 + 0.5565 * phi;
+    T C = exp(4.905 - 13.8944 * phi + 18.4222 * (phi * phi) - 10.2599 * (phi * phi * phi));
+    T D = exp(1.4681 + 12.2584 * phi - 20.7322 * (phi * phi) + 15.8855 * (phi * phi * phi));
+    T Cd = (24.0 / Re) * (1 + A * std::pow(Re, B)) + (C / (1 + (D / Re)));
     return Cd;
 };
 
-
 template <typename Real>
-Real poiseuilleVelocity(plint iY, IncomprFlowParam<Real> const& parameters) {
+Real poiseuilleVelocity(plint iY, IncomprFlowParam<Real> const &parameters)
+{
     Real y = (Real)iY / (Real)parameters.getNy();
     return 4. * parameters.getLatticeU() * (y - y * y);
 }
 
 /// Linearly decreasing pressure profile
 template <typename Real>
-Real poiseuillePressure(plint iX, IncomprFlowParam<Real> const& parameters) {
+Real poiseuillePressure(plint iX, IncomprFlowParam<Real> const &parameters)
+{
     Real Lx = parameters.getNx() - 1;
     Real Ly = parameters.getNy() - 1;
-    return 8. * parameters.getLatticeNu() * parameters.getLatticeU() /
-           (Ly * Ly) * (Lx / (Real)2 - (Real)iX);
+    return 8. * parameters.getLatticeNu() * parameters.getLatticeU() / (Ly * Ly)
+           * (Lx / (Real)2 - (Real)iX);
 }
 
 /// Convert pressure to density according to ideal gas law
 template <typename Real, template <typename U> class Descriptor>
-Real poiseuilleDensity(plint iX, IncomprFlowParam<Real> const& parameters) {
-    return poiseuillePressure(iX, parameters) * Descriptor<Real>::invCs2 +
-           (Real)1;
+Real poiseuilleDensity(plint iX, IncomprFlowParam<Real> const &parameters)
+{
+    return poiseuillePressure(iX, parameters) * Descriptor<Real>::invCs2 + (Real)1;
 }
 
 /// A functional, used to initialize the velocity for the boundary conditions
 template <typename Real>
 class PoiseuilleVelocity {
 public:
-    explicit PoiseuilleVelocity(IncomprFlowParam<Real> parameters_)
-        : parameters(parameters_) {}
+    explicit PoiseuilleVelocity(IncomprFlowParam<Real> parameters_) : parameters(parameters_) { }
     // 2D case
-    void operator()(plint iX, plint iY, Array<Real, 2>& u) const {
+    void operator()(plint iX, plint iY, Array<Real, 2> &u) const
+    {
         u[0] = poiseuilleVelocity(iY, parameters);
         u[1] = Real();
     }
     // 3D case
-    void operator()(plint iX, plint iY, plint iZ, Array<Real, 3>& u) const {
+    void operator()(plint iX, plint iY, plint iZ, Array<Real, 3> &u) const
+    {
         u[0] = poiseuilleVelocity(iY, parameters);
         u[1] = Real();
         u[2] = Real();
@@ -95,13 +95,14 @@ private:
 template <typename Real>
 class ConstantVelocity {
 public:
-    explicit ConstantVelocity(IncomprFlowParam<Real> parameters_)
-        : parameters(parameters_) {}
-    void operator()(plint iX, plint iY, Array<Real, 2>& u) const {
+    explicit ConstantVelocity(IncomprFlowParam<Real> parameters_) : parameters(parameters_) { }
+    void operator()(plint iX, plint iY, Array<Real, 2> &u) const
+    {
         u[0] = parameters.getLatticeU();
         u[1] = Real();
     }
-    void operator()(plint iX, plint iY, plint iZ, Array<Real, 3>& u) const {
+    void operator()(plint iX, plint iY, plint iZ, Array<Real, 3> &u) const
+    {
         u[0] = parameters.getLatticeU();
         u[1] = Real();
         u[2] = Real();
@@ -115,9 +116,15 @@ private:
 template <typename T>
 class ConstantDensity {
 public:
-    explicit ConstantDensity(T density_) : density(density_) {}
-    T operator()(plint iX, plint iY) const { return density; }
-    T operator()(plint iX, plint iY, plint iZ) const { return density; }
+    explicit ConstantDensity(T density_) : density(density_) { }
+    T operator()(plint iX, plint iY) const
+    {
+        return density;
+    }
+    T operator()(plint iX, plint iY, plint iZ) const
+    {
+        return density;
+    }
 
 private:
     T density;
@@ -128,15 +135,17 @@ private:
 template <typename Real, template <typename U> class Descriptor>
 class PoiseuilleVelocityAndDensity {
 public:
-    explicit PoiseuilleVelocityAndDensity(IncomprFlowParam<Real> parameters_)
-        : parameters(parameters_) {}
-    void operator()(plint iX, plint iY, Real& rho, Array<Real, 2>& u) const {
+    explicit PoiseuilleVelocityAndDensity(IncomprFlowParam<Real> parameters_) :
+        parameters(parameters_)
+    { }
+    void operator()(plint iX, plint iY, Real &rho, Array<Real, 2> &u) const
+    {
         rho = poiseuilleDensity<Real, Descriptor>(iX, parameters);
         u[0] = poiseuilleVelocity(iY, parameters);
         u[1] = Real();
     }
-    void operator()(plint iX, plint iY, plint iZ, Real& rho,
-                    Array<Real, 3>& u) const {
+    void operator()(plint iX, plint iY, plint iZ, Real &rho, Array<Real, 3> &u) const
+    {
         rho = poiseuilleDensity<Real, Descriptor>(iX, parameters);
         u[0] = poiseuilleVelocity(iY, parameters);
         u[1] = Real();
@@ -152,15 +161,17 @@ private:
 template <typename Real>
 class ConstantVelocityAndDensity {
 public:
-    explicit ConstantVelocityAndDensity(IncomprFlowParam<Real> parameters_)
-        : parameters(parameters_) {}
-    void operator()(plint iX, plint iY, Real& rho, Array<Real, 2>& u) const {
+    explicit ConstantVelocityAndDensity(IncomprFlowParam<Real> parameters_) :
+        parameters(parameters_)
+    { }
+    void operator()(plint iX, plint iY, Real &rho, Array<Real, 2> &u) const
+    {
         rho = 1.0;
         u[0] = parameters.getLatticeU();
         u[1] = Real();
     }
-    void operator()(plint iX, plint iY, plint iZ, Real& rho,
-                    Array<Real, 3>& u) const {
+    void operator()(plint iX, plint iY, plint iZ, Real &rho, Array<Real, 3> &u) const
+    {
         rho = 1.0;
         u[0] = parameters.getLatticeU();
         u[1] = Real();
@@ -176,12 +187,13 @@ private:
 template <typename Real, template <typename U> class Descriptor>
 class PoiseuilleDensity {
 public:
-    explicit PoiseuilleDensity(IncomprFlowParam<Real> parameters_)
-        : parameters(parameters_) {}
-    Real operator()(plint iX, plint iY) const {
+    explicit PoiseuilleDensity(IncomprFlowParam<Real> parameters_) : parameters(parameters_) { }
+    Real operator()(plint iX, plint iY) const
+    {
         return poiseuilleDensity<Real, Descriptor>(iX, parameters);
     }
-    Real operator()(plint iX, plint iY, plint iZ) const {
+    Real operator()(plint iX, plint iY, plint iZ) const
+    {
         return poiseuilleDensity<Real, Descriptor>(iX, parameters);
     }
 
