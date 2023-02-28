@@ -280,7 +280,7 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
 
     if (bcType == boundary::neumann || bcType == boundary::outflow) {
         integrateProcessingFunctional(
-            new CopyDensityFunctional3D<T, Descriptor, normalX, normalY, normalZ>, domain, lattice);
+            new CopyDensityFunctional3D<T, Descriptor, xNormal, yNormal, zNormal>, Box3D(x, x, y, y, z, z), lattice);
     }
 
     BoxProcessingFunctional3D_L<T, Descriptor> *functional =
@@ -581,7 +581,7 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
 
     if (bcType == boundary::neumann || bcType == boundary::outflow) {
         integrateProcessingFunctional(
-            new CopyDensityFunctional3D<T, Descriptor, normalX, normalY, normalZ>, domain, lattice);
+            new CopyDensityFunctional3D<T, Descriptor, xNormal, yNormal, zNormal>, Box3D(x, x, y, y, z, z), lattice);
     }
 
     BoxProcessingFunctional3D_L<T, Descriptor> *functional =
