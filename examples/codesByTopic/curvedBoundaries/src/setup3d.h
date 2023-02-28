@@ -285,10 +285,6 @@ auto inject_off_lattice_bc(
             abort();
     }
 
-//    FilippovaHaenelLocalModel3D<T, DESCRIPTOR> *model =
-//        new FilippovaHaenelLocalModel3D<T, DESCRIPTOR>(
-//            new TriangleFlowShape3D<ST, Array<T, 3> >(voxelizedDomain.getBoundary(), profiles),
-//            flowType);
     boundaryCondition =
         new OffLatticeBoundaryCondition3D<Real, Descriptor, Array3D>(
             offLatticeModel, *voxalized_domain, *target_lattice);
@@ -345,25 +341,17 @@ auto inject_on_lattice_bc(MultiBlockLattice3D<Real, Descriptor>* target_lattice,
     // integrates a data processors in the lattice for boundary conditions on
     // surfaces, edges and corners.
     onlatt_boundary_condition->setVelocityConditionOnBlockBoundaries(
-        *target_lattice, target_lattice->getBoundingBox());
-//    onlatt_boundary_condition->setVelocityConditionOnBlockBoundaries(
-//        *target_lattice, Box3D(0, nx - 1, 0, 0, 1, nz - 2), boundary::neumann);
-//    onlatt_boundary_condition->setVelocityConditionOnBlockBoundaries(
-//        *target_lattice, Box3D(0, nx - 1, ny - 1, ny - 1, 1, nz - 2), boundary::neumann);
-//    onlatt_boundary_condition->setPressureConditionOnBlockBoundaries(
-//        *target_lattice, outlet, boundary::density);
+        *target_lattice, Box3D(0, 0, 1, ny - 2, 1, nz - 2));
+    onlatt_boundary_condition->setPressureConditionOnBlockBoundaries(
+        *target_lattice, outlet, boundary::density);
 
-    // Define the value of the imposed velocity on all nodes which have previously been
-    //   defined to be velocity boundary nodes.
-//    setBoundaryVelocity(*target_lattice, inlet,
-//                        ConstantVelocity<Real>(parameters));
-    setBoundaryVelocity(*target_lattice, target_lattice->getBoundingBox().enlarge(1),
-                        AdaptiveVelocityProfileOfSphereInAChannel<Real>(parameters,spherePosition));
+    setBoundaryVelocity(*target_lattice, target_lattice->getBoundingBox(),
+                        ConstantVelocity<Real>(parameters));
     setBoundaryDensity(*target_lattice, outlet,
                        ConstantDensity<Real>(1.0));
-//    initializeAtEquilibrium(
-//        *target_lattice, target_lattice->getBoundingBox(),
-//        AdaptiveVelocityProfileOfSphereInAChannel<Real>(parameters,spherePosition));
+    initializeAtEquilibrium(
+        *target_lattice, target_lattice->getBoundingBox(),
+        ConstantVelocityAndDensity<Real>(parameters));
 
     return onlatt_boundary_condition;
 }

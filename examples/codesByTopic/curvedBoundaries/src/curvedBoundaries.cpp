@@ -170,15 +170,15 @@ int main(int argc, char *argv[]) {
     global::directories().setOutputDir(outdir);
     pcout << "The selected model is " << magic_enum::enum_name(kmin) << std::endl;
     // Define simulation parameters: we use two ad-hoc units helper
-    const Real re = 1;  // NB: Obstacle reynolds!
+    const Real re = 20;  // NB: Obstacle reynolds!
     sp::Numerics<Real, Int> lu;
     sp::NonDimensional<Real> dimless;
-    dimless.initReLxLyLz(re, 15, 7, 7);// the diameter is the reference length
+    dimless.initReLxLyLz(re, 12, 7, 7);// the diameter is the reference length
     dimless.printParameters();
     // initLrefluNodim initializes lu, getIncomprFlowParam() returns
     // the palabos structure IncomprFlowParam
     IncomprFlowParam<Real> parameters =
-        lu.initLrefluNodim(15/*resolution*/, &dimless, 0.05 /*u_lb*/,
+        lu.initLrefluNodim(25/*resolution*/, &dimless, 0.04 /*u_lb*/,
                            false /*tau, optional*/)
             .printParameters()
             .getIncomprFlowParam();
@@ -204,16 +204,16 @@ int main(int argc, char *argv[]) {
     for (plint iT = 0; (Real)iT * parameters.getDeltaT() < maxT; ++iT) {
         Real cd = 0., error = 0.0;
         if (iT % parameters.nStep(logT) == 0) {
-            cd = 2.0*norm(boundaryoff->getForceOnObject()) /
-                      (0.25 * 1.0 * lu.getUlb() * lu.getUlb() * lu.getLref() *
+            cd = 2.0*boundaryoff->getForceOnObject()[0] /
+                      (0.25 * lu.getUlb() * lu.getUlb() * lu.getLref() *
                        lu.getLref() * M_PI);
             error = (cd-empirical_sphere_drag(parameters.getRe()))/
                     empirical_sphere_drag(parameters.getRe());
             std::string fullName =
                 global::directories().getLogOutDir() + "Cd.dat";
             plb_ofstream ofile(fullName.c_str(), std::ostream::app);
-            ofile << std::setw(10) << iT * parameters.getDeltaT()
-                  << cd << " " << error << std::endl;
+            ofile << std::setw(15) << iT * parameters.getDeltaT() << " "<< std::setw(15)
+                  << cd << " "<< std::setw(15) << error << std::endl;
         }
         // At this point, the state of the lattice corresponds to the
         //   discrete time iT. However, the stored averages

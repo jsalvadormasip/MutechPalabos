@@ -264,27 +264,6 @@ void ELIModels3D<T, Descriptor>::cellCompletion(
        T c_i_w_j = D::c[i_solid][0] * w_j[0] + D::c[i_solid][1] * w_j[1] + D::c[i_solid][2] * w_j[2];
        T eqMinusWall = -2.0 * D::t[i_solid] * D::invCs2 * c_i_w_j;
 
-
-//       T Kplus = q-tauPlus;
-//       T Kelim = q-tauMinus;
-       // YLI
-//       T alphaPlus = 0.;
-//       T alphaMinus = 2./(1.+q);
-//       T beta = (1.-q)/(1.+q);
-//       Kelip = 0.;
-//       Kelim = 0.;
-//       eqPlus = 0.;
-
-
-       // ELIUL
-//       T alphaPlus = -1.;
-//       T alphaMinus = 1.;
-//       T Kmin = Kelim;
-
-       // ELIUL-C
-//       Kmin = 0.0;
-//       // k1 eli
-//       Kmin = 1.-alphaMinus/2.0;
        auto [alphaPlus,alphaMinus,beta,Kplus,Kmin] = eliCoefficients(q,tauPlus,tauMinus);
 
        cellF[i_fluid] =   0.5 * (alphaPlus + alphaMinus) * cellS[i_solid]
