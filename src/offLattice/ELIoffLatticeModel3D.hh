@@ -418,9 +418,9 @@ std::array<T, 5> ELIULK3<T, D>::eliCoefficients(T q, T tauPlus, T tauMinus) cons
 }
 
 template <typename T, template <typename U> class D, typename Function>
-#if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
-    requires std::invocable<Function, T, T, T> /*&& object<Function>*/
-#endif
+// #if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
+//     requires std::invocable<Function, T, T, T> /*&& object<Function>*/
+// #endif
 ELIgeneric<T, D, Function>::ELIgeneric(
     BoundaryShape3D<T, Array<T, 3>> *shape_, int flowType_, Function coefficients_) :
     ELIModels3D<T, D>(shape_, flowType_), compute_coefficients(coefficients_)
@@ -429,18 +429,18 @@ ELIgeneric<T, D, Function>::ELIgeneric(
 }
 
 template <typename T, template <typename U> class D, typename Function>
-#if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
-    requires std::invocable<Function, T, T, T> /*&& object<Function>*/
-#endif
+// #if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
+//     requires std::invocable<Function, T, T, T> /*&& object<Function>*/
+// #endif
 ELIgeneric<T, D, Function> *ELIgeneric<T, D, Function>::clone() const
 {
     return new ELIgeneric<T, D, Function>(*this);
 }
 
 template <typename T, template <typename U> class D, typename Function>
-#if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
-    requires std::invocable<Function, T, T, T> /*&& object<Function>*/
-#endif
+// #if ((defined(_MSVC_LANG) && _MSVC_LANG > 201703L) || __cplusplus > 201703L)
+//     requires std::invocable<Function, T, T, T> /*&& object<Function>*/
+// #endif
 std::array<T, 5> ELIgeneric<T, D, Function>::eliCoefficients(T q, T tauPlus, T tauMinus) const
 {
     return compute_coefficients(q, tauPlus, tauMinus);
