@@ -238,9 +238,9 @@ class ELIULK4 : public ELIModels3D<T, D> {
 // #endif
 
 template <typename T, template <typename U> class D, typename Function>
-#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus > 201703L)
-    requires std::invocable<Function, T, T, T> /*&& object<Function>*/
-#endif
+//#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus > 201703L)
+//    requires std::invocable<Function, T, T, T> /*&& object<Function>*/
+//#endif
 class ELIgeneric : public ELIModels3D<T, D> {
 public:
     ELIgeneric(BoundaryShape3D<T, Array<T, 3>> *shape_, int flowType_, Function coefficients_);
