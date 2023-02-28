@@ -38,6 +38,7 @@
 #include <list>
 #include <vector>
 
+#include "boundaryCondition/boundaryCondition.h"
 #include "atomicBlock/blockLattice2D.h"
 #include "complexDynamics/advectionDiffusionDynamics.h"
 #include "core/globalDefs.h"
@@ -50,41 +51,63 @@ class OnLatticeAdvectionDiffusionBoundaryCondition2D {
 public:
     virtual ~OnLatticeAdvectionDiffusionBoundaryCondition2D() { }
 
-    virtual void addTemperatureBoundary0N(Box2D domain, BlockLattice2D<T, Descriptor> &lattice) = 0;
-    virtual void addTemperatureBoundary0P(Box2D domain, BlockLattice2D<T, Descriptor> &lattice) = 0;
-    virtual void addTemperatureBoundary1N(Box2D domain, BlockLattice2D<T, Descriptor> &lattice) = 0;
-    virtual void addTemperatureBoundary1P(Box2D domain, BlockLattice2D<T, Descriptor> &lattice) = 0;
+    virtual void addTemperatureBoundary0N(
+        Box2D domain, BlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
+    virtual void addTemperatureBoundary0P(
+        Box2D domain, BlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
+    virtual void addTemperatureBoundary1N(
+        Box2D domain, BlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
+    virtual void addTemperatureBoundary1P(
+        Box2D domain, BlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
 
     virtual void addTemperatureCornerNN(
-        plint x, plint y, BlockLattice2D<T, Descriptor> &lattice) = 0;
+        plint x, plint y, BlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
     virtual void addTemperatureCornerNP(
-        plint x, plint y, BlockLattice2D<T, Descriptor> &lattice) = 0;
+        plint x, plint y, BlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
     virtual void addTemperatureCornerPN(
-        plint x, plint y, BlockLattice2D<T, Descriptor> &lattice) = 0;
+        plint x, plint y, BlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
     virtual void addTemperatureCornerPP(
-        plint x, plint y, BlockLattice2D<T, Descriptor> &lattice) = 0;
+        plint x, plint y, BlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
 
-    void setTemperatureConditionOnBlockBoundaries(BlockLattice2D<T, Descriptor> &lattice);
+    void setTemperatureConditionOnBlockBoundaries(
+        BlockLattice2D<T, Descriptor> &lattice, boundary::BcType bcType = boundary::dirichlet);
 
     virtual void addTemperatureBoundary0N(
-        Box2D domain, MultiBlockLattice2D<T, Descriptor> &lattice) = 0;
+        Box2D domain, MultiBlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
     virtual void addTemperatureBoundary0P(
-        Box2D domain, MultiBlockLattice2D<T, Descriptor> &lattice) = 0;
+        Box2D domain, MultiBlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
     virtual void addTemperatureBoundary1N(
-        Box2D domain, MultiBlockLattice2D<T, Descriptor> &lattice) = 0;
+        Box2D domain, MultiBlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
     virtual void addTemperatureBoundary1P(
-        Box2D domain, MultiBlockLattice2D<T, Descriptor> &lattice) = 0;
+        Box2D domain, MultiBlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
 
     virtual void addTemperatureCornerNN(
-        plint x, plint y, MultiBlockLattice2D<T, Descriptor> &lattice) = 0;
+        plint x, plint y, MultiBlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
     virtual void addTemperatureCornerNP(
-        plint x, plint y, MultiBlockLattice2D<T, Descriptor> &lattice) = 0;
+        plint x, plint y, MultiBlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
     virtual void addTemperatureCornerPN(
-        plint x, plint y, MultiBlockLattice2D<T, Descriptor> &lattice) = 0;
+        plint x, plint y, MultiBlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
     virtual void addTemperatureCornerPP(
-        plint x, plint y, MultiBlockLattice2D<T, Descriptor> &lattice) = 0;
+        plint x, plint y, MultiBlockLattice2D<T, Descriptor> &lattice,
+        boundary::BcType bcType = boundary::dirichlet) = 0;
 
-    void setTemperatureConditionOnBlockBoundaries(MultiBlockLattice2D<T, Descriptor> &lattice);
+    void setTemperatureConditionOnBlockBoundaries(
+        MultiBlockLattice2D<T, Descriptor> &lattice, boundary::BcType bcType = boundary::dirichlet);
 };
 
 //////  Factory function for Zou-He Thermal BC

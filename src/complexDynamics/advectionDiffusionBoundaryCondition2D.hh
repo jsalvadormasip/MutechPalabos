@@ -47,39 +47,41 @@
 namespace plb {
 
 template <typename T, template <typename U> class Descriptor>
-void OnLatticeAdvectionDiffusionBoundaryCondition2D<
-    T, Descriptor>::setTemperatureConditionOnBlockBoundaries(BlockLattice2D<T, Descriptor> &lattice)
+void OnLatticeAdvectionDiffusionBoundaryCondition2D<T, Descriptor>::
+    setTemperatureConditionOnBlockBoundaries(
+        BlockLattice2D<T, Descriptor> &lattice, boundary::BcType bcType)
 {
     plint nx = lattice.getNx();
     plint ny = lattice.getNy();
 
-    addTemperatureBoundary0N(Box2D(0, 0, 1, ny - 2), lattice);
-    addTemperatureBoundary0P(Box2D(nx - 1, nx - 1, 1, ny - 2), lattice);
-    addTemperatureBoundary1N(Box2D(1, nx - 2, 0, 0), lattice);
-    addTemperatureBoundary1P(Box2D(1, nx - 2, ny - 1, ny - 1), lattice);
+    addTemperatureBoundary0N(Box2D(0, 0, 1, ny - 2), lattice, bcType);
+    addTemperatureBoundary0P(Box2D(nx - 1, nx - 1, 1, ny - 2), lattice, bcType);
+    addTemperatureBoundary1N(Box2D(1, nx - 2, 0, 0), lattice, bcType);
+    addTemperatureBoundary1P(Box2D(1, nx - 2, ny - 1, ny - 1), lattice, bcType);
 
-    addTemperatureCornerNN(0, 0, lattice);
-    addTemperatureCornerNP(0, ny - 1, lattice);
-    addTemperatureCornerPN(nx - 1, 0, lattice);
-    addTemperatureCornerPP(nx - 1, ny - 1, lattice);
+    addTemperatureCornerNN(0, 0, lattice, bcType);
+    addTemperatureCornerNP(0, ny - 1, lattice, bcType);
+    addTemperatureCornerPN(nx - 1, 0, lattice, bcType);
+    addTemperatureCornerPP(nx - 1, ny - 1, lattice, bcType);
 }
 
 template <typename T, template <typename U> class Descriptor>
 void OnLatticeAdvectionDiffusionBoundaryCondition2D<T, Descriptor>::
-    setTemperatureConditionOnBlockBoundaries(MultiBlockLattice2D<T, Descriptor> &lattice)
+    setTemperatureConditionOnBlockBoundaries(
+        MultiBlockLattice2D<T, Descriptor> &lattice, boundary::BcType bcType)
 {
     plint nx = lattice.getNx();
     plint ny = lattice.getNy();
 
-    addTemperatureBoundary0N(Box2D(0, 0, 1, ny - 2), lattice);
-    addTemperatureBoundary0P(Box2D(nx - 1, nx - 1, 1, ny - 2), lattice);
-    addTemperatureBoundary1N(Box2D(1, nx - 2, 0, 0), lattice);
-    addTemperatureBoundary1P(Box2D(1, nx - 2, ny - 1, ny - 1), lattice);
+    addTemperatureBoundary0N(Box2D(0, 0, 1, ny - 2), lattice, bcType);
+    addTemperatureBoundary0P(Box2D(nx - 1, nx - 1, 1, ny - 2), lattice, bcType);
+    addTemperatureBoundary1N(Box2D(1, nx - 2, 0, 0), lattice, bcType);
+    addTemperatureBoundary1P(Box2D(1, nx - 2, ny - 1, ny - 1), lattice, bcType);
 
-    addTemperatureCornerNN(0, 0, lattice);
-    addTemperatureCornerNP(0, ny - 1, lattice);
-    addTemperatureCornerPN(nx - 1, 0, lattice);
-    addTemperatureCornerPP(nx - 1, ny - 1, lattice);
+    addTemperatureCornerNN(0, 0, lattice, bcType);
+    addTemperatureCornerNP(0, ny - 1, lattice, bcType);
+    addTemperatureCornerPN(nx - 1, 0, lattice, bcType);
+    addTemperatureCornerPP(nx - 1, ny - 1, lattice, bcType);
 }
 
 //================ Zou-He like advectionDiffusionBoundaryManager2D ==========//
