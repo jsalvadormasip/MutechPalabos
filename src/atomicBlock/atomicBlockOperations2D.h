@@ -68,6 +68,10 @@ void executeDataProcessor(
     ReductiveDataProcessorGenerator2D &generator, AtomicBlock2D &object1, AtomicBlock2D &object2);
 
 void addInternalProcessor(
+    DataProcessorGenerator2D const &generator, AtomicBlock2D &actor,
+    std::vector<AtomicBlock2D *> objects, plint level = 0);
+
+void addInternalProcessor(
     DataProcessorGenerator2D const &generator, std::vector<AtomicBlock2D *> objects,
     plint level = 0);
 
