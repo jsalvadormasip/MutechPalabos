@@ -31,16 +31,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BOUZIDI_OFF_LATTICE_MODEL_3D_HH
-#define BOUZIDI_OFF_LATTICE_MODEL_3D_HH
+#ifndef CLI_OFF_LATTICE_MODEL_3D_HH
+#define CLI_OFF_LATTICE_MODEL_3D_HH
 
-#include <algorithm>
-#include <cmath>
-#include <vector>
-
-#include "latticeBoltzmann/externalFieldAccess.h"
+#include "offLattice/CLIoffLatticeModel3D.h"
 #include "latticeBoltzmann/geometricOperationTemplates.h"
-#include "offLattice/bouzidiOffLatticeModel3D.h"
+#include "latticeBoltzmann/externalFieldAccess.h"
+#include <algorithm>
+#include <vector>
+#include <cmath>
 
 namespace plb {
 
@@ -66,7 +65,7 @@ namespace plb {
  * @tparam Descriptor
  */
 template <typename T, template <typename U> class Descriptor>
-BouzidiOffLatticeModel3D<T, Descriptor>::BouzidiOffLatticeModel3D(
+CLIoffLatticeModel3D<T, Descriptor>::CLIoffLatticeModel3D(
     BoundaryShape3D<T, Array<T, 3> > *shape_, int flowType_) :
     OffLatticeModel3D<T, Array<T, 3> >(shape_, flowType_)
 {
@@ -82,19 +81,19 @@ BouzidiOffLatticeModel3D<T, Descriptor>::BouzidiOffLatticeModel3D(
 }
 
 template <typename T, template <typename U> class Descriptor>
-BouzidiOffLatticeModel3D<T, Descriptor> *BouzidiOffLatticeModel3D<T, Descriptor>::clone() const
+CLIoffLatticeModel3D<T, Descriptor> *CLIoffLatticeModel3D<T, Descriptor>::clone() const
 {
-    return new BouzidiOffLatticeModel3D(*this);
+    return new CLIoffLatticeModel3D(*this);
 }
 
 template <typename T, template <typename U> class Descriptor>
-plint BouzidiOffLatticeModel3D<T, Descriptor>::getNumNeighbors() const
+plint CLIoffLatticeModel3D<T, Descriptor>::getNumNeighbors() const
 {
     return 1;
 }
 
 template <typename T, template <typename U> class Descriptor>
-bool BouzidiOffLatticeModel3D<T, Descriptor>::isExtrapolated() const
+bool CLIoffLatticeModel3D<T, Descriptor>::isExtrapolated() const
 {
     // Bouzidi is a completion scheme for a layer of cells on the
     // "fluid" side of the boundary, unlike Guo.
@@ -102,12 +101,12 @@ bool BouzidiOffLatticeModel3D<T, Descriptor>::isExtrapolated() const
 }
 
 template <typename T, template <typename U> class Descriptor>
-void BouzidiOffLatticeModel3D<T, Descriptor>::prepareCell(
+void CLIoffLatticeModel3D<T, Descriptor>::prepareCell(
     Dot3D const &cellLocation, AtomicContainerBlock3D &container)
 {
     typedef Descriptor<T> D;
     Dot3D offset = container.getLocation();
-    BouzidiOffLatticeInfo3D *info = dynamic_cast<BouzidiOffLatticeInfo3D *>(container.getData());
+    CLIOffLatticeInfo3D *info = dynamic_cast<CLIOffLatticeInfo3D *>(container.getData());
     PLB_ASSERT(info);
     std::vector<int> solidDirections;
     std::vector<plint> boundaryIds;
@@ -162,28 +161,28 @@ void BouzidiOffLatticeModel3D<T, Descriptor>::prepareCell(
 }
 
 template <typename T, template <typename U> class Descriptor>
-ContainerBlockData *BouzidiOffLatticeModel3D<T, Descriptor>::generateOffLatticeInfo() const
+ContainerBlockData *CLIoffLatticeModel3D<T, Descriptor>::generateOffLatticeInfo() const
 {
-    return new BouzidiOffLatticeInfo3D;
+    return new CLIOffLatticeInfo3D;
 }
 
 template <typename T, template <typename U> class Descriptor>
-Array<T, 3> BouzidiOffLatticeModel3D<T, Descriptor>::getLocalForce(
+Array<T, 3> CLIoffLatticeModel3D<T, Descriptor>::getLocalForce(
     AtomicContainerBlock3D &container) const
 {
-    BouzidiOffLatticeInfo3D *info = dynamic_cast<BouzidiOffLatticeInfo3D *>(container.getData());
+    CLIOffLatticeInfo3D *info = dynamic_cast<CLIOffLatticeInfo3D *>(container.getData());
     PLB_ASSERT(info);
     return info->getLocalForce();
 }
 
 template <typename T, template <typename U> class Descriptor>
-void BouzidiOffLatticeModel3D<T, Descriptor>::boundaryCompletion(
+void CLIoffLatticeModel3D<T, Descriptor>::boundaryCompletion(
     AtomicBlock3D &nonTypeLattice, AtomicContainerBlock3D &container,
     std::vector<AtomicBlock3D *> const &args)
 {
     BlockLattice3D<T, Descriptor> &lattice =
         dynamic_cast<BlockLattice3D<T, Descriptor> &>(nonTypeLattice);
-    BouzidiOffLatticeInfo3D *info = dynamic_cast<BouzidiOffLatticeInfo3D *>(container.getData());
+    CLIOffLatticeInfo3D *info = dynamic_cast<CLIOffLatticeInfo3D *>(container.getData());
     PLB_ASSERT(info);
     std::vector<Dot3D> const &boundaryNodes = info->getBoundaryNodes();
     std::vector<std::vector<int> > const &solidDirections = info->getSolidDirections();
@@ -204,13 +203,12 @@ void BouzidiOffLatticeModel3D<T, Descriptor>::boundaryCompletion(
     }
 }
 
-// QUESTION: What are args for here?
 template <typename T, template <typename U> class Descriptor>
-void BouzidiOffLatticeModel3D<T, Descriptor>::cellCompletion(
+void CLIoffLatticeModel3D<T, Descriptor>::cellCompletion(
     BlockLattice3D<T, Descriptor> &lattice, Dot3D const &boundaryNode,
     std::vector<int> const &solidDirections, std::vector<plint> const &boundaryIds,
     std::vector<bool> const &hasFluidNeighbor, Dot3D const &absoluteOffset, Array<T, 3> &localForce,
-    std::vector<AtomicBlock3D *> const &)
+    std::vector<AtomicBlock3D *> const &args)
 {
     typedef Descriptor<T> D;
     Array<T, D::d> deltaJ;
@@ -220,8 +218,7 @@ void BouzidiOffLatticeModel3D<T, Descriptor>::cellCompletion(
     T neumannDensity = T();
     Cell<T, Descriptor> &cellF = lattice.get(boundaryNode.x, boundaryNode.y, boundaryNode.z);
     //    if (this->computesStat()) {
-    //        for (pluint i = 0; i < solidDirections.size(); ++i) {
-    //            int iPop = solidDirections[i];
+    //        for (int iPop : solidDirections) {
     //            deltaJ[0] += D::c[iPop][0] * cellF[iPop];
     //            deltaJ[1] += D::c[iPop][1] * cellF[iPop];
     //            deltaJ[2] += D::c[iPop][2] * cellF[iPop];
@@ -247,34 +244,30 @@ void BouzidiOffLatticeModel3D<T, Descriptor>::cellCompletion(
         Cell<T, Descriptor> &cellS = lattice.get(
             boundaryNode.x + D::c[i_solid][0], boundaryNode.y + D::c[i_solid][1],
             boundaryNode.z + D::c[i_solid][2]);
-        Cell<T, Descriptor> &cdllFF = lattice.get(
+        Cell<T, Descriptor> &cellFF = lattice.get(
             boundaryNode.x - D::c[i_solid][0], boundaryNode.y - D::c[i_solid][1],
             boundaryNode.z - D::c[i_solid][2]);
         if (bdType == OffBoundary::dirichlet) {
             T u_ci = D::c[i_solid][0] * wall_vel[0] + D::c[i_solid][1] * wall_vel[1]
                      + D::c[i_solid][2] * wall_vel[2];
             plint numUnknown = 0;
-            if (q < (T)0.5) {
-                if (hasFluidNeighbor[i]) {
-                    cellF[i_fluid] = 2. * q * cellS[i_solid] + (1. - 2. * q) * cellF[i_solid];
-                } else {
-                    ++numUnknown;
-                    cellF[i_fluid] = cellS[i_solid];
-                }
-                cellF[i_fluid] -= 2. * u_ci * D::t[i_solid] * D::invCs2;
+            if (hasFluidNeighbor[i]) {
+                T alpha_hat = 1.0;                       //(1. - 2. * q) / (1. + 2. * q); // k0
+                T beta = (1. - 2. * q) / (1. + 2. * q);  // kbar-1
+                T beta_hat = -beta;                      // k1
+                T f_alpha_hat = cellS[i_solid] - 2. * u_ci * D::t[i_solid] * D::invCs2;
+                T f_beta = cellF[i_solid] - 2. * u_ci * D::t[i_solid] * D::invCs2;
+                T f_beta_hat = cellFF[i_fluid];
+                cellF[i_fluid] = alpha_hat * f_alpha_hat + beta_hat * f_beta + beta * f_beta_hat;
             } else {
-                cellF[i_fluid] =
-                    1. / (2. * q) * cellS[i_solid] + (2. * q - 1) / (2. * q) * cdllFF[i_fluid];
-                cellF[i_fluid] -= 1. / q * u_ci * D::t[i_solid] * D::invCs2;
+                ++numUnknown;
+                cellF[i_fluid] = cellS[i_solid];
             }
-        } else if (bdType == OffBoundary::densityNeumann) {
-            ++numNeumannNodes;
-            neumannDensity += wall_vel[0];
-            cellF[i_fluid] = cdllFF[i_fluid];
         } else {
             // Not implemented yet.
             PLB_ASSERT(false);
         }
+
         localForce[0] += D::c[i_solid][0] * (cellF[i_fluid] + cellS[i_solid]);
         localForce[1] += D::c[i_solid][1] * (cellF[i_fluid] + cellS[i_solid]);
         localForce[2] += D::c[i_solid][2] * (cellF[i_fluid] + cellS[i_solid]);
@@ -285,15 +278,14 @@ void BouzidiOffLatticeModel3D<T, Descriptor>::cellCompletion(
     //        BlockStatistics statsCopy(lattice.getInternalStatistics());
     //        collidedCell.collide(statsCopy);
     //
-    //        for (pluint i = 0; i < solidDirections.size(); ++i) {
-    //            int iPop = solidDirections[i];
+    //        for (int iPop : solidDirections) {
     //            int oppPop = indexTemplates::opposite<D>(iPop);
     //            deltaJ[0] -= D::c[oppPop][0] * collidedCell[oppPop];
     //            deltaJ[1] -= D::c[oppPop][1] * collidedCell[oppPop];
     //            deltaJ[2] -= D::c[oppPop][2] * collidedCell[oppPop];
     //        }
     //    }
-
+    //
     //    localForce += deltaJ;
     if (numNeumannNodes > 0) {
         neumannDensity /= numNeumannNodes;
@@ -312,4 +304,4 @@ void BouzidiOffLatticeModel3D<T, Descriptor>::cellCompletion(
 
 }  // namespace plb
 
-#endif  // BOUZIDI_OFF_LATTICE_MODEL_3D_HH
+#endif  // CLI_OFF_LATTICE_MODEL_3D_HH

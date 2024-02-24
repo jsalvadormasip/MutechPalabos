@@ -38,6 +38,8 @@
 #include "offLattice/asciiDataFileIO.hh"
 #include "offLattice/boundaryShapes3D.hh"
 #include "offLattice/bouzidiOffLatticeModel3D.hh"
+#include "offLattice/CLIoffLatticeModel3D.hh"
+#include "offLattice/ELIoffLatticeModel3D.hh"
 #include "offLattice/connectedTriangleGenerator.hh"
 #include "offLattice/connectedTriangleMesh.hh"
 #include "offLattice/connectedTriangleSet.hh"

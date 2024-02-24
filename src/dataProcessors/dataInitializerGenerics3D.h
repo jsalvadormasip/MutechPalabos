@@ -145,7 +145,7 @@ void IniCustomEquilibriumFunctional3D<T, Descriptor, RhoUFunction>::execute(
     plint iX, plint iY, plint iZ, Cell<T, Descriptor> &cell) const
 {
     Array<T, Descriptor<T>::d> j;
-    T rho;
+    T rho = 1.0;
     f(iX, iY, iZ, rho, j);
     Array<T, Descriptor<T>::d> force;
     force[0] = getExternalForceComponent(cell, 0);

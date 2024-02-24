@@ -1,0 +1,8 @@
+<!--admitted symbols: tauPlus, tauMinus, q, up, down -->
+<generic_eli>
+    <alphaPlus>-1</alphaPlus>
+    <alphaMin>+1</alphaMin>
+    <beta>0</beta> <!--    if beta = 0 => ELI \in LI+, if beta \neq 0 => LI+-->
+    <kPlus>q - tauPlus</kPlus>
+    <kMin>0</kMin>
+</generic_eli>
