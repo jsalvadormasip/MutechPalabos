@@ -39,6 +39,7 @@
 #include <list>
 #include <vector>
 
+#include "boundaryCondition/boundaryCondition.h"
 #include "atomicBlock/blockLattice3D.h"
 #include "complexDynamics/advectionDiffusionDynamics.h"
 #include "core/dynamics.h"

@@ -676,7 +676,7 @@ std::unique_ptr<ScalarField2D<T> > computeAbsoluteValue(ScalarField2D<T> &A, Box
 {
     ScalarField2D<T> *result = new ScalarField2D<T>(A.getNx(), A.getNy());
     computeAbsoluteValue(A, *result, domain);
-    return result;
+    return std::unique_ptr<ScalarField2D<T> >(result);
 }
 
 template <typename T>

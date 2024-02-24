@@ -237,10 +237,24 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
         || (domain.x0 == domain.x1 && domain.z0 == domain.z1)
         || (domain.y0 == domain.y1 && domain.z0 == domain.z1));
 
+    // Convert (plane,normal1,normal2) description of the normal vector into a
+    // (normalX,normalY,normalZ)
+    //   description, as it is requried by the data processor for Neumann boundaries.
+    enum {
+        normalX = plane == 0 ? 0 : (plane == 1 ? normal2 : normal1),
+        normalY = plane == 1 ? 0 : (plane == 2 ? normal2 : normal1),
+        normalZ = plane == 2 ? 0 : (plane == 0 ? normal2 : normal1)
+    };
+
     setCompositeDynamics(
         lattice, domain,
         BoundaryManager::template getTemperatureEdgeDynamics<plane, normal1, normal2>(
             new NoDynamics<T, Descriptor>));
+
+    if (bcType == boundary::neumann || bcType == boundary::outflow) {
+        integrateProcessingFunctional(
+            new CopyDensityFunctional3D<T, Descriptor, normalX, normalY, normalZ>, domain, lattice);
+    }
 
     BoxProcessingFunctional3D_L<T, Descriptor> *functional =
         BoundaryManager::template getTemperatureEdgeProcessor<plane, normal1, normal2>(domain);
@@ -260,6 +274,12 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
         lattice, Box3D(x, x, y, y, z, z),
         BoundaryManager::template getTemperatureCornerDynamics<xNormal, yNormal, zNormal>(
             new NoDynamics<T, Descriptor>));
+
+    if (bcType == boundary::neumann || bcType == boundary::outflow) {
+        integrateProcessingFunctional(
+            new CopyDensityFunctional3D<T, Descriptor, xNormal, yNormal, zNormal>,
+            Box3D(x, x, y, y, z, z), lattice);
+    }
 
     BoxProcessingFunctional3D_L<T, Descriptor> *functional =
         BoundaryManager::template getTemperatureCornerProcessor<xNormal, yNormal, zNormal>(x, y, z);
@@ -516,10 +536,24 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
         || (domain.x0 == domain.x1 && domain.z0 == domain.z1)
         || (domain.y0 == domain.y1 && domain.z0 == domain.z1));
 
+    // Convert (plane,normal1,normal2) description of the normal vector into a
+    // (normalX,normalY,normalZ)
+    //   description, as it is requried by the data processor for Neumann boundaries.
+    enum {
+        normalX = plane == 0 ? 0 : (plane == 1 ? normal2 : normal1),
+        normalY = plane == 1 ? 0 : (plane == 2 ? normal2 : normal1),
+        normalZ = plane == 2 ? 0 : (plane == 0 ? normal2 : normal1)
+    };
+
     setCompositeDynamics(
         lattice, domain,
         BoundaryManager::template getTemperatureEdgeDynamics<plane, normal1, normal2>(
             new NoDynamics<T, Descriptor>));
+
+    if (bcType == boundary::neumann || bcType == boundary::outflow) {
+        integrateProcessingFunctional(
+            new CopyDensityFunctional3D<T, Descriptor, normalX, normalY, normalZ>, domain, lattice);
+    }
 
     BoxProcessingFunctional3D_L<T, Descriptor> *functional =
         BoundaryManager::template getTemperatureEdgeProcessor<plane, normal1, normal2>(domain);
@@ -539,6 +573,12 @@ void AdvectionDiffusionBoundaryConditionInstantiator3D<T, Descriptor, BoundaryMa
         lattice, Box3D(x, x, y, y, z, z),
         BoundaryManager::template getTemperatureCornerDynamics<xNormal, yNormal, zNormal>(
             new NoDynamics<T, Descriptor>));
+
+    if (bcType == boundary::neumann || bcType == boundary::outflow) {
+        integrateProcessingFunctional(
+            new CopyDensityFunctional3D<T, Descriptor, xNormal, yNormal, zNormal>,
+            Box3D(x, x, y, y, z, z), lattice);
+    }
 
     BoxProcessingFunctional3D_L<T, Descriptor> *functional =
         BoundaryManager::template getTemperatureCornerProcessor<xNormal, yNormal, zNormal>(x, y, z);
