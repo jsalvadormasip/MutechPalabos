@@ -401,9 +401,40 @@ void MultiGridLattice2D<T, Descriptor>::iterateMultiGrid(plint level)
 
 /// One iteration of the entire multigrid
 template <typename T, template <typename U> class Descriptor>
+void MultiGridLattice2D<T, Descriptor>::iterateMultiGridWithInternalProcessors(plint level)
+{
+    PLB_PRECONDITION(level >= 0 && level < (plint)lattices.size());
+    if (!useExecuteInternalProcessors[level]) {
+        lattices[level]->collideAndStream();
+    } else {
+        lattices[level]->executeInternalProcessors();
+        lattices[level]->incrementTime();
+    }
+    if ((pluint)level < lattices.size() - 1) {
+        iterateMultiGridWithInternalProcessors(level + 1);
+        iterateMultiGridWithInternalProcessors(level + 1);
+        // Overlaps must be duplicated on the coarse lattice, because the
+        //   fine->coarse copy acts on bulk nodes only.
+        lattices[level]->getBlockCommunicator().duplicateOverlaps(
+            *lattices[level], modif::staticVariables);
+    }
+}
+
+/// One iteration of the entire multigrid
+template <typename T, template <typename U> class Descriptor>
 void MultiGridLattice2D<T, Descriptor>::collideAndStream()
 {
     iterateMultiGrid(0);
+    this->evaluateStatistics();
+}
+
+/// One iteration of the entire multigrid
+template <typename T, template <typename U> class Descriptor>
+void MultiGridLattice2D<T, Descriptor>::collideAndStream(
+    std::vector<bool> const &useExecuteInternalProcessors_)
+{
+    useExecuteInternalProcessors = useExecuteInternalProcessors_;
+    iterateMultiGridWithInternalProcessors(0);
     this->evaluateStatistics();
 }
 

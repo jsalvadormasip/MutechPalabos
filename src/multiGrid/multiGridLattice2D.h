@@ -107,6 +107,7 @@ public:
     virtual void stream();
     virtual void collideAndStream(Box2D domain);
     virtual void collideAndStream();
+    virtual void collideAndStream(std::vector<bool> const &useExecuteInternalProcessors_);
     virtual void incrementTime();
     TimeCounter &getTimeCounter();
     TimeCounter const &getTimeCounter() const;
@@ -114,10 +115,12 @@ public:
 private:
     void createInterfaces();
     void iterateMultiGrid(plint level);
+    void iterateMultiGridWithInternalProcessors(plint level);
     void eliminateStatisticsInOverlap();
 
 private:
     std::vector<MultiBlockLattice2D<T, Descriptor> *> lattices;
+    std::vector<bool> useExecuteInternalProcessors;
     // the objects to create the interfaces
     FineGridInterfaceInstantiator<T, Descriptor> *fineGridInstantiator;
     CoarseGridInterfaceInstantiator<T, Descriptor> *coarseGridInstantiator;
