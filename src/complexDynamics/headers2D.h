@@ -53,3 +53,4 @@
 #include "complexDynamics/trtDynamics.h"
 #include "complexDynamics/variableOmegaDynamics.h"
 #include "complexDynamics/wavePropagation.h"
+#include "complexDynamics/zhouAxisymmetricDynamics.h"
