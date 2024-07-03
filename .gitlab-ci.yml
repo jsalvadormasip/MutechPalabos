@@ -33,11 +33,8 @@ cache:
 
 stages:
     - prepare_docker
-    # - check_format
-    # - build_cmake
-    # - regression_tests
+    - check_format
     - parallel_regression_tests
-    # - deploy
 
 # Build and test stages are using a docker image containing package
 # needed to build and run a Palabos application.
