@@ -47,7 +47,7 @@
          If 0, then a constant velocity is imposed at the outlet.
          If 1, then a constant pressure is imposed at the outlet.
          If 2, then a velocity Neumann condition is imposed at the outlet. -->
-    <outflowBcType> 0 </outflowBcType>
+    <outflowBcType> 1 </outflowBcType>
 
     <spongeZones>
     <!-- Sponge zones: There are at most 6 sponge zones, as many as the

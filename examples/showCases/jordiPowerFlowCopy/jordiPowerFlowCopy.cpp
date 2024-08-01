@@ -677,12 +677,12 @@ void applyOuterBoundaryConditions(
         Array<T, 3> zero((T)0, (T)0, (T)0);
 
         // Lateral boundary conditions.
-        bc->setVelocityConditionOnBlockBoundaries(
-            lattice, boundingBox, yBottom, boundary::dirichlet);
-        setBoundaryVelocity(lattice, yBottom, velocity);
+        // bc->setVelocityConditionOnBlockBoundaries(
+        //     lattice, boundingBox, yBottom, boundary::dirichlet);
+        // setBoundaryVelocity(lattice, yBottom, velocity);
 
-        bc->setVelocityConditionOnBlockBoundaries(lattice, boundingBox, yTop, boundary::dirichlet);
-        setBoundaryVelocity(lattice, yTop, velocity);
+        // bc->setVelocityConditionOnBlockBoundaries(lattice, boundingBox, yTop, boundary::dirichlet);
+        // setBoundaryVelocity(lattice, yTop, velocity);
 
         bc->setVelocityConditionOnBlockBoundaries(
             lattice, boundingBox, zBottom, boundary::dirichlet);
@@ -690,7 +690,7 @@ void applyOuterBoundaryConditions(
 
         bc->setVelocityConditionOnBlockBoundaries(lattice, boundingBox, zTop, boundary::dirichlet);
         setBoundaryVelocity(lattice, zTop, velocity);
-
+        
         // Outlet boundary condition.
 
         if (param.outflowBcType == 0) {
@@ -706,7 +706,12 @@ void applyOuterBoundaryConditions(
                 lattice, boundingBox, outlet, boundary::neumann);
             setBoundaryVelocity(lattice, outlet, velocity);
         }
-
+        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, outlet, boundary::dirichlet);
+        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, inlet, boundary::dirichlet);
+        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, zTop, boundary::dirichlet);
+        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, zBottom, boundary::dirichlet);
+        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, yTop, boundary::dirichlet);
+        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, yBottom, boundary::dirichlet);
         setBoundaryDensity(lattice, box, param.rho_LB);
         // box.y0 -= 2;  // y-periodicity   I don't really understand how this makes it periodic but sure. 
         // box.y1 += 2;
