@@ -700,7 +700,7 @@ void applyOuterBoundaryConditions(
         } else if (param.outflowBcType == 1) {
             bc->setPressureConditionOnBlockBoundaries(
                 lattice, boundingBox, outlet, boundary::dirichlet);
-            setBoundaryVelocity(lattice, outlet, velocity);  //interestingly they set boundary velocity to set the pressure. wtf. 
+            // setBoundaryVelocity(lattice, outlet, velocity);  //interestingly they set boundary velocity to set the pressure. wtf. 
         } else if (param.outflowBcType == 2) {
             bc->setVelocityConditionOnBlockBoundaries(
                 lattice, boundingBox, outlet, boundary::neumann);
@@ -793,7 +793,7 @@ void writeResults(
             // by a scale factor (and adds an offset).
             addTransform<T, float, 3>(vtkGroup, velocity->getLevel(iLevel), "velocity", dx / dt); //scale factor dx/dt
             addTransform<T, float>(
-                vtkGroup, density->getLevel(iLevel), "pressure", pressureScale, pressureOffset);
+                vtkGroup, density->getLevel(iLevel), "pressure", pressureScale, pressureOffset); //nicely gives pressure. 
             if (param.computeAverages) {
                 addTransform<T, float, 3>(vtkGroup, outAvgVel->getLevel(iLevel), "avgVel", dx / dt);
             }
