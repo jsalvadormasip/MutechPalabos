@@ -591,6 +591,7 @@ void createZones( //creates sponze zones
         pcout << "Generating viscosity sponge zone at level: " << level << std::endl;
         bool smartSpongeZone = true;
         T bulkValue = param.omega[level];
+        pcout << "omega at this level is " << bulkValue << std::endl;
         plint radius = nx/4;
         plint centerX = nx / 2;
         plint centerZ = nz / 2;
