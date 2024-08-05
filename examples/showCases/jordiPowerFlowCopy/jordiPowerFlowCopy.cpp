@@ -586,7 +586,7 @@ void createZones( //creates sponze zones
     plint ny = util::roundToInt(toLB(param.fullDomain.y1(), 1, dx, param.physicalLocation)) + 1;
     plint nz = util::roundToInt(toLB(param.fullDomain.z1(), 2, dx, param.physicalLocation)) + 1;
     Box3D fullBox(0, nx - 1, 0, ny - 1, 0, nz - 1); //at this current level resolution.
-
+    pcout << "Look hereeee " << std::endl;
     if (totalNumSpongeCells > 0) {
         pcout << "Generating viscosity sponge zone at level: " << level << std::endl;
         bool smartSpongeZone = true;
@@ -943,6 +943,7 @@ int main(int argc, char *argv[])
     triangleSet.cutWithPlane(planeyminus, triangleSet2);
     triangleSet2.cutWithPlane(planeyplus,triangleSet3);
     Cuboid<T> bCuboid3 = triangleSet3.getBoundingCuboid();
+    pcout << "Hello, testing pcout " << std::endl;
     pcout << "El objetoo x0 " << bCuboid3.lowerLeftCorner[0] << " a " << bCuboid3.upperRightCorner[0] << std::endl;
     pcout << "Lattice x0 " << lattices.getLevel(param.finestLevel).getBoundingBox().x0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().x1 << std::endl;
     pcout << "El objetoo y0 " << bCuboid3.lowerLeftCorner[1] << " a " << bCuboid3.upperRightCorner[1] << std::endl;
