@@ -944,7 +944,7 @@ int main(int argc, char *argv[])
     triangleSet2.cutWithPlane(planeyplus,triangleSet3);
     Cuboid<T> bCuboid3 = triangleSet3.getBoundingCuboid();
     pcout << "Hello, testing pcout " << std::endl;
-    pcout << "El objetoo x0 " << bCuboid3.lowerLeftCorner[0] << " a " << bCuboid3.upperRightCorner[0] << std::endl;
+    pcout << "El objetoooooooooooooo x0 " << bCuboid3.lowerLeftCorner[0] << " a " << bCuboid3.upperRightCorner[0] << std::endl;
     pcout << "Lattice x0 " << lattices.getLevel(param.finestLevel).getBoundingBox().x0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().x1 << std::endl;
     pcout << "El objetoo y0 " << bCuboid3.lowerLeftCorner[1] << " a " << bCuboid3.upperRightCorner[1] << std::endl;
     pcout << "Lattice Y0 " << lattices.getLevel(param.finestLevel).getBoundingBox().y0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().y1 << std::endl;
