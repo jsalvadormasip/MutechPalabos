@@ -585,42 +585,117 @@ void createZones( //creates sponze zones
     plint nx = util::roundToInt(toLB(param.fullDomain.x1(), 0, dx, param.physicalLocation)) + 1;
     plint ny = util::roundToInt(toLB(param.fullDomain.y1(), 1, dx, param.physicalLocation)) + 1;
     plint nz = util::roundToInt(toLB(param.fullDomain.z1(), 2, dx, param.physicalLocation)) + 1;
+    pcout << "nx " << nx << "ny " << ny << "nz " << nz << std::endl;
     Box3D fullBox(0, nx - 1, 0, ny - 1, 0, nz - 1); //at this current level resolution.
     pcout << "Look hereeee " << std::endl;
     if (totalNumSpongeCells > 0) {
         pcout << "Generating viscosity sponge zone at level: " << level << std::endl;
         bool smartSpongeZone = true;
         T bulkValue = param.omega[level];
+        // T bulkValue = 3;
         pcout << "omega at this level is " << bulkValue << std::endl;
         plint radius = nx/4;
         plint centerX = nx / 2;
         plint centerZ = nz / 2;
         if (smartSpongeZone) {
-            MultiScalarField3D<int> flagMatrix(nx, ny, nz);
+            // ScalarField3D<int> flagMatrix1(nx, ny, nz);
+            // MultiScalarField3D<int> flagMatrix(nx, ny, nz, (T) 1.0);
 
-            for (plint iX = 0; iX < nx; ++iX) {
-                for (plint iY = 0; iY < ny; ++iY) {
-                    for (plint iZ = 0; iZ < nz; ++iZ) {
-                        T dx = (T)(iX - centerX);
-                        T dz = (T)(iZ - centerZ);
-                        T distance = std::sqrt(dx * dx + dz * dz);
+            // for (plint iX = 0; iX < nx; ++iX) {
+            //     for (plint iY = 0; iY < ny; ++iY) {
+            //         for (plint iZ = 0; iZ < nz; ++iZ) {
+            //             T dxi = (T)(iX - centerX);
+            //             T dzi = (T)(iZ - centerZ);
+            //             T distance = std::sqrt(dxi * dxi + dzi * dzi);
+            //             if (distance < radius) {
+            //                 pcout << "radius " << radius << "distance " << distance << std::endl;
+            //                 flagMatrix.get(iX, iY, iZ) = 0.0;  // Inside cylinder, no sponge
+            //                 pcout << "INSIDE " << std::endl;
+            //                 pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
+            //             } 
+            //             else {   //this else DOESNT WORK. FIX TOMORROW
+            //                 flagMatrix.get(iX, iY, iZ) = 1.0;  // Outside cylinder, apply sponge
+            //                 // pcout << "OUTSIDE " << std::endl;
+            //             }
+            //             // pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
+            //         }
+            //     }
+            // }
+            TriangleSet<T> triangleSetCylinder("cylindricalDomain.stl", DBL);  //DBL is double precision TriangleSet (std::string fname, Precision precision_=DBL, SurfaceGeometryFileFormat fformat=STL, TriangleSelector< T > *selector=0)
+            triangleSetCylinder.scale((T)1 / dx);
+            Cuboid<T> bCuboidCylinder = triangleSetCylinder.getBoundingCuboid();  //gets bounding cuboid
+            Array<T, 3> obstacleCenterCylinder = (T)0.5 * (bCuboidCylinder.lowerLeftCorner + bCuboidCylinder.upperRightCorner); //gets center of obstacle
+            
+            triangleSetCylinder.translate(-obstacleCenterCylinder); //centers it at 0,0,0 i think. indeed, tested below. 
+            
+              
 
-                        if (distance < radius) {
-                            flagMatrix.get(iX, iY, iZ) = 0;  // Inside cylinder, no sponge
-                        } else {
-                            flagMatrix.get(iX, iY, iZ) = 1;  // Outside cylinder, apply sponge
-                        }
-                    }
-                }
-            }
+            T scaling_factor_cylinder = (lattice.getBoundingBox().x1-lattice.getBoundingBox().x0)/(-bCuboidCylinder.lowerLeftCorner[0] + bCuboidCylinder.upperRightCorner[0])*0.5; //in jordi's density.dat generator, chord was also set as 40% of the length of level 0 x span
+            triangleSetCylinder.scale(scaling_factor_cylinder);
+            // T scaling_factor2 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-lattices.getLevel(param.finestLevel).getBoundingBox().y0)/(-bCuboid.lowerLeftCorner[1] + bCuboid.upperRightCorner[1]);
+            // triangleSet.scale((T)0.0,(T) scaling_factor2*1.05 , (T) 0.0);
+
+            Cuboid<T> bCuboid2Cylinder = triangleSetCylinder.getBoundingCuboid();  //gets bounding cuboid
+            Array<T, 3> obstacleCenter2Cylinder = (T)0.5 * (bCuboid2Cylinder.lowerLeftCorner + bCuboid2Cylinder.upperRightCorner); //gets center of obstacle
+            //fixed to center considering the tail does not count in the center calculation. 
+            triangleSetCylinder.translate(-obstacleCenter2Cylinder); //centers it at 0,0,0 i think. indeed, tested below. 
+            triangleSetCylinder.translate(Array<T,3>((lattice.getBoundingBox().x1+lattice.getBoundingBox().x0)/2, (lattice.getBoundingBox().y1+lattice.getBoundingBox().y0)/2, (lattice.getBoundingBox().z1+lattice.getBoundingBox().z0)/2)); //centers it at 0,0,0 i think. indeed, tested below. 
+            TriangleSet<T> triangleSet2Cylinder;
+            TriangleSet<T> triangleSet3Cylinder;
+            
+            Plane<T> planeyminusCylinder(Array<T, 3>(0., lattice.getBoundingBox().y0, 0.),Array<T, 3>(0., -1., 0.) );
+            Plane<T> planeyplusCylinder(Array<T, 3>(0., lattice.getBoundingBox().y1 , 0.),Array<T, 3>(0., 1., 0.) );
+    
+            triangleSetCylinder.cutWithPlane(planeyminusCylinder, triangleSet2Cylinder);
+            triangleSet2Cylinder.cutWithPlane(planeyplusCylinder,triangleSet3Cylinder);
+            Cuboid<T> bCuboid3Cylinder = triangleSet3Cylinder.getBoundingCuboid();  //gets bounding cuboid
+            pcout << "El objeto x0 " << bCuboid3Cylinder.lowerLeftCorner[0] << " a " << bCuboid3Cylinder.upperRightCorner[0] << std::endl;
+            pcout << "Lattice x0 " << lattice.getBoundingBox().x0 << "a " << lattice.getBoundingBox().x1 << std::endl;
+            pcout << "El objetoo y0 " << bCuboid3Cylinder.lowerLeftCorner[1] << " a " << bCuboid3Cylinder.upperRightCorner[1] << std::endl;
+            pcout << "Lattice Y0 " << lattice.getBoundingBox().y0 << "a " << lattice.getBoundingBox().y1 << std::endl;
+            pcout << "El objetoo z0 " << bCuboid3Cylinder.lowerLeftCorner[2] << " a " << bCuboid3Cylinder.upperRightCorner[2] << std::endl;
+            pcout << "Lattice z0 " << lattice.getBoundingBox().z0 << "a " << lattice.getBoundingBox().z1 << std::endl;
+   
+            // The DEFscaledMesh, and the triangle-boundary are more sophisticated data
+            // structures used internally by Palabos to treat the boundary.
+            plint xDirectionCylinder = 0;  //reference direction idk exactly what it is. 
+            plint borderWidthCylinder = 1;  // Because Guo acts in a one-cell layer.
+                                    // Requirement: margin>=borderWidth.
+            plint marginCylinder =
+                1;  // Extra margin of allocated cells around the obstacle, for the case of moving walls.
+            plint blockSizeCylinder = 0;  // Size of blocks in the sparse/parallel representation.
+                                // Zero means: don't use sparse representation. A dense grid stores information for every node, while a sparse grid only stores information for non-empty or significant nodes. Sparse representations can save memory and improve performance, especially for large simulations with many empty or uniform regions.
+            DEFscaledMesh<T> defMeshCylinder(triangleSet3Cylinder, 0, xDirectionCylinder, marginCylinder, Dot3D(0, 0, 0));  //DEFscaledMesh (TriangleSet< T > const &triangleSet_, plint resolution_, plint referenceDirection_, plint margin_, Dot3D location)
+            TriangleBoundary3D<T> boundaryCylinder(defMeshCylinder); //TriangleBoundary3D (DEFscaledMesh< T > const &defMesh, bool automaticCloseHoles=true)
+            // boundary.getMesh().inflate();
+            //they basically redefine the mesh and boundary to have more sophisticated data 
+            /*
+            * Voxelize the domain.
+            */
+
+            // Voxelize the domain means: decide which lattice nodes are inside the obstacle and which are
+            // outside. Interesting!
+            plint extendedEnvelopeWidthCylinder = 2;  // Extrapolated off-lattice BCs.
+            const int flowTypeCylinder = voxelFlag::inside;
+            VoxelizedDomain3D<T> voxelizedDomainCylinder(
+                boundaryCylinder, flowTypeCylinder, lattice.getBoundingBox(), borderWidthCylinder, extendedEnvelopeWidthCylinder, blockSizeCylinder); //VoxelizedDomain3D (TriangleBoundary3D< T > const &boundary_, int flowType_, Box3D const &boundingBox, plint borderWidth_, plint envelopeWidth_, plint blockSize_, plint gridLevel_=0, bool dynamicMesh_=false)
+            MultiScalarField3D<int> flagMatrixCylinder((MultiBlock3D &)voxelizedDomainCylinder.getVoxelMatrix());
+            setToConstant(
+                flagMatrixCylinder, voxelizedDomainCylinder.getVoxelMatrix(), voxelFlag::outside,
+                flagMatrixCylinder.getBoundingBox(), 1);
             std::vector<MultiBlock3D *> args;
             args.push_back(&lattice);
-            args.push_back(&flagMatrix);
+            args.push_back(&flagMatrixCylinder);
 
             applyProcessingFunctional(
                 new MaskedViscositySpongeZone3D<T, DESCRIPTOR>(
                     nx, ny, nz, bulkValue, 1, numSpongeCells),  // Note: 1 is the flag value for applying the sponge
                 lattice.getBoundingBox(), args);
+            // std::vector<MultiBlock3D *> args;
+            // args.push_back(&lattice);
+            // applyProcessingFunctional(
+            //     new ViscositySpongeZone3D<T, DESCRIPTOR>(nx, ny, nz, bulkValue, numSpongeCells),
+            //     lattice.getBoundingBox(), args);
         }
         
         // MultiScalarField3D<int> flagMatrix((MultiBlock3D &)voxelizedDomain.getVoxelMatrix());
@@ -729,7 +804,7 @@ void initializeSimulation(
             Array<T, 3> velocity(param.inletVelocity_LB);
 
             MultiBlockLattice3D<T, DESCRIPTOR> &lattice = lattices.getLevel(iLevel);
-            initializeAtEquilibrium(lattice, lattice.getBoundingBox(), param.rho_LB, velocity);
+            initializeAtEquilibrium(lattice, lattice.getBoundingBox(), param.rho_LB,  velocity);//Array<T, 3>(0.,0.,0.));
         } 
         // We do NOT want to call internal data processors here...
         lattices.initialize();
