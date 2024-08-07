@@ -1224,8 +1224,8 @@ int main(int argc, char *argv[])
                 param.rho * (param.dxFinest * param.dxFinest * param.dxFinest * param.dxFinest)
                 / (param.dtFinest * param.dtFinest);
             Array<T, 3> force = forceConversion * boundaryCondition->getForceOnObject();
-            forces << (double)(iter * param.dtCoarsest) << " " << force[0] << " " << force[1] << " "
-                   << force[2] << " " << empirical_sphere_drag(param.Re) << std::endl;
+            forces << (double)(iter * param.dtCoarsest) << " " << force[2]*std::cos(angle)-force[0]*std::sin(angle) << " " << force[0]*std::cos(angle)+force[2]*std::sin(angle) << " "
+                   << force[1] << std::endl; //time, lift, drag, lateral force. because lift is perpendicular to airflow, and drag parallel
 
             if (iter > 0) {
                 T totTime = global::timer("lb-iter").getTime();
