@@ -1,0 +1,6 @@
+# Ignore everything in this directory
+/showCases/*
+# Except this file
+!/showCases/jordiPowerFlowCopy/
+!/showCases/jordiCylindricalDomain/
+!.gitignore
