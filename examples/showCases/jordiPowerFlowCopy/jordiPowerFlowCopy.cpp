@@ -182,15 +182,16 @@ void readUserDefinedSimulationParameters(std::string xmlInputFileName, Simulatio
     document["grid"]["gridDensityFunctionFile"].read(param.gridDensityFunctionFile);
     abortIfCannotOpenFileForReading(param.gridDensityFunctionFile);
     plint numLevels = 0;
-    document["grid"]["numLevels"].read(numLevels); //number of increases
+    document["grid"]["numLevels"].read(numLevels); 
     PLB_ASSERT(numLevels >= 1);
     plint maxOctreeLevel = 0;
-    document["grid"]["maxOctreeLevel"].read(maxOctreeLevel); //increasefactor
+    document["grid"]["maxOctreeLevel"].read(maxOctreeLevel); 
     if (maxOctreeLevel - numLevels + 1 < 0) {
         maxOctreeLevel = numLevels - 1;
     }
     param.maxLeafLevel = maxOctreeLevel;
     param.minLeafLevel = maxOctreeLevel - numLevels + 1;
+    pcout << "maxLeafLevel is " << param.maxLeafLevel << " and min leaf level is " << param.minLeafLevel << std::endl;
     document["grid"]["nBlock"].read(param.nBlock);
     PLB_ASSERT(param.nBlock >= 6);
 
@@ -598,29 +599,49 @@ void createZones( //creates sponze zones
         plint centerX = nx / 2;
         plint centerZ = nz / 2;
         if (smartSpongeZone) {
-            // ScalarField3D<int> flagMatrix1(nx, ny, nz);
-            // MultiScalarField3D<int> flagMatrix(nx, ny, nz, (T) 1.0);
+            // T circleFunction(plint iX, plint iY, plint iZ) {
+            //     T dxi = iX - centerX;
+            //     T dzi = iZ - centerZ;
+            //     T distanceSquared = dxi*dxi +  dzi*dzi;
 
-            // for (plint iX = 0; iX < nx; ++iX) {
-            //     for (plint iY = 0; iY < ny; ++iY) {
-            //         for (plint iZ = 0; iZ < nz; ++iZ) {
-            //             T dxi = (T)(iX - centerX);
-            //             T dzi = (T)(iZ - centerZ);
-            //             T distance = std::sqrt(dxi * dxi + dzi * dzi);
-            //             if (distance < radius) {
-            //                 pcout << "radius " << radius << "distance " << distance << std::endl;
-            //                 flagMatrix.get(iX, iY, iZ) = 0.0;  // Inside cylinder, no sponge
-            //                 pcout << "INSIDE " << std::endl;
-            //                 pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
-            //             } 
-            //             else {   //this else DOESNT WORK. FIX TOMORROW
-            //                 flagMatrix.get(iX, iY, iZ) = 1.0;  // Outside cylinder, apply sponge
-            //                 // pcout << "OUTSIDE " << std::endl;
-            //             }
-            //             // pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
-            //         }
+            //     if (distanceSquared <= radius*radius) {
+            //         return 0.0; // Inside the circle
+            //     } else {
+            //         return 1.0; // Outside the circle
             //     }
             // }
+            // MultiScalarField3D<int> flagMatrixCylinder(nx, ny, nz);
+            // setToFunction(flagMatrixCylinder, lattice.getBoundingBox(), circleFunction);
+
+            ScalarField3D<int> flagMatrix(nx, ny, nz);
+            MultiScalarField3D<int> flagMatrix1(nx, ny, nz);
+            pcout << (T) nx*ny*nz << "This many nodes " << std::endl;
+
+            for (plint iX = 0; iX < nx; ++iX) {
+                for (plint iY = 0; iY < ny; ++iY) {
+                    for (plint iZ = 0; iZ < nz; ++iZ) {
+                        T dxi = (T)(iX - centerX);
+                        T dzi = (T)(iZ - centerZ);
+                        T distance = std::sqrt(dxi * dxi + dzi * dzi);
+                        if (distance < radius) {
+                            // pcout << "radius " << radius << "distance " << distance << std::endl;
+                            flagMatrix.get(iX, iY, iZ) = 0.0;  // Inside cylinder, no sponge
+                            // pcout << "INSIDE " << std::endl;
+                            // pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
+                        } 
+                        else {   //this else DOESNT WORK. FIX TOMORROW
+                            // pcout << "radius " << radius << "distance " << distance << std::endl;
+                            flagMatrix.get(iX, iY, iZ) = 1.0;  // Outside cylinder, apply sponge
+                            // pcout << "OUTSIDE " << std::endl;
+                            // pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
+                        }
+                        // pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
+                    }
+                }
+            }
+            copySerializedBlock(flagMatrix, flagMatrix1); //CAREFUL ITS SUMMING MORE STUFF I THINK
+            pcout << "This should be larger than 1 " << computeSum(flagMatrix1) << std::endl;
+            /*
             TriangleSet<T> triangleSetCylinder("cylindricalDomain.stl", DBL);  //DBL is double precision TriangleSet (std::string fname, Precision precision_=DBL, SurfaceGeometryFileFormat fformat=STL, TriangleSelector< T > *selector=0)
             triangleSetCylinder.scale((T)1 / dx);
             Cuboid<T> bCuboidCylinder = triangleSetCylinder.getBoundingCuboid();  //gets bounding cuboid
@@ -666,12 +687,14 @@ void createZones( //creates sponze zones
             plint blockSizeCylinder = 0;  // Size of blocks in the sparse/parallel representation.
                                 // Zero means: don't use sparse representation. A dense grid stores information for every node, while a sparse grid only stores information for non-empty or significant nodes. Sparse representations can save memory and improve performance, especially for large simulations with many empty or uniform regions.
             DEFscaledMesh<T> defMeshCylinder(triangleSet3Cylinder, 0, xDirectionCylinder, marginCylinder, Dot3D(0, 0, 0));  //DEFscaledMesh (TriangleSet< T > const &triangleSet_, plint resolution_, plint referenceDirection_, plint margin_, Dot3D location)
+            pcout << "hey1" << std::endl;
             TriangleBoundary3D<T> boundaryCylinder(defMeshCylinder); //TriangleBoundary3D (DEFscaledMesh< T > const &defMesh, bool automaticCloseHoles=true)
+            pcout << "hey2" << std::endl;
             // boundary.getMesh().inflate();
             //they basically redefine the mesh and boundary to have more sophisticated data 
-            /*
-            * Voxelize the domain.
-            */
+            
+            // Voxelize the domain.
+            
 
             // Voxelize the domain means: decide which lattice nodes are inside the obstacle and which are
             // outside. Interesting!
@@ -679,18 +702,22 @@ void createZones( //creates sponze zones
             const int flowTypeCylinder = voxelFlag::inside;
             VoxelizedDomain3D<T> voxelizedDomainCylinder(
                 boundaryCylinder, flowTypeCylinder, lattice.getBoundingBox(), borderWidthCylinder, extendedEnvelopeWidthCylinder, blockSizeCylinder); //VoxelizedDomain3D (TriangleBoundary3D< T > const &boundary_, int flowType_, Box3D const &boundingBox, plint borderWidth_, plint envelopeWidth_, plint blockSize_, plint gridLevel_=0, bool dynamicMesh_=false)
+            pcout << "hey3" << std::endl;
             MultiScalarField3D<int> flagMatrixCylinder((MultiBlock3D &)voxelizedDomainCylinder.getVoxelMatrix());
             setToConstant(
                 flagMatrixCylinder, voxelizedDomainCylinder.getVoxelMatrix(), voxelFlag::outside,
                 flagMatrixCylinder.getBoundingBox(), 1);
+            pcout << "hey4" << std::endl;
+            */
             std::vector<MultiBlock3D *> args;
             args.push_back(&lattice);
-            args.push_back(&flagMatrixCylinder);
+            args.push_back(&flagMatrix1);
 
             applyProcessingFunctional(
                 new MaskedViscositySpongeZone3D<T, DESCRIPTOR>(
                     nx, ny, nz, bulkValue, 1, numSpongeCells),  // Note: 1 is the flag value for applying the sponge
                 lattice.getBoundingBox(), args);
+            pcout << "hey5" << std::endl;
             // std::vector<MultiBlock3D *> args;
             // args.push_back(&lattice);
             // applyProcessingFunctional(
@@ -1014,7 +1041,7 @@ int main(int argc, char *argv[])
     TriangleSet<T> triangleSet3;
     
     Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+1, 0.),Array<T, 3>(0., -1., 0.) );
-    Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-1 , 0.),Array<T, 3>(0., 1., 0.) );
+    Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-1, 0.),Array<T, 3>(0., 1., 0.) );
     triangleSet.cutWithPlane(planeyminus, triangleSet2);
     triangleSet2.cutWithPlane(planeyplus,triangleSet3);
     Cuboid<T> bCuboid3 = triangleSet3.getBoundingCuboid();
@@ -1030,8 +1057,11 @@ int main(int argc, char *argv[])
     DEFscaledMesh<T> defMesh(triangleSet3, 0, 0, 1, Dot3D(0, 0, 0));
     defMesh.setDx(param.dxFinest);
     defMesh.setPhysicalLocation(param.physicalLocation);
+    pcout << "hey1 " << std::endl;
     TriangleBoundary3D<T> boundary(defMesh);
+    pcout << "hey2 " << std::endl;
     boundary.getMesh().inflate(0.05); 
+    pcout << "hey3 " << std::endl;
 
     // The aneurysm simulation is an interior (as opposed to exterior) flow problem. For
     // this reason, the lattice nodes that lay inside the computational domain must
