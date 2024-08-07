@@ -1,0 +1,4 @@
+*
+!/showCases/
+!/showCases/**
+!.gitignore
