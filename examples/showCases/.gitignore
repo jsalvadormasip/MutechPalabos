@@ -2,5 +2,7 @@
 *
 # Except this file
 !/jordiPowerFlowCopy/
+!/jordiPowerFlowCopy/**
 !/jordiCylindricalDomain/
+!/jordiCylindricalDomain/**
 !.gitignore
