@@ -131,7 +131,7 @@
         </ySlices>
         <!-- Slices normal to the z-axis for disk output. -->
         <zSlices>
-            <zPositions> 0.0 </zPositions>
+            <zPositions> 0.0 -20.0 19.0 </zPositions>
             <xRange> -20.0 20.0 </xRange>
             <yRange> -20.0 20.0 </yRange>
         </zSlices>

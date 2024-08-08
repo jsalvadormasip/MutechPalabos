@@ -3,9 +3,9 @@ import numpy as np
 
 # Constants
 rho = 1.0  # Assuming constant density for incompressible flow
-
+nBlock = 6.0
 # Load the VTM file
-file_path = 'C:/Users/jordi/Documents/GitHub/MutechPalabos/examples/showCases/jordiPowerFlowCopy/tmp/slice_y_00_00004200.vtm'
+file_path = 'C:/Users/jordi/Desktop/MutechInternship/Notable Results/tmp 02-08-2024, pressure output v other boundaries/slice_y_00_00003000.vtm'
 dataset = pv.read(file_path)
 
 # Initialize lists to hold the datasets for merging
@@ -14,12 +14,13 @@ pressure_datasets_to_merge = []
 
 # Variables to store inlet velocities and modified outlet velocities
 inlet_velocities = []
-modified_outlet_velocities = []
-modified_outlet_areas = []
+outlet_velocities = []
+# modified_outlet_velocities = []
+# modified_outlet_areas = []
 
 # Define the number of columns to the left of the outlet
-columns_to_left = 10
-# print("number of blocks: ", dataset.GetNumberOfBlocks())
+
+print("number of blocks: ", dataset.GetNumberOfBlocks())
 # Explore the MultiBlock structure
 for i in range(dataset.GetNumberOfBlocks()):
     
@@ -81,7 +82,7 @@ if velocity_datasets_to_merge:
     for ds in velocity_datasets_to_merge[1:]:
         combined_velocity_dataset = combined_velocity_dataset.merge(ds)
 # print(combined_velocity_dataset)
-print("cells ", combined_velocity_dataset.cells[0:270])
+# print("cells ", combined_velocity_dataset.cells[0:270])
 # print("cells ", combined_velocity_dataset.cells.shape)
 # print(combined_velocity_dataset['velocity'].shape)
 # print("array names ",combined_velocity_dataset.array_names)
@@ -110,9 +111,14 @@ if 'velocity_magnitude' in combined_velocity_dataset.array_names:
     plotter_velocity_magnitude.show()
 
 for i in range(combined_velocity_dataset['velocity_x'].size):
-    if i % 60 ==0 and i >=7200*2:  #inlet
-        inlet_velocities.append(combined_velocity_dataset['velocity_x'][i])
-print(np.max(inlet_velocities), np.min(inlet_velocities), np.average(inlet_velocities))
+    if i % 59 ==0 :  #inlet
+        # inlet_velocities.append(combined_velocity_dataset['velocity_x'][i])
+        combined_velocity_dataset['velocity_x'][i] = i
+# print("inlet velocities, max min avg ", np.max(inlet_velocities), np.min(inlet_velocities), np.average(inlet_velocities))
+for i in range(combined_velocity_dataset['velocity_x'].size):
+    if (i+10) % 60 ==0 and i <= 7200*2:  #outlet?
+        outlet_velocities.append(combined_velocity_dataset['velocity_x'][i])
+print("outlet velocities, max min avg ",np.max(outlet_velocities), np.min(outlet_velocities), np.average(outlet_velocities))
 # combined_velocity_dataset['velocity_x'][59] = -50000
 # Plot the x component of velocity
 if 'velocity_x' in combined_velocity_dataset.array_names:
@@ -131,6 +137,12 @@ if 'velocity_z' in combined_velocity_dataset.array_names:
     plotter_velocity_z = pv.Plotter()
     plotter_velocity_z.add_mesh(combined_velocity_dataset, scalars='velocity_z', cmap='coolwarm')
     plotter_velocity_z.show()
+#drag force calculation
+outlet_velocity = np.array(outlet_velocities)
+inlet_velocity = np.array(inlet_velocities)
+drag_contribution = rho * outlet_velocity * (outlet_velocity - inlet_velocity)
+drag_force = np.sum(drag_contribution)  # Integrate
+print("Drag", drag_force)
 
 # # Calculate Drag Force based on inlet and modified outlet velocities
 # if inlet_velocities and modified_outlet_velocities:
