@@ -51,8 +51,8 @@ def main(input_file, output_file, num_points):
     plot_airfoil(x, z, x_new, z_new)
 
 if __name__ == "__main__":
-    input_file = "MutechAirfoilRefinementpart2.dat"   # Path to your input .dat file
-    output_file = "refined_airfoilpart2.dat"  # Path to save the refined .dat file
+    input_file = "UnderstandingGridRefinement/MutechAirfoilRefinementpart2_clean.dat"   # Path to your input .dat file
+    output_file = "UnderstandingGridRefinement/refined_airfoilpart2_clean.dat"  # Path to save the refined .dat file
     num_points = 500  # Number of points in the refined airfoil line
     
     main(input_file, output_file, num_points)

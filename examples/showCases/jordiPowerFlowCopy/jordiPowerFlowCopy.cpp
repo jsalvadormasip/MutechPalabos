@@ -51,6 +51,8 @@ typedef Array<T, 3> Velocity;
 #define RESCALER   ConvectiveNoForceRescaler    //there are types of rescalers!!! la hemos liao
 #define DESCRIPTOR descriptors::D3Q19Descriptor
 T angle = 7.8 * 3.1415 / 180;
+T chordLengthPercentage = 0.01;
+bool teaddon = false;
 struct SimulationParameters {
     /*
      * Parameters set by the user.
@@ -1021,16 +1023,19 @@ int main(int argc, char *argv[])
     
     Cuboid<T> bCuboid = triangleSet.getBoundingCuboid();  //gets bounding cuboid
     Array<T, 3> obstacleCenter = (T)0.5 * (bCuboid.lowerLeftCorner + bCuboid.upperRightCorner); //gets center of obstacle
-    T scaling_factor = (lattices.getLevel(0).getBoundingBox().x1-lattices.getLevel(0).getBoundingBox().x0)/(-bCuboid.lowerLeftCorner[0] + bCuboid.upperRightCorner[0])*0.4*(T)util::intTwoToThePower(param.finestLevel); //in jordi's density.dat generator, chord was also set as 40% of the length of level 0 x span
+    T scaling_factor = (lattices.getLevel(0).getBoundingBox().x1-lattices.getLevel(0).getBoundingBox().x0)/(-bCuboid.lowerLeftCorner[0] + bCuboid.upperRightCorner[0])*chordLengthPercentage*(T)util::intTwoToThePower(param.finestLevel); //in jordi's density.dat generator, chord was also set as 40% of the length of level 0 x span
     triangleSet.scale(scaling_factor);
     // T scaling_factor2 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-lattices.getLevel(param.finestLevel).getBoundingBox().y0)/(-bCuboid.lowerLeftCorner[1] + bCuboid.upperRightCorner[1]);
     // triangleSet.scale((T)0.0,(T) scaling_factor2*1.05 , (T) 0.0);
 
     Cuboid<T> bCuboid2 = triangleSet.getBoundingCuboid();  //gets bounding cuboid
     Array<T, 3> obstacleCenter2 = (T)0.5 * (bCuboid2.lowerLeftCorner + bCuboid2.upperRightCorner); //gets center of obstacle
-    T cleanChordLength = (bCuboid2.upperRightCorner[0]-bCuboid2.lowerLeftCorner[0])*0.2/0.2335; //this is based on the Marlon object that we are analysing. 
-    T actualCenterWithoutTail = (T)0.5 * (bCuboid2.lowerLeftCorner[0] + cleanChordLength);
-    obstacleCenter2[0] = actualCenterWithoutTail;
+    if (teaddon == true)
+    {
+        T cleanChordLength = (bCuboid2.upperRightCorner[0]-bCuboid2.lowerLeftCorner[0])*0.2/0.2335; //this is based on the Marlon object that we are analysing. 
+        T actualCenterWithoutTail = (T)0.5 * (bCuboid2.lowerLeftCorner[0] + cleanChordLength);
+        obstacleCenter2[0] = actualCenterWithoutTail;   
+    }
     //fixed to center considering the tail does not count in the center calculation. 
     triangleSet.translate(-obstacleCenter2); //centers it at 0,0,0 i think. indeed, tested below. 
     triangleSet.translate(Array<T,3>((lattices.getLevel(0).getBoundingBox().x1+lattices.getLevel(0).getBoundingBox().x0)/2*(T)util::intTwoToThePower(param.finestLevel), (lattices.getLevel(0).getBoundingBox().y1+lattices.getLevel(0).getBoundingBox().y0)/2*(T)util::intTwoToThePower(param.finestLevel), (lattices.getLevel(0).getBoundingBox().z1+lattices.getLevel(0).getBoundingBox().z0)/2*(T)util::intTwoToThePower(param.finestLevel))); //centers it at 0,0,0 i think. indeed, tested below. 
@@ -1225,7 +1230,7 @@ int main(int argc, char *argv[])
                 param.rho * (param.dxFinest * param.dxFinest * param.dxFinest * param.dxFinest)
                 / (param.dtFinest * param.dtFinest);
             Array<T, 3> force = forceConversion * boundaryCondition->getForceOnObject();
-            forces << (double)(iter * param.dtCoarsest) << " " << force[2]*std::cos(angle)-force[0]*std::sin(angle)/(0.5*param.rho*param.inletVelocity*param.inletVelocity*(-param.fullDomain.lowerLeftCorner[0]+param.fullDomain.upperRightCorner[0])*0.4*(param.fullDomain.upperRightCorner[1]-param.fullDomain.lowerLeftCorner[1])) << " " << force[0]*std::cos(angle)+force[2]*std::sin(angle)/(0.5*param.rho*param.inletVelocity*param.inletVelocity*(-param.fullDomain.lowerLeftCorner[0]+param.fullDomain.upperRightCorner[0])*0.4*(param.fullDomain.upperRightCorner[1]-param.fullDomain.lowerLeftCorner[1])) << " " << force[1] << std::endl; //time, cl, cd, lateral force. because lift is perpendicular to airflow, and drag parallel
+            forces << (double)(iter * param.dtCoarsest) << " " << force[2]*std::cos(angle)-force[0]*std::sin(angle)/(0.5*param.rho*param.inletVelocity*param.inletVelocity*(-param.fullDomain.lowerLeftCorner[0]+param.fullDomain.upperRightCorner[0])*chordLengthPercentage*(param.fullDomain.upperRightCorner[1]-param.fullDomain.lowerLeftCorner[1])) << " " << force[0]*std::cos(angle)+force[2]*std::sin(angle)/(0.5*param.rho*param.inletVelocity*param.inletVelocity*(-param.fullDomain.lowerLeftCorner[0]+param.fullDomain.upperRightCorner[0])*chordLengthPercentage*(param.fullDomain.upperRightCorner[1]-param.fullDomain.lowerLeftCorner[1])) << " " << force[1] << std::endl; //time, cl, cd, lateral force. because lift is perpendicular to airflow, and drag parallel
 
             if (iter > 0) {
                 T totTime = global::timer("lb-iter").getTime();

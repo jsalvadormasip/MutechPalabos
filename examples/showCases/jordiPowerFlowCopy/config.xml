@@ -7,9 +7,9 @@
 <geometry>
     <!-- Coordinates of the physical simulation domain. -->
     <simulationDomain>
-        <x> -20.0 20.0 </x>
-        <y> -2.0 2.0 </y>
-        <z> -20.0 20.0 </z>
+        <x> -10.0 10.0 </x>
+        <y> -0.487 0.487 </y>
+        <z> -10.0 10.0 </z>
     </simulationDomain>
     <!-- The direction of the uniform flow is always the +x one. -->
 
@@ -22,7 +22,7 @@
             that all surfaces are fully contained in the finest nested grid (finest grid level).
     -->
     <!-- Files (in physical units) with the static immersed surface geometries. -->
-    <staticSurfaceFileName> MarlonDesign.stl </staticSurfaceFileName>
+    <staticSurfaceFileName> NACA0018emptyscaled.stl </staticSurfaceFileName>
 </geometry>
 
 <grid>
@@ -57,9 +57,9 @@
          to that axis, which holds the minimum axis coordinate. If no sponge
          zone is necessary at a lattice boundary, the corresponding width
          should be 0. -->
-        <xWidths> 15.0 15.0 </xWidths>
+        <xWidths> 7.5 7.5 </xWidths>
         <yWidths> 0. 0. </yWidths>
-        <zWidths> 15.0 15.0 </zWidths>
+        <zWidths> 7.5 7.5 </zWidths>
     </spongeZones>
 
 </boundaryConditions>
@@ -108,9 +108,9 @@
     <outputInDomain> false </outputInDomain>
     <!-- Domain for disk output (must be a subset of the simulation domain). -->
     <outputDomain>
-        <x> -20.0 20.0 </x>
-        <y> -20.0 20.0 </y>
-        <z> -20.0 20.0 </z>
+        <x> -10.0 10.0 </x>
+        <y> -0.487 0.487 </y>
+        <z> -10.0 10.0 </z>
     </outputDomain>
 
     <!-- Save data on disk on a set of slices or not? -->
@@ -119,21 +119,21 @@
     <outputSlices>
         <!-- Slices normal to the x-axis for disk output. -->
         <xSlices>
-            <xPositions> 0.0 -20.0 15.0 </xPositions>
-            <yRange> -2.0 2.0 </yRange>
-            <zRange> -19.0 19.0 </zRange>
+            <xPositions> 0.0 -10.0 7.5 </xPositions>
+            <yRange> -0.487 0.487 </yRange>
+            <zRange> -9.5 9.5 </zRange>
         </xSlices>
         <!-- Slices normal to the y-axis for disk output. -->
         <ySlices>
-            <yPositions> 1.0 </yPositions>
-            <zRange> -20.0 20.0 </zRange>
-            <xRange> -20.0 20.0 </xRange>
+            <yPositions> 0.0 </yPositions>
+            <zRange> -10.0 10.0 </zRange>
+            <xRange> -10.0 10.0 </xRange>
         </ySlices>
         <!-- Slices normal to the z-axis for disk output. -->
         <zSlices>
             <zPositions> 0.0 </zPositions>
-            <xRange> -2.0 2.0 </xRange>
-            <yRange> -20.0 20.0 </yRange>
+            <xRange> -10.0 10.0 </xRange>
+            <yRange> -10.0 10.0 </yRange>
         </zSlices>
     </outputSlices>
 

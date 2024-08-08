@@ -123,21 +123,22 @@ def plot_y_slice(file_path, y_index, nx, ny, nz):
 
 # Example usage:
 # Airfoil points file path
-airfoil_file_path = 'airfoilcoordinates.dat'  # Replace with your airfoil points file path
+airfoil_file_path = 'UnderstandingGridRefinement/airfoilcoordinates_clean.dat'  # Replace with your airfoil points file path
 #grid dimensions
-dx = 0.04
-domainx0 = -20
-domainx1 = 20
-domainy0 = -2
-domainy1 = 2
-domainz0 = -20
-domainz1 = 20
+dx = 0.02
+domainx0 = -10
+domainx1 = 10
+domainy0 = -0.487
+domainy1 = 0.487
+domainz0 = -10
+domainz1 = 10
 nx = int(domainx1/dx*2+2)
 ny = int(domainy1/dx*2+2)
 nz = int(domainz1/dx*2+2)
+print("nx ", nx, " ny ", ny, " nz ", nz)
 # Define the z offset
 z_offset = int(nz/2)  # Replace with the desired offset value
-chord = int(0.4*nx) #clean chord
+chord = int(0.01*nx) #clean chord
 x_offset = int(nx/2-chord/2)
 
 # Read airfoil points from file with the z offset
@@ -170,7 +171,7 @@ density_ranges = [
 
 
 # Output file
-output_file = 'density.dat'
+output_file = 'examples/showCases/jordiPowerFlowCopy/density.dat'
 
 create_density_file(nx, ny, nz, airfoil_points, density_ranges, output_file)
 
