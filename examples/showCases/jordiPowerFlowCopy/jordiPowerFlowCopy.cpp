@@ -1200,7 +1200,8 @@ int main(int argc, char *argv[])
     pcout << "The full initialization phase took " << global::timer("init").getTime()
           << " seconds on " << nproc << " processes." << std::endl;
     pcout << std::endl;
-
+    pcout << "rho " << param.rho << " inlet velocity " << param.inletVelocity << " x0 " << param.fullDomain.lowerLeftCorner[0] << " x1 " << param.fullDomain.upperRightCorner[0] << " y0 " << param.fullDomain.lowerLeftCorner[1] << " y1 " << param.fullDomain.upperRightCorner[1] << std::endl;
+    
     pcout << "Starting simulation." << std::endl;
     pcout << std::endl;
     bool stopExecution = false;
@@ -1224,8 +1225,7 @@ int main(int argc, char *argv[])
                 param.rho * (param.dxFinest * param.dxFinest * param.dxFinest * param.dxFinest)
                 / (param.dtFinest * param.dtFinest);
             Array<T, 3> force = forceConversion * boundaryCondition->getForceOnObject();
-            forces << (double)(iter * param.dtCoarsest) << " " << force[2]*std::cos(angle)-force[0]*std::sin(angle) << " " << force[0]*std::cos(angle)+force[2]*std::sin(angle) << " "
-                   << force[1] << std::endl; //time, lift, drag, lateral force. because lift is perpendicular to airflow, and drag parallel
+            forces << (double)(iter * param.dtCoarsest) << " " << force[2]*std::cos(angle)-force[0]*std::sin(angle)/(0.5*param.rho*param.inletVelocity*param.inletVelocity*(-param.fullDomain.lowerLeftCorner[0]+param.fullDomain.upperRightCorner[0])*0.4*(param.fullDomain.upperRightCorner[1]-param.fullDomain.lowerLeftCorner[1])) << " " << force[0]*std::cos(angle)+force[2]*std::sin(angle)/(0.5*param.rho*param.inletVelocity*param.inletVelocity*(-param.fullDomain.lowerLeftCorner[0]+param.fullDomain.upperRightCorner[0])*0.4*(param.fullDomain.upperRightCorner[1]-param.fullDomain.lowerLeftCorner[1])) << " " << force[1] << std::endl; //time, cl, cd, lateral force. because lift is perpendicular to airflow, and drag parallel
 
             if (iter > 0) {
                 T totTime = global::timer("lb-iter").getTime();

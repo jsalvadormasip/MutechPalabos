@@ -1,165 +1,177 @@
 import pyvista as pv
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Constants
+# Parameters
+plot_iterations = []
+plots = False
+area = 19 * 2 * 4
 rho = 1.0  # Assuming constant density for incompressible flow
 nBlock = 6.0
-# Load the VTM file
-file_path = 'C:/Users/jordi/Desktop/MutechInternship/Notable Results/tmp 02-08-2024, pressure output v other boundaries/slice_y_00_00003000.vtm'
-dataset = pv.read(file_path)
+iterations = range(50, 401, 50)  # Modify the range as needed
+file_path_template_input = 'C:/Users/jordi/Documents/GitHub/MutechPalabos/examples/showCases/jordiPowerFlowCopy/tmp/slice_x_01_{:08d}.vtm'
+file_path_template_output = 'C:/Users/jordi/Documents/GitHub/MutechPalabos/examples/showCases/jordiPowerFlowCopy/tmp/slice_x_02_{:08d}.vtm'
 
-# Initialize lists to hold the datasets for merging
-velocity_datasets_to_merge = []
-pressure_datasets_to_merge = []
+# Lists to store drag force and drag coefficient for each iteration
+drag_forces = []
+drag_coefficients = []
+iteration_numbers = []
 
-# Variables to store inlet velocities and modified outlet velocities
-inlet_velocities = []
-outlet_velocities = []
-# modified_outlet_velocities = []
-# modified_outlet_areas = []
+for iteration in iterations:
+    file_path_input = file_path_template_input.format(iteration)
+    file_path_output = file_path_template_output.format(iteration)
 
-# Define the number of columns to the left of the outlet
+    # Read datasets
+    dataset_input = pv.read(file_path_input)
+    dataset_output = pv.read(file_path_output)
 
-print("number of blocks: ", dataset.GetNumberOfBlocks())
-# Explore the MultiBlock structure
-for i in range(dataset.GetNumberOfBlocks()):
-    
-    block = dataset.GetBlock(i)
+    # Initialize lists to hold the datasets for merging
+    velocity_datasets_to_merge_input = []
+    velocity_datasets_to_merge_output = []
+    pressure_datasets_to_merge_input = []
+    pressure_datasets_to_merge_output = []
 
-    if block is not None and isinstance(block, pv.MultiBlock):
-        print("number of subblocks: ", block.GetNumberOfBlocks())
-        for j in range(block.GetNumberOfBlocks()):
-            sub_block = block.GetBlock(j)
+    # Process input dataset
+    for i in range(dataset_input.GetNumberOfBlocks()):
+        block = dataset_input.GetBlock(i)
+        if block is not None and isinstance(block, pv.MultiBlock):
+            for j in range(block.GetNumberOfBlocks()):
+                sub_block = block.GetBlock(j)
+                if sub_block is not None and isinstance(sub_block, pv.DataSet):
+                    if 'velocity' in sub_block.array_names:
+                        velocity_array = sub_block['velocity']
+                        velocity_magnitude = np.linalg.norm(velocity_array, axis=1)
+                        sub_block['velocity_magnitude'] = velocity_magnitude
+                        sub_block['velocity_x'] = velocity_array[:, 0]
+                        sub_block['velocity_y'] = velocity_array[:, 1]
+                        sub_block['velocity_z'] = velocity_array[:, 2]
+                        velocity_datasets_to_merge_input.append(sub_block)
+                    if 'pressure' in sub_block.array_names:
+                        pressure_datasets_to_merge_input.append(sub_block)
 
-            if sub_block is not None and isinstance(sub_block, pv.DataSet):
-                # Process velocity data
-                if 'velocity' in sub_block.array_names:
-                    velocity_array = sub_block['velocity']
-                    
-                    # print(velocity_array)
-                    # print(velocity_array.shape)
-                    points = sub_block.points
-                    # print(points.shape)
-                    # Identify inlet based on x-coordinate (leftmost points)
-                    # inlet_mask = np.isclose(points[:, 0], points[:, 0].min())
+    # Process output dataset
+    for i in range(dataset_output.GetNumberOfBlocks()):
+        block = dataset_output.GetBlock(i)
+        if block is not None and isinstance(block, pv.MultiBlock):
+            for j in range(block.GetNumberOfBlocks()):
+                sub_block = block.GetBlock(j)
+                if sub_block is not None and isinstance(sub_block, pv.DataSet):
+                    if 'velocity' in sub_block.array_names:
+                        velocity_array = sub_block['velocity']
+                        velocity_magnitude = np.linalg.norm(velocity_array, axis=1)
+                        sub_block['velocity_magnitude'] = velocity_magnitude
+                        sub_block['velocity_x'] = velocity_array[:, 0]
+                        sub_block['velocity_y'] = velocity_array[:, 1]
+                        sub_block['velocity_z'] = velocity_array[:, 2]
+                        velocity_datasets_to_merge_output.append(sub_block)
+                    if 'pressure' in sub_block.array_names:
+                        pressure_datasets_to_merge_output.append(sub_block)
 
-                    # Identify the modified outlet based on the position 10 columns to the left
-                    # unique_x = np.unique(points[:, 0])
-                    # if len(unique_x) >= columns_to_left + 1:
-                    #     modified_outlet_x = unique_x[-columns_to_left - 1]
-                    #     modified_outlet_mask = np.isclose(points[:, 0], modified_outlet_x)
-                    # else:
-                    #     modified_outlet_mask = np.array([False] * len(points))
+    # Merge the velocity datasets
+    if velocity_datasets_to_merge_input:
+        combined_velocity_dataset_input = velocity_datasets_to_merge_input[0]
+        for ds in velocity_datasets_to_merge_input[1:]:
+            combined_velocity_dataset_input = combined_velocity_dataset_input.merge(ds)
+    if velocity_datasets_to_merge_output:
+        combined_velocity_dataset_output = velocity_datasets_to_merge_output[0]
+        for ds in velocity_datasets_to_merge_output[1:]:
+            combined_velocity_dataset_output = combined_velocity_dataset_output.merge(ds)
+    # Merge the pressure datasets
+    if pressure_datasets_to_merge_input:
+        combined_pressure_dataset_input = pressure_datasets_to_merge_input[0]
+        for ds in pressure_datasets_to_merge_input[1:]:
+            combined_pressure_dataset_input = combined_pressure_dataset_input.merge(ds)
+    if pressure_datasets_to_merge_output:
+        combined_pressure_dataset_output = pressure_datasets_to_merge_output[0]
+        for ds in pressure_datasets_to_merge_output[1:]:
+            combined_pressure_dataset_output = combined_pressure_dataset_output.merge(ds)
+    # Drag force calculation
+    inlet_velocity = np.average(np.array(combined_velocity_dataset_input['velocity_x']))
+    outlet_velocity = np.array(combined_velocity_dataset_output['velocity_x'])
+    drag_contribution = rho * outlet_velocity * (outlet_velocity - inlet_velocity) * area / outlet_velocity.size
+    drag_force = np.sum(drag_contribution)  # Integrate
 
-                    # Extract and store inlet and modified outlet velocities
-                    # if inlet_mask.any():
-                    #     inlet_velocities.append(sub_block.extract_points(inlet_mask)['velocity'])
-                    # if modified_outlet_mask.any():
-                    #     extracted_outlet = sub_block.extract_points(modified_outlet_mask)
-                    #     modified_outlet_velocities.append(extracted_outlet['velocity'])
+    # Store results
+    domainlength = 40
+    chord = 0.4 * domainlength
+    span = 4
+    drag_coefficient = drag_force / (0.5 * rho * inlet_velocity**2 * chord * span)
+    drag_forces.append(drag_force)
+    drag_coefficients.append(drag_coefficient)
+    iteration_numbers.append(iteration)
 
-                    #     # Store outlet areas for integration
-                    #     modified_outlet_areas.append(extracted_outlet.compute_cell_sizes()['Area'])
+    # Optionally plot the data for each iteration
+    if iteration in plot_iterations:
+        if 'pressure' in combined_pressure_dataset_input.array_names:
+            plotter_pressure_input = pv.Plotter()
+            plotter_pressure_input.add_mesh(combined_pressure_dataset_input, scalars='pressure', cmap='viridis')
+            plotter_pressure_input.show()
+        if 'pressure' in combined_pressure_dataset_output.array_names:
+            plotter_pressure_output = pv.Plotter()
+            plotter_pressure_output.add_mesh(combined_pressure_dataset_output, scalars='pressure', cmap='viridis')
+            plotter_pressure_output.show()
 
-                    # Process and store components for plotting
-                    velocity_magnitude = np.linalg.norm(velocity_array, axis=1)
-                    velocity_x_component = velocity_array[:, 0]
-                    velocity_y_component = velocity_array[:, 1]
-                    velocity_z_component = velocity_array[:, 2]
-                    sub_block['velocity_magnitude'] = velocity_magnitude
-                    sub_block['velocity_x'] = velocity_x_component
-                    sub_block['velocity_y'] = velocity_y_component
-                    sub_block['velocity_z'] = velocity_z_component
-                    velocity_datasets_to_merge.append(sub_block)
+        # Plot the velocity magnitude data
+        if 'velocity_magnitude' in combined_velocity_dataset_input.array_names:
+            plotter_velocity_magnitude_input = pv.Plotter()
+            plotter_velocity_magnitude_input.add_mesh(combined_velocity_dataset_input, scalars='velocity_magnitude', cmap='plasma')
+            plotter_velocity_magnitude_input.show()
+        if 'velocity_magnitude' in combined_velocity_dataset_output.array_names:
+            plotter_velocity_magnitude_output = pv.Plotter()
+            plotter_velocity_magnitude_output.add_mesh(combined_velocity_dataset_output, scalars='velocity_magnitude', cmap='plasma')
+            plotter_velocity_magnitude_output.show()
+        # for i in range(combined_velocity_dataset['velocity_x'].size):
+        #     if i % 59 ==0 :  #inlet
+        #         # inlet_velocities.append(combined_velocity_dataset['velocity_x'][i])
+        #         combined_velocity_dataset['velocity_x'][i] = i
+        # # print("inlet velocities, max min avg ", np.max(inlet_velocities), np.min(inlet_velocities), np.average(inlet_velocities))
+        # for i in range(combined_velocity_dataset['velocity_x'].size):
+        #     if (i+10) % 60 ==0 and i <= 7200*2:  #outlet?
+        #         outlet_velocities.append(combined_velocity_dataset['velocity_x'][i])
+        # print("outlet velocities, max min avg ",np.max(outlet_velocities), np.min(outlet_velocities), np.average(outlet_velocities))
+        # combined_velocity_dataset['velocity_x'][59] = -50000
+        # Plot the x component of velocity
+        if 'velocity_x' in combined_velocity_dataset_input.array_names:
+            plotter_velocity_x_input = pv.Plotter()
+            plotter_velocity_x_input.add_mesh(combined_velocity_dataset_input, scalars='velocity_x', cmap='coolwarm')
+            plotter_velocity_x_input.show()
+        if 'velocity_x' in combined_velocity_dataset_output.array_names:
+            plotter_velocity_x_output = pv.Plotter()
+            plotter_velocity_x_output.add_mesh(combined_velocity_dataset_output, scalars='velocity_x', cmap='coolwarm')
+            plotter_velocity_x_output.show()
+        # Plot the y component of velocity
+        if 'velocity_y' in combined_velocity_dataset_input.array_names:
+            plotter_velocity_y_input = pv.Plotter()
+            plotter_velocity_y_input.add_mesh(combined_velocity_dataset_input, scalars='velocity_y', cmap='coolwarm')
+            plotter_velocity_y_input.show()
+        if 'velocity_y' in combined_velocity_dataset_output.array_names:
+            plotter_velocity_y_output = pv.Plotter()
+            plotter_velocity_y_output.add_mesh(combined_velocity_dataset_output, scalars='velocity_y', cmap='coolwarm')
+            plotter_velocity_y_output.show()
+        # Plot the z component of velocity
+        if 'velocity_z' in combined_velocity_dataset_input.array_names:
+            plotter_velocity_z_input = pv.Plotter()
+            plotter_velocity_z_input.add_mesh(combined_velocity_dataset_input, scalars='velocity_z', cmap='coolwarm')
+            plotter_velocity_z_input.show()
+        if 'velocity_z' in combined_velocity_dataset_output.array_names:
+            plotter_velocity_z_output = pv.Plotter()
+            plotter_velocity_z_output.add_mesh(combined_velocity_dataset_output, scalars='velocity_z', cmap='coolwarm')
+            plotter_velocity_z_output.show()
 
-                # Process pressure data
-                if 'pressure' in sub_block.array_names:
-                    pressure_datasets_to_merge.append(sub_block)
+# Plotting drag force and drag coefficient vs iteration
+times = np.array(iteration_numbers) * 5/400
+plt.figure()
+plt.subplot(2, 1, 1)
+plt.plot(times, drag_forces, marker='o')
+plt.title('Drag Force vs. Iteration')
+plt.xlabel('Iteration')
+plt.ylabel('Drag Force')
 
-# Merge the velocity datasets
-if velocity_datasets_to_merge:
-    combined_velocity_dataset = velocity_datasets_to_merge[0]
-    for ds in velocity_datasets_to_merge[1:]:
-        combined_velocity_dataset = combined_velocity_dataset.merge(ds)
-# print(combined_velocity_dataset)
-# print("cells ", combined_velocity_dataset.cells[0:270])
-# print("cells ", combined_velocity_dataset.cells.shape)
-# print(combined_velocity_dataset['velocity'].shape)
-# print("array names ",combined_velocity_dataset.array_names)
-# print(np.min(combined_velocity_dataset.points, axis=0))
-# print(np.max(combined_velocity_dataset.points, axis=0))
-# print(np.max(combined_velocity_dataset['velocity_x'], axis=0))
-# print(np.min(combined_velocity_dataset.cells, axis=0))
-# print(np.max(combined_velocity_dataset.cells, axis=0))
+plt.subplot(2, 1, 2)
+plt.plot(times, drag_coefficients, marker='o')
+plt.title('Drag Coefficient vs. Iteration')
+plt.xlabel('Iteration')
+plt.ylabel('Drag Coefficient')
 
-# Merge the pressure datasets
-if pressure_datasets_to_merge:
-    combined_pressure_dataset = pressure_datasets_to_merge[0]
-    for ds in pressure_datasets_to_merge[1:]:
-        combined_pressure_dataset = combined_pressure_dataset.merge(ds)
-# print(combined_pressure_dataset)
-# Plot the pressure data
-if 'pressure' in combined_pressure_dataset.array_names:
-    plotter_pressure = pv.Plotter()
-    plotter_pressure.add_mesh(combined_pressure_dataset, scalars='pressure', cmap='viridis')
-    plotter_pressure.show()
-
-# Plot the velocity magnitude data
-if 'velocity_magnitude' in combined_velocity_dataset.array_names:
-    plotter_velocity_magnitude = pv.Plotter()
-    plotter_velocity_magnitude.add_mesh(combined_velocity_dataset, scalars='velocity_magnitude', cmap='plasma')
-    plotter_velocity_magnitude.show()
-
-for i in range(combined_velocity_dataset['velocity_x'].size):
-    if i % 59 ==0 :  #inlet
-        # inlet_velocities.append(combined_velocity_dataset['velocity_x'][i])
-        combined_velocity_dataset['velocity_x'][i] = i
-# print("inlet velocities, max min avg ", np.max(inlet_velocities), np.min(inlet_velocities), np.average(inlet_velocities))
-for i in range(combined_velocity_dataset['velocity_x'].size):
-    if (i+10) % 60 ==0 and i <= 7200*2:  #outlet?
-        outlet_velocities.append(combined_velocity_dataset['velocity_x'][i])
-print("outlet velocities, max min avg ",np.max(outlet_velocities), np.min(outlet_velocities), np.average(outlet_velocities))
-# combined_velocity_dataset['velocity_x'][59] = -50000
-# Plot the x component of velocity
-if 'velocity_x' in combined_velocity_dataset.array_names:
-    plotter_velocity_x = pv.Plotter()
-    plotter_velocity_x.add_mesh(combined_velocity_dataset, scalars='velocity_x', cmap='coolwarm')
-    plotter_velocity_x.show()
-
-# Plot the y component of velocity
-if 'velocity_y' in combined_velocity_dataset.array_names:
-    plotter_velocity_y = pv.Plotter()
-    plotter_velocity_y.add_mesh(combined_velocity_dataset, scalars='velocity_y', cmap='coolwarm')
-    plotter_velocity_y.show()
-
-# Plot the z component of velocity
-if 'velocity_z' in combined_velocity_dataset.array_names:
-    plotter_velocity_z = pv.Plotter()
-    plotter_velocity_z.add_mesh(combined_velocity_dataset, scalars='velocity_z', cmap='coolwarm')
-    plotter_velocity_z.show()
-#drag force calculation
-outlet_velocity = np.array(outlet_velocities)
-inlet_velocity = np.array(inlet_velocities)
-drag_contribution = rho * outlet_velocity * (outlet_velocity - inlet_velocity)
-drag_force = np.sum(drag_contribution)  # Integrate
-print("Drag", drag_force)
-
-# # Calculate Drag Force based on inlet and modified outlet velocities
-# if inlet_velocities and modified_outlet_velocities:
-#     # Calculate the average inlet and outlet velocities
-#     inlet_velocity = np.mean(np.vstack(inlet_velocities), axis=0)
-#     outlet_velocity = np.vstack(modified_outlet_velocities)
-
-#     # Calculate the drag contribution at each point on the outlet
-#     drag_contribution = rho * outlet_velocity * (outlet_velocity - inlet_velocity)
-
-#     # Flatten the outlet areas list
-#     modified_outlet_areas = np.hstack(modified_outlet_areas)
-
-#     # Integrate over the outlet surface
-#     drag_force = np.sum(drag_contribution * modified_outlet_areas[:, None], axis=0)  # Integrate
-
-#     # Output the drag force (for all directions)
-#     print(f"Drag Force (x, y, z): {drag_force}")
-# else:
-#     print("Inlet or modified Outlet data not found. Unable to calculate drag force.")
+plt.tight_layout()
+plt.show()

@@ -29,9 +29,9 @@
     <!-- File with the discrete grid density function. -->
     <gridDensityFunctionFile> density.dat </gridDensityFunctionFile>
     <!-- Total number of grid refinement levels. basically levels displayed -->
-    <numLevels> 1 </numLevels>
+    <numLevels> 3 </numLevels>
     <!-- Maximum octree subdivision level. basically actual max level depth. so if this is 4 and numlevels is 3, it displays 2 3 4. -->
-    <maxOctreeLevel> 1 </maxOctreeLevel>
+    <maxOctreeLevel> 3 </maxOctreeLevel>
     <!-- Block size in the smallest domain of the tree (number of nodes minus 1
          in the smallest edge of the domain decomposition).
          It must be an even integer number greater equal to 6. -->
@@ -119,9 +119,9 @@
     <outputSlices>
         <!-- Slices normal to the x-axis for disk output. -->
         <xSlices>
-            <xPositions> 0.0 </xPositions>
-            <yRange> -20.0 20.0 </yRange>
-            <zRange> -20.0 20.0 </zRange>
+            <xPositions> 0.0 -20.0 15.0 </xPositions>
+            <yRange> -2.0 2.0 </yRange>
+            <zRange> -19.0 19.0 </zRange>
         </xSlices>
         <!-- Slices normal to the y-axis for disk output. -->
         <ySlices>
@@ -131,8 +131,8 @@
         </ySlices>
         <!-- Slices normal to the z-axis for disk output. -->
         <zSlices>
-            <zPositions> 0.0 -20.0 19.0 </zPositions>
-            <xRange> -20.0 20.0 </xRange>
+            <zPositions> 0.0 </zPositions>
+            <xRange> -2.0 2.0 </xRange>
             <yRange> -20.0 20.0 </yRange>
         </zSlices>
     </outputSlices>

@@ -8,8 +8,8 @@ data = pd.read_csv(file_path, delim_whitespace=True, header=None, names=["time",
 
 # Step 2: Plot the data
 plt.figure(figsize=(10, 6))
-plt.plot(data['time'], data['lift'], label='Lift')
-plt.plot(data['time'], data['drag'], label='Drag')
+plt.plot(data['time'], data['lift'], label='cl')
+plt.plot(data['time'], data['drag'], label='cd')
 plt.plot(data['time'], data['lateralforce'], label='Lateral Force')
 
 # Adding labels and title
