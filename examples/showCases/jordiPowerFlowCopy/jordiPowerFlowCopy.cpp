@@ -597,7 +597,7 @@ void createZones( //creates sponze zones
         T bulkValue = param.omega[level];
         // T bulkValue = 3;
         pcout << "omega at this level is " << bulkValue << std::endl;
-        plint radius = nx/4;
+        plint radius = nx/3;
         plint centerX = nx / 2;
         plint centerZ = nz / 2;
         if (smartSpongeZone) {

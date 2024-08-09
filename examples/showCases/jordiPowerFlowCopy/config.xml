@@ -8,7 +8,7 @@
     <!-- Coordinates of the physical simulation domain. -->
     <simulationDomain>
         <x> -10.0 10.0 </x>
-        <y> -0.487 0.487 </y>
+        <y> -0.5 0.5 </y>
         <z> -10.0 10.0 </z>
     </simulationDomain>
     <!-- The direction of the uniform flow is always the +x one. -->
@@ -41,7 +41,7 @@
 <boundaryConditions>
     <!-- Inlet velocity (in physical units, at the +x axis direction).
          The inlet is always at the minimum x-coordinate. -->
-    <inletVelocity> 1.0 </inletVelocity>
+    <inletVelocity> 20.0 </inletVelocity>
 
     <!-- Type of the outflow boundary condition. The outlet is always at the maximum x-coordinate.
          If 0, then a constant velocity is imposed at the outlet.
@@ -68,10 +68,10 @@
     <!-- Precision for geometric operations (FLT, DBL, LDBL, INF). -->
     <precision> DBL </precision>
     <!-- Characteristic length to define the Reynolds number. -->
-    <characteristicLength> 1.0 </characteristicLength>
+    <characteristicLength> 0.2 </characteristicLength>
     <!-- Characteristic velocity to compute the time step and the Reynolds number.
          It should be an estimate of the maximum velocity of the system. -->
-    <characteristicVelocity> 1.0 </characteristicVelocity>
+    <characteristicVelocity> 20.0 </characteristicVelocity>
     <!-- Lattice velocity (with respect to the characteristic velocity). -->
     <uLB> 0.075 </uLB>
     <!-- Maximum number of iterations at the coarsest level. -->
@@ -82,9 +82,9 @@
      <!-- Fluid density. -->
     <rho> 1.0 </rho>
     <!-- Reynolds number. -->
-    <Re> 3700.0 </Re>
+    <Re> 222000000 </Re>
     <!-- Absolute pressure at infinity. -->
-    <ambientPressure> 0.0 </ambientPressure>
+    <ambientPressure> 101325.0 </ambientPressure>
 </fluid>
 
 <output>
@@ -109,7 +109,7 @@
     <!-- Domain for disk output (must be a subset of the simulation domain). -->
     <outputDomain>
         <x> -10.0 10.0 </x>
-        <y> -0.487 0.487 </y>
+        <y> -0.5 0.5 </y>
         <z> -10.0 10.0 </z>
     </outputDomain>
 
@@ -120,7 +120,7 @@
         <!-- Slices normal to the x-axis for disk output. -->
         <xSlices>
             <xPositions> 0.0 -10.0 7.5 </xPositions>
-            <yRange> -0.487 0.487 </yRange>
+            <yRange> -0.5 0.5 </yRange>
             <zRange> -9.5 9.5 </zRange>
         </xSlices>
         <!-- Slices normal to the y-axis for disk output. -->
