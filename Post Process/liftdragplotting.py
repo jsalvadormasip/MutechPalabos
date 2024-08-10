@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # Step 1: Load the data
 # Assuming the file is formatted with whitespace separating the columns
-file_path = 'C:/Users/jordi/Documents/GitHub/MutechPalabos/examples/showCases/jordiPowerFlowCopy/tmp/MarlonDesign_total_force.dat'
+file_path = 'C:/Users/jordi/Documents/GitHub/MutechPalabos/examples/showCases/jordiPowerFlowCopy/tmp/NACA0018emptyscaled_total_force.dat'
 data = pd.read_csv(file_path, delim_whitespace=True, header=None, names=["time", "lift", "drag", "lateralforce"])
 
 # Step 2: Plot the data

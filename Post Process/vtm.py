@@ -7,7 +7,7 @@ DragCalculation = False
 rho = 1.0  # Assuming constant density for incompressible flow
 
 
-plot_iterations = []
+plot_iterations = [50]
 
 if DragCalculation:
 
@@ -22,7 +22,7 @@ if DragCalculation:
     iteration_numbers = []
 if not DragCalculation:
     iterations = [50]
-    file_path_template_input = 'C:/Users/jordi/Documents/GitHub/MutechPalabos/UnderstandingGridRefinement/tmp jordiPowerFlowCopy 30-07-2024 16-56/slice_y_00_{:08d}.vtm'
+    file_path_template_input = 'C:/Users/jordi/Documents/GitHub/MutechPalabos/examples/showCases/jordiPowerFlowCopy/tmp/slice_y_00_{:08d}.vtm'
 
     #with cp calc there are only input, no output
 

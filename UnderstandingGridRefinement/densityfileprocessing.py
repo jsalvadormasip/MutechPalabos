@@ -128,8 +128,8 @@ airfoil_file_path = 'UnderstandingGridRefinement/airfoilcoordinates_clean.dat'  
 dx = 0.02
 domainx0 = -10
 domainx1 = 10
-domainy0 = -0.487
-domainy1 = 0.487
+domainy0 = -0.162304
+domainy1 = 0.162304
 domainz0 = -10
 domainz1 = 10
 nx = int(domainx1/dx*2+2)
@@ -151,11 +151,13 @@ density_ranges = [
     (5.5542/200*chord, 15.0757/200*chord, 0.8),
     (15.0757/200*chord, 37.2925/200*chord, 0.7),
     (37.2925/200*chord, 88.0737/200*chord, 0.6),
-    (88.0737/200*chord, 456.256/200*chord, 0.5),
-    (456.256/200*chord, 600/200*chord, 0.4),
-    (600/200*chord, 1600/200*chord, 0.3),
-    (1600/200*chord, 3750/200*chord, 0.2),
-    (3750/200*chord, 9375/200*chord, 0.1),
+    (88.0737/200*chord, 10000*np.sqrt(2)/200*chord, 0.5),
+    # (88.0737/200*chord, 456.256/200*chord, 0.5),
+    # (456.256/200*chord, 600/200*chord, 0.4),
+    # (600/200*chord, 1600/200*chord, 0.3),
+    # (1600/200*chord, 3750/200*chord, 0.2),
+    # (3750/200*chord, 9375/200*chord, 0.1),
+    # (3750/200*chord, 10000*np.sqrt(2)/200*chord, 0.0),
 
     # Add more ranges as needed
 ]
