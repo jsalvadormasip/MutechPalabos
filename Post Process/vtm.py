@@ -21,8 +21,8 @@ if DragCalculation:
     drag_coefficients = []
     iteration_numbers = []
 if not DragCalculation:
-    iterations = [50]
-    file_path_template_input = 'C:/Users/jordi/Documents/GitHub/MutechPalabos/examples/showCases/jordiPowerFlowCopy/tmp/slice_y_00_{:08d}.vtm'
+    iterations = [0]
+    file_path_template_input = 'examples/showCases/jordiPowerFlowCopy/tmp/slice_y_00_{:08d}.vtm'
 
     #with cp calc there are only input, no output
 
