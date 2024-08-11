@@ -125,20 +125,21 @@ def plot_y_slice(file_path, y_index, nx, ny, nz):
 # Airfoil points file path
 airfoil_file_path = 'UnderstandingGridRefinement/airfoilcoordinates_clean.dat'  # Replace with your airfoil points file path
 #grid dimensions
-dx = 0.02
-domainx0 = -10
-domainx1 = 10
-domainy0 = -0.162304
-domainy1 = 0.162304
-domainz0 = -10
-domainz1 = 10
+
+domainx0 = -1.2
+dx = -1/50*domainx0
+domainx1 = 1.2
+domainy0 = -0.04
+domainy1 = 0.04
+domainz0 = -1.2
+domainz1 = 1.2
 nx = int(domainx1/dx*2+2)
 ny = int(domainy1/dx*2+2)
 nz = int(domainz1/dx*2+2)
 print("nx ", nx, " ny ", ny, " nz ", nz)
 # Define the z offset
 z_offset = int(nz/2)  # Replace with the desired offset value
-chord = int(0.01*nx) #clean chord
+chord = int(1/12*nx) #clean chord
 x_offset = int(nx/2-chord/2)
 
 # Read airfoil points from file with the z offset
