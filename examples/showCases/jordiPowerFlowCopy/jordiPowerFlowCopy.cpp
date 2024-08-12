@@ -51,7 +51,7 @@ typedef Array<T, 3> Velocity;
 #define RESCALER   ConvectiveNoForceRescaler    //there are types of rescalers!!! la hemos liao
 #define DESCRIPTOR descriptors::D3Q19Descriptor
 T angle = 7.8 * 3.1415 / 180;
-T chordLengthPercentage = 0.0833334;
+T chordLengthPercentage = 0.10;
 bool teaddon = false;
 struct SimulationParameters {
     /*
@@ -1038,7 +1038,7 @@ int main(int argc, char *argv[])
     }
     //fixed to center considering the tail does not count in the center calculation. 
     triangleSet.translate(-obstacleCenter2); //centers it at 0,0,0 i think. indeed, tested below. 
-    triangleSet.translate(Array<T,3>((lattices.getLevel(0).getBoundingBox().x1+lattices.getLevel(0).getBoundingBox().x0)/2*(T)util::intTwoToThePower(param.finestLevel), (lattices.getLevel(0).getBoundingBox().y1+lattices.getLevel(0).getBoundingBox().y0)/2*(T)util::intTwoToThePower(param.finestLevel), (lattices.getLevel(0).getBoundingBox().z1+lattices.getLevel(0).getBoundingBox().z0)/2*(T)util::intTwoToThePower(param.finestLevel))); //centers it at 0,0,0 i think. indeed, tested below. 
+    triangleSet.translate(Array<T,3>((lattices.getLevel(0).getBoundingBox().x1+lattices.getLevel(0).getBoundingBox().x0)*0.5*(T)util::intTwoToThePower(param.finestLevel), (lattices.getLevel(0).getBoundingBox().y1+lattices.getLevel(0).getBoundingBox().y0)*0.5*(T)util::intTwoToThePower(param.finestLevel), (lattices.getLevel(0).getBoundingBox().z1+lattices.getLevel(0).getBoundingBox().z0)/2*(T)util::intTwoToThePower(param.finestLevel))); //centers it at 0,0,0 i think. indeed, tested below. 
     
     // triangleSet.scale((T)5000);
      

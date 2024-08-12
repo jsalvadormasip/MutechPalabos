@@ -17,8 +17,57 @@ def calculate_density(x, z, airfoil_points, density_ranges):
     
     # Determine the density based on the distance ranges
     for (dist_min, dist_max, density) in density_ranges:
-        if dist_min <= min_distance < dist_max:
-            return density
+        # if x >= int(nx/2):
+        #     return 0.0
+        # if x>=int(nx/4) and x<=int(nx/2):
+        #     return 0.25
+        # if x<=int(nx/4) and z>= int(3*nz/4):
+        #     return 0.25
+        # if x<=int(nx/4) and z<= int(nz/4):
+        #     return 0.25
+        # if x<=int(nx/8) and z<= int(3*nz/4) and z>=int(0.625*nz):
+        #     return 0.5
+        # if x<=int(nx/8) and z>= int(nz/4) and z<=int(0.375*nz):
+        #     return 0.5
+        # if x<=int(nx/4) and x>= int(nx/8) and z>= int(nz/4) and z<= int(nz*3/4):
+        #     return 0.5
+        # else:
+        #     return 0.75
+        # if x>=int(nx/4) and x <=int(nx/2) and z<= int(nz*0.625) and z>=int(0.5625*nz):
+        #     return 0.75
+        # if x>=int(nx/4) and x <=int(nx/2) and z>= int(nz*0.375) and z<=int(0.4375*nz):
+        #     return 0.75
+        # if x>=int(nx/4) and x <=int(nx/2) and z>= int(nz*0.4375) and z<=int(0.5625*nz):
+        #     return 0.75
+        # Assuming x and z are within the range of 0 to nx and 0 to nz respectively
+
+        # Initialize density
+        # Assuming x and z are within the range of 0 to nx and 0 to nz respectively
+
+        # Initialize density
+        if (0 <= x < 0.25 * nx or 0.75 * nx < x <= nx) or (0 <= z < 0.25 * nz or 0.75 * nz < z <= nz):
+            return 0
+
+        # Level 3
+        elif (0.25 * nx <= x < 0.375 * nx or 0.625 * nx < x <= 0.75 * nx) or (0.25 * nz <= z < 0.375 * nz or 0.625 * nz < z <= 0.75 * nz):
+            return 0.25
+
+        # Level 4
+        elif (0.375 * nx <= x < 0.4375 * nx or 0.5625 * nx < x <= 0.625 * nx) or (0.375 * nz <= z < 0.4375 * nz or 0.5625 * nz < z <= 0.625 * nz):
+            return 0.5
+
+        # Level 5 (center)
+        elif 0.4375 * nx <= x <= 0.5625 * nx and 0.4375 * nz <= z <= 0.5625 * nz:
+            return 0.75
+
+        # Default return value if no condition is met
+        # return 1
+
+
+        
+            
+        # if dist_min <= min_distance < dist_max:
+        #     return density
     return 0.0  # Default density if no range matches
 
 def create_density_file(nx, ny, nz, airfoil_points, density_ranges, output_file):
@@ -140,7 +189,7 @@ print("nx ", nx, " ny ", ny, " nz ", nz)
 # Define the z offset
 z_offset = int(nz/2)  # Replace with the desired offset value
 chord = int(1/12*nx) #clean chord
-x_offset = int(nx/2-chord/2)
+x_offset = int(chord)
 
 # Read airfoil points from file with the z offset
 airfoil_points = read_airfoil_points(airfoil_file_path, z_offset,x_offset, chord)
