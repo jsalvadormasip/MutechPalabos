@@ -45,29 +45,30 @@ def calculate_density(x, z, airfoil_points, density_ranges):
         # Assuming x and z are within the range of 0 to nx and 0 to nz respectively
 
         # Initialize density
-        if (0 <= x < 0.25 * nx or 0.75 * nx < x <= nx) or (0 <= z < 0.25 * nz or 0.75 * nz < z <= nz):
-            return 0
+        # if (0 <= x < 0.25 * nx or 0.75 * nx < x <= nx) or (0 <= z < 0.25 * nz or 0.75 * nz < z <= nz):
+        #     return 0
 
-        # Level 3
-        elif (0.25 * nx <= x < 0.375 * nx or 0.625 * nx < x <= 0.75 * nx) or (0.25 * nz <= z < 0.375 * nz or 0.625 * nz < z <= 0.75 * nz):
-            return 0.25
+        # # Level 3
+        # elif (0.25 * nx <= x < 0.375 * nx or 0.625 * nx < x <= 0.75 * nx) or (0.25 * nz <= z < 0.375 * nz or 0.625 * nz < z <= 0.75 * nz):
+        #     return 0.25
 
-        # Level 4
-        elif (0.375 * nx <= x < 0.4375 * nx or 0.5625 * nx < x <= 0.625 * nx) or (0.375 * nz <= z < 0.4375 * nz or 0.5625 * nz < z <= 0.625 * nz):
-            return 0.5
+        # # Level 4
+        # elif (0.375 * nx <= x < 0.4375 * nx or 0.5625 * nx < x <= 0.625 * nx) or (0.375 * nz <= z < 0.4375 * nz or 0.5625 * nz < z <= 0.625 * nz):
+        #     return 0.5
 
-        # Level 5 (center)
-        elif 0.4375 * nx <= x <= 0.5625 * nx and 0.4375 * nz <= z <= 0.5625 * nz:
-            return 0.75
+        # # Level 5 (center)
+        # elif 0.4375 * nx <= x <= 0.5625 * nx and 0.4375 * nz <= z <= 0.5625 * nz:
+        #     return 0.75
 
         # Default return value if no condition is met
         # return 1
 
 
         
-            
-        # if dist_min <= min_distance < dist_max:
-        #     return density
+        if x<=int(0.25*nx) or x>=int(0.75*nx):
+            return 0.0
+        if dist_min <= min_distance < dist_max:
+            return density
     return 0.0  # Default density if no range matches
 
 def create_density_file(nx, ny, nz, airfoil_points, density_ranges, output_file):
@@ -189,7 +190,7 @@ print("nx ", nx, " ny ", ny, " nz ", nz)
 # Define the z offset
 z_offset = int(nz/2)  # Replace with the desired offset value
 chord = int(1/12*nx) #clean chord
-x_offset = int(chord)
+x_offset = int(nx/2-1/2*chord)
 
 # Read airfoil points from file with the z offset
 airfoil_points = read_airfoil_points(airfoil_file_path, z_offset,x_offset, chord)
