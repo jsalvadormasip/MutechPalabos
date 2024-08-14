@@ -51,7 +51,7 @@ typedef Array<T, 3> Velocity;
 #define RESCALER   ConvectiveNoForceRescaler    //there are types of rescalers!!! la hemos liao
 #define DESCRIPTOR descriptors::D3Q19Descriptor
 T angle = 7.8 * 3.1415 / 180;
-T chordLengthPercentage = 0.01;
+T chordLengthPercentage = 1.0/12.0;
 bool teaddon = false;
 struct SimulationParameters {
     /*
