@@ -62,13 +62,21 @@ def calculate_density(x, z, airfoil_points, density_ranges):
 
         # Default return value if no condition is met
         # return 1
+        for ix in range(1,boundariesx.size):
+            if x<= int(boundariesx[ix]*nx) and x>= int(boundariesx[ix-1]*nx) or z<= int(boundariesx[ix]*nz) and z>= int(boundariesx[ix-1]*nz):
+                return 0.1*ix 
+            if x>= int((1-boundariesx[ix])*nx) and x<= int((1-boundariesx[ix-1])*nx) or z>= int((1-boundariesx[ix])*nz) and z<= int((1-boundariesx[ix-1])*nz):
+                return 0.1*ix 
+            
+            
 
-
+        #if x<=int(boundaries[levelmin]*nx) or x>=int((1-boundaries[levelmin])*nx):
+        #     return 0.0
         
-        if x<=int(0.25*nx) or x>=int(0.75*nx):
-            return 0.0
-        if dist_min <= min_distance < dist_max:
-            return density
+        # if x<=int((boundaries[levelmin+1]+boundaries[levelmin])*nx) or x>=int(0.75*nx):
+        #     return 0.0
+        # if dist_min <= min_distance < dist_max:
+        #     return density
     return 0.0  # Default density if no range matches
 
 def create_density_file(nx, ny, nz, airfoil_points, density_ranges, output_file):
@@ -191,7 +199,21 @@ print("nx ", nx, " ny ", ny, " nz ", nz)
 z_offset = int(nz/2)  # Replace with the desired offset value
 chord = int(1/12*nx) #clean chord
 x_offset = int(nx/2-1/2*chord)
+minborderforchordx = 0.5-chord/2/nx
+minborderforchordy = 0.5-chord*0.18/2/nx
 
+levelmax = 5
+levelmin = 2
+boundariesx = np.zeros(levelmax)
+boundariesy = np.zeros(levelmax)
+for i in range(0, levelmax+1):
+    if i>=2 and boundariesx[-1]<minborderforchordx-(1/(2**i)):
+        boundariesx[i:] += (1/(2**i))
+    if i>=2 and boundariesy[-1]<minborderforchordy-(1/(2**i)):
+        boundariesy[i:] += (1/(2**i))
+boundariesx = np.append(boundariesx, 0.5)
+print(boundariesx)
+print(boundariesy)
 # Read airfoil points from file with the z offset
 airfoil_points = read_airfoil_points(airfoil_file_path, z_offset,x_offset, chord)
 
