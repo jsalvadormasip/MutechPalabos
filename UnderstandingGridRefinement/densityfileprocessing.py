@@ -62,11 +62,11 @@ def calculate_density(x, z, airfoil_points, density_ranges):
 
         # Default return value if no condition is met
         # return 1
-        for ix in range(1,boundariesx.size):
-            if x<= int(boundariesx[ix]*nx) and x>= int(boundariesx[ix-1]*nx) or z<= int(boundariesx[ix]*nz) and z>= int(boundariesx[ix-1]*nz):
-                return 0.1*ix 
-            if x>= int((1-boundariesx[ix])*nx) and x<= int((1-boundariesx[ix-1])*nx) or z>= int((1-boundariesx[ix])*nz) and z<= int((1-boundariesx[ix-1])*nz):
-                return 0.1*ix 
+        # for ix in range(1,boundariesx.size):
+        #     if x< np.floor(boundariesx[ix]*nx) and x>= np.floor(boundariesx[ix-1]*nx) or z< np.floor(boundariesx[ix]*nz) and z>= np.floor(boundariesx[ix-1]*nz):
+        #         return (ix - 2) / (levelmax - 2)
+        #     if x>= np.floor((1-boundariesx[ix])*nx) and x< np.floor((1-boundariesx[ix-1])*nx) or z>= np.floor((1-boundariesx[ix])*nz) and z< np.floor((1-boundariesx[ix-1])*nz):
+        #         return (ix - 2) / (levelmax - 2)
             
             
 
@@ -75,8 +75,8 @@ def calculate_density(x, z, airfoil_points, density_ranges):
         
         # if x<=int((boundaries[levelmin+1]+boundaries[levelmin])*nx) or x>=int(0.75*nx):
         #     return 0.0
-        # if dist_min <= min_distance < dist_max:
-        #     return density
+        if dist_min <= min_distance < dist_max:
+            return density
     return 0.0  # Default density if no range matches
 
 def create_density_file(nx, ny, nz, airfoil_points, density_ranges, output_file):
@@ -184,30 +184,30 @@ def plot_y_slice(file_path, y_index, nx, ny, nz):
 airfoil_file_path = 'UnderstandingGridRefinement/airfoilcoordinates_clean.dat'  # Replace with your airfoil points file path
 #grid dimensions
 
-domainx0 = -1.2
+domainx0 = -10
 dx = -1/50*domainx0
-domainx1 = 1.2
-domainy0 = -0.04
-domainy1 = 0.04
-domainz0 = -1.2
-domainz1 = 1.2
+domainx1 = 10
+domainy0 = -10.0
+domainy1 = 10.0
+domainz0 = -10
+domainz1 = 10
 nx = int(domainx1/dx*2+2)
 ny = int(domainy1/dx*2+2)
 nz = int(domainz1/dx*2+2)
 print("nx ", nx, " ny ", ny, " nz ", nz)
 # Define the z offset
 z_offset = int(nz/2)  # Replace with the desired offset value
-chord = int(1/12*nx) #clean chord
+chord = int(1/100*nx) #clean chord
 x_offset = int(nx/2-1/2*chord)
 minborderforchordx = 0.5-chord/2/nx
 minborderforchordy = 0.5-chord*0.18/2/nx
 
-levelmax = 5
+levelmax = 11
 levelmin = 2
 boundariesx = np.zeros(levelmax)
 boundariesy = np.zeros(levelmax)
 for i in range(0, levelmax+1):
-    if i>=2 and boundariesx[-1]<minborderforchordx-(1/(2**i)):
+    if i>=2 :
         boundariesx[i:] += (1/(2**i))
     if i>=2 and boundariesy[-1]<minborderforchordy-(1/(2**i)):
         boundariesy[i:] += (1/(2**i))
@@ -227,6 +227,7 @@ density_ranges = [
     # (88.0737/200*chord, 10000*np.sqrt(2)/200*chord, 0.5),
     (88.0737/200*chord, 456.256/200*chord, 0.5),
     (456.256/200*chord, 600/200*chord, 0.4),
+    # (600/200*chord, 10000*np.sqrt(2)/200*chord, 0.3),
     (600/200*chord, 1600/200*chord, 0.3),
     (1600/200*chord, 3750/200*chord, 0.2),
     (3750/200*chord, 9375/200*chord, 0.1),
