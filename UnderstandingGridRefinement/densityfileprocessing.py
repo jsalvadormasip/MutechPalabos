@@ -62,11 +62,6 @@ def calculate_density(x, z, airfoil_points, density_ranges):
 
         # Default return value if no condition is met
         # return 1
-        # for ix in range(1,boundariesx.size):
-        #     if x< np.floor(boundariesx[ix]*nx) and x>= np.floor(boundariesx[ix-1]*nx) or z< np.floor(boundariesx[ix]*nz) and z>= np.floor(boundariesx[ix-1]*nz):
-        #         return (ix - 2) / (levelmax - 2)
-        #     if x>= np.floor((1-boundariesx[ix])*nx) and x< np.floor((1-boundariesx[ix-1])*nx) or z>= np.floor((1-boundariesx[ix])*nz) and z< np.floor((1-boundariesx[ix-1])*nz):
-        #         return (ix - 2) / (levelmax - 2)
             
             
 
@@ -75,8 +70,16 @@ def calculate_density(x, z, airfoil_points, density_ranges):
         
         # if x<=int((boundaries[levelmin+1]+boundaries[levelmin])*nx) or x>=int(0.75*nx):
         #     return 0.0
-        if dist_min <= min_distance < dist_max:
-            return density
+        if offsets:
+            if dist_min <= min_distance < dist_max:
+                return density
+        if not offsets:
+            for ix in range(1,boundariesx.size):
+                if x< np.floor(boundariesx[ix]*nx) and x>= np.floor(boundariesx[ix-1]*nx) or z< np.floor(boundariesx[ix]*nz) and z>= np.floor(boundariesx[ix-1]*nz):
+                    return (ix - 2) / (levelmax - 2)
+                if x>= np.floor((1-boundariesx[ix])*nx) and x< np.floor((1-boundariesx[ix-1])*nx) or z>= np.floor((1-boundariesx[ix])*nz) and z< np.floor((1-boundariesx[ix-1])*nz):
+                    return (ix - 2) / (levelmax - 2)
+
     return 0.0  # Default density if no range matches
 
 def create_density_file(nx, ny, nz, airfoil_points, density_ranges, output_file):
@@ -103,6 +106,7 @@ def create_density_file(nx, ny, nz, airfoil_points, density_ranges, output_file)
         # Fourth line: densities
         for density in densities.flatten(order='C'):  # 'F' means column-major order
             file.write(f"{density} ")
+        print("outputed to file")
 
 def sum_fourth_line(file_path):
     with open(file_path, 'r') as file:
@@ -183,26 +187,26 @@ def plot_y_slice(file_path, y_index, nx, ny, nz):
 # Airfoil points file path
 airfoil_file_path = 'UnderstandingGridRefinement/airfoilcoordinates_clean.dat'  # Replace with your airfoil points file path
 #grid dimensions
-
-domainx0 = -1.2
-dx = -1/50*domainx0
-domainx1 = 1.2
-domainy0 = -0.04
-domainy1 = 0.04
-domainz0 = -1.2
-domainz1 = 1.2
+offsets = True
+domainx0 = -10.0
+dx = -1/2000*domainx0
+domainx1 = 10.0
+domainy0 = -0.05
+domainy1 = 0.05
+domainz0 = -10.0
+domainz1 = 10.0
 nx = int(domainx1/dx*2+2)
 ny = int(domainy1/dx*2+2)
 nz = int(domainz1/dx*2+2)
 print("nx ", nx, " ny ", ny, " nz ", nz)
 # Define the z offset
 z_offset = int(nz/2)  # Replace with the desired offset value
-chord = int(1/12*nx) #clean chord
+chord = int(1/100*nx) #clean chord
 x_offset = int(nx/2-1/2*chord)
 minborderforchordx = 0.5-chord/2/nx
 minborderforchordy = 0.5-chord*0.18/2/nx
 
-levelmax = 11
+levelmax = 14
 levelmin = 2
 boundariesx = np.zeros(levelmax)
 boundariesy = np.zeros(levelmax)
@@ -218,23 +222,58 @@ print(boundariesy)
 airfoil_points = read_airfoil_points(airfoil_file_path, z_offset,x_offset, chord)
 
 # Define density ranges: (distance_min, distance_max, density)
-density_ranges = [
-    (0, 1.58691/200*chord, 0.99),
-    (1.58691/200*chord, 5.5542/200*chord, 0.9),
-    (5.5542/200*chord, 15.0757/200*chord, 0.8),
-    (15.0757/200*chord, 37.2925/200*chord, 0.7),
-    (37.2925/200*chord, 88.0737/200*chord, 0.6),
-    # (88.0737/200*chord, 10000*np.sqrt(2)/200*chord, 0.5),
-    (88.0737/200*chord, 456.256/200*chord, 0.5),
-    (456.256/200*chord, 600/200*chord, 0.4),
-    # (600/200*chord, 10000*np.sqrt(2)/200*chord, 0.3),
-    (600/200*chord, 1600/200*chord, 0.3),
-    (1600/200*chord, 3750/200*chord, 0.2),
-    (3750/200*chord, 9375/200*chord, 0.1),
-    (3750/200*chord, 10000*np.sqrt(2)/200*chord, 0.0),
+fine = False
+medium = False
+coarse = True
+if fine:
+    density_ranges = [
+        (0, 1.58691/200*chord, 1),
+        (1.58691/200*chord, 5.5542/200*chord, 8/9),
+        (5.5542/200*chord, 15.0757/200*chord, 7/9),
+        (15.0757/200*chord, 37.2925/200*chord, 6/9),
+        (37.2925/200*chord, 88.0737/200*chord, 5/9),
+        # (88.0737/200*chord, 10000*np.sqrt(2)/200*chord, 0.5),
+        (88.0737/200*chord, 456.256/200*chord, 4/9),
+        (456.256/200*chord, 600/200*chord, 3/9),
+        # (600/200*chord, 10000*np.sqrt(2)/200*chord, 0.3),
+        (600/200*chord, 1600/200*chord, 2/9),
+        (1600/200*chord, 3750/200*chord, 1/9),
+        (3750/200*chord, 9375/200*chord, 0.0),
+        (9375/200*chord, 10000*np.sqrt(2)/200*chord, 0.0),
 
-    # Add more ranges as needed
-]
+        # Add more ranges as needed
+    ]
+if medium:
+    density_ranges = [
+        (0, 1.58691/200*chord, 1),
+        (1.58691/200*chord, 5.5542/200*chord, 0.875),
+        (5.5542/200*chord, 15.0757/200*chord, 0.75),
+        (15.0757/200*chord, 37.2925/200*chord, 0.625),
+        (37.2925/200*chord, 88.0737/200*chord, 0.5),
+        # (88.0737/200*chord, 10000*np.sqrt(2)/200*chord, 0.5),
+        (88.0737/200*chord, 456.256/200*chord, 0.375),
+        (456.256/200*chord, 600/200*chord, 0.25),
+        # (600/200*chord, 10000*np.sqrt(2)/200*chord, 0.3),
+        (600/200*chord, 1600/200*chord, 0.125),
+        (1600/200*chord, 10000*np.sqrt(2)/200*chord, 0.0)
+
+        # Add more ranges as needed
+    ]
+if coarse:
+    density_ranges = [
+        (0, 1.58691/200*chord, 1),
+        (1.58691/200*chord, 5.5542/200*chord, 0.858),
+        (5.5542/200*chord, 15.0757/200*chord, 0.715),
+        (15.0757/200*chord, 37.2925/200*chord, 0.572),
+        (37.2925/200*chord, 88.0737/200*chord, 0.429),
+        # (88.0737/200*chord, 10000*np.sqrt(2)/200*chord, 0.5),
+        (88.0737/200*chord, 456.256/200*chord, 0.286),
+        (456.256/200*chord, 600/200*chord, 0.143),
+        # (600/200*chord, 10000*np.sqrt(2)/200*chord, 0.3),
+        (600/200*chord, 10000*np.sqrt(2)/200*chord, 0.0)
+
+        # Add more ranges as needed
+    ]
 # density_ranges = [(i/10, (i+1)/10, 0.007*(i+1)/10) for i in range(1430)]
 # density_ranges.append((14.30, 14.31, 1.0))
 

@@ -7,9 +7,9 @@
 <geometry>
     <!-- Coordinates of the physical simulation domain. -->
     <simulationDomain>
-        <x> -1.2 1.2 </x>
-        <y> -0.04 0.04 </y>
-        <z> -1.2 1.2 </z>
+        <x> -10.0 10.0 </x>
+        <y> -5.0 5.0 </y>
+        <z> -10.0 10.0 </z>
     </simulationDomain>
     <!-- The direction of the uniform flow is always the +x one. -->
 
@@ -29,9 +29,9 @@
     <!-- File with the discrete grid density function. -->
     <gridDensityFunctionFile> density.dat </gridDensityFunctionFile>
     <!-- Total number of grid refinement levels. basically levels displayed -->
-    <numLevels> 6 </numLevels>
+    <numLevels> 13 </numLevels>
     <!-- Maximum octree subdivision level. basically actual max level depth. so if this is 4 and numlevels is 3, it displays 2 3 4. -->
-    <maxOctreeLevel> 5 </maxOctreeLevel>
+    <maxOctreeLevel> 12 </maxOctreeLevel>
     <!-- Block size in the smallest domain of the tree (number of nodes minus 1
          in the smallest edge of the domain decomposition).
          It must be an even integer number greater equal to 6. -->
@@ -57,9 +57,9 @@
          to that axis, which holds the minimum axis coordinate. If no sponge
          zone is necessary at a lattice boundary, the corresponding width
          should be 0. -->
-        <xWidths> 0.04 0.04 </xWidths>
+        <xWidths> 0.75 0.75 </xWidths>
         <yWidths> 0. 0. </yWidths>
-        <zWidths> 0.04 0.04 </zWidths>
+        <zWidths> 0.75 0.75 </zWidths>
     </spongeZones>
 
 </boundaryConditions>
@@ -108,9 +108,9 @@
     <outputInDomain> false </outputInDomain>
     <!-- Domain for disk output (must be a subset of the simulation domain). -->
     <outputDomain>
-        <x> -1.2 1.2 </x>
-        <y> -0.04 0.04 </y>
-        <z> -1.2 1.2 </z>
+        <x> -10.0 10.0 </x>
+        <y> -1.0 1.0 </y>
+        <z> -10.0 10.0 </z>
     </outputDomain>
 
     <!-- Save data on disk on a set of slices or not? -->
@@ -119,21 +119,21 @@
     <outputSlices>
         <!-- Slices normal to the x-axis for disk output. -->
         <xSlices>
-            <xPositions> 0.0 -1.2 -1.0 </xPositions>
-            <yRange> -0.04 0.04 </yRange>
-            <zRange> -1.2 1.2 </zRange>
+            <xPositions> 0.0 </xPositions>
+            <yRange> -1.0 1.0 </yRange>
+            <zRange> -10.0 10.0 </zRange>
         </xSlices>
         <!-- Slices normal to the y-axis for disk output. -->
         <ySlices>
             <yPositions> 0.0 </yPositions>
-            <zRange> -1.2 1.2 </zRange>
-            <xRange> -1.2 1.2 </xRange>
+            <zRange> -10.0 10.0 </zRange>
+            <xRange> -10.0 10.0 </xRange>
         </ySlices>
         <!-- Slices normal to the z-axis for disk output. -->
         <zSlices>
             <zPositions> 0.0 </zPositions>
-            <xRange> -1.2 1.2 </xRange>
-            <yRange> -0.04 0.04 </yRange>
+            <xRange> -10.0 10.0 </xRange>
+            <yRange> -1.0 1.0 </yRange>
         </zSlices>
     </outputSlices>
 
