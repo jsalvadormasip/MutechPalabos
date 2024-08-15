@@ -593,7 +593,7 @@ void createZones( //creates sponze zones
     pcout << "Look hereeee " << std::endl;
     if (totalNumSpongeCells > 0) {
         pcout << "Generating viscosity sponge zone at level: " << level << std::endl;
-        bool smartSpongeZone = true;
+        bool smartSpongeZone = false;
         T bulkValue = param.omega[level];
         // T bulkValue = 3;
         pcout << "omega at this level is " << bulkValue << std::endl;

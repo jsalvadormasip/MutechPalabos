@@ -57,9 +57,9 @@
          to that axis, which holds the minimum axis coordinate. If no sponge
          zone is necessary at a lattice boundary, the corresponding width
          should be 0. -->
-        <xWidths> 0.75 0.75 </xWidths>
+        <xWidths> 7.5 7.5 </xWidths>
         <yWidths> 0. 0. </yWidths>
-        <zWidths> 0.75 0.75 </zWidths>
+        <zWidths> 7.5 7.5 </zWidths>
     </spongeZones>
 
 </boundaryConditions>
@@ -109,7 +109,7 @@
     <!-- Domain for disk output (must be a subset of the simulation domain). -->
     <outputDomain>
         <x> -10.0 10.0 </x>
-        <y> -1.0 1.0 </y>
+        <y> -5.0 5.0 </y>
         <z> -10.0 10.0 </z>
     </outputDomain>
 
@@ -120,7 +120,7 @@
         <!-- Slices normal to the x-axis for disk output. -->
         <xSlices>
             <xPositions> 0.0 </xPositions>
-            <yRange> -1.0 1.0 </yRange>
+            <yRange> -5.0 5.0 </yRange>
             <zRange> -10.0 10.0 </zRange>
         </xSlices>
         <!-- Slices normal to the y-axis for disk output. -->
@@ -133,7 +133,7 @@
         <zSlices>
             <zPositions> 0.0 </zPositions>
             <xRange> -10.0 10.0 </xRange>
-            <yRange> -1.0 1.0 </yRange>
+            <yRange> -5.0 5.0 </yRange>
         </zSlices>
     </outputSlices>
 
