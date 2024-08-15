@@ -1261,6 +1261,7 @@ int main(int argc, char *argv[])
                   << ", t = " << iter * param.dtCoarsest << std::endl;
 
             writeResults(param, lattices, avgVelocity, iter);
+            pcout << "Output Completed" << std::endl;
         }
 
         if ((param.cpIter > 0 && iter % param.cpIter == 0 && iter != iniIter)
