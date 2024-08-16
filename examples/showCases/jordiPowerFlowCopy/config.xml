@@ -8,7 +8,7 @@
     <!-- Coordinates of the physical simulation domain. -->
     <simulationDomain>
         <x> -10.0 10.0 </x>
-        <y> -5.0 5.0 </y>
+        <y> -10.0 10.0 </y>
         <z> -10.0 10.0 </z>
     </simulationDomain>
     <!-- The direction of the uniform flow is always the +x one. -->
@@ -109,7 +109,7 @@
     <!-- Domain for disk output (must be a subset of the simulation domain). -->
     <outputDomain>
         <x> -10.0 10.0 </x>
-        <y> -5.0 5.0 </y>
+        <y> -10.0 10.0 </y>
         <z> -10.0 10.0 </z>
     </outputDomain>
 
@@ -120,7 +120,7 @@
         <!-- Slices normal to the x-axis for disk output. -->
         <xSlices>
             <xPositions> 0.0 </xPositions>
-            <yRange> -5.0 5.0 </yRange>
+            <yRange> -10.0 10.0 </yRange>
             <zRange> -10.0 10.0 </zRange>
         </xSlices>
         <!-- Slices normal to the y-axis for disk output. -->
@@ -133,7 +133,7 @@
         <zSlices>
             <zPositions> 0.0 </zPositions>
             <xRange> -10.0 10.0 </xRange>
-            <yRange> -5.0 5.0 </yRange>
+            <yRange> -10.0 10.0 </yRange>
         </zSlices>
     </outputSlices>
 
@@ -148,5 +148,5 @@
     <!-- Base file name for checkpoint files (inside the outDir). -->
     <baseFileName> checkpoint_ </baseFileName>
     <!-- For a desktop PC this should be "false", for a cluster "true". -->
-    <useParallelIO> false </useParallelIO>
+    <useParallelIO> true </useParallelIO>
 </output>

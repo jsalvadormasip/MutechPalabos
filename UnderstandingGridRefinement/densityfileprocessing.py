@@ -185,11 +185,11 @@ def plot_y_slice(file_path, y_index, nx, ny, nz):
 
 # Example usage:
 # Airfoil points file path
-airfoil_file_path = 'UnderstandingGridRefinement/airfoilcoordinates_clean.dat'  # Replace with your airfoil points file path
+airfoil_file_path = 'UnderstandingGridRefinement/airfoilcoordinates_clean_filled.dat'  # Replace with your airfoil points file path
 #grid dimensions
 offsets = True
 domainx0 = -10.0
-dx = -1/2000*domainx0
+dx = -1/1000*domainx0
 domainx1 = 10.0
 domainy0 = -0.05
 domainy1 = 0.05
@@ -222,23 +222,27 @@ print(boundariesy)
 airfoil_points = read_airfoil_points(airfoil_file_path, z_offset,x_offset, chord)
 
 # Define density ranges: (distance_min, distance_max, density)
-fine = False
+fine = True
 medium = False
-coarse = True
+coarse = False
 if fine:
     density_ranges = [
         (0, 1.58691/200*chord, 1),
-        (1.58691/200*chord, 5.5542/200*chord, 8/9),
-        (5.5542/200*chord, 15.0757/200*chord, 7/9),
-        (15.0757/200*chord, 37.2925/200*chord, 6/9),
-        (37.2925/200*chord, 88.0737/200*chord, 5/9),
+        (1.58691/200*chord, 5.5542/200*chord, 0.9),
+        (5.5542/200*chord, 15.0757/200*chord, 0.8),
+        (15.0757/200*chord, 37.2925/200*chord, 0.7),
+        # (37.2925/200*chord, 55/200*chord, 8/12), #fake 55
+        # (55/200*chord, 88.0737/200*chord, 7/12),
+        (37.2925/200*chord, 88.0737/200*chord, 0.6), #fake 55
         # (88.0737/200*chord, 10000*np.sqrt(2)/200*chord, 0.5),
-        (88.0737/200*chord, 456.256/200*chord, 4/9),
-        (456.256/200*chord, 600/200*chord, 3/9),
+        # (88.0737/200*chord, 200/200*chord, 6/12), #fake 200
+        # (200/200*chord, 456.256/200*chord, 5/12),
+        (88.0737/200*chord, 456.256/200*chord, 0.5), #fake 200
+        (456.256/200*chord, 600/200*chord, 0.4),
         # (600/200*chord, 10000*np.sqrt(2)/200*chord, 0.3),
-        (600/200*chord, 1600/200*chord, 2/9),
-        (1600/200*chord, 3750/200*chord, 1/9),
-        (3750/200*chord, 9375/200*chord, 0.0),
+        (600/200*chord, 1600/200*chord, 0.3),
+        (1600/200*chord, 3750/200*chord, 0.2),
+        (3750/200*chord, 9375/200*chord, 0.1),
         (9375/200*chord, 10000*np.sqrt(2)/200*chord, 0.0),
 
         # Add more ranges as needed
