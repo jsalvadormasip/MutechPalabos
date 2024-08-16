@@ -29,9 +29,9 @@
     <!-- File with the discrete grid density function. -->
     <gridDensityFunctionFile> density.dat </gridDensityFunctionFile>
     <!-- Total number of grid refinement levels. basically levels displayed -->
-    <numLevels> 13 </numLevels>
+    <numLevels> 14 </numLevels>
     <!-- Maximum octree subdivision level. basically actual max level depth. so if this is 4 and numlevels is 3, it displays 2 3 4. -->
-    <maxOctreeLevel> 12 </maxOctreeLevel>
+    <maxOctreeLevel> 13 </maxOctreeLevel>
     <!-- Block size in the smallest domain of the tree (number of nodes minus 1
          in the smallest edge of the domain decomposition).
          It must be an even integer number greater equal to 6. -->
