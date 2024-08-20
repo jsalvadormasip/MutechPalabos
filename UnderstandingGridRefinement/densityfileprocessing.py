@@ -189,7 +189,7 @@ def plot_y_slice(file_path, y_index, nx, ny, nz):
 
 # Example usage:
 # Airfoil points file path
-airfoil_file_path = 'UnderstandingGridRefinement/airfoilcoordinates_clean_filled.dat'  # Replace with your airfoil points file path
+airfoil_file_path = 'UnderstandingGridRefinement/refinedairfoil.dat'  # Replace with your airfoil points file path
 #grid dimensions
 offsets = True
 domainx0 = -7.790592

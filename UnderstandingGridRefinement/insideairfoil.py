@@ -37,8 +37,8 @@ def filter_inside_points(contour_points, grid_points):
 
 def plot_airfoil(contour_points, interior_points):
     plt.figure(figsize=(10, 6))
-    plt.plot(contour_points[:, 0], contour_points[:, 1], 'b-', label='Contour')
-    plt.scatter(interior_points[:, 0], interior_points[:, 1], c='red', s=1, label='Interior Points')
+    plt.scatter(contour_points[:, 0], contour_points[:, 1], c='blue', s=1, label='Contour')
+    # plt.scatter(interior_points[:, 0], interior_points[:, 1], c='red', s=1, label='Interior Points')
     plt.title("Airfoil Contour and Filled Points")
     plt.xlabel("X")
     plt.ylabel("Z")
