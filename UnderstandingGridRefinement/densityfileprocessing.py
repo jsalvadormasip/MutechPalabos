@@ -71,6 +71,10 @@ def calculate_density(x, z, airfoil_points, density_ranges):
         # if x<=int((boundaries[levelmin+1]+boundaries[levelmin])*nx) or x>=int(0.75*nx):
         #     return 0.0
         if offsets:
+            # if x <= int(0.25*nx) or x >= int(0.75*nx):
+            #     return 0.0
+            # if z <= int(0.25*nz) or z >= int(0.75*nz):
+            #     return 0.0
             if dist_min <= min_distance < dist_max:
                 return density
         if not offsets:
@@ -188,20 +192,20 @@ def plot_y_slice(file_path, y_index, nx, ny, nz):
 airfoil_file_path = 'UnderstandingGridRefinement/airfoilcoordinates_clean_filled.dat'  # Replace with your airfoil points file path
 #grid dimensions
 offsets = True
-domainx0 = -10.0
-dx = -1/1000*domainx0
-domainx1 = 10.0
-domainy0 = -0.05
-domainy1 = 0.05
-domainz0 = -10.0
-domainz1 = 10.0
+domainx0 = -7.790592
+dx = -1/2000*domainx0
+domainx1 = 7.790592
+domainy0 = -0.081625/2
+domainy1 = 0.081625/2
+domainz0 = -7.790592
+domainz1 = 7.790592
 nx = int(domainx1/dx*2+2)
 ny = int(domainy1/dx*2+2)
 nz = int(domainz1/dx*2+2)
 print("nx ", nx, " ny ", ny, " nz ", nz)
 # Define the z offset
 z_offset = int(nz/2)  # Replace with the desired offset value
-chord = int(1/100*nx) #clean chord
+chord = int(0.1/7.790592*nx) #clean chord
 x_offset = int(nx/2-1/2*chord)
 minborderforchordx = 0.5-chord/2/nx
 minborderforchordy = 0.5-chord*0.18/2/nx
@@ -230,19 +234,21 @@ if fine:
         (0, 1.58691/200*chord, 1),
         (1.58691/200*chord, 5.5542/200*chord, 0.9),
         (5.5542/200*chord, 15.0757/200*chord, 0.8),
+        # (5.5542/200*chord, 10/200*chord, 11/13),
+        # (10/200*chord, 15.0757/200*chord, 10/13), #fake 10
         (15.0757/200*chord, 37.2925/200*chord, 0.7),
-        # (37.2925/200*chord, 55/200*chord, 8/12), #fake 55
-        # (55/200*chord, 88.0737/200*chord, 7/12),
+        # (37.2925/200*chord, 55/200*chord, 8/13), #fake 55
+        # (55/200*chord, 88.0737/200*chord, 7/13),
         (37.2925/200*chord, 88.0737/200*chord, 0.6), #fake 55
         # (88.0737/200*chord, 10000*np.sqrt(2)/200*chord, 0.5),
-        # (88.0737/200*chord, 200/200*chord, 6/12), #fake 200
-        # (200/200*chord, 456.256/200*chord, 5/12),
-        (88.0737/200*chord, 456.256/200*chord, 0.5), #fake 200
-        (456.256/200*chord, 600/200*chord, 0.4),
+        # (88.0737/200*chord, 200/200*chord, 6/13), #fake 200
+        # (200/200*chord, 456.256/200*chord, 5/13),
+        (88.0737/200*chord, 456.256/200*chord, 0.5), 
+        (456.256/200*chord, 600/200*chord, 0.4/1.0),
         # (600/200*chord, 10000*np.sqrt(2)/200*chord, 0.3),
-        (600/200*chord, 1600/200*chord, 0.3),
-        (1600/200*chord, 3750/200*chord, 0.2),
-        (3750/200*chord, 9375/200*chord, 0.1),
+        (600/200*chord, 1600/200*chord, 0.3/1.0),
+        (1600/200*chord, 3750/200*chord, 2/10),
+        (3750/200*chord, 9375/200*chord, 1/10),
         (9375/200*chord, 10000*np.sqrt(2)/200*chord, 0.0),
 
         # Add more ranges as needed

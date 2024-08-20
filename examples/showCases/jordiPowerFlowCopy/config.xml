@@ -7,9 +7,9 @@
 <geometry>
     <!-- Coordinates of the physical simulation domain. -->
     <simulationDomain>
-        <x> -10.0 10.0 </x>
-        <y> -10.0 10.0 </y>
-        <z> -10.0 10.0 </z>
+        <x> -7.790592 7.790592 </x>
+        <y> -7.790592 7.790592 </y>
+        <z> -7.790592 7.790592 </z>
     </simulationDomain>
     <!-- The direction of the uniform flow is always the +x one. -->
 
@@ -57,9 +57,9 @@
          to that axis, which holds the minimum axis coordinate. If no sponge
          zone is necessary at a lattice boundary, the corresponding width
          should be 0. -->
-        <xWidths> 7.5 7.5 </xWidths>
+        <xWidths> 0.75 0.75 </xWidths>
         <yWidths> 0. 0. </yWidths>
-        <zWidths> 7.5 7.5 </zWidths>
+        <zWidths> 0.75 0.75 </zWidths>
     </spongeZones>
 
 </boundaryConditions>
@@ -73,7 +73,7 @@
          It should be an estimate of the maximum velocity of the system. -->
     <characteristicVelocity> 20.0 </characteristicVelocity>
     <!-- Lattice velocity (with respect to the characteristic velocity). -->
-    <uLB> 0.075 </uLB>
+    <uLB> 0.03278233438 </uLB>
     <!-- Maximum number of iterations at the coarsest level. -->
     <maxIter> 10000000 </maxIter>
 </numerics>
@@ -82,7 +82,7 @@
      <!-- Fluid density. -->
     <rho> 1.0 </rho>
     <!-- Reynolds number. -->
-    <Re> 222000000 </Re>
+    <Re> 270000 </Re>
     <!-- Absolute pressure at infinity. -->
     <ambientPressure> 101325.0 </ambientPressure>
 </fluid>
@@ -108,9 +108,9 @@
     <outputInDomain> false </outputInDomain>
     <!-- Domain for disk output (must be a subset of the simulation domain). -->
     <outputDomain>
-        <x> -10.0 10.0 </x>
-        <y> -10.0 10.0 </y>
-        <z> -10.0 10.0 </z>
+        <x> -7.790592 7.790592 </x>
+        <y> -7.790592 7.790592 </y>
+        <z> -7.790592 7.790592 </z>
     </outputDomain>
 
     <!-- Save data on disk on a set of slices or not? -->
@@ -120,20 +120,20 @@
         <!-- Slices normal to the x-axis for disk output. -->
         <xSlices>
             <xPositions> 0.0 </xPositions>
-            <yRange> -10.0 10.0 </yRange>
-            <zRange> -10.0 10.0 </zRange>
+            <yRange> -7.790592 7.790592 </yRange>
+            <zRange> -7.790592 7.790592 </zRange>
         </xSlices>
         <!-- Slices normal to the y-axis for disk output. -->
         <ySlices>
             <yPositions> 0.0 </yPositions>
-            <zRange> -10.0 10.0 </zRange>
-            <xRange> -10.0 10.0 </xRange>
+            <zRange> -7.790592 7.790592 </zRange>
+            <xRange> -7.790592 7.790592 </xRange>
         </ySlices>
         <!-- Slices normal to the z-axis for disk output. -->
         <zSlices>
             <zPositions> 0.0 </zPositions>
-            <xRange> -10.0 10.0 </xRange>
-            <yRange> -10.0 10.0 </yRange>
+            <xRange> -7.790592 7.790592 </xRange>
+            <yRange> -7.790592 7.790592 </yRange>
         </zSlices>
     </outputSlices>
 
