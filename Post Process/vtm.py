@@ -21,8 +21,9 @@ if DragCalculation:
     drag_coefficients = []
     iteration_numbers = []
 if not DragCalculation:
-    iterations = [0]
-    file_path_template_input = 'examples/showCases/jordiPowerFlowCopy/tmp/slice_y_00_{:08d}.vtm'
+    iterations = [50]
+    # file_path_template_input = 'examples/showCases/jordiPowerFlowCopy/tmp/slice_y_00_{:08d}.vtm'
+    file_path_template_input = 'C:/Users/jordi/Documents/GitHub/MutechPalabos/examples/showCases/jordiPowerFlowCopy/tmp/slice_y_00_{:08d}.vtm'
 
     #with cp calc there are only input, no output
 
@@ -117,8 +118,11 @@ for iteration in iterations:
 if not DragCalculation:
     print(combined_pressure_dataset_input)
     print(combined_pressure_dataset_input.points.shape)
+    print("velocity points shape",combined_velocity_dataset_input.points.shape)
     # Assuming your array is named `arr`
     pressure_points = np.array(combined_pressure_dataset_input.points)  
+    velocity_points = np.array(combined_pressure_dataset_input.points)  
+    
     # Define the target point
     # Step 1: Read the .dat file
     filename = 'UnderstandingGridRefinement/airfoilcoordinates_clean.dat'  # Replace this with the path to your .dat file
@@ -161,7 +165,7 @@ if not DragCalculation:
         # cellspositionfiltered = cellsposition[0]
         # cellspositionfiltered = combined_pressure_dataset_input['pressure'].size
         for i in range(cellsposition.size):
-            if combined_pressure_dataset_input['pressure'][int(cellsposition[i])] != 0:
+            if combined_velocity_dataset_input['velocity_x'][int(cellsposition[i])] != 0:
                 cellspositionfiltered = cellsposition[i]
                 break
             if i == cellsposition.size-1:

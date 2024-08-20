@@ -6,7 +6,7 @@ filename = 'Post Process/pressureMapAroundAirfoil.dat'  # Replace this with your
 
 # Step 1: Read the .dat file
 data = np.loadtxt(filename, skiprows=1)  # Skip the title row
-ambient_pressure = 0.0
+ambient_pressure = 101325.0
 freestream_velocity = 1.0
 rho = 1.0
 # Step 2: Extract the x, z, and pressure data
