@@ -116,9 +116,12 @@ for iteration in iterations:
         drag_coefficients.append(drag_coefficient)
         iteration_numbers.append(iteration)
 if not DragCalculation:
-    print(combined_pressure_dataset_input)
-    print(combined_pressure_dataset_input.points.shape)
-    print("velocity points shape",combined_velocity_dataset_input.points.shape)
+    # print(combined_pressure_dataset_input)
+    # print(combined_pressure_dataset_input.points.shape)
+    # print("velocity points shape",combined_velocity_dataset_input.points.shape)
+    # print(combined_velocity_dataset_input['velocity_x'])
+    # print(combined_velocity_dataset_input['velocity_magnitude'])
+    # print(combined_pressure_dataset_input['pressure'].shape)
     # Assuming your array is named `arr`
     pressure_points = np.array(combined_pressure_dataset_input.points)  
     velocity_points = np.array(combined_pressure_dataset_input.points)  
@@ -142,7 +145,7 @@ if not DragCalculation:
     # Convert the list of coordinates to a NumPy array
     target_points = np.array(coordinates)
     target_points[:,0] -= 0.5
-    target_points *= 0.41*40 
+    target_points *= 0.4*2 
     print("target points size", target_points.shape)
 
     # Now `target_points` contains your x, y, z coordinates
@@ -154,25 +157,37 @@ if not DragCalculation:
     cellsnumbers = np.array([])
     countzeros = 0
     countbadestimates = 0
+    # cellsnumbers2 = np.array([])
+    # for i in range(combined_velocity_dataset_input['velocity_magnitude'].size):
+    #     if combined_velocity_dataset_input['velocity_magnitude'][i] != 0 and combined_velocity_dataset_input['velocity_magnitude'][i-1] == 0: #or combined_velocity_dataset_input['velocity_magnitude'][i] != 0 and combined_velocity_dataset_input['velocity_magnitude'][i+1] == 0:
+    #         cellsnumbers2 = np.append(cellsnumbers2, i) 
+
+
     for target_point in target_points:
         # Calculate the Euclidean distance from the target point for each sub-array
         distances = np.linalg.norm(pressure_points - target_point, axis=1)
-
+        
         # Find the index of the minimum distance
-        position = np.argmin(distances)
-        cellsposition = np.where(combined_pressure_dataset_input.cells == position)[0] // 9  
+        shouldbreak = False
+        positions = np.argsort(distances)
+        for ixx in positions:
+            
+            cellsposition = np.where(combined_pressure_dataset_input.cells == ixx)[0] // 9  
 
-        # cellspositionfiltered = cellsposition[0]
-        # cellspositionfiltered = combined_pressure_dataset_input['pressure'].size
-        for i in range(cellsposition.size):
-            if combined_velocity_dataset_input['velocity_x'][int(cellsposition[i])] != 0:
-                cellspositionfiltered = cellsposition[i]
+            # cellspositionfiltered = cellsposition[0]
+            # cellspositionfiltered = combined_pressure_dataset_input['pressure'].size
+            for i in range(cellsposition.size):
+                if combined_velocity_dataset_input['velocity_magnitude'][int(cellsposition[i])] != 0.:
+                    cellspositionfiltered = cellsposition[i]
+                    shouldbreak = True
+                    break
+                if i == cellsposition.size-1:
+                    # print("They are all zeros!")
+                    countzeros += 1
+                    cellspositionfiltered = np.nan
+            if shouldbreak:
                 break
-            if i == cellsposition.size-1:
-                # print("They are all zeros!")
-                countzeros += 1
-                cellspositionfiltered = np.nan
-                # should_break = False
+            # should_break = False
                 # for ix in range(15):
                 #     if combined_pressure_dataset_input['pressure'][int(cellsposition[i])-ix] != 0:
                 #         cellspositionfiltered = cellsposition[i]-ix
@@ -198,6 +213,7 @@ if not DragCalculation:
     print(countbadestimates, " this many badestimates. ")
     # print(cellsnumbers)
     print(cellsnumbers.shape)
+    # print("cellsnumbers2",cellsnumbers2)
     pressure_distribution = []
     for i in range(cellsnumbers.size):
         # if combined_pressure_dataset_input['pressure'][i] == 0:  #inlet
@@ -236,7 +252,9 @@ if not DragCalculation:
 
     # Optionally plot the data for each iteration
     if iteration in plot_iterations:
-        
+        for ix in range(cellsnumbers.size):
+            if not np.isnan(cellsnumbers[ix]):
+                combined_pressure_dataset_input['pressure'][int(cellsnumbers[ix])] = 0
         if 'pressure' in combined_pressure_dataset_input.array_names:
             plotter_pressure_input = pv.Plotter()
             plotter_pressure_input.add_mesh(combined_pressure_dataset_input, scalars='pressure', cmap='viridis')
