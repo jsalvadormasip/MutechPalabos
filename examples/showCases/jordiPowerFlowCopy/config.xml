@@ -29,9 +29,9 @@
     <!-- File with the discrete grid density function. -->
     <gridDensityFunctionFile> density.dat </gridDensityFunctionFile>
     <!-- Total number of grid refinement levels. basically levels displayed -->
-    <numLevels> 9 </numLevels>
+    <numLevels> 15 </numLevels>
     <!-- Maximum octree subdivision level. basically actual max level depth. so if this is 4 and numlevels is 3, it displays 2 3 4. -->
-    <maxOctreeLevel> 11 </maxOctreeLevel>
+    <maxOctreeLevel> 15 </maxOctreeLevel>
     <!-- Block size in the smallest domain of the tree (number of nodes minus 1
          in the smallest edge of the domain decomposition).
          It must be an even integer number greater equal to 6. -->
@@ -57,9 +57,9 @@
          to that axis, which holds the minimum axis coordinate. If no sponge
          zone is necessary at a lattice boundary, the corresponding width
          should be 0. -->
-        <xWidths> 0.75 0.75 </xWidths>
+        <xWidths> 3 3 </xWidths>
         <yWidths> 0. 0. </yWidths>
-        <zWidths> 0.75 0.75 </zWidths>
+        <zWidths> 3 3 </zWidths>
     </spongeZones>
 
 </boundaryConditions>
