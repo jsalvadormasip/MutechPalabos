@@ -1,3 +1,5 @@
 *.dat
 *.png
 !airfoilcoordinates_clean.dat
+!airfoillowerpart.dat
+!airfoilupperpart.dat
