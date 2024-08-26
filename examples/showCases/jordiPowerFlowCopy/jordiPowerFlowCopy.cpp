@@ -51,7 +51,8 @@ typedef Array<T, 3> Velocity;
 #define RESCALER   ConvectiveNoForceRescaler    //there are types of rescalers!!! la hemos liao
 #define DESCRIPTOR descriptors::D3Q19Descriptor
 T angle = 7.8 * 3.1415 / 180;
-T chordLengthPercentage = 0.2/(7.790592*2);
+// T chordLengthPercentage = 0.2/(7.790592*2);
+T chordLengthPercentage = 0.4;
 bool teaddon = false;
 struct SimulationParameters {
     /*
@@ -828,8 +829,8 @@ void applyOuterBoundaryConditions(
         // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, yTop, boundary::dirichlet);
         // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, yBottom, boundary::dirichlet);
         setBoundaryDensity(lattice, box, param.rho_LB);
-        // box.y0 -= 2;  // y-periodicity   I don't really understand how this makes it periodic but sure. 
-        // box.y1 += 2;
+            // box.y0 -= 2;  // y-periodicity   I don't really understand how this makes it periodic but sure. 
+            // box.y1 += 2;     
     }
 }
 
@@ -1035,9 +1036,11 @@ int main(int argc, char *argv[])
     Array<T, 3> obstacleCenter = (T)0.5 * (bCuboid.lowerLeftCorner + bCuboid.upperRightCorner); //gets center of obstacle
     T scaling_factor = (lattices.getLevel(0).getBoundingBox().x1-lattices.getLevel(0).getBoundingBox().x0)/(-bCuboid.lowerLeftCorner[0] + bCuboid.upperRightCorner[0])*chordLengthPercentage*(T)util::intTwoToThePower(param.finestLevel); //in jordi's density.dat generator, chord was also set as 40% of the length of level 0 x span
     triangleSet.scale(scaling_factor);
+    Cuboid<T> bCuboidy = triangleSet.getBoundingCuboid();  //gets bounding cuboid
+    T yscaling_factor = (lattices.getLevel(0).getBoundingBox().y1-lattices.getLevel(0).getBoundingBox().y0)/(-bCuboidy.lowerLeftCorner[1] + bCuboidy.upperRightCorner[1])*(T)util::intTwoToThePower(param.finestLevel);
     // T scaling_factor2 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-lattices.getLevel(param.finestLevel).getBoundingBox().y0)/(-bCuboid.lowerLeftCorner[1] + bCuboid.upperRightCorner[1]);
     // triangleSet.scale((T)0.0,(T) scaling_factor2*1.05 , (T) 0.0);
-
+    triangleSet.scale((T) 1.0, yscaling_factor, (T) 1.0);
     Cuboid<T> bCuboid2 = triangleSet.getBoundingCuboid();  //gets bounding cuboid
     Array<T, 3> obstacleCenter2 = (T)0.5 * (bCuboid2.lowerLeftCorner + bCuboid2.upperRightCorner); //gets center of obstacle
     if (teaddon == true)
@@ -1055,19 +1058,34 @@ int main(int argc, char *argv[])
     TriangleSet<T> triangleSet2;
     TriangleSet<T> triangleSet3;
     
-    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+1, 0.),Array<T, 3>(0., -1., 0.) );
-    Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-1, 0.),Array<T, 3>(0., 1., 0.) );
+    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(0).getBoundingBox().y0*(T)util::intTwoToThePower(param.finestLevel)+1, 0.),Array<T, 3>(0., -1., 0.) );
+    Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(0).getBoundingBox().y1*(T)util::intTwoToThePower(param.finestLevel)-1, 0.),Array<T, 3>(0., 1., 0.) );
     triangleSet.cutWithPlane(planeyminus, triangleSet2);
     triangleSet2.cutWithPlane(planeyplus,triangleSet3);
     Cuboid<T> bCuboid3 = triangleSet3.getBoundingCuboid();
     pcout << "Hello, testing pcout " << std::endl;
     pcout << "El objetoooooooooooooo x0 " << bCuboid3.lowerLeftCorner[0] << " a " << bCuboid3.upperRightCorner[0] << std::endl;
     pcout << "Lattice x0 " << lattices.getLevel(param.finestLevel).getBoundingBox().x0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().x1 << std::endl;
+    pcout << "Domain x0 " << lattices.getLevel(0).getBoundingBox().x0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().x1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
     pcout << "El objetoo y0 " << bCuboid3.lowerLeftCorner[1] << " a " << bCuboid3.upperRightCorner[1] << std::endl;
     pcout << "Lattice Y0 " << lattices.getLevel(param.finestLevel).getBoundingBox().y0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().y1 << std::endl;
+    pcout << "Domain Y0 " << lattices.getLevel(0).getBoundingBox().y0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().y1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
     pcout << "El objetoo z0 " << bCuboid3.lowerLeftCorner[2] << " a " << bCuboid3.upperRightCorner[2] << std::endl;
     pcout << "Lattice z0 " << lattices.getLevel(param.finestLevel).getBoundingBox().z0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().z1 << std::endl;
-   
+    pcout << "Domain Y0 " << lattices.getLevel(0).getBoundingBox().z0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().z1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
+    // triangleSet3.scale((T) 1.0 , (T) 3.0 , (T) 1.0);
+    // Cuboid<T> bCuboid4 = triangleSet3.getBoundingCuboid();
+    // pcout << "Hello, testing pcout " << std::endl;
+    // pcout << "El objetoooooooooooooo x0 " << bCuboid4.lowerLeftCorner[0] << " a " << bCuboid4.upperRightCorner[0] << std::endl;
+    // pcout << "Lattice x0 " << lattices.getLevel(param.finestLevel).getBoundingBox().x0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().x1 << std::endl;
+    // pcout << "Domain x0 " << lattices.getLevel(0).getBoundingBox().x0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().x1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
+    // pcout << "El objetoo y0 " << bCuboid4.lowerLeftCorner[1] << " a " << bCuboid4.upperRightCorner[1] << std::endl;
+    // pcout << "Lattice Y0 " << lattices.getLevel(param.finestLevel).getBoundingBox().y0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().y1 << std::endl;
+    // pcout << "Domain Y0 " << lattices.getLevel(0).getBoundingBox().y0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().y1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
+    // pcout << "El objetoo z0 " << bCuboid4.lowerLeftCorner[2] << " a " << bCuboid4.upperRightCorner[2] << std::endl;
+    // pcout << "Lattice z0 " << lattices.getLevel(param.finestLevel).getBoundingBox().z0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().z1 << std::endl;
+    // pcout << "Domain Y0 " << lattices.getLevel(0).getBoundingBox().z0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().z1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
+    
     // 
     DEFscaledMesh<T> defMesh(triangleSet3, 0, 0, 1, Dot3D(0, 0, 0));
     defMesh.setDx(param.dxFinest);
