@@ -1041,8 +1041,10 @@ int main(int argc, char *argv[])
     // T yscaling_factor = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-lattices.getLevel(param.finestLevel).getBoundingBox().y0)/(-bCuboidy.lowerLeftCorner[1] + bCuboidy.upperRightCorner[1]);
     // T scaling_factor2 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-lattices.getLevel(param.finestLevel).getBoundingBox().y0)/(-bCuboid.lowerLeftCorner[1] + bCuboid.upperRightCorner[1]);
     // triangleSet.scale((T)0.0,(T) scaling_factor2*1.05 , (T) 0.0);
+    pcout << "El objetoooooooooooooo x0 " << bCuboidy.lowerLeftCorner[2] << " a " << bCuboidy.upperRightCorner[2] << std::endl;
     triangleSet.scale((T) 1.0, yscaling_factor, (T) 1.0);
     Cuboid<T> bCuboid2 = triangleSet.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objetoooooooooooooo x0 " << bCuboid2.lowerLeftCorner[2] << " a " << bCuboid2.upperRightCorner[2] << std::endl;
     Array<T, 3> obstacleCenter2 = (T)0.5 * (bCuboid2.lowerLeftCorner + bCuboid2.upperRightCorner); //gets center of obstacle
     if (teaddon == true)
     {
@@ -1051,38 +1053,130 @@ int main(int argc, char *argv[])
         obstacleCenter2[0] = actualCenterWithoutTail;   
     }
     //fixed to center considering the tail does not count in the center calculation. 
-    triangleSet.translate(-obstacleCenter2); //centers it at 0,0,0 i think. indeed, tested below. 
-    triangleSet.translate(Array<T,3>((lattices.getLevel(0).getBoundingBox().x1+lattices.getLevel(0).getBoundingBox().x0)*0.5*(T)util::intTwoToThePower(param.finestLevel), (lattices.getLevel(0).getBoundingBox().y1+lattices.getLevel(0).getBoundingBox().y0)*0.5*(T)util::intTwoToThePower(param.finestLevel), (lattices.getLevel(0).getBoundingBox().z1+lattices.getLevel(0).getBoundingBox().z0)/2*(T)util::intTwoToThePower(param.finestLevel))); //centers it at 0,0,0 i think. indeed, tested below. 
+    triangleSet.translate(-obstacleCenter2); 
+    Cuboid<T> bCuboidy2 = triangleSet.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objetoooooooooooooo x0 " << bCuboidy2.lowerLeftCorner[2] << " a " << bCuboidy2.upperRightCorner[2] << std::endl;
+    triangleSet.translate(Array<T,3>((lattices.getLevel(param.finestLevel).getBoundingBox().x1+lattices.getLevel(param.finestLevel).getBoundingBox().x0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().y1+lattices.getLevel(param.finestLevel).getBoundingBox().y0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().z1+lattices.getLevel(param.finestLevel).getBoundingBox().z0)/2)); //centers it at 0,0,0 i think. indeed, tested below. 
+    Cuboid<T> bCuboidy3 = triangleSet.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objetoooooooooooooo x0 " << bCuboidy3.lowerLeftCorner[2] << " a " << bCuboidy3.upperRightCorner[2] << std::endl;
     
     // triangleSet.scale((T)5000);
      
     TriangleSet<T> triangleSet2;
+    TriangleSet<T> triangleSetx;
+    TriangleSet<T> triangleSetx2;
+    TriangleSet<T> triangleSetz;
+    TriangleSet<T> triangleSetz2;
     TriangleSet<T> triangleSet3;
     
     Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+5, 0.),Array<T, 3>(0., -1., 0.) );
+    pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y0+5 << std::endl;
     Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-5, 0.),Array<T, 3>(0., 1., 0.) );
+    pcout << "planeyplus " << lattices.getLevel(param.finestLevel).getBoundingBox().y1-5 << std::endl;
+    Plane<T> planexminus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x0+5, 0., 0.),Array<T, 3>(-1., 0., 0.) );
+    pcout << "planexminus " << lattices.getLevel(param.finestLevel).getBoundingBox().x0+5 << std::endl;
+    Plane<T> planexplus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x1-5, 0., 0.),Array<T, 3>(1., 0., 0.) );
+    pcout << "planexplus " << lattices.getLevel(param.finestLevel).getBoundingBox().x1-5 << std::endl;
+    Plane<T> planezminus(Array<T, 3>(0., 0., lattices.getLevel(param.finestLevel).getBoundingBox().z0+5),Array<T, 3>(0., 0., -1.) );
+    pcout << "planezminus " << lattices.getLevel(param.finestLevel).getBoundingBox().z0+5 << std::endl;
+    Plane<T> planezplus(Array<T, 3>(0., 0., lattices.getLevel(param.finestLevel).getBoundingBox().z1-5),Array<T, 3>(0., 0., 1.) );
+    pcout << "planezplus " << lattices.getLevel(param.finestLevel).getBoundingBox().z1-5 << std::endl;
     // Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(0).getBoundingBox().y0*(T)util::intTwoToThePower(param.finestLevel)+1, 0.),Array<T, 3>(0., -1., 0.) );
     // Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(0).getBoundingBox().y1*(T)util::intTwoToThePower(param.finestLevel)-1, 0.),Array<T, 3>(0., 1., 0.) );
-    triangleSet.cutWithPlane(planeyminus, triangleSet2);
-    triangleSet2.cutWithPlane(planeyplus,triangleSet3);
-    Cuboid<T> bCuboid3 = triangleSet3.getBoundingCuboid();
-    Array<T, 3> obstacleCenter3 = (T)0.5 * (bCuboid3.lowerLeftCorner + bCuboid3.upperRightCorner); //gets center of obstacle
+    if (bCuboidy3.lowerLeftCorner[1] < lattices.getLevel(param.finestLevel).getBoundingBox().y0+5) {
+        triangleSet.cutWithPlane(planeyminus, triangleSet2);
+    }
+    else {
+        triangleSet2 = triangleSet;
+    }
+    Cuboid<T> bCuboidy4 = triangleSet2.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objeto x0 " << bCuboidy4.lowerLeftCorner[0] << " a " << bCuboidy4.upperRightCorner[0] << std::endl;
+    pcout << "El objeto y0 " << bCuboidy4.lowerLeftCorner[1] << " a " << bCuboidy4.upperRightCorner[1] << std::endl;
+    pcout << "El objeto z0 " << bCuboidy4.lowerLeftCorner[2] << " a " << bCuboidy4.upperRightCorner[2] << std::endl;
+    if (bCuboidy4.upperRightCorner[1] > lattices.getLevel(param.finestLevel).getBoundingBox().y1-5) {
+        triangleSet2.cutWithPlane(planeyplus,triangleSetx);
+    }
+    else {
+        triangleSetx = triangleSet2;
+    }
+    
+    Cuboid<T> bCuboidy5 = triangleSetx.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objeto x0 " << bCuboidy5.lowerLeftCorner[0] << " a " << bCuboidy5.upperRightCorner[0] << std::endl;
+    pcout << "El objeto y0 " << bCuboidy5.lowerLeftCorner[1] << " a " << bCuboidy5.upperRightCorner[1] << std::endl;
+    pcout << "El objeto z0 " << bCuboidy5.lowerLeftCorner[2] << " a " << bCuboidy5.upperRightCorner[2] << std::endl;
+    // if (bCuboidy5.lowerLeftCorner[0] < lattices.getLevel(param.finestLevel).getBoundingBox().x0+5) {
+    if (9>10) {
+        triangleSetx.cutWithPlane(planexminus,triangleSetx2);
+    }
+    else {
+        triangleSetx2 = triangleSetx;
+    }
+    
+    Cuboid<T> bCuboidy6 = triangleSetx2.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objeto x0 " << bCuboidy6.lowerLeftCorner[0] << " a " << bCuboidy6.upperRightCorner[0] << std::endl;
+    pcout << "El objeto y0 " << bCuboidy6.lowerLeftCorner[1] << " a " << bCuboidy6.upperRightCorner[1] << std::endl;
+    pcout << "El objeto z0 " << bCuboidy6.lowerLeftCorner[2] << " a " << bCuboidy6.upperRightCorner[2] << std::endl;
+    // if (bCuboidy6.upperRightCorner[0] > lattices.getLevel(param.finestLevel).getBoundingBox().x1-5) {
+    if (9>10) {
+        triangleSetx2.cutWithPlane(planexplus,triangleSetz);
+    }
+    else {
+        triangleSetz = triangleSetx2;
+    }
+    
+    Cuboid<T> bCuboidy7 = triangleSetz.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objeto below it will explode x0 " << bCuboidy7.lowerLeftCorner[0] << " a " << bCuboidy7.upperRightCorner[0] << std::endl;
+    pcout << "El objeto below it will explode y0 " << bCuboidy7.lowerLeftCorner[1] << " a " << bCuboidy7.upperRightCorner[1] << std::endl;
+    pcout << "El objeto below it will explode z0 " << bCuboidy7.lowerLeftCorner[2] << " a " << bCuboidy7.upperRightCorner[2] << std::endl;
+    // if (bCuboidy7.lowerLeftCorner[2] < lattices.getLevel(param.finestLevel).getBoundingBox().z0+5) {
+    if (9>10) {
+        triangleSetz.cutWithPlane(planezminus,bCuboidy7,triangleSetz2);
+        pcout << "ep" << std::endl;
+    }
+    else {
+        triangleSetz2 = triangleSetz;
+    }
+     //here x it multiplies by a lot
+    Cuboid<T> bCuboidy8 = triangleSetz2.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objeto x0 " << bCuboidy8.lowerLeftCorner[0] << " a " << bCuboidy8.upperRightCorner[0] << std::endl;
+    pcout << "El objeto y0 " << bCuboidy8.lowerLeftCorner[1] << " a " << bCuboidy8.upperRightCorner[1] << std::endl;
+    pcout << "El objeto z0 " << bCuboidy8.lowerLeftCorner[2] << " a " << bCuboidy8.upperRightCorner[2] << std::endl;
+    // if (bCuboidy7.upperRightCorner[2] > lattices.getLevel(param.finestLevel).getBoundingBox().z1-5) {
+    if (9>10) {
+        triangleSetz2.cutWithPlane(planezplus,bCuboidy7,triangleSet3);
+    }
+    else {
+        triangleSet3 = triangleSetz2;
+    }
+    
+    Cuboid<T> bCuboidy9 = triangleSet3.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objeto x0 " << bCuboidy9.lowerLeftCorner[0] << " a " << bCuboidy9.upperRightCorner[0] << std::endl;
+    pcout << "El objeto y0 " << bCuboidy9.lowerLeftCorner[1] << " a " << bCuboidy9.upperRightCorner[1] << std::endl;
+    pcout << "El objeto z0 " << bCuboidy9.lowerLeftCorner[2] << " a " << bCuboidy9.upperRightCorner[2] << std::endl;
+    Cuboid<T> bCuboid3x = triangleSet3.getBoundingCuboid();
+    pcout << "El objetoooooooooooooo x0 " << bCuboid3x.lowerLeftCorner[2] << " a " << bCuboid3x.upperRightCorner[2] << std::endl;
+    Array<T, 3> obstacleCenter3 = (T)0.5 * (bCuboid3x.lowerLeftCorner + bCuboid3x.upperRightCorner); //gets center of obstacle
     if (teaddon == true)
     {
-        T cleanChordLength = (bCuboid3.upperRightCorner[0]-bCuboid3.lowerLeftCorner[0])*0.2/0.2335; //this is based on the Marlon object that we are analysing. 
-        T actualCenterWithoutTail = (T)0.5 * (bCuboid3.lowerLeftCorner[0] + cleanChordLength);
+        T cleanChordLength = (bCuboid3x.upperRightCorner[0]-bCuboid3x.lowerLeftCorner[0])*0.2/0.2335; //this is based on the Marlon object that we are analysing. 
+        T actualCenterWithoutTail = (T)0.5 * (bCuboid3x.lowerLeftCorner[0] + cleanChordLength);
         obstacleCenter3[0] = actualCenterWithoutTail;   
     }
     //fixed to center considering the tail does not count in the center calculation. 
     triangleSet3.translate(-obstacleCenter3); //centers it at 0,0,0 i think. indeed, tested below. 
+    Cuboid<T> bCuboidy10 = triangleSet3.getBoundingCuboid();  //gets bounding cuboid
+    pcout << "El objeto x0 " << bCuboidy10.lowerLeftCorner[0] << " a " << bCuboidy10.upperRightCorner[0] << std::endl;
+    pcout << "El objeto y0 " << bCuboidy10.lowerLeftCorner[1] << " a " << bCuboidy10.upperRightCorner[1] << std::endl;
+    pcout << "El objeto z0 " << bCuboidy10.lowerLeftCorner[2] << " a " << bCuboidy10.upperRightCorner[2] << std::endl;
     triangleSet3.translate(Array<T,3>((lattices.getLevel(param.finestLevel).getBoundingBox().x1+lattices.getLevel(param.finestLevel).getBoundingBox().x0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().y1+lattices.getLevel(param.finestLevel).getBoundingBox().y0)*0.5,  (lattices.getLevel(param.finestLevel).getBoundingBox().z1+lattices.getLevel(param.finestLevel).getBoundingBox().z0)/2)); //centers it at 0,0,0 i think. indeed, tested below. 
-
+    // triangleSet3.scale((T) 0.5);
+    Cuboid<T> bCuboid3 = triangleSet3.getBoundingCuboid();
     pcout << "Hello, testing pcout " << std::endl;
     pcout << "El objetoooooooooooooo x0 " << bCuboid3.lowerLeftCorner[0] << " a " << bCuboid3.upperRightCorner[0] << std::endl;
     pcout << "Lattice x0 " << lattices.getLevel(param.finestLevel).getBoundingBox().x0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().x1 << std::endl;
     pcout << "Domain x0 " << lattices.getLevel(0).getBoundingBox().x0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().x1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
     pcout << "El objetoo y0 " << bCuboid3.lowerLeftCorner[1] << " a " << bCuboid3.upperRightCorner[1] << std::endl;
-    pcout << "Lattice Y0 " << lattices.getLevel(param.finestLevel).getBoundingBox().y0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().y1 << std::endl;
+    pcout << "Lattice Y0 " << lattices.getLevel(param.finestLevel-1).getBoundingBox().y0 << "a " << lattices.getLevel(param.finestLevel-1).getBoundingBox().y1 << std::endl;
     pcout << "Domain Y0 " << lattices.getLevel(0).getBoundingBox().y0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().y1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
     pcout << "El objetoo z0 " << bCuboid3.lowerLeftCorner[2] << " a " << bCuboid3.upperRightCorner[2] << std::endl;
     pcout << "Lattice z0 " << lattices.getLevel(param.finestLevel).getBoundingBox().z0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().z1 << std::endl;
@@ -1119,10 +1213,10 @@ int main(int argc, char *argv[])
     const int extendedEnvelopeWidth = 2;
     const int blockSize = 0;
     VoxelizedDomain3D<T> voxelizedDomain(
-        boundary, flowType, lattices.getLevel(param.finestLevel).getBoundingBox(), borderWidth,
+        boundary, flowType, lattices.getLevel(param.finestLevel-1).getBoundingBox(), borderWidth,
         extendedEnvelopeWidth, blockSize);
     voxelizedDomain.reparallelize(param.ogs.getMultiBlockManagement(
-        param.finestLevel, lattices.getLevel(param.finestLevel).getBoundingBox(),
+        param.finestLevel-1, lattices.getLevel(param.finestLevel-1).getBoundingBox(),
         extendedEnvelopeWidth)); //im not sure what reparallelize is for, maybe to insert the multiblockmanagement thing
 
     defineDynamics(

@@ -137,7 +137,7 @@ airfoil_file_path = 'UnderstandingGridRefinement/refinedairfoil2.dat'  # Replace
 #grid dimensions
 offsets = True
 domainx0 = -0.37
-dx = 1/20000*7.790592
+dx = 1/2000*7.790592
 domainx1 = 0.37
 domainy0 = -0.081625/2
 domainy1 = 0.081625/2
