@@ -776,20 +776,38 @@ void applyOuterBoundaryConditions(
 
         Box3D boundingBox = coarsestBoundingBox.multiply(util::intTwoToThePower(iLevel)); //put bounding box in level units
         Box3D box = boundingBox;
+        T objecty0 = (lattices.getLevel(param.finestLevel).getBoundingBox().y0+4);
+        objecty0 /= (util::intTwoToThePower(param.finestLevel));
+        objecty0 *= util::intTwoToThePower(iLevel);
+        T objecty1 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5);
+        objecty1 /= (util::intTwoToThePower(param.finestLevel));
+        objecty1 *= util::intTwoToThePower(iLevel);
+        pcout << param.finestLevel << " " << iLevel << std::endl;
+        pcout << lattices.getLevel(param.finestLevel).getBoundingBox().y0 << " " << lattices.getLevel(param.finestLevel).getBoundingBox().y1 << std::endl;
+        objecty0 = int(objecty0);
+        objecty1 = int(objecty1);
+        pcout << "objetoy0" << objecty0 << " objetoy1 " << objecty1 << std::endl;
         Box3D inlet(box.x0, box.x0, box.y0, box.y1, box.z0, box.z1);
         Box3D outlet(box.x1, box.x1, box.y0 + 1, box.y1 - 1, box.z0 + 1, box.z1 - 1);
         Box3D yBottom(box.x0 + 1, box.x1, box.y0, box.y0, box.z0, box.z1);
         Box3D yTop(box.x0 + 1, box.x1, box.y1, box.y1, box.z0, box.z1);
-        Box3D zBottom(box.x0 + 1, box.x1, box.y0 + 1, box.y1 - 1, box.z0, box.z0);
-        Box3D zTop(box.x0 + 1, box.x1, box.y0 + 1, box.y1 - 1, box.z1, box.z1);
-
+        Box3D zBottom(box.x0 + 1, box.x1, box.y0, box.y1, box.z0, box.z0);
+        Box3D zTop(box.x0 + 1, box.x1, box.y0, box.y1, box.z1, box.z1);
+        Box3D yMarlon0(box.x0+1, box.x1-1, objecty0,objecty0, box.z0-1, box.z1-1 );
+        Box3D yMarlon1(box.x0+1, box.x1-1, objecty1,objecty1, box.z0-1, box.z1-1 );
+        // Box3D yMarlonedge0
         // Inlet boundary condition.
 
-        bc->setVelocityConditionOnBlockBoundaries(lattice, boundingBox, inlet, boundary::dirichlet);
+        bc->setVelocityConditionOnBlockBoundaries(lattice,  boundingBox, inlet,  boundary::dirichlet);
 
         Array<T, 3> velocity(param.inletVelocity_LB);
         setBoundaryVelocity(lattice, inlet, velocity);
-
+        bc->setVelocityConditionOnBlockBoundaries(lattice, yMarlon0 ,boundingBox,     boundary::freeslip);
+        bc->setVelocityConditionOnBlockBoundaries(lattice, yMarlon1, boundingBox,     boundary::freeslip);
+        // bc->addVelocityBoundary1N(yMarlon0, lattice, boundary::freeslip);
+        // bc->addVelocityBoundary1P(yMarlon1, lattice, boundary::freeslip);
+        // setBoundaryVelocity(lattice, yMarlon0, velocity);
+        // setBoundaryVelocity(lattice, yMarlon1, velocity);
         Array<T, 3> zero((T)0, (T)0, (T)0);
 
         // Lateral boundary conditions.
@@ -880,11 +898,16 @@ void writeResults(
         std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > velocity = computeVelocity( //for output
             lattices, param.outputDomains.find(param.maxOutputLevel)->second[iDomain], //the second stored value gets the domain, which corresponds to the maxoutput level
             param.maxOutputLevel, crop);
-
+        // std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > vorticity = computeVorticity( //for output
+        //     vel, param.outputDomains.find(param.maxOutputLevel)->second[iDomain], //the second stored value gets the domain, which corresponds to the maxoutput level
+        //     param.maxOutputLevel, crop);
+        // std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVorticity(
+        //     MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain, bool crop)
+        
         std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > density = computeDensity(
             lattices, param.outputDomains.find(param.maxOutputLevel)->second[iDomain],
             param.maxOutputLevel, crop);
-
+        
         std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > outAvgVel;
 
         if (param.computeAverages) {
@@ -910,6 +933,7 @@ void writeResults(
             addTransform<T, float, 3>(vtkGroup, velocity->getLevel(iLevel), "velocity", dx / dt); //scale factor dx/dt
             addTransform<T, float>(
                 vtkGroup, density->getLevel(iLevel), "pressure", pressureScale, pressureOffset); //nicely gives pressure. 
+
             if (param.computeAverages) {
                 addTransform<T, float, 3>(vtkGroup, outAvgVel->getLevel(iLevel), "avgVel", dx / dt);
             }
@@ -1069,8 +1093,8 @@ int main(int argc, char *argv[])
     TriangleSet<T> triangleSetz2;
     TriangleSet<T> triangleSet3;
     
-    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+5, 0.),Array<T, 3>(0., -1., 0.) );
-    pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y0+5 << std::endl;
+    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+4, 0.),Array<T, 3>(0., -1., 0.) );
+    pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y0+4 << std::endl;
     Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-5, 0.),Array<T, 3>(0., 1., 0.) );
     pcout << "planeyplus " << lattices.getLevel(param.finestLevel).getBoundingBox().y1-5 << std::endl;
     Plane<T> planexminus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x0+5, 0., 0.),Array<T, 3>(-1., 0., 0.) );
@@ -1213,10 +1237,10 @@ int main(int argc, char *argv[])
     const int extendedEnvelopeWidth = 2;
     const int blockSize = 0;
     VoxelizedDomain3D<T> voxelizedDomain(
-        boundary, flowType, lattices.getLevel(param.finestLevel-1).getBoundingBox(), borderWidth,
+        boundary, flowType, lattices.getLevel(param.finestLevel).getBoundingBox(), borderWidth,
         extendedEnvelopeWidth, blockSize);
     voxelizedDomain.reparallelize(param.ogs.getMultiBlockManagement(
-        param.finestLevel-1, lattices.getLevel(param.finestLevel-1).getBoundingBox(),
+        param.finestLevel, lattices.getLevel(param.finestLevel).getBoundingBox(),
         extendedEnvelopeWidth)); //im not sure what reparallelize is for, maybe to insert the multiblockmanagement thing
 
     defineDynamics(
@@ -1385,7 +1409,7 @@ int main(int argc, char *argv[])
         if (iter % param.outIter == 0) {
             pcout << "Output to disk at coarsest level iteration: " << iter
                   << ", t = " << iter * param.dtCoarsest << std::endl;
-
+            // MultiLevelTensorField3D<T,3> vels = vel;
             writeResults(param, lattices, avgVelocity, iter);
             pcout << "Output Completed" << std::endl;
         }
