@@ -796,7 +796,7 @@ void writeResults( //output results.
             T dx = param.dxFinest * util::intTwoToThePower(param.finestLevel - iLevel);
             T dt = param.dtFinest * util::intTwoToThePower(param.finestLevel - iLevel);
 
-            T pressureScale = param.rho * (dx * dx) / (dt * dt) * DESCRIPTOR<T>::cs2;
+            T pressureScale = param.rho * (dx * dx) / (dt * dt) * DESCRIPTOR<T>::cs2; //scales the pressure from lattice boltzmann units to pressure. 
             T pressureOffset = param.ambientPressure - param.rho_LB * pressureScale;
 
             Group3D vtkGroup;
@@ -805,7 +805,7 @@ void writeResults( //output results.
             // by a scale factor (and adds an offset).
             addTransform<T, float, 3>(vtkGroup, velocity->getLevel(iLevel), "velocity", dx / dt); //scale factor dx/dt
             addTransform<T, float>(
-                vtkGroup, density->getLevel(iLevel), "pressure", pressureScale, pressureOffset); //nicely gives pressure. 
+                vtkGroup, density->getLevel(iLevel), "pressure", pressureScale, pressureOffset); 
 
             if (param.computeAverages) {
                 addTransform<T, float, 3>(vtkGroup, outAvgVel->getLevel(iLevel), "avgVel", dx / dt);
@@ -815,28 +815,27 @@ void writeResults( //output results.
             // interpolations, and is useful for debugging.
             bool pointData = false;
             sparseOut.writeVtkBlock(vtkGroup, dx, param.physicalLocation, iLevel, pointData);
-            // ... Add more data at different levels.
         }
     }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[])  //the main function. 
 {
-    plbInit(&argc, &argv);
+    plbInit(&argc, &argv); //intialize. 
 
-    std::cout.precision(10);
+    std::cout.precision(10);//set output precision for numbers. 
     std::scientific(std::cout);
 
     // Command-line arguments
 
     if (argc != 2 && argc != 3) {
-        pcerr << "Usage: " << argv[0] << " xml-input-file-name [restart]" << std::endl;
+        pcerr << "Usage: " << argv[0] << " xml-input-file-name [restart]" << std::endl; //if you don't specify an input file, it asks you to do so. 
         exit(1);
     }
 
     std::string xmlInputFileName;
     xmlInputFileName = std::string(argv[1]);
-    abortIfCannotOpenFileForReading(xmlInputFileName);
+    abortIfCannotOpenFileForReading(xmlInputFileName); //if it can't open the input file, abort. 
 
     bool continueSimulation = false;
     if (argc == 3) {
@@ -846,7 +845,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    int nproc = global::mpi().getSize();
+    int nproc = global::mpi().getSize(); //get number of processors. specified in teh terminal by mpirun -np 4 ./jordiPowerFlowCopy config.xml   | , 4 is the number of processors
 
     // global::mpi().barrier();
     global::timer("init").start();
@@ -886,7 +885,7 @@ int main(int argc, char *argv[])
     order = 1;
     MultiLevelCoupling3D<T, DESCRIPTOR, RESCALER> lattices(
         param.ogs,
-        new ConsistentSmagorinskyCompleteRegularizedBGKdynamics<T, DESCRIPTOR>(
+        new ConsistentSmagorinskyCompleteRegularizedBGKdynamics<T, DESCRIPTOR>(  //collision dynamics for lattice boltzmann.
             param.omega[0], 0.14), //for some reason they use the first omega and the 0.14 smagorinksy factor
         order);
     pcout << "CompleteRegularizedBGKdynamics" << std::endl;
