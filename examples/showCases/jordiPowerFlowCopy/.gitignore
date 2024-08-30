@@ -1,0 +1,6 @@
+#externalFlowAroundObstacle
+*.stl
+*.dat
+!MarlonDesign.stl
+!NACA0018emptyscaled.stl
+*.zip
