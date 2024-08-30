@@ -119,7 +119,7 @@
     <outputSlices>
         <!-- Slices normal to the x-axis for disk output. -->
         <xSlices>
-            <xPositions> -0.2 0.0 0.2  </xPositions>
+            <xPositions> 0.0  </xPositions>
             <yRange> -7.790592 7.790592 </yRange>
             <zRange> -7.790592 7.790592 </zRange>
         </xSlices>

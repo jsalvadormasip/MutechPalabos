@@ -48,12 +48,12 @@ using namespace plb;
 typedef double T;
 typedef Array<T, 3> Velocity;
 
-#define RESCALER   ConvectiveNoForceRescaler    //there are types of rescalers!!! la hemos liao
+#define RESCALER   ConvectiveNoForceRescaler    
 #define DESCRIPTOR descriptors::D3Q19Descriptor
-T angle = 7.8 * 3.1415 / 180;
-T chordLengthPercentage = 0.2/(7.790592*2);
-// T chordLengthPercentage = 0.4;
-bool teaddon = false;
+T angle = 7.8 * 3.1415 / 180; //angle of attack. Note that the airfoil's chord is aligned with the domain, and it is the air that comes at an angle. 
+T chordLengthPercentage = 0.2/(7.790592*2); //ratio between domain length and chord length. Useful for calculation below. 
+
+bool teaddon = false; //later on this will be used. Basically, if the STL model has a Trailing Edge Add-on, it will still center the STL file based on the airfoil center, without considering the add-on. It is set as false bc for now we are using NACA0018
 struct SimulationParameters {
     /*
      * Parameters set by the user.
@@ -151,7 +151,7 @@ struct SimulationParameters {
     std::vector<std::string> outputDomainNames;
 };
 
-T toLB(T physVal, plint direction, T dx, Array<T, 3> const &location)
+T toLB(T physVal, plint direction, T dx, Array<T, 3> const &location)  //this function normalizes distances to have them in lattice units, e.g. 10 voxels of distance.
 {
     PLB_ASSERT(direction >= 0 && direction <= 2);
     return ((physVal - location[direction]) / dx);
@@ -367,7 +367,7 @@ void createOctreeGridStructure(SimulationParameters &param)
         gridDensityScaleFactor, useSamples, numSamples, maxIter, removeBlocks, fineToCoarse,
         numLevelsToGroupBlocks, numLevelsToGroupOverlaps, strongGrouping, param.outDir, verbose,
         stlOutput, stlBaseName);
-
+    //Hier above is a really smart class that generates an ocree grid structure based on the density file that you input, and based on the maximum and minimum levels that you want. Check Notion user guide for more info.
     param.ogs = octreeGridGenerator.generateOctreeGridStructure();
     param.fullDomain = octreeGridGenerator.getFullDomain();
     param.dxFinest = octreeGridGenerator.getDxFinestLevel();
@@ -386,12 +386,12 @@ void createOctreeGridStructure(SimulationParameters &param)
     }
 }
 
-Box3D computeOutputDomain(
+Box3D computeOutputDomain( 
     SimulationParameters const &param, Cuboid<T> const &outputCuboid, plint level)
 {
-    T dx = param.dxFinest * (T)util::intTwoToThePower(param.finestLevel - level);
+    T dx = param.dxFinest * (T)util::intTwoToThePower(param.finestLevel - level); //bc levels of resolution scale by factors of 2
     Box3D outputBox;
-    outputBox.x0 = (plint)toLB(outputCuboid.x0(), 0, dx, param.physicalLocation);
+    outputBox.x0 = (plint)toLB(outputCuboid.x0(), 0, dx, param.physicalLocation); //this toLB function does (physlocation-x0)/dx
     outputBox.x1 = (plint)toLB(outputCuboid.x1(), 0, dx, param.physicalLocation) + (plint)1;
     outputBox.y0 = (plint)toLB(outputCuboid.y0(), 1, dx, param.physicalLocation);
     outputBox.y1 = (plint)toLB(outputCuboid.y1(), 1, dx, param.physicalLocation) + (plint)1;
@@ -408,11 +408,11 @@ void computeAllOutputDomains(SimulationParameters &param)
         param.outputDomainNames.push_back("domain");
     }
 
-    if (param.outputOnSlices) {
-        plint numXdigits = util::val2str(param.xPositions.size()).length(); //number of x digits?
+    if (param.outputOnSlices) { //if output onslices boolean is true
+        plint numXdigits = util::val2str(param.xPositions.size()).length(); //number of digits.
         for (plint i = 0; i < (plint)param.xPositions.size(); i++) {
-            Array<T, 3> llc(param.xPositions[i], param.xyRange[0], param.xzRange[0]); //first point of the slice
-            Array<T, 3> urc(param.xPositions[i], param.xyRange[1], param.xzRange[1]); //second point of the slice
+            Array<T, 3> llc(param.xPositions[i], param.xyRange[0], param.xzRange[0]); //first point of the slice (llc means lowerleftcorner)
+            Array<T, 3> urc(param.xPositions[i], param.xyRange[1], param.xzRange[1]); //second point of the slice (upperrightcorner)
             outputCuboids.push_back(Cuboid<T>(llc, urc));
             param.outputDomainNames.push_back(createFileName("slice_x_", i, numXdigits + 1));
         }
@@ -447,7 +447,7 @@ void computeAllOutputDomains(SimulationParameters &param)
                 // outputDomain.y1--;
                 // outputDomain.z1--;
             }
-            if (outputDomain.getNx() <= 0 || outputDomain.getNy() <= 0 || outputDomain.getNz() <= 0) //if its broken officially break it
+            if (outputDomain.getNx() <= 0 || outputDomain.getNy() <= 0 || outputDomain.getNz() <= 0) //if domain doesnt exists officially break it
             {
                 outputDomain = Box3D(-1, -1, -1, -1, -1, -1);
             } else {
@@ -776,16 +776,16 @@ void applyOuterBoundaryConditions(
 
         Box3D boundingBox = coarsestBoundingBox.multiply(util::intTwoToThePower(iLevel)); //put bounding box in level units
         Box3D box = boundingBox;
-        T objecty0 = (lattices.getLevel(param.finestLevel).getBoundingBox().y0+4);
-        objecty0 /= (util::intTwoToThePower(param.finestLevel));
-        objecty0 *= util::intTwoToThePower(iLevel);
+        T objecty0 = (lattices.getLevel(param.finestLevel).getBoundingBox().y0+5);
+        // objecty0 /= (util::intTwoToThePower(param.finestLevel));
+        // objecty0 *= util::intTwoToThePower(iLevel);
         T objecty1 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5);
-        objecty1 /= (util::intTwoToThePower(param.finestLevel));
-        objecty1 *= util::intTwoToThePower(iLevel);
+        // objecty1 /= (util::intTwoToThePower(param.finestLevel));
+        // objecty1 *= util::intTwoToThePower(iLevel);
         pcout << param.finestLevel << " " << iLevel << std::endl;
         pcout << lattices.getLevel(param.finestLevel).getBoundingBox().y0 << " " << lattices.getLevel(param.finestLevel).getBoundingBox().y1 << std::endl;
-        objecty0 = int(objecty0);
-        objecty1 = int(objecty1);
+        objecty0 = int(std::round(objecty0));
+        objecty1 = int(std::round(objecty1));
         pcout << "objetoy0" << objecty0 << " objetoy1 " << objecty1 << std::endl;
         Box3D inlet(box.x0, box.x0, box.y0, box.y1, box.z0, box.z1);
         Box3D outlet(box.x1, box.x1, box.y0 + 1, box.y1 - 1, box.z0 + 1, box.z1 - 1);
@@ -793,8 +793,8 @@ void applyOuterBoundaryConditions(
         Box3D yTop(box.x0 + 1, box.x1, box.y1, box.y1, box.z0, box.z1);
         Box3D zBottom(box.x0 + 1, box.x1, box.y0, box.y1, box.z0, box.z0);
         Box3D zTop(box.x0 + 1, box.x1, box.y0, box.y1, box.z1, box.z1);
-        Box3D yMarlon0(box.x0+1, box.x1-1, objecty0,objecty0, box.z0-1, box.z1-1 );
-        Box3D yMarlon1(box.x0+1, box.x1-1, objecty1,objecty1, box.z0-1, box.z1-1 );
+        Box3D yMarlon0(box.x0+1, box.x1, objecty0,objecty0, box.z0, box.z1 );
+        Box3D yMarlon1(box.x0+1, box.x1, objecty1,objecty1, box.z0, box.z1 );
         // Box3D yMarlonedge0
         // Inlet boundary condition.
 
@@ -802,10 +802,10 @@ void applyOuterBoundaryConditions(
 
         Array<T, 3> velocity(param.inletVelocity_LB);
         setBoundaryVelocity(lattice, inlet, velocity);
-        bc->setVelocityConditionOnBlockBoundaries(lattice, yMarlon0 ,boundingBox,     boundary::freeslip);
-        bc->setVelocityConditionOnBlockBoundaries(lattice, yMarlon1, boundingBox,     boundary::freeslip);
-        // bc->addVelocityBoundary1N(yMarlon0, lattice, boundary::freeslip);
-        // bc->addVelocityBoundary1P(yMarlon1, lattice, boundary::freeslip);
+        // bc->setVelocityConditionOnBlockBoundaries(lattice, yMarlon0 ,boundingBox,     boundary::freeslip);
+        // bc->setVelocityConditionOnBlockBoundaries(lattice, yMarlon1, boundingBox,     boundary::freeslip);
+        bc->addVelocityBoundary1N(yMarlon0, lattice, boundary::freeslip);
+        bc->addVelocityBoundary1P(yMarlon1, lattice, boundary::freeslip);
         // setBoundaryVelocity(lattice, yMarlon0, velocity);
         // setBoundaryVelocity(lattice, yMarlon1, velocity);
         Array<T, 3> zero((T)0, (T)0, (T)0);
@@ -1082,7 +1082,9 @@ int main(int argc, char *argv[])
     pcout << "El objetoooooooooooooo x0 " << bCuboidy2.lowerLeftCorner[2] << " a " << bCuboidy2.upperRightCorner[2] << std::endl;
     triangleSet.translate(Array<T,3>((lattices.getLevel(param.finestLevel).getBoundingBox().x1+lattices.getLevel(param.finestLevel).getBoundingBox().x0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().y1+lattices.getLevel(param.finestLevel).getBoundingBox().y0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().z1+lattices.getLevel(param.finestLevel).getBoundingBox().z0)/2)); //centers it at 0,0,0 i think. indeed, tested below. 
     Cuboid<T> bCuboidy3 = triangleSet.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objetoooooooooooooo x0 " << bCuboidy3.lowerLeftCorner[2] << " a " << bCuboidy3.upperRightCorner[2] << std::endl;
+    pcout << "El objeto x0 " << bCuboidy3.lowerLeftCorner[0] << " a " << bCuboidy3.upperRightCorner[0] << std::endl;
+    pcout << "El objeto y0 " << bCuboidy3.lowerLeftCorner[1] << " a " << bCuboidy3.upperRightCorner[1] << std::endl;
+    pcout << "El objeto z0 " << bCuboidy3.lowerLeftCorner[2] << " a " << bCuboidy3.upperRightCorner[2] << std::endl;
     
     // triangleSet.scale((T)5000);
      
@@ -1093,10 +1095,12 @@ int main(int argc, char *argv[])
     TriangleSet<T> triangleSetz2;
     TriangleSet<T> triangleSet3;
     
-    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+4, 0.),Array<T, 3>(0., -1., 0.) );
-    pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y0+4 << std::endl;
-    Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-5, 0.),Array<T, 3>(0., 1., 0.) );
-    pcout << "planeyplus " << lattices.getLevel(param.finestLevel).getBoundingBox().y1-5 << std::endl;
+    // Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+5, 0.),Array<T, 3>(0., -1., 0.) );
+    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1+3, 0.),Array<T, 3>(0., -1., 0.) );
+    pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y1+3 << std::endl;
+    // Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-5, 0.),Array<T, 3>(0., 1., 0.) );
+    Plane<T> planeyplus(Array<T, 3>(0., (lattices.getLevel(param.finestLevel-1).getBoundingBox().y1-3)*2, 0.),Array<T, 3>(0., 1., 0.) );
+    pcout << "planeyplus " << 2*(lattices.getLevel(param.finestLevel-1).getBoundingBox().y1-3) << std::endl;
     Plane<T> planexminus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x0+5, 0., 0.),Array<T, 3>(-1., 0., 0.) );
     pcout << "planexminus " << lattices.getLevel(param.finestLevel).getBoundingBox().x0+5 << std::endl;
     Plane<T> planexplus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x1-5, 0., 0.),Array<T, 3>(1., 0., 0.) );
@@ -1117,7 +1121,7 @@ int main(int argc, char *argv[])
     pcout << "El objeto x0 " << bCuboidy4.lowerLeftCorner[0] << " a " << bCuboidy4.upperRightCorner[0] << std::endl;
     pcout << "El objeto y0 " << bCuboidy4.lowerLeftCorner[1] << " a " << bCuboidy4.upperRightCorner[1] << std::endl;
     pcout << "El objeto z0 " << bCuboidy4.lowerLeftCorner[2] << " a " << bCuboidy4.upperRightCorner[2] << std::endl;
-    if (bCuboidy4.upperRightCorner[1] > lattices.getLevel(param.finestLevel).getBoundingBox().y1-5) {
+    if (bCuboidy4.upperRightCorner[1] > lattices.getLevel(param.finestLevel-1).getBoundingBox().y1-5) {
         triangleSet2.cutWithPlane(planeyplus,triangleSetx);
     }
     else {
@@ -1187,12 +1191,12 @@ int main(int argc, char *argv[])
         obstacleCenter3[0] = actualCenterWithoutTail;   
     }
     //fixed to center considering the tail does not count in the center calculation. 
-    triangleSet3.translate(-obstacleCenter3); //centers it at 0,0,0 i think. indeed, tested below. 
+    // triangleSet3.translate(-obstacleCenter3); //centers it at 0,0,0 i think. indeed, tested below. 
     Cuboid<T> bCuboidy10 = triangleSet3.getBoundingCuboid();  //gets bounding cuboid
     pcout << "El objeto x0 " << bCuboidy10.lowerLeftCorner[0] << " a " << bCuboidy10.upperRightCorner[0] << std::endl;
     pcout << "El objeto y0 " << bCuboidy10.lowerLeftCorner[1] << " a " << bCuboidy10.upperRightCorner[1] << std::endl;
     pcout << "El objeto z0 " << bCuboidy10.lowerLeftCorner[2] << " a " << bCuboidy10.upperRightCorner[2] << std::endl;
-    triangleSet3.translate(Array<T,3>((lattices.getLevel(param.finestLevel).getBoundingBox().x1+lattices.getLevel(param.finestLevel).getBoundingBox().x0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().y1+lattices.getLevel(param.finestLevel).getBoundingBox().y0)*0.5,  (lattices.getLevel(param.finestLevel).getBoundingBox().z1+lattices.getLevel(param.finestLevel).getBoundingBox().z0)/2)); //centers it at 0,0,0 i think. indeed, tested below. 
+    // triangleSet3.translate(Array<T,3>((lattices.getLevel(param.finestLevel).getBoundingBox().x1+lattices.getLevel(param.finestLevel).getBoundingBox().x0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().y1+lattices.getLevel(param.finestLevel).getBoundingBox().y0)*0.5,  (lattices.getLevel(param.finestLevel).getBoundingBox().z1+lattices.getLevel(param.finestLevel).getBoundingBox().z0)/2)); //centers it at 0,0,0 i think. indeed, tested below. 
     // triangleSet3.scale((T) 0.5);
     Cuboid<T> bCuboid3 = triangleSet3.getBoundingCuboid();
     pcout << "Hello, testing pcout " << std::endl;
@@ -1200,7 +1204,8 @@ int main(int argc, char *argv[])
     pcout << "Lattice x0 " << lattices.getLevel(param.finestLevel).getBoundingBox().x0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().x1 << std::endl;
     pcout << "Domain x0 " << lattices.getLevel(0).getBoundingBox().x0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().x1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
     pcout << "El objetoo y0 " << bCuboid3.lowerLeftCorner[1] << " a " << bCuboid3.upperRightCorner[1] << std::endl;
-    pcout << "Lattice Y0 " << lattices.getLevel(param.finestLevel-1).getBoundingBox().y0 << "a " << lattices.getLevel(param.finestLevel-1).getBoundingBox().y1 << std::endl;
+    pcout << "Lattice finest -1 Y0 " << lattices.getLevel(param.finestLevel-1).getBoundingBox().y0 << "a " << lattices.getLevel(param.finestLevel-1).getBoundingBox().y1 << std::endl;
+    pcout << "Lattice finest Y0 " << lattices.getLevel(param.finestLevel).getBoundingBox().y0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().y1 << std::endl;
     pcout << "Domain Y0 " << lattices.getLevel(0).getBoundingBox().y0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().y1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
     pcout << "El objetoo z0 " << bCuboid3.lowerLeftCorner[2] << " a " << bCuboid3.upperRightCorner[2] << std::endl;
     pcout << "Lattice z0 " << lattices.getLevel(param.finestLevel).getBoundingBox().z0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().z1 << std::endl;
@@ -1217,10 +1222,10 @@ int main(int argc, char *argv[])
     // pcout << "El objetoo z0 " << bCuboid4.lowerLeftCorner[2] << " a " << bCuboid4.upperRightCorner[2] << std::endl;
     // pcout << "Lattice z0 " << lattices.getLevel(param.finestLevel).getBoundingBox().z0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().z1 << std::endl;
     // pcout << "Domain Y0 " << lattices.getLevel(0).getBoundingBox().z0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().z1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
-    
+    triangleSet3.scale((T) 0.5);
     // 
     DEFscaledMesh<T> defMesh(triangleSet3, 0, 0, 1, Dot3D(0, 0, 0));
-    defMesh.setDx(param.dxFinest);
+    defMesh.setDx(param.dxFinest*2);
     defMesh.setPhysicalLocation(param.physicalLocation);
     pcout << "hey1 " << std::endl;
     TriangleBoundary3D<T> boundary(defMesh);
@@ -1237,15 +1242,15 @@ int main(int argc, char *argv[])
     const int extendedEnvelopeWidth = 2;
     const int blockSize = 0;
     VoxelizedDomain3D<T> voxelizedDomain(
-        boundary, flowType, lattices.getLevel(param.finestLevel).getBoundingBox(), borderWidth,
+        boundary, flowType, lattices.getLevel(param.finestLevel-1).getBoundingBox(), borderWidth,
         extendedEnvelopeWidth, blockSize);
     voxelizedDomain.reparallelize(param.ogs.getMultiBlockManagement(
-        param.finestLevel, lattices.getLevel(param.finestLevel).getBoundingBox(),
+        param.finestLevel-1, lattices.getLevel(param.finestLevel-1).getBoundingBox(),
         extendedEnvelopeWidth)); //im not sure what reparallelize is for, maybe to insert the multiblockmanagement thing
 
     defineDynamics(
-        lattices.getLevel(param.finestLevel), voxelizedDomain.getVoxelMatrix(),
-        lattices.getLevel(param.finestLevel).getBoundingBox(), new NoDynamics<T, DESCRIPTOR>((T)1),
+        lattices.getLevel(param.finestLevel-1), voxelizedDomain.getVoxelMatrix(),
+        lattices.getLevel(param.finestLevel-1).getBoundingBox(), new NoDynamics<T, DESCRIPTOR>((T)1),
         voxelFlag::inside);
 
     boundary.getMesh().writeAsciiSTL(param.outDir + "flowMesh.stl");
@@ -1257,8 +1262,8 @@ int main(int argc, char *argv[])
 
     // Filipova BC needs no dynamics inside the voxel object
     defineDynamics(
-        lattices.getLevel(param.finestLevel), voxelizedDomain.getVoxelMatrix(),
-        lattices.getLevel(param.finestLevel).getBoundingBox(), new NoDynamics<T, DESCRIPTOR>((T)1), //1 is the density 
+        lattices.getLevel(param.finestLevel-1), voxelizedDomain.getVoxelMatrix(),
+        lattices.getLevel(param.finestLevel-1).getBoundingBox(), new NoDynamics<T, DESCRIPTOR>((T)1), //1 is the density 
         voxelFlag::innerBorder);
 
    
@@ -1277,7 +1282,7 @@ int main(int argc, char *argv[])
 
     OffLatticeBoundaryCondition3D<T, DESCRIPTOR, Velocity> *boundaryCondition =
         new OffLatticeBoundaryCondition3D<T, DESCRIPTOR, Velocity>(
-            model->clone(), voxelizedDomain, lattices.getLevel(param.finestLevel));
+            model->clone(), voxelizedDomain, lattices.getLevel(param.finestLevel-1));
     boundaryCondition->insert(rhoBarJarg);
     PLB_ASSERT(boundaryCondition != 0);
     delete model;
