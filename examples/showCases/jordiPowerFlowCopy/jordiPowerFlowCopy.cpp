@@ -475,7 +475,7 @@ void calculateDerivedSimulationParameters(SimulationParameters &param)
 
     plint numLevels = param.ogs.getNumLevels(); //get number of levels in octree grid structure. 
     PLB_ASSERT(numLevels >= 1);
-    param.finestLevel = numLevels - 1;
+    param.finestLevel = numLevels - 1; //note that param.finestLevel is not maxOctreeLevel, but they are actually scaled from 0 to finest level. 
     if (param.minOutputLevel < 0) {
         param.minOutputLevel = 0; //if min output level is below 0, set at 0
     }
@@ -488,20 +488,20 @@ void calculateDerivedSimulationParameters(SimulationParameters &param)
         Array<T, 3>(param.fullDomain.x0(), param.fullDomain.y0(), param.fullDomain.z0());
 
     param.dxCoarsest = param.dxFinest * (T)util::intTwoToThePower(param.finestLevel); //indeed, the scaling is by 2
-    param.dtFinest = (param.u_LB / param.u_Ref) * param.dxFinest;  //so dt = ulb/u*dx
-    param.dtCoarsest = param.dtFinest * (T)util::intTwoToThePower(param.finestLevel);
+    param.dtFinest = (param.u_LB / param.u_Ref) * param.dxFinest;  //so dt = ulb/u*dx Note that the best way to change the time steps is by changing uLB, bc uRef is not changeable, and dx finest u want it set at a certian value
+    param.dtCoarsest = param.dtFinest * (T)util::intTwoToThePower(param.finestLevel); //the time also scales by 2. 
 
     param.rho_LB = 1.0;
     param.inletVelocity_LB =
-        Array<T, 3>(param.inletVelocity * param.dtFinest / param.dxFinest*std::cos(angle), (T)0, param.inletVelocity * param.dtFinest / param.dxFinest*std::sin(angle));
+        Array<T, 3>(param.inletVelocity * param.dtFinest / param.dxFinest*std::cos(angle), (T)0, param.inletVelocity * param.dtFinest / param.dxFinest*std::sin(angle)); //this is the inlet velocity, I added the angle of attack.
 
-    param.omega.resize(numLevels); //omega is different per level now as can be seen below. 
+    param.omega.resize(numLevels); //omega (relaxation factor) is different per level now as can be seen below. 
     for (plint iLevel = 0; iLevel < numLevels; iLevel++) {
         T dx = param.dxFinest * (T)util::intTwoToThePower(param.finestLevel - iLevel);
         T dt = param.dtFinest * (T)util::intTwoToThePower(param.finestLevel - iLevel);
         T nu_LB = param.nu * dt / (dx * dx);
-        param.omega[iLevel] = (T)1 / (DESCRIPTOR<T>::invCs2 * nu_LB + (T)0.5); //invCs2 chat says is the inverse of the square of the speed of sound in the lattice. For some unexplicable reason
-        //for them the speed of sound is Cs = 1/sqrt(3) for d3q19 lattice
+        param.omega[iLevel] = (T)1 / (DESCRIPTOR<T>::invCs2 * nu_LB + (T)0.5); //invCs2 chat says is the inverse of the square of the speed of sound in the lattice. This is some lattice boltzmann theory outside of my scope of understanding
+        
     }
 
     FileName fileName(param.staticSurfaceFileName);
@@ -569,7 +569,7 @@ void printSimulationParameters(SimulationParameters const &param)
     pcout << std::endl;
 }
 
-void createZones( //creates sponze zones
+void createZones( //creates sponze zones. A sponge zone dampens sound waves so that they don't rebound on the walls and affect the whole simulation. This function is called for each level
     SimulationParameters const &param, MultiBlockLattice3D<T, DESCRIPTOR> &lattice, plint level)
 {
     T dx = param.dxFinest * (T)util::intTwoToThePower(param.finestLevel - level);
@@ -577,150 +577,58 @@ void createZones( //creates sponze zones
     Array<plint, 6> numSpongeCells;
     plint totalNumSpongeCells = 0;
     for (plint iZone = 0; iZone < 6; iZone++) {
-        numSpongeCells[iZone] = util::roundToInt(param.spongeWidths[iZone] / dx); //determine number of sponge cells per zone
-        totalNumSpongeCells += numSpongeCells[iZone];
+        numSpongeCells[iZone] = util::roundToInt(param.spongeWidths[iZone] / dx); //determine number of sponge cells per zone by dividing the spongeWidth from config.xml by dx, and rounding it to int.
+        totalNumSpongeCells += numSpongeCells[iZone]; //keep track of total number of spongecells.
     }
     // Number of sponge zone lattice nodes at all the outer domain boundaries.
-        // So: 0 means the boundary at x = 0
-        //     1 means the boundary at x = nx-1
+        // So: iZone 0 means the boundary at x = 0
+        //     iZone 1 means the boundary at x = nx-1
         //     2 means the boundary at y = 0
         //     and so on... 
-        // Somehow i have to figure out how to make it a circle......
     plint nx = util::roundToInt(toLB(param.fullDomain.x1(), 0, dx, param.physicalLocation)) + 1;
     plint ny = util::roundToInt(toLB(param.fullDomain.y1(), 1, dx, param.physicalLocation)) + 1;
     plint nz = util::roundToInt(toLB(param.fullDomain.z1(), 2, dx, param.physicalLocation)) + 1;
     pcout << "nx " << nx << "ny " << ny << "nz " << nz << std::endl;
-    Box3D fullBox(0, nx - 1, 0, ny - 1, 0, nz - 1); //at this current level resolution.
-    pcout << "Look hereeee " << std::endl;
+    Box3D fullBox(0, nx - 1, 0, ny - 1, 0, nz - 1); //at this current level resolution, the total domain is this big. 
     if (totalNumSpongeCells > 0) {
         pcout << "Generating viscosity sponge zone at level: " << level << std::endl;
-        bool smartSpongeZone = true;
-        T bulkValue = param.omega[level];
-        // T bulkValue = 3;
-        pcout << "omega at this level is " << bulkValue << std::endl;
-        plint radius = nx*chordLengthPercentage*33;
-        plint centerX = nx / 2;
+        bool smartSpongeZone = true; //if true, my function is applied, which makes a cylindrical sponge zone. If false, just makes it cubical sponge zone. 
+        T bulkValue = param.omega[level]; //bulk value is the relaxation parameter's for the sponge zone. 
+        plint radius = nx*chordLengthPercentage*33; //this is the radius of my cylindrical sponge zone. 33 chord lengths. 
+        plint centerX = nx / 2; //center of cylindrical sopnge zone.
         plint centerZ = nz / 2;
-        if (smartSpongeZone) {
+        if (smartSpongeZone) { //cylindrical sponge zone function:
             T x0lattice = lattice.getBoundingBox().x0;
             T x1lattice = lattice.getBoundingBox().x1;
             T y0lattice = lattice.getBoundingBox().y0;
             T y1lattice = lattice.getBoundingBox().y1;
             T z0lattice = lattice.getBoundingBox().z0;
             T z1lattice = lattice.getBoundingBox().z1;
-            if (x0lattice <= centerX - radius  || x1lattice >= centerX + radius || z0lattice <= centerZ - radius || z1lattice >= centerZ + radius) {
-                // pcout << "Lattice x0 " << lattice.getBoundingBox().x0 << "a " << lattice.getBoundingBox().x1 << std::endl;
-                // T circleFunction(plint iX, plint iY, plint iZ) {
-                //     T dxi = iX - centerX;
-                //     T dzi = iZ - centerZ;
-                //     T distanceSquared = dxi*dxi +  dzi*dzi;
-
-                //     if (distanceSquared <= radius*radius) {
-                //         return 0.0; // Inside the circle
-                //     } else {
-                //         return 1.0; // Outside the circle
-                //     }
-                // }
-                // MultiScalarField3D<int> flagMatrixCylinder(nx, ny, nz);
-                // setToFunction(flagMatrixCylinder, lattice.getBoundingBox(), circleFunction);
-
-                ScalarField3D<int> flagMatrix(nx, ny, nz);
+            if (x0lattice <= centerX - radius  || x1lattice >= centerX + radius || z0lattice <= centerZ - radius || z1lattice >= centerZ + radius) { //first determine whether it is even necessary to apply the sponge zone to that specific resolution level, indeed, if the whole resolution level is constrained within the cylinder, no need to put sponge zone. 
+                //below are two scalar fields, the first one is easy to modify, then will be copied into flagMatrix1 and then that will be used in the spongezone function
+                ScalarField3D<int> flagMatrix(nx, ny, nz); 
                 MultiScalarField3D<int> flagMatrix1(nx, ny, nz);
                 pcout << (T) nx*ny*nz << "This many nodes " << std::endl;
 
                 for (plint iX = 0; iX < nx; ++iX) {
                     for (plint iY = 0; iY < ny; ++iY) {
-                        for (plint iZ = 0; iZ < nz; ++iZ) {
+                        for (plint iZ = 0; iZ < nz; ++iZ) { //loop over all cells.
                             T dxi = (T)(iX - centerX);
                             T dzi = (T)(iZ - centerZ);
                             T distance = std::sqrt(dxi * dxi + dzi * dzi);
-                            if (distance < radius) {
-                                // pcout << "radius " << radius << "distance " << distance << std::endl;
+                            if (distance < radius) { //determine whether that voxel is inside the cylinder
                                 flagMatrix.get(iX, iY, iZ) = 0.0;  // Inside cylinder, no sponge
-                                // pcout << "INSIDE " << std::endl;
-                                // pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
                             } 
-                            else {   //this else DOESNT WORK. FIX TOMORROW
-                                // pcout << "radius " << radius << "distance " << distance << std::endl;
+                            else {   
                                 flagMatrix.get(iX, iY, iZ) = 1.0;  // Outside cylinder, apply sponge
-                                // pcout << "OUTSIDE " << std::endl;
-                                // pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
                             }
-                            // pcout << flagMatrix.get(iX, iY, iZ) << std::endl;
                         }
                     }
                 }
-                copySerializedBlock(flagMatrix, flagMatrix1); //CAREFUL ITS SUMMING MORE STUFF I THINK
-                pcout << "This should be larger than 1 " << computeSum(flagMatrix1) << std::endl;
-                /*
-                TriangleSet<T> triangleSetCylinder("cylindricalDomain.stl", DBL);  //DBL is double precision TriangleSet (std::string fname, Precision precision_=DBL, SurfaceGeometryFileFormat fformat=STL, TriangleSelector< T > *selector=0)
-                triangleSetCylinder.scale((T)1 / dx);
-                Cuboid<T> bCuboidCylinder = triangleSetCylinder.getBoundingCuboid();  //gets bounding cuboid
-                Array<T, 3> obstacleCenterCylinder = (T)0.5 * (bCuboidCylinder.lowerLeftCorner + bCuboidCylinder.upperRightCorner); //gets center of obstacle
+                copySerializedBlock(flagMatrix, flagMatrix1); //copy flagmatrix into flagmatrix1
+                pcout << "This should be larger than 1 " << computeSum(flagMatrix1) << std::endl; //check that it works.
                 
-                triangleSetCylinder.translate(-obstacleCenterCylinder); //centers it at 0,0,0 i think. indeed, tested below. 
-                
-                
-
-                T scaling_factor_cylinder = (lattice.getBoundingBox().x1-lattice.getBoundingBox().x0)/(-bCuboidCylinder.lowerLeftCorner[0] + bCuboidCylinder.upperRightCorner[0])*0.5; //in jordi's density.dat generator, chord was also set as 40% of the length of level 0 x span
-                triangleSetCylinder.scale(scaling_factor_cylinder);
-                // T scaling_factor2 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-lattices.getLevel(param.finestLevel).getBoundingBox().y0)/(-bCuboid.lowerLeftCorner[1] + bCuboid.upperRightCorner[1]);
-                // triangleSet.scale((T)0.0,(T) scaling_factor2*1.05 , (T) 0.0);
-
-                Cuboid<T> bCuboid2Cylinder = triangleSetCylinder.getBoundingCuboid();  //gets bounding cuboid
-                Array<T, 3> obstacleCenter2Cylinder = (T)0.5 * (bCuboid2Cylinder.lowerLeftCorner + bCuboid2Cylinder.upperRightCorner); //gets center of obstacle
-                //fixed to center considering the tail does not count in the center calculation. 
-                triangleSetCylinder.translate(-obstacleCenter2Cylinder); //centers it at 0,0,0 i think. indeed, tested below. 
-                triangleSetCylinder.translate(Array<T,3>((lattice.getBoundingBox().x1+lattice.getBoundingBox().x0)/2, (lattice.getBoundingBox().y1+lattice.getBoundingBox().y0)/2, (lattice.getBoundingBox().z1+lattice.getBoundingBox().z0)/2)); //centers it at 0,0,0 i think. indeed, tested below. 
-                TriangleSet<T> triangleSet2Cylinder;
-                TriangleSet<T> triangleSet3Cylinder;
-                
-                Plane<T> planeyminusCylinder(Array<T, 3>(0., lattice.getBoundingBox().y0, 0.),Array<T, 3>(0., -1., 0.) );
-                Plane<T> planeyplusCylinder(Array<T, 3>(0., lattice.getBoundingBox().y1 , 0.),Array<T, 3>(0., 1., 0.) );
-        
-                triangleSetCylinder.cutWithPlane(planeyminusCylinder, triangleSet2Cylinder);
-                triangleSet2Cylinder.cutWithPlane(planeyplusCylinder,triangleSet3Cylinder);
-                Cuboid<T> bCuboid3Cylinder = triangleSet3Cylinder.getBoundingCuboid();  //gets bounding cuboid
-                pcout << "El objeto x0 " << bCuboid3Cylinder.lowerLeftCorner[0] << " a " << bCuboid3Cylinder.upperRightCorner[0] << std::endl;
-                pcout << "Lattice x0 " << lattice.getBoundingBox().x0 << "a " << lattice.getBoundingBox().x1 << std::endl;
-                pcout << "El objetoo y0 " << bCuboid3Cylinder.lowerLeftCorner[1] << " a " << bCuboid3Cylinder.upperRightCorner[1] << std::endl;
-                pcout << "Lattice Y0 " << lattice.getBoundingBox().y0 << "a " << lattice.getBoundingBox().y1 << std::endl;
-                pcout << "El objetoo z0 " << bCuboid3Cylinder.lowerLeftCorner[2] << " a " << bCuboid3Cylinder.upperRightCorner[2] << std::endl;
-                pcout << "Lattice z0 " << lattice.getBoundingBox().z0 << "a " << lattice.getBoundingBox().z1 << std::endl;
-    
-                // The DEFscaledMesh, and the triangle-boundary are more sophisticated data
-                // structures used internally by Palabos to treat the boundary.
-                plint xDirectionCylinder = 0;  //reference direction idk exactly what it is. 
-                plint borderWidthCylinder = 1;  // Because Guo acts in a one-cell layer.
-                                        // Requirement: margin>=borderWidth.
-                plint marginCylinder =
-                    1;  // Extra margin of allocated cells around the obstacle, for the case of moving walls.
-                plint blockSizeCylinder = 0;  // Size of blocks in the sparse/parallel representation.
-                                    // Zero means: don't use sparse representation. A dense grid stores information for every node, while a sparse grid only stores information for non-empty or significant nodes. Sparse representations can save memory and improve performance, especially for large simulations with many empty or uniform regions.
-                DEFscaledMesh<T> defMeshCylinder(triangleSet3Cylinder, 0, xDirectionCylinder, marginCylinder, Dot3D(0, 0, 0));  //DEFscaledMesh (TriangleSet< T > const &triangleSet_, plint resolution_, plint referenceDirection_, plint margin_, Dot3D location)
-                pcout << "hey1" << std::endl;
-                TriangleBoundary3D<T> boundaryCylinder(defMeshCylinder); //TriangleBoundary3D (DEFscaledMesh< T > const &defMesh, bool automaticCloseHoles=true)
-                pcout << "hey2" << std::endl;
-                // boundary.getMesh().inflate();
-                //they basically redefine the mesh and boundary to have more sophisticated data 
-                
-                // Voxelize the domain.
-                
-
-                // Voxelize the domain means: decide which lattice nodes are inside the obstacle and which are
-                // outside. Interesting!
-                plint extendedEnvelopeWidthCylinder = 2;  // Extrapolated off-lattice BCs.
-                const int flowTypeCylinder = voxelFlag::inside;
-                VoxelizedDomain3D<T> voxelizedDomainCylinder(
-                    boundaryCylinder, flowTypeCylinder, lattice.getBoundingBox(), borderWidthCylinder, extendedEnvelopeWidthCylinder, blockSizeCylinder); //VoxelizedDomain3D (TriangleBoundary3D< T > const &boundary_, int flowType_, Box3D const &boundingBox, plint borderWidth_, plint envelopeWidth_, plint blockSize_, plint gridLevel_=0, bool dynamicMesh_=false)
-                pcout << "hey3" << std::endl;
-                MultiScalarField3D<int> flagMatrixCylinder((MultiBlock3D &)voxelizedDomainCylinder.getVoxelMatrix());
-                setToConstant(
-                    flagMatrixCylinder, voxelizedDomainCylinder.getVoxelMatrix(), voxelFlag::outside,
-                    flagMatrixCylinder.getBoundingBox(), 1);
-                pcout << "hey4" << std::endl;
-                */
-                std::vector<MultiBlock3D *> args;
+                std::vector<MultiBlock3D *> args; //arguments for our MaskedViscositySpongeZone class.
                 args.push_back(&lattice);
                 args.push_back(&flagMatrix1);
 
@@ -728,26 +636,12 @@ void createZones( //creates sponze zones
                     new MaskedViscositySpongeZone3D<T, DESCRIPTOR>(
                         nx, ny, nz, bulkValue, 1, numSpongeCells),  // Note: 1 is the flag value for applying the sponge
                     lattice.getBoundingBox(), args);
-                pcout << "hey5" << std::endl;
-                // std::vector<MultiBlock3D *> args;
-                // args.push_back(&lattice);
-                // applyProcessingFunctional(
-                //     new ViscositySpongeZone3D<T, DESCRIPTOR>(nx, ny, nz, bulkValue, numSpongeCells),
-                //     lattice.getBoundingBox(), args);
-   
+                pcout << "hey5" << std::endl; // sometimes i add this prints to check where the code breaks.
             }
         }
         
-        // MultiScalarField3D<int> flagMatrix((MultiBlock3D &)voxelizedDomain.getVoxelMatrix());
-        // setToConstant(
-        //     flagMatrix, voxelizedDomain.getVoxelMatrix(), voxelFlag::inside,
-        //     flagMatrix.getBoundingBox(), 1);
-        // setToConstant(
-        //     flagMatrix, voxelizedDomain.getVoxelMatrix(), voxelFlag::innerBorder,
-        //     flagMatrix.getBoundingBox(), 1);
-        // pcout << "Number of fluid cells: " << computeSum(flagMatrix) << std::endl;
-        // }
-        else {
+        
+        else { //the cubical normal sponge zone. 
             std::vector<MultiBlock3D *> args;
             args.push_back(&lattice);
             applyProcessingFunctional(
@@ -762,92 +656,76 @@ void applyOuterBoundaryConditions(
     SimulationParameters const &param, MultiLevelCoupling3D<T, DESCRIPTOR, RESCALER> &lattices,
     OnLatticeBoundaryCondition3D<T, DESCRIPTOR> *bc)
 {
-    Box3D coarsestBoundingBox = lattices.getOgs().getClosedCover(0); //0 is the coarsest level
+    Box3D coarsestBoundingBox = lattices.getOgs().getClosedCover(0); //0 is the coarsest level, therefore this gets the coarsest bounding box. 
     for (plint iLevel = 0; iLevel <= param.finestLevel; iLevel++) {
         pcout << "Generating outer domain boundary conditions at level: " << iLevel << std::endl;
         MultiBlockLattice3D<T, DESCRIPTOR> &lattice = lattices.getLevel(iLevel);
 
-        lattice.periodicity().toggleAll(true);
+        lattice.periodicity().toggleAll(true); //this makes all boundaries periodic. 
     
-        lattice.periodicity().toggle(0, false);  //the x direction is still not periodic. Only the laterals. 
+        lattice.periodicity().toggle(0, false);  //the x direction is still not periodic. 
     
-        lattice.periodicity().toggle(2, false);  //the z direction is still not periodic. Only the laterals. 
+        lattice.periodicity().toggle(2, false);  //the z direction is still not periodic. therefore, only the y direction stays periodic. 
     
 
-        Box3D boundingBox = coarsestBoundingBox.multiply(util::intTwoToThePower(iLevel)); //put bounding box in level units
+        Box3D boundingBox = coarsestBoundingBox.multiply(util::intTwoToThePower(iLevel)); //put bounding box in current level units
         Box3D box = boundingBox;
-        T objecty0 = (lattices.getLevel(param.finestLevel).getBoundingBox().y0+5);
+        T objecty0 = (lattices.getLevel(param.finestLevel).getBoundingBox().y0+5); //this is to implement a freeslip wall right at the tip of the blade as discussed in the presentation
         // objecty0 /= (util::intTwoToThePower(param.finestLevel));
         // objecty0 *= util::intTwoToThePower(iLevel);
-        T objecty1 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5);
+        T objecty1 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5); //same
         // objecty1 /= (util::intTwoToThePower(param.finestLevel));
         // objecty1 *= util::intTwoToThePower(iLevel);
-        pcout << param.finestLevel << " " << iLevel << std::endl;
-        pcout << lattices.getLevel(param.finestLevel).getBoundingBox().y0 << " " << lattices.getLevel(param.finestLevel).getBoundingBox().y1 << std::endl;
-        objecty0 = int(std::round(objecty0));
+        objecty0 = int(std::round(objecty0)); //rounding it.
         objecty1 = int(std::round(objecty1));
-        pcout << "objetoy0" << objecty0 << " objetoy1 " << objecty1 << std::endl;
+        pcout << "objecty0" << objecty0 << " objecty1 " << objecty1 << std::endl;
         Box3D inlet(box.x0, box.x0, box.y0, box.y1, box.z0, box.z1);
         Box3D outlet(box.x1, box.x1, box.y0 + 1, box.y1 - 1, box.z0 + 1, box.z1 - 1);
         Box3D yBottom(box.x0 + 1, box.x1, box.y0, box.y0, box.z0, box.z1);
         Box3D yTop(box.x0 + 1, box.x1, box.y1, box.y1, box.z0, box.z1);
         Box3D zBottom(box.x0 + 1, box.x1, box.y0, box.y1, box.z0, box.z0);
         Box3D zTop(box.x0 + 1, box.x1, box.y0, box.y1, box.z1, box.z1);
-        Box3D yMarlon0(box.x0+1, box.x1, objecty0,objecty0, box.z0, box.z1 );
+        Box3D yMarlon0(box.x0+1, box.x1, objecty0,objecty0, box.z0, box.z1 );  //this is where the first freeslip wall is applied. 
         Box3D yMarlon1(box.x0+1, box.x1, objecty1,objecty1, box.z0, box.z1 );
         // Box3D yMarlonedge0
         // Inlet boundary condition.
 
-        bc->setVelocityConditionOnBlockBoundaries(lattice,  boundingBox, inlet,  boundary::dirichlet);
+        bc->setVelocityConditionOnBlockBoundaries(lattice,  boundingBox, inlet,  boundary::dirichlet); //set inlet as dirichlet boundary.
 
         Array<T, 3> velocity(param.inletVelocity_LB);
-        setBoundaryVelocity(lattice, inlet, velocity);
+        setBoundaryVelocity(lattice, inlet, velocity); //give a value for that dirichlet condition. Note that the velocity is 3 dimnesional
         // bc->setVelocityConditionOnBlockBoundaries(lattice, yMarlon0 ,boundingBox,     boundary::freeslip);
         // bc->setVelocityConditionOnBlockBoundaries(lattice, yMarlon1, boundingBox,     boundary::freeslip);
-        bc->addVelocityBoundary1N(yMarlon0, lattice, boundary::freeslip);
+        bc->addVelocityBoundary1N(yMarlon0, lattice, boundary::freeslip); //make the first freeslip wall
         bc->addVelocityBoundary1P(yMarlon1, lattice, boundary::freeslip);
         // setBoundaryVelocity(lattice, yMarlon0, velocity);
         // setBoundaryVelocity(lattice, yMarlon1, velocity);
         Array<T, 3> zero((T)0, (T)0, (T)0);
 
-        // Lateral boundary conditions.
-        // bc->setVelocityConditionOnBlockBoundaries(
-        //     lattice, boundingBox, yBottom, boundary::dirichlet);
-        // setBoundaryVelocity(lattice, yBottom, velocity);
-
-        // bc->setVelocityConditionOnBlockBoundaries(lattice, boundingBox, yTop, boundary::dirichlet);
-        // setBoundaryVelocity(lattice, yTop, velocity);
-
         bc->setVelocityConditionOnBlockBoundaries(
             lattice, boundingBox, zBottom, boundary::dirichlet);
-        setBoundaryVelocity(lattice, zBottom, velocity);
+        setBoundaryVelocity(lattice, zBottom, velocity); //make zbottom dirichlet, with the same input velocity. 
 
         bc->setVelocityConditionOnBlockBoundaries(lattice, boundingBox, zTop, boundary::dirichlet);
         setBoundaryVelocity(lattice, zTop, velocity);
         
         // Outlet boundary condition.
 
-        if (param.outflowBcType == 0) {
+        if (param.outflowBcType == 0) { //if 0, set as velocity boundary
             bc->setVelocityConditionOnBlockBoundaries(
                 lattice, boundingBox, outlet, boundary::dirichlet);
             setBoundaryVelocity(lattice, outlet, velocity);
         } else if (param.outflowBcType == 1) {
-            bc->setPressureConditionOnBlockBoundaries(
+            bc->setPressureConditionOnBlockBoundaries( // if 1 set as pressure boundary
                 lattice, boundingBox, outlet, boundary::dirichlet);
             // setBoundaryVelocity(lattice, outlet, velocity);  //interestingly they set boundary velocity to set the pressure. wtf. 
-        } else if (param.outflowBcType == 2) {
+        } else if (param.outflowBcType == 2) { //if 2 set as neumann velocity boundary
             bc->setVelocityConditionOnBlockBoundaries(
                 lattice, boundingBox, outlet, boundary::neumann);
             setBoundaryVelocity(lattice, outlet, velocity);
         }
-        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, outlet, boundary::dirichlet);
-        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, inlet, boundary::dirichlet);
-        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, zTop, boundary::dirichlet);
-        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, zBottom, boundary::dirichlet);
-        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, yTop, boundary::dirichlet);
-        // bc->setPressureConditionOnBlockBoundaries(lattice, boundingBox, yBottom, boundary::dirichlet);
-        setBoundaryDensity(lattice, box, param.rho_LB);
-            // box.y0 -= 2;  // y-periodicity   I don't really understand how this makes it periodic but sure. 
+        setBoundaryDensity(lattice, box, param.rho_LB);  //sets boundary density (pressure) mainly for the outlet. 
+            // box.y0 -= 2;  // y-periodicity  I deleted this, bc I don't think it's necessary for periodicity. This was taken from externalFlowAroundObstacle example. 
             // box.y1 += 2;     
     }
 }
@@ -862,15 +740,14 @@ void initializeSimulation(
             Array<T, 3> velocity(param.inletVelocity_LB);
 
             MultiBlockLattice3D<T, DESCRIPTOR> &lattice = lattices.getLevel(iLevel);
-            initializeAtEquilibrium(lattice, lattice.getBoundingBox(), param.rho_LB,  velocity);//Array<T, 3>(0.,0.,0.));
+            initializeAtEquilibrium(lattice, lattice.getBoundingBox(), param.rho_LB,  velocity);//simulation is intialized at equilibrium
         } 
-        // We do NOT want to call internal data processors here...
         lattices.initialize();
         lattices.initializeTensorFields();
     } else {
         pcout << std::endl;
         pcout << "Reading state of the simulation from file: " << param.xmlContinueFileName
-              << std::endl;  //theres a continue xml file?
+              << std::endl; 
         loadState(checkpointBlocks, iniIter, param.saveDynamicContent, param.xmlContinueFileName);
         for (plint iLevel = 0; iLevel <= param.finestLevel; iLevel++) {
             MultiBlockLattice3D<T, DESCRIPTOR> &lattice = lattices.getLevel(iLevel);
@@ -885,24 +762,20 @@ void initializeSimulation(
     pcout << std::endl;
 }
 
-void writeResults(
+void writeResults( //output results.
     SimulationParameters const &param, MultiLevelCoupling3D<T, DESCRIPTOR, RESCALER> &lattices,
     std::unique_ptr<MultiLevelTensorField3D<T, 3> > &avgVel, plint iter)
 {
     bool crop = true;
     for (plint iDomain = 0; iDomain < (plint)param.outputDomainNames.size(); iDomain++) {
         std::string fname =
-            createFileName(param.outputDomainNames[iDomain] + "_", iter, param.fileNamePadding);
-        SparseVtkImageOutput3D sparseOut(fname); //vtk output class
+            createFileName(param.outputDomainNames[iDomain] + "_", iter, param.fileNamePadding); //creates file name
+        SparseVtkImageOutput3D sparseOut(fname); //vtk output class, it groups the vtk files.
 
         std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > velocity = computeVelocity( //for output
             lattices, param.outputDomains.find(param.maxOutputLevel)->second[iDomain], //the second stored value gets the domain, which corresponds to the maxoutput level
-            param.maxOutputLevel, crop);
-        // std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > vorticity = computeVorticity( //for output
-        //     vel, param.outputDomains.find(param.maxOutputLevel)->second[iDomain], //the second stored value gets the domain, which corresponds to the maxoutput level
-        //     param.maxOutputLevel, crop);
-        // std::unique_ptr<MultiLevelTensorFieldForOutput3D<T, 3> > computeVorticity(
-        //     MultiLevelTensorField3D<T, 3> &velocities, Box3D domain, plint levelOfDomain, bool crop)
+            param.maxOutputLevel, crop); //computes the velocity of the whole domain.
+        
         
         std::unique_ptr<MultiLevelScalarFieldForOutput3D<T> > density = computeDensity(
             lattices, param.outputDomains.find(param.maxOutputLevel)->second[iDomain],
