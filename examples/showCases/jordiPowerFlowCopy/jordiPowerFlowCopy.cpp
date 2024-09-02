@@ -883,8 +883,8 @@ int main(int argc, char *argv[])  //the main function.
     pcout << "Generating the lattices." << std::endl;
 
     order = 1;
-    MultiLevelCoupling3D<T, DESCRIPTOR, RESCALER> lattices(
-        param.ogs,
+    MultiLevelCoupling3D<T, DESCRIPTOR, RESCALER> lattices( //multilevelcoupling is a class that can couple multiple lattices. 
+        param.ogs, //param.ogs is the octree grid structure. 
         new ConsistentSmagorinskyCompleteRegularizedBGKdynamics<T, DESCRIPTOR>(  //collision dynamics for lattice boltzmann.
             param.omega[0], 0.14), //for some reason they use the first omega and the 0.14 smagorinksy factor
         order);
@@ -903,20 +903,20 @@ int main(int argc, char *argv[])  //the main function.
     pcout << "Reading the immersed surface geometries." << std::endl;
     pcout << "Generating fluid blocks at finest level." << std::endl;
 
-    std::vector<MultiBlock3D *> rhoBarJarg;
+    std::vector<MultiBlock3D *> rhoBarJarg; 
     // Here we assume that the object is far from the outlet. This is why we can compute
     // the rhoBarJ field to be used with the off-lattice BC, before the FluidPressureOutlet3D
     // is executed.
     plint numScalars = 4;
     plint extendedTensorEnvelopeWidth = 2;  // Extrapolated BCs. guo = 2, generalized = 3
-    MultiNTensorField3D<T> *rhoBarJfield = generateMultiNTensorField3D<T>(
+    MultiNTensorField3D<T> *rhoBarJfield = generateMultiNTensorField3D<T>( //multidimensional tensor field. 
         lattices.getLevel(param.finestLevel), extendedTensorEnvelopeWidth, numScalars);
     rhoBarJfield->toggleInternalStatistics(false);
-    rhoBarJarg.push_back(rhoBarJfield);
+    rhoBarJarg.push_back(rhoBarJfield); // add the field to the vector. 
     integrateProcessingFunctional(
         new PackedRhoBarJfunctional3D<T, DESCRIPTOR>(),
         lattices.getLevel(param.finestLevel).getBoundingBox(), lattices.getLevel(param.finestLevel),
-        *rhoBarJfield, 0);
+        *rhoBarJfield, 0); // add a processing functional to calculate the rhobharJ
 
     pcout << "Implementing the geometry at level." << std::endl;
 
@@ -924,25 +924,25 @@ int main(int argc, char *argv[])  //the main function.
     //   stl given by the user to more efficient data structures that are internally
     //   used by palabos. The TriangleBoundary3D structure will be later used to assign
     //   proper boundary conditions.
-    TriangleSet<T> triangleSet(param.staticSurfaceFileName, DBL);
-    triangleSet.translate(-param.physicalLocation);
-    triangleSet.scale((T)1 / param.dxFinest);
+    TriangleSet<T> triangleSet(param.staticSurfaceFileName, DBL); //read the stl file
+    triangleSet.translate(-param.physicalLocation); //translate it to the physical Location (lowerleft corner of the domain)
+    triangleSet.scale((T)1 / param.dxFinest); //put it in dx finest units, bc now 1 corresponds to dx.
     
     Cuboid<T> bCuboid = triangleSet.getBoundingCuboid();  //gets bounding cuboid
     Array<T, 3> obstacleCenter = (T)0.5 * (bCuboid.lowerLeftCorner + bCuboid.upperRightCorner); //gets center of obstacle
-    T scaling_factor = (lattices.getLevel(0).getBoundingBox().x1-lattices.getLevel(0).getBoundingBox().x0)/(-bCuboid.lowerLeftCorner[0] + bCuboid.upperRightCorner[0])*chordLengthPercentage*(T)util::intTwoToThePower(param.finestLevel); //in jordi's density.dat generator, chord was also set as 40% of the length of level 0 x span
-    triangleSet.scale(scaling_factor);
+    T scaling_factor = (lattices.getLevel(0).getBoundingBox().x1-lattices.getLevel(0).getBoundingBox().x0)/(-bCuboid.lowerLeftCorner[0] + bCuboid.upperRightCorner[0])*chordLengthPercentage*(T)util::intTwoToThePower(param.finestLevel); // this is a scaling factor to set the chord length as the desired chordLengthPercentage of the whole domain length. 
+    triangleSet.scale(scaling_factor); //rescales all dimensions by the scaling factor. 
     Cuboid<T> bCuboidy = triangleSet.getBoundingCuboid();  //gets bounding cuboid
-    T yscaling_factor = (lattices.getLevel(0).getBoundingBox().y1-lattices.getLevel(0).getBoundingBox().y0)/(-bCuboidy.lowerLeftCorner[1] + bCuboidy.upperRightCorner[1])*(T)util::intTwoToThePower(param.finestLevel);
+    T yscaling_factor = (lattices.getLevel(0).getBoundingBox().y1-lattices.getLevel(0).getBoundingBox().y0)/(-bCuboidy.lowerLeftCorner[1] + bCuboidy.upperRightCorner[1])*(T)util::intTwoToThePower(param.finestLevel); //this is to elongate the stl file to cover from y0 to y1
     // T yscaling_factor = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-lattices.getLevel(param.finestLevel).getBoundingBox().y0)/(-bCuboidy.lowerLeftCorner[1] + bCuboidy.upperRightCorner[1]);
     // T scaling_factor2 = (lattices.getLevel(param.finestLevel).getBoundingBox().y1-lattices.getLevel(param.finestLevel).getBoundingBox().y0)/(-bCuboid.lowerLeftCorner[1] + bCuboid.upperRightCorner[1]);
     // triangleSet.scale((T)0.0,(T) scaling_factor2*1.05 , (T) 0.0);
-    pcout << "El objetoooooooooooooo x0 " << bCuboidy.lowerLeftCorner[2] << " a " << bCuboidy.upperRightCorner[2] << std::endl;
-    triangleSet.scale((T) 1.0, yscaling_factor, (T) 1.0);
+    // pcout << "El objetoooooooooooooo x0 " << bCuboidy.lowerLeftCorner[2] << " a " << bCuboidy.upperRightCorner[2] << std::endl;
+    triangleSet.scale((T) 1.0, yscaling_factor, (T) 1.0); //scale the y dimension
     Cuboid<T> bCuboid2 = triangleSet.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objetoooooooooooooo x0 " << bCuboid2.lowerLeftCorner[2] << " a " << bCuboid2.upperRightCorner[2] << std::endl;
+    // pcout << "El objetoooooooooooooo x0 " << bCuboid2.lowerLeftCorner[2] << " a " << bCuboid2.upperRightCorner[2] << std::endl;
     Array<T, 3> obstacleCenter2 = (T)0.5 * (bCuboid2.lowerLeftCorner + bCuboid2.upperRightCorner); //gets center of obstacle
-    if (teaddon == true)
+    if (teaddon == true) //when this is true, the obstacle center is recalculated bc we don't to center the domain at the stl's center, but at the airfoil center, (without the add on)
     {
         T cleanChordLength = (bCuboid2.upperRightCorner[0]-bCuboid2.lowerLeftCorner[0])*0.2/0.2335; //this is based on the Marlon object that we are analysing. 
         T actualCenterWithoutTail = (T)0.5 * (bCuboid2.lowerLeftCorner[0] + cleanChordLength);
@@ -951,12 +951,12 @@ int main(int argc, char *argv[])  //the main function.
     //fixed to center considering the tail does not count in the center calculation. 
     triangleSet.translate(-obstacleCenter2); 
     Cuboid<T> bCuboidy2 = triangleSet.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objetoooooooooooooo x0 " << bCuboidy2.lowerLeftCorner[2] << " a " << bCuboidy2.upperRightCorner[2] << std::endl;
-    triangleSet.translate(Array<T,3>((lattices.getLevel(param.finestLevel).getBoundingBox().x1+lattices.getLevel(param.finestLevel).getBoundingBox().x0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().y1+lattices.getLevel(param.finestLevel).getBoundingBox().y0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().z1+lattices.getLevel(param.finestLevel).getBoundingBox().z0)/2)); //centers it at 0,0,0 i think. indeed, tested below. 
+    // pcout << "El objetoooooooooooooo x0 " << bCuboidy2.lowerLeftCorner[2] << " a " << bCuboidy2.upperRightCorner[2] << std::endl;
+    triangleSet.translate(Array<T,3>((lattices.getLevel(param.finestLevel).getBoundingBox().x1+lattices.getLevel(param.finestLevel).getBoundingBox().x0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().y1+lattices.getLevel(param.finestLevel).getBoundingBox().y0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().z1+lattices.getLevel(param.finestLevel).getBoundingBox().z0)/2)); //centers it at 0,0,0 of finest level
     Cuboid<T> bCuboidy3 = triangleSet.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objeto x0 " << bCuboidy3.lowerLeftCorner[0] << " a " << bCuboidy3.upperRightCorner[0] << std::endl;
-    pcout << "El objeto y0 " << bCuboidy3.lowerLeftCorner[1] << " a " << bCuboidy3.upperRightCorner[1] << std::endl;
-    pcout << "El objeto z0 " << bCuboidy3.lowerLeftCorner[2] << " a " << bCuboidy3.upperRightCorner[2] << std::endl;
+    // pcout << "El objeto x0 " << bCuboidy3.lowerLeftCorner[0] << " a " << bCuboidy3.upperRightCorner[0] << std::endl;
+    // pcout << "El objeto y0 " << bCuboidy3.lowerLeftCorner[1] << " a " << bCuboidy3.upperRightCorner[1] << std::endl;
+    // pcout << "El objeto z0 " << bCuboidy3.lowerLeftCorner[2] << " a " << bCuboidy3.upperRightCorner[2] << std::endl;
     
     // triangleSet.scale((T)5000);
      
@@ -968,11 +968,11 @@ int main(int argc, char *argv[])  //the main function.
     TriangleSet<T> triangleSet3;
     
     // Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+5, 0.),Array<T, 3>(0., -1., 0.) );
-    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1+3, 0.),Array<T, 3>(0., -1., 0.) );
-    pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y1+3 << std::endl;
+    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+5, 0.),Array<T, 3>(0., -1., 0.) ); //create a cutting plane at the y0 of the finest level.
+    pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y0+5 << std::endl;
     // Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-5, 0.),Array<T, 3>(0., 1., 0.) );
-    Plane<T> planeyplus(Array<T, 3>(0., (lattices.getLevel(param.finestLevel-1).getBoundingBox().y1-3)*2, 0.),Array<T, 3>(0., 1., 0.) );
-    pcout << "planeyplus " << 2*(lattices.getLevel(param.finestLevel-1).getBoundingBox().y1-3) << std::endl;
+    Plane<T> planeyplus(Array<T, 3>(0., (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5)*2, 0.),Array<T, 3>(0., 1., 0.) ); //same for y1
+    pcout << "planeyplus " << 2*(lattices.getLevel(param.finestLevel).getBoundingBox().y1-5) << std::endl;
     Plane<T> planexminus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x0+5, 0., 0.),Array<T, 3>(-1., 0., 0.) );
     pcout << "planexminus " << lattices.getLevel(param.finestLevel).getBoundingBox().x0+5 << std::endl;
     Plane<T> planexplus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x1-5, 0., 0.),Array<T, 3>(1., 0., 0.) );
@@ -983,29 +983,29 @@ int main(int argc, char *argv[])  //the main function.
     pcout << "planezplus " << lattices.getLevel(param.finestLevel).getBoundingBox().z1-5 << std::endl;
     // Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(0).getBoundingBox().y0*(T)util::intTwoToThePower(param.finestLevel)+1, 0.),Array<T, 3>(0., -1., 0.) );
     // Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(0).getBoundingBox().y1*(T)util::intTwoToThePower(param.finestLevel)-1, 0.),Array<T, 3>(0., 1., 0.) );
-    if (bCuboidy3.lowerLeftCorner[1] < lattices.getLevel(param.finestLevel).getBoundingBox().y0+5) {
-        triangleSet.cutWithPlane(planeyminus, triangleSet2);
+    if (bCuboidy3.lowerLeftCorner[1] < lattices.getLevel(param.finestLevel).getBoundingBox().y0+5) { //if the object overpasses the plane
+        triangleSet.cutWithPlane(planeyminus, triangleSet2); //crop crop
     }
     else {
-        triangleSet2 = triangleSet;
+        triangleSet2 = triangleSet; //otherwise don't change it .
     }
     Cuboid<T> bCuboidy4 = triangleSet2.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objeto x0 " << bCuboidy4.lowerLeftCorner[0] << " a " << bCuboidy4.upperRightCorner[0] << std::endl;
-    pcout << "El objeto y0 " << bCuboidy4.lowerLeftCorner[1] << " a " << bCuboidy4.upperRightCorner[1] << std::endl;
-    pcout << "El objeto z0 " << bCuboidy4.lowerLeftCorner[2] << " a " << bCuboidy4.upperRightCorner[2] << std::endl;
-    if (bCuboidy4.upperRightCorner[1] > lattices.getLevel(param.finestLevel-1).getBoundingBox().y1-5) {
-        triangleSet2.cutWithPlane(planeyplus,triangleSetx);
+    // pcout << "El objeto x0 " << bCuboidy4.lowerLeftCorner[0] << " a " << bCuboidy4.upperRightCorner[0] << std::endl;
+    // pcout << "El objeto y0 " << bCuboidy4.lowerLeftCorner[1] << " a " << bCuboidy4.upperRightCorner[1] << std::endl;
+    // pcout << "El objeto z0 " << bCuboidy4.lowerLeftCorner[2] << " a " << bCuboidy4.upperRightCorner[2] << std::endl;
+    if (bCuboidy4.upperRightCorner[1] > lattices.getLevel(param.finestLevel).getBoundingBox().y1-5) { //if object passes plane
+        triangleSet2.cutWithPlane(planeyplus,triangleSetx);  //crop crop
     }
     else {
         triangleSetx = triangleSet2;
     }
     
     Cuboid<T> bCuboidy5 = triangleSetx.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objeto x0 " << bCuboidy5.lowerLeftCorner[0] << " a " << bCuboidy5.upperRightCorner[0] << std::endl;
-    pcout << "El objeto y0 " << bCuboidy5.lowerLeftCorner[1] << " a " << bCuboidy5.upperRightCorner[1] << std::endl;
-    pcout << "El objeto z0 " << bCuboidy5.lowerLeftCorner[2] << " a " << bCuboidy5.upperRightCorner[2] << std::endl;
+    // pcout << "El objeto x0 " << bCuboidy5.lowerLeftCorner[0] << " a " << bCuboidy5.upperRightCorner[0] << std::endl;
+    // pcout << "El objeto y0 " << bCuboidy5.lowerLeftCorner[1] << " a " << bCuboidy5.upperRightCorner[1] << std::endl;
+    // pcout << "El objeto z0 " << bCuboidy5.lowerLeftCorner[2] << " a " << bCuboidy5.upperRightCorner[2] << std::endl;
     // if (bCuboidy5.lowerLeftCorner[0] < lattices.getLevel(param.finestLevel).getBoundingBox().x0+5) {
-    if (9>10) {
+    if (9>10) { //this is disabled by force (as 9 is never larger than 10) because of some bugs
         triangleSetx.cutWithPlane(planexminus,triangleSetx2);
     }
     else {
@@ -1013,11 +1013,11 @@ int main(int argc, char *argv[])  //the main function.
     }
     
     Cuboid<T> bCuboidy6 = triangleSetx2.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objeto x0 " << bCuboidy6.lowerLeftCorner[0] << " a " << bCuboidy6.upperRightCorner[0] << std::endl;
-    pcout << "El objeto y0 " << bCuboidy6.lowerLeftCorner[1] << " a " << bCuboidy6.upperRightCorner[1] << std::endl;
-    pcout << "El objeto z0 " << bCuboidy6.lowerLeftCorner[2] << " a " << bCuboidy6.upperRightCorner[2] << std::endl;
+    // pcout << "El objeto x0 " << bCuboidy6.lowerLeftCorner[0] << " a " << bCuboidy6.upperRightCorner[0] << std::endl;
+    // pcout << "El objeto y0 " << bCuboidy6.lowerLeftCorner[1] << " a " << bCuboidy6.upperRightCorner[1] << std::endl;
+    // pcout << "El objeto z0 " << bCuboidy6.lowerLeftCorner[2] << " a " << bCuboidy6.upperRightCorner[2] << std::endl;
     // if (bCuboidy6.upperRightCorner[0] > lattices.getLevel(param.finestLevel).getBoundingBox().x1-5) {
-    if (9>10) {
+    if (9>10) { //disabled
         triangleSetx2.cutWithPlane(planexplus,triangleSetz);
     }
     else {
@@ -1025,11 +1025,11 @@ int main(int argc, char *argv[])  //the main function.
     }
     
     Cuboid<T> bCuboidy7 = triangleSetz.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objeto below it will explode x0 " << bCuboidy7.lowerLeftCorner[0] << " a " << bCuboidy7.upperRightCorner[0] << std::endl;
-    pcout << "El objeto below it will explode y0 " << bCuboidy7.lowerLeftCorner[1] << " a " << bCuboidy7.upperRightCorner[1] << std::endl;
-    pcout << "El objeto below it will explode z0 " << bCuboidy7.lowerLeftCorner[2] << " a " << bCuboidy7.upperRightCorner[2] << std::endl;
+    // pcout << "El objeto below it will explode x0 " << bCuboidy7.lowerLeftCorner[0] << " a " << bCuboidy7.upperRightCorner[0] << std::endl;
+    // pcout << "El objeto below it will explode y0 " << bCuboidy7.lowerLeftCorner[1] << " a " << bCuboidy7.upperRightCorner[1] << std::endl;
+    // pcout << "El objeto below it will explode z0 " << bCuboidy7.lowerLeftCorner[2] << " a " << bCuboidy7.upperRightCorner[2] << std::endl;
     // if (bCuboidy7.lowerLeftCorner[2] < lattices.getLevel(param.finestLevel).getBoundingBox().z0+5) {
-    if (9>10) {
+    if (9>10) { //disabled
         triangleSetz.cutWithPlane(planezminus,bCuboidy7,triangleSetz2);
         pcout << "ep" << std::endl;
     }
@@ -1038,11 +1038,11 @@ int main(int argc, char *argv[])  //the main function.
     }
      //here x it multiplies by a lot
     Cuboid<T> bCuboidy8 = triangleSetz2.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objeto x0 " << bCuboidy8.lowerLeftCorner[0] << " a " << bCuboidy8.upperRightCorner[0] << std::endl;
-    pcout << "El objeto y0 " << bCuboidy8.lowerLeftCorner[1] << " a " << bCuboidy8.upperRightCorner[1] << std::endl;
-    pcout << "El objeto z0 " << bCuboidy8.lowerLeftCorner[2] << " a " << bCuboidy8.upperRightCorner[2] << std::endl;
+    // pcout << "El objeto x0 " << bCuboidy8.lowerLeftCorner[0] << " a " << bCuboidy8.upperRightCorner[0] << std::endl;
+    // pcout << "El objeto y0 " << bCuboidy8.lowerLeftCorner[1] << " a " << bCuboidy8.upperRightCorner[1] << std::endl;
+    // pcout << "El objeto z0 " << bCuboidy8.lowerLeftCorner[2] << " a " << bCuboidy8.upperRightCorner[2] << std::endl;
     // if (bCuboidy7.upperRightCorner[2] > lattices.getLevel(param.finestLevel).getBoundingBox().z1-5) {
-    if (9>10) {
+    if (9>10) { //disabled
         triangleSetz2.cutWithPlane(planezplus,bCuboidy7,triangleSet3);
     }
     else {
@@ -1050,11 +1050,11 @@ int main(int argc, char *argv[])  //the main function.
     }
     
     Cuboid<T> bCuboidy9 = triangleSet3.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objeto x0 " << bCuboidy9.lowerLeftCorner[0] << " a " << bCuboidy9.upperRightCorner[0] << std::endl;
-    pcout << "El objeto y0 " << bCuboidy9.lowerLeftCorner[1] << " a " << bCuboidy9.upperRightCorner[1] << std::endl;
-    pcout << "El objeto z0 " << bCuboidy9.lowerLeftCorner[2] << " a " << bCuboidy9.upperRightCorner[2] << std::endl;
+    // pcout << "El objeto x0 " << bCuboidy9.lowerLeftCorner[0] << " a " << bCuboidy9.upperRightCorner[0] << std::endl;
+    // pcout << "El objeto y0 " << bCuboidy9.lowerLeftCorner[1] << " a " << bCuboidy9.upperRightCorner[1] << std::endl;
+    // pcout << "El objeto z0 " << bCuboidy9.lowerLeftCorner[2] << " a " << bCuboidy9.upperRightCorner[2] << std::endl;
     Cuboid<T> bCuboid3x = triangleSet3.getBoundingCuboid();
-    pcout << "El objetoooooooooooooo x0 " << bCuboid3x.lowerLeftCorner[2] << " a " << bCuboid3x.upperRightCorner[2] << std::endl;
+    // pcout << "El objetoooooooooooooo x0 " << bCuboid3x.lowerLeftCorner[2] << " a " << bCuboid3x.upperRightCorner[2] << std::endl;
     Array<T, 3> obstacleCenter3 = (T)0.5 * (bCuboid3x.lowerLeftCorner + bCuboid3x.upperRightCorner); //gets center of obstacle
     if (teaddon == true)
     {
@@ -1065,9 +1065,9 @@ int main(int argc, char *argv[])  //the main function.
     //fixed to center considering the tail does not count in the center calculation. 
     // triangleSet3.translate(-obstacleCenter3); //centers it at 0,0,0 i think. indeed, tested below. 
     Cuboid<T> bCuboidy10 = triangleSet3.getBoundingCuboid();  //gets bounding cuboid
-    pcout << "El objeto x0 " << bCuboidy10.lowerLeftCorner[0] << " a " << bCuboidy10.upperRightCorner[0] << std::endl;
-    pcout << "El objeto y0 " << bCuboidy10.lowerLeftCorner[1] << " a " << bCuboidy10.upperRightCorner[1] << std::endl;
-    pcout << "El objeto z0 " << bCuboidy10.lowerLeftCorner[2] << " a " << bCuboidy10.upperRightCorner[2] << std::endl;
+    // pcout << "El objeto x0 " << bCuboidy10.lowerLeftCorner[0] << " a " << bCuboidy10.upperRightCorner[0] << std::endl;
+    // pcout << "El objeto y0 " << bCuboidy10.lowerLeftCorner[1] << " a " << bCuboidy10.upperRightCorner[1] << std::endl;
+    // pcout << "El objeto z0 " << bCuboidy10.lowerLeftCorner[2] << " a " << bCuboidy10.upperRightCorner[2] << std::endl;
     // triangleSet3.translate(Array<T,3>((lattices.getLevel(param.finestLevel).getBoundingBox().x1+lattices.getLevel(param.finestLevel).getBoundingBox().x0)*0.5, (lattices.getLevel(param.finestLevel).getBoundingBox().y1+lattices.getLevel(param.finestLevel).getBoundingBox().y0)*0.5,  (lattices.getLevel(param.finestLevel).getBoundingBox().z1+lattices.getLevel(param.finestLevel).getBoundingBox().z0)/2)); //centers it at 0,0,0 i think. indeed, tested below. 
     // triangleSet3.scale((T) 0.5);
     Cuboid<T> bCuboid3 = triangleSet3.getBoundingCuboid();
@@ -1094,49 +1094,46 @@ int main(int argc, char *argv[])  //the main function.
     // pcout << "El objetoo z0 " << bCuboid4.lowerLeftCorner[2] << " a " << bCuboid4.upperRightCorner[2] << std::endl;
     // pcout << "Lattice z0 " << lattices.getLevel(param.finestLevel).getBoundingBox().z0 << "a " << lattices.getLevel(param.finestLevel).getBoundingBox().z1 << std::endl;
     // pcout << "Domain Y0 " << lattices.getLevel(0).getBoundingBox().z0*(T)util::intTwoToThePower(param.finestLevel) << "a " << lattices.getLevel(0).getBoundingBox().z1*(T)util::intTwoToThePower(param.finestLevel) << std::endl;
-    triangleSet3.scale((T) 0.5);
+    // triangleSet3.scale((T) 0.5);
     // 
-    DEFscaledMesh<T> defMesh(triangleSet3, 0, 0, 1, Dot3D(0, 0, 0));
-    defMesh.setDx(param.dxFinest*2);
-    defMesh.setPhysicalLocation(param.physicalLocation);
+    DEFscaledMesh<T> defMesh(triangleSet3, 0, 0, 1, Dot3D(0, 0, 0)); //defMesh defines a mesh around the object
+    defMesh.setDx(param.dxFinest);
+    defMesh.setPhysicalLocation(param.physicalLocation); 
     pcout << "hey1 " << std::endl;
-    TriangleBoundary3D<T> boundary(defMesh);
+    TriangleBoundary3D<T> boundary(defMesh); //makes it a boundary
     pcout << "hey2 " << std::endl;
     boundary.getMesh().inflate(0.05); 
     pcout << "hey3 " << std::endl;
 
-    // The aneurysm simulation is an interior (as opposed to exterior) flow problem. For
-    // this reason, the lattice nodes that lay inside the computational domain must
-    // be identified and distinguished from the ones that lay outside of it. This is
-    // handled by the following voxelization process.
-    const int flowType = voxelFlag::outside;
+    //A voxelization process is used to determine which nodes are inside of the object, and which nodes are outside
+    const int flowType = voxelFlag::outside;  //set the flag as outside (flow is outside)
     const int borderWidth = 1;
     const int extendedEnvelopeWidth = 2;
     const int blockSize = 0;
-    VoxelizedDomain3D<T> voxelizedDomain(
-        boundary, flowType, lattices.getLevel(param.finestLevel-1).getBoundingBox(), borderWidth,
+    VoxelizedDomain3D<T> voxelizedDomain( //voxelize the domain
+        boundary, flowType, lattices.getLevel(param.finestLevel).getBoundingBox(), borderWidth,
         extendedEnvelopeWidth, blockSize);
-    voxelizedDomain.reparallelize(param.ogs.getMultiBlockManagement(
-        param.finestLevel-1, lattices.getLevel(param.finestLevel-1).getBoundingBox(),
+    voxelizedDomain.reparallelize(param.ogs.getMultiBlockManagement( 
+        param.finestLevel, lattices.getLevel(param.finestLevel).getBoundingBox(),
         extendedEnvelopeWidth)); //im not sure what reparallelize is for, maybe to insert the multiblockmanagement thing
 
     defineDynamics(
-        lattices.getLevel(param.finestLevel-1), voxelizedDomain.getVoxelMatrix(),
-        lattices.getLevel(param.finestLevel-1).getBoundingBox(), new NoDynamics<T, DESCRIPTOR>((T)1),
-        voxelFlag::inside);
+        lattices.getLevel(param.finestLevel), voxelizedDomain.getVoxelMatrix(),
+        lattices.getLevel(param.finestLevel).getBoundingBox(), new NoDynamics<T, DESCRIPTOR>((T)1),
+        voxelFlag::inside); //defines dynamics inside as NoDynamics (flow inside does not move )
 
     boundary.getMesh().writeAsciiSTL(param.outDir + "flowMesh.stl");
 
     pcout << getMultiBlockInfo(voxelizedDomain.getVoxelMatrix()) << std::endl;
     // The boundary condition algorithm for the object.
-    BoundaryProfiles3D<T, Velocity> profiles;
-    profiles.setWallProfile(new NoSlipProfile3D<T>());
+    BoundaryProfiles3D<T, Velocity> profiles; 
+    profiles.setWallProfile(new NoSlipProfile3D<T>()); //set no slip boundary condition for object
 
     // Filipova BC needs no dynamics inside the voxel object
     defineDynamics(
-        lattices.getLevel(param.finestLevel-1), voxelizedDomain.getVoxelMatrix(),
-        lattices.getLevel(param.finestLevel-1).getBoundingBox(), new NoDynamics<T, DESCRIPTOR>((T)1), //1 is the density 
-        voxelFlag::innerBorder);
+        lattices.getLevel(param.finestLevel), voxelizedDomain.getVoxelMatrix(),
+        lattices.getLevel(param.finestLevel).getBoundingBox(), new NoDynamics<T, DESCRIPTOR>((T)1), //1 is the density 
+        voxelFlag::innerBorder); // at the inner border also no dynamics
 
    
     // GuoOffLatticeModel3D< T, DESCRIPTOR > *model =
@@ -1146,16 +1143,16 @@ int main(int argc, char *argv[])  //the main function.
     FilippovaHaenelLocalModel3D<T, DESCRIPTOR> *model = 
         new FilippovaHaenelLocalModel3D<T, DESCRIPTOR>(
             new TriangleFlowShape3D<T, Array<T, 3> >(voxelizedDomain.getBoundary(), profiles),
-            flowType); //filippova is slower but can be used with only one side +1
+            flowType); //this is the filippova off lattice boundary condition model.
     // BouzidiOffLatticeModel3D<T, DESCRIPTOR> *model =
     //     new BouzidiOffLatticeModel3D<T, DESCRIPTOR>(
     //         new TriangleFlowShape3D<T, Array<T, 3> >(voxelizedDomain.getBoundary(), profiles),
     //         flowType);
 
-    OffLatticeBoundaryCondition3D<T, DESCRIPTOR, Velocity> *boundaryCondition =
+    OffLatticeBoundaryCondition3D<T, DESCRIPTOR, Velocity> *boundaryCondition = //apply the boundary condition
         new OffLatticeBoundaryCondition3D<T, DESCRIPTOR, Velocity>(
-            model->clone(), voxelizedDomain, lattices.getLevel(param.finestLevel-1));
-    boundaryCondition->insert(rhoBarJarg);
+            model->clone(), voxelizedDomain, lattices.getLevel(param.finestLevel));
+    boundaryCondition->insert(rhoBarJarg); //insert the rhoBarJ field.
     PLB_ASSERT(boundaryCondition != 0);
     delete model;
     model = 0;
@@ -1169,7 +1166,7 @@ int main(int argc, char *argv[])  //the main function.
 
     pcout << "Generating outer domain boundary conditions." << std::endl;
 
-    OnLatticeBoundaryCondition3D<T, DESCRIPTOR> *bc =
+    OnLatticeBoundaryCondition3D<T, DESCRIPTOR> *bc = //make on lattice boundary conditions (domain boundary conditions.)
         createInterpBoundaryCondition3D<T, DESCRIPTOR>();
     applyOuterBoundaryConditions(param, lattices, bc);
     delete bc;
@@ -1178,13 +1175,13 @@ int main(int argc, char *argv[])  //the main function.
     // Generation of statistics MultiLevel fields.
 
     std::unique_ptr<MultiLevelTensorField3D<T, 3> > vel;
-    std::unique_ptr<MultiLevelTensorField3D<T, 3> > avgVelocity;  //we have to apply a multileveltensor field too ofc
+    std::unique_ptr<MultiLevelTensorField3D<T, 3> > avgVelocity;  //these fields are for output of data .
     
 
     std::vector<MultiLevel3D *> avgVelocityArgs;
 
     Box3D coarsestBoundingBox = lattices.getOgs().getClosedCover(0);
-    if (param.computeAverages) {
+    if (param.computeAverages) { 
         vel = generateMultiLevelTensorField3D<T, 3>(
             lattices.getOgs(), coarsestBoundingBox, 0, Array<T, 3>(0.0, 0.0, 0.0));
         avgVelocity = generateMultiLevelTensorField3D<T, 3>(
@@ -1210,13 +1207,13 @@ int main(int argc, char *argv[])  //the main function.
 
     plint iniIter = 0;
 
-    initializeSimulation(param, continueSimulation, iniIter, lattices, checkpointBlocks);
+    initializeSimulation(param, continueSimulation, iniIter, lattices, checkpointBlocks); 
 
     // Use "collideAndStream" at all levels except the finest one, at
     // which "executeInternalProcessors" is used instead.
     std::map<plint, bool> useExecuteInternalProcessors;
     for (plint iLevel = 0; iLevel <= param.finestLevel; iLevel++) {
-        useExecuteInternalProcessors[iLevel] = false;
+        useExecuteInternalProcessors[iLevel] = false; 
     }
 
     // Prepare files.
@@ -1251,11 +1248,11 @@ int main(int argc, char *argv[])  //the main function.
     plint iter = iniIter;
     bool avgProcIntegrated = false;
     std::vector<plint> extProcFunIds;
-    for (; iter < param.maxIter && !stopExecution; iter++) {
+    for (; iter < param.maxIter && !stopExecution; iter++) { //here begins the simulation. 
         if (iter % param.statIter == 0 && iter != 0) {
             pcout << "At coarsest level iteration: " << iter << ", t = " << iter * param.dtCoarsest
                   << std::endl;
-            T energy = boundaryCondition->computeAverageEnergy() * param.rho
+            T energy = boundaryCondition->computeAverageEnergy() * param.rho //computes kinetic energy
                        * (param.dxFinest * param.dxFinest) / (param.dtFinest * param.dtFinest);
 
             pcout << "Average kinetic energy at the finest level: " << energy << std::endl;
@@ -1263,12 +1260,13 @@ int main(int argc, char *argv[])  //the main function.
 
             // Forces on immersed surfaces.
 
-            T forceConversion =
+            T forceConversion = //there needs to be a force conversion bc we go from lattice units (basically unitless) to SI units
                 param.rho * (param.dxFinest * param.dxFinest * param.dxFinest * param.dxFinest)
                 / (param.dtFinest * param.dtFinest);
             Array<T, 3> force = forceConversion * boundaryCondition->getForceOnObject();
             forces << (double)(iter * param.dtCoarsest) << " " << force[2]*std::cos(angle)-force[0]*std::sin(angle)/(0.5*param.rho*param.inletVelocity*param.inletVelocity*(-param.fullDomain.lowerLeftCorner[0]+param.fullDomain.upperRightCorner[0])*chordLengthPercentage*(param.fullDomain.upperRightCorner[1]-param.fullDomain.lowerLeftCorner[1])) << " " << force[0]*std::cos(angle)+force[2]*std::sin(angle)/(0.5*param.rho*param.inletVelocity*param.inletVelocity*(-param.fullDomain.lowerLeftCorner[0]+param.fullDomain.upperRightCorner[0])*chordLengthPercentage*(param.fullDomain.upperRightCorner[1]-param.fullDomain.lowerLeftCorner[1])) << " " << force[1] << std::endl; //time, cl, cd, lateral force. because lift is perpendicular to airflow, and drag parallel
-
+            //this long line above calculated lift coefficient, drag coefficient and lateral force.  (the coordinate system is at an angle with the flow.)
+            //Cl = (Fz*cos(aoa) - Fx*sin(aoa))/(1/2*rho*V**2*S) .  Cd = (Fx*cos(aoa) + Fz*sin(aoa))/(1/2*rho*V**2*S)
             if (iter > 0) {
                 T totTime = global::timer("lb-iter").getTime();
                 pcout << "Total coarsest level iteration: " << totTime / (T)iter << std::endl;
