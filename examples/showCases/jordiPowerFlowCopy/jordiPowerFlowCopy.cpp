@@ -971,8 +971,8 @@ int main(int argc, char *argv[])  //the main function.
     Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+5, 0.),Array<T, 3>(0., -1., 0.) ); //create a cutting plane at the y0 of the finest level.
     pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y0+5 << std::endl;
     // Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-5, 0.),Array<T, 3>(0., 1., 0.) );
-    Plane<T> planeyplus(Array<T, 3>(0., (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5)*2, 0.),Array<T, 3>(0., 1., 0.) ); //same for y1
-    pcout << "planeyplus " << 2*(lattices.getLevel(param.finestLevel).getBoundingBox().y1-5) << std::endl;
+    Plane<T> planeyplus(Array<T, 3>(0., (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5), 0.),Array<T, 3>(0., 1., 0.) ); //same for y1
+    pcout << "planeyplus " << (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5) << std::endl;
     Plane<T> planexminus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x0+5, 0., 0.),Array<T, 3>(-1., 0., 0.) );
     pcout << "planexminus " << lattices.getLevel(param.finestLevel).getBoundingBox().x0+5 << std::endl;
     Plane<T> planexplus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x1-5, 0., 0.),Array<T, 3>(1., 0., 0.) );
