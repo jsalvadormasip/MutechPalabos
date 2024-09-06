@@ -10,12 +10,12 @@ def read_airfoil_points(file_path, z_offset, x_offset, chord):
     airfoil_points[:, 1] += z_offset  # Add the offset to all z values
     airfoil_points[:, 0] += x_offset  # Add the offset to all x values
     return airfoil_points
-
+outerlayercounter = 0
 def calculate_density(x, z, airfoil_points, density_ranges):
     # Determine if the point (x, z) is inside the airfoil
     airfoil_path = Path(airfoil_points)
     if airfoil_path.contains_point((x, z)):
-        return 0.0  # Inside the airfoil
+        return -1.0  # Inside the airfoil
 
     # Calculate the distance from the point (x, z) to the nearest airfoil point
     distances = np.sqrt((x - airfoil_points[:, 0])**2 + (z - airfoil_points[:, 1])**2)
@@ -24,18 +24,23 @@ def calculate_density(x, z, airfoil_points, density_ranges):
     # Determine the density based on the distance ranges
     for (dist_min, dist_max, density) in density_ranges:
         if dist_min <= min_distance < dist_max:
+            if density == 0.0:
+                global outerlayercounter 
+                outerlayercounter += 1
             return density
 
     return 0.0  # Default density if no range matches
 
 def create_density_file(nx, ny, nz, airfoil_points, density_ranges, output_file):
     densities2d = np.zeros((nx, nz))
+    
     for ix in range(nx):
         print(ix / nx * 100)
         for iz in range(nz):
             x = ix  # x-coordinate in the grid
             z = iz  # z-coordinate in the grid
             densities2d[ix, iz] = calculate_density(x, z, airfoil_points, density_ranges)
+    print(outerlayercounter/nx/nz, "area percentage of coarsest level")
     num_layers = ny
     array_expanded = densities2d[:, np.newaxis, :]
     densities = np.repeat(array_expanded, num_layers, axis=1)
@@ -136,20 +141,23 @@ def plot_y_slice(file_path, y_index, nx, ny, nz):
 airfoil_file_path = 'UnderstandingGridRefinement/refinedairfoil2.dat'  # Replace with your airfoil points file path
 #grid dimensions
 offsets = True
-domainx0 = -0.37
-dx = 1/2000*7.790592
-domainx1 = 0.37
-domainy0 = -0.081625/2
-domainy1 = 0.081625/2
-domainz0 = -0.37
-domainz1 = 0.37
+# domainx0 = -0.37
+domainx0 = -10.448
+dx = 1/200*7.790592
+domainx1 = 10.448
+# domainy0 = -0.081625/2*4
+# domainy1 = 0.081625/2*4
+domainy0 = -10.448
+domainy1 = 10.448
+domainz0 = -10.448
+domainz1 = 10.448
 nx = int(domainx1/dx*2+2)
 ny = int(domainy1/dx*2+2)
 nz = int(domainz1/dx*2+2)
 print("nx ", nx, " ny ", ny, " nz ", nz)
 # Define the z offset
 z_offset = int(nz/2)  # Replace with the desired offset value
-chord = int(0.1/0.37*nx) #clean chord
+chord = int(0.1/domainx1*nx) #clean chord
 x_offset = int(nx/2-1/2*chord)
 minborderforchordx = 0.5-chord/2/nx
 minborderforchordy = 0.5-chord*0.18/2/nx
@@ -170,9 +178,9 @@ print(boundariesy)
 airfoil_points = read_airfoil_points(airfoil_file_path, z_offset,x_offset, chord)
 
 # Define density ranges: (distance_min, distance_max, density)
-fine = True
+fine = False
 medium = False
-coarse = False
+coarse = True
 if fine:
     density_ranges = [
         (0, 1.58691/200*chord, 1),

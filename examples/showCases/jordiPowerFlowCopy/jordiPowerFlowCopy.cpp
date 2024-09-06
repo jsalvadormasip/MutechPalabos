@@ -51,8 +51,8 @@ typedef Array<T, 3> Velocity;
 #define RESCALER   ConvectiveNoForceRescaler    
 #define DESCRIPTOR descriptors::D3Q19Descriptor
 T angle = 7.8 * 3.1415 / 180; //angle of attack. Note that the airfoil's chord is aligned with the domain, and it is the air that comes at an angle. 
-T chordLengthPercentage = 0.2/(7.790592*2); //ratio between domain length and chord length. Useful for calculation below. 
-
+T chordLengthPercentage = 0.15/(7.790592*2); //ratio between domain length and chord length. Useful for calculation below. 
+//change to 0.2/(7.790592*2)
 bool teaddon = false; //later on this will be used. Basically, if the STL model has a Trailing Edge Add-on, it will still center the STL file based on the airfoil center, without considering the add-on. It is set as false bc for now we are using NACA0018
 struct SimulationParameters {
     /*
@@ -968,11 +968,11 @@ int main(int argc, char *argv[])  //the main function.
     TriangleSet<T> triangleSet3;
     
     // Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+5, 0.),Array<T, 3>(0., -1., 0.) );
-    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+5, 0.),Array<T, 3>(0., -1., 0.) ); //create a cutting plane at the y0 of the finest level.
-    pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y0+5 << std::endl;
+    Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y0+2, 0.),Array<T, 3>(0., -1., 0.) ); //create a cutting plane at the y0 of the finest level.
+    pcout << "planeyminus " << lattices.getLevel(param.finestLevel).getBoundingBox().y0+2 << std::endl;
     // Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(param.finestLevel).getBoundingBox().y1-5, 0.),Array<T, 3>(0., 1., 0.) );
-    Plane<T> planeyplus(Array<T, 3>(0., (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5), 0.),Array<T, 3>(0., 1., 0.) ); //same for y1
-    pcout << "planeyplus " << (lattices.getLevel(param.finestLevel).getBoundingBox().y1-5) << std::endl;
+    Plane<T> planeyplus(Array<T, 3>(0., (lattices.getLevel(param.finestLevel).getBoundingBox().y1-2), 0.),Array<T, 3>(0., 1., 0.) ); //same for y1
+    pcout << "planeyplus " << (lattices.getLevel(param.finestLevel).getBoundingBox().y1-2) << std::endl;
     Plane<T> planexminus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x0+5, 0., 0.),Array<T, 3>(-1., 0., 0.) );
     pcout << "planexminus " << lattices.getLevel(param.finestLevel).getBoundingBox().x0+5 << std::endl;
     Plane<T> planexplus(Array<T, 3>(lattices.getLevel(param.finestLevel).getBoundingBox().x1-5, 0., 0.),Array<T, 3>(1., 0., 0.) );
@@ -983,7 +983,8 @@ int main(int argc, char *argv[])  //the main function.
     pcout << "planezplus " << lattices.getLevel(param.finestLevel).getBoundingBox().z1-5 << std::endl;
     // Plane<T> planeyminus(Array<T, 3>(0., lattices.getLevel(0).getBoundingBox().y0*(T)util::intTwoToThePower(param.finestLevel)+1, 0.),Array<T, 3>(0., -1., 0.) );
     // Plane<T> planeyplus(Array<T, 3>(0., lattices.getLevel(0).getBoundingBox().y1*(T)util::intTwoToThePower(param.finestLevel)-1, 0.),Array<T, 3>(0., 1., 0.) );
-    if (bCuboidy3.lowerLeftCorner[1] < lattices.getLevel(param.finestLevel).getBoundingBox().y0+5) { //if the object overpasses the plane
+    if (bCuboidy3.lowerLeftCorner[1] < lattices.getLevel(param.finestLevel).getBoundingBox().y0+2) { //if the object overpasses the plane
+        // if (9>10) { //if the object overpasses the plane
         triangleSet.cutWithPlane(planeyminus, triangleSet2); //crop crop
     }
     else {
@@ -993,7 +994,8 @@ int main(int argc, char *argv[])  //the main function.
     // pcout << "El objeto x0 " << bCuboidy4.lowerLeftCorner[0] << " a " << bCuboidy4.upperRightCorner[0] << std::endl;
     // pcout << "El objeto y0 " << bCuboidy4.lowerLeftCorner[1] << " a " << bCuboidy4.upperRightCorner[1] << std::endl;
     // pcout << "El objeto z0 " << bCuboidy4.lowerLeftCorner[2] << " a " << bCuboidy4.upperRightCorner[2] << std::endl;
-    if (bCuboidy4.upperRightCorner[1] > lattices.getLevel(param.finestLevel).getBoundingBox().y1-5) { //if object passes plane
+    if (bCuboidy4.upperRightCorner[1] > lattices.getLevel(param.finestLevel).getBoundingBox().y1-2) { //if object passes plane
+        // if (9>10) { //if object passes plane
         triangleSet2.cutWithPlane(planeyplus,triangleSetx);  //crop crop
     }
     else {

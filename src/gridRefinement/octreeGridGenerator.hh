@@ -1236,7 +1236,7 @@ OctreeGridGenerator<T>::OctreeGridGenerator(std::string xmlFileName) : outS(&pco
 
     document["n"].read(n);
     plbIOError(
-        !(n % 2 == 0 && n >= 6),
+        !(n % 2 == 0 && n >= 2),
         "The block size (n) must be an even positive integer greater than 5.");
     document["numProcesses"].read(numProcesses);
     plbIOError(numProcesses <= 0, "The number of processes must be greater than 0.");
@@ -1363,7 +1363,7 @@ OctreeGridGenerator<T>::OctreeGridGenerator(
         "The maximum grid level must be greater than or equal to the minimum grid level.");
     plbIOError(maxIter < 0, "The maximum number of iterations must be non-negative.");
     plbIOError(
-        !(n % 2 == 0 && n >= 6),
+        !(n % 2 == 0 && n >= 2),
         "The block size (n) must be an even positive integer greater than 5.");
     plbIOError(numProcesses <= 0, "The number of processes must be greater than 0.");
     plbIOError(

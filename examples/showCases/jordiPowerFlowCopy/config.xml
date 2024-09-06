@@ -7,9 +7,9 @@
 <geometry>
     <!-- Coordinates of the physical simulation domain. -->
     <simulationDomain>
-        <x> -7.790592 7.790592 </x>
-        <y> -7.790592 7.790592 </y>
-        <z> -7.790592 7.790592 </z>
+        <x> -10.448 10.448   </x>
+        <y> -10.448 10.448    </y>
+        <z> -10.448 10.448    </z>
     </simulationDomain>
     <!-- The direction of the uniform flow is always the +x one. -->
 
@@ -29,13 +29,13 @@
     <!-- File with the discrete grid density function. -->
     <gridDensityFunctionFile> density.dat </gridDensityFunctionFile>
     <!-- Total number of grid refinement levels. basically levels displayed -->
-    <numLevels> 7 </numLevels>
+    <numLevels> 11 </numLevels>
     <!-- Maximum octree subdivision level. basically actual max level depth. so if this is 4 and numlevels is 3, it displays 2 3 4. -->
-    <maxOctreeLevel> 7 </maxOctreeLevel>
+    <maxOctreeLevel> 12 </maxOctreeLevel>
     <!-- Block size in the smallest domain of the tree (number of nodes minus 1
          in the smallest edge of the domain decomposition).
          It must be an even integer number greater equal to 6. -->
-    <nBlock> 6 </nBlock>
+    <nBlock> 2 </nBlock>
 </grid>
 
 <boundaryConditions>
@@ -108,9 +108,9 @@
     <outputInDomain> false </outputInDomain>
     <!-- Domain for disk output (must be a subset of the simulation domain). -->
     <outputDomain>
-        <x> -7.790592 7.790592 </x>
-        <y> -7.790592 7.790592 </y>
-        <z> -7.790592 7.790592 </z>
+        <x> -10.448 10.448 </x>
+        <y> -0.16325 0.16325 </y>
+        <z> -10.448 10.448 </z>
     </outputDomain>
 
     <!-- Save data on disk on a set of slices or not? -->
@@ -120,20 +120,20 @@
         <!-- Slices normal to the x-axis for disk output. -->
         <xSlices>
             <xPositions> 0.0  </xPositions>
-            <yRange> -7.790592 7.790592 </yRange>
-            <zRange> -7.790592 7.790592 </zRange>
+            <yRange> -0.16325 0.16325 </yRange>
+            <zRange> -10.448 10.448 </zRange>
         </xSlices>
         <!-- Slices normal to the y-axis for disk output. -->
         <ySlices>
             <yPositions> 0.0 </yPositions>
-            <zRange> -7.790592 7.790592 </zRange>
-            <xRange> -7.790592 7.790592 </xRange>
+            <zRange> -10.448 10.448 </zRange>
+            <xRange> -10.448 10.448 </xRange>
         </ySlices>
         <!-- Slices normal to the z-axis for disk output. -->
         <zSlices>
             <zPositions> 0.0 </zPositions>
-            <xRange> -7.790592 7.790592 </xRange>
-            <yRange> -7.790592 7.790592 </yRange>
+            <xRange> -10.448 10.448 </xRange>
+            <yRange> -0.16325 0.16325 </yRange>
         </zSlices>
     </outputSlices>
 
