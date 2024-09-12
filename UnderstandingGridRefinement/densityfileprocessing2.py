@@ -15,7 +15,7 @@ def calculate_density(x, z, airfoil_points, density_ranges):
     # Determine if the point (x, z) is inside the airfoil
     airfoil_path = Path(airfoil_points)
     if airfoil_path.contains_point((x, z)):
-        return 0.0  # Inside the airfoil
+        return -1.0  # Inside the airfoil
 
     # Calculate the distance from the point (x, z) to the nearest airfoil point
     distances = np.sqrt((x - airfoil_points[:, 0])**2 + (z - airfoil_points[:, 1])**2)
@@ -142,15 +142,15 @@ airfoil_file_path = 'UnderstandingGridRefinement/refinedairfoil2.dat'  # Replace
 #grid dimensions
 offsets = True
 # domainx0 = -0.37
-domainx0 = -0.12
+domainx0 = -0.37
 dx = 1/5000*10.448
-domainx1 = 0.12
-# domainy0 = -0.081625/2
-# domainy1 = 0.081625/2
-domainy0 = -10.448
-domainy1 = 10.448
-domainz0 = -0.12
-domainz1 = 0.12
+domainx1 = 0.37
+domainy0 = -0.081625/2*4
+domainy1 = 0.081625/2*4
+# domainy0 = -0.37
+# domainy1 = 0.37
+domainz0 = -0.37
+domainz1 = 0.37
 nx = int(domainx1/dx*2+2)
 ny = int(domainy1/dx*2+2)
 nz = int(domainz1/dx*2+2)
@@ -178,9 +178,9 @@ print(boundariesy)
 airfoil_points = read_airfoil_points(airfoil_file_path, z_offset,x_offset, chord)
 
 # Define density ranges: (distance_min, distance_max, density)
-fine = False
+fine = True
 medium = False
-coarse = True
+coarse = False
 if fine:
     density_ranges = [
         (0, 1.58691/200*chord, 1),
